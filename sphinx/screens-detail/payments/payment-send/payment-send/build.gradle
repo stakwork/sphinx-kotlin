@@ -36,7 +36,6 @@ dependencies {
     // Sphinx
     api project(path: ':sphinx:screens-detail:payments:payment-common:payment-common')
 
-    implementation deps.androidx.lifecycle.hilt
     implementation deps.google.hilt
     kapt kaptDeps.google.hilt
 }

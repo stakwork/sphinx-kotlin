@@ -33,7 +33,6 @@ dependencies {
     // KotlinAndroid
     implementation project(path: ':android:features:android-feature-screens')
 
-    implementation deps.androidx.lifecycle.hilt
     implementation deps.google.hilt
     implementation deps.square.moshi
 

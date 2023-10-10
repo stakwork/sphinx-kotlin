@@ -35,7 +35,6 @@ dependencies {
     // Sphinx
     implementation project(path: ':sphinx:application:common:resources')
 
-    implementation deps.androidx.lifecycle.hilt
     implementation deps.google.hilt
     kapt kaptDeps.google.hilt
 }

@@ -74,7 +74,6 @@ dependencies {
 
     implementation deps.androidx.swipeRefreshLayout
     implementation deps.androidx.recyclerView
-    implementation deps.androidx.lifecycle.hilt
     implementation deps.google.hilt
     implementation deps.jna.sdk
     implementation deps.lottie.sdk

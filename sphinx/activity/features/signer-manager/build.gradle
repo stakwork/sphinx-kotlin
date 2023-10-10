@@ -50,7 +50,6 @@ dependencies {
 
     implementation deps.jncryptor
 
-    implementation deps.androidx.lifecycle.hilt
     implementation deps.jna.sdk
     implementation deps.paho.sdk
     implementation deps.kotlinx.serialization

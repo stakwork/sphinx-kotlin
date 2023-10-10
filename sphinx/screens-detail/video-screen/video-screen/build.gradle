@@ -58,7 +58,6 @@ dependencies {
     implementation project(path: ':sphinx:application:network:concepts:queries:concept-network-query-feed-status')
 
 
-    implementation deps.androidx.lifecycle.hilt
     implementation deps.google.hilt
     implementation deps.lottie.sdk
     kapt kaptDeps.google.hilt

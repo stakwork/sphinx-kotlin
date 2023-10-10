@@ -48,7 +48,6 @@ dependencies {
     api project(path: ':sphinx:application:common:wrappers:wrapper-contact')
     api project(path: ':sphinx:activity:insetter-activity')
 
-    implementation deps.androidx.lifecycle.hilt
     implementation deps.google.hilt
     kapt kaptDeps.google.hilt
 }

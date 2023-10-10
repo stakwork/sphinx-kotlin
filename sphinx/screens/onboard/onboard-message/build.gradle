@@ -37,7 +37,6 @@ dependencies {
     implementation project(path: ':sphinx:activity:concepts:concept-signer-manager')
     implementation project(path: ':kotlin:encoders:base64')
 
-    implementation deps.androidx.lifecycle.hilt
     implementation deps.google.hilt
 
     // Sphinx

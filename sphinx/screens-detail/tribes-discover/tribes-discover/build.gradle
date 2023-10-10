@@ -51,7 +51,6 @@ dependencies {
     implementation project(path: ':sphinx:screens-detail:join-tribe:join-tribe')
     api project(path: ':sphinx:screens-detail:tribes-discover:tribes-discover-view-model-coordinator')
 
-    implementation deps.androidx.lifecycle.hilt
     implementation deps.google.hilt
 
     kapt kaptDeps.google.hilt

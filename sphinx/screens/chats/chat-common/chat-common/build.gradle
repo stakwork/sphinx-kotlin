@@ -75,7 +75,6 @@ dependencies {
     api project(path: ':sphinx:screens-detail:camera:camera-view-model-coordinator')
 
     api deps.androidx.recyclerView
-    implementation deps.androidx.lifecycle.hilt
     implementation deps.google.hilt
     kapt kaptDeps.google.hilt
 

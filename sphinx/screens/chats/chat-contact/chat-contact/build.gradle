@@ -32,7 +32,6 @@ dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
     api project(path: ':sphinx:screens:chats:chat-common:chat-common')
 
-    implementation deps.androidx.lifecycle.hilt
     implementation deps.google.hilt
     implementation deps.square.moshi
     implementation deps.facebook.shimmer
