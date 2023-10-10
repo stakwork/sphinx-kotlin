@@ -17,7 +17,7 @@ ext.versions = [
     'hiltJetpack': '1.0.0-alpha03',
     'kotlin'     : '1.6.21',
     'moshi'      : '1.13.0',
-    'navigation' : '2.4.1',
+    'navigation' : '2.5.3',
     'okhttp'     : '4.9.1',
     'sqlDelight' : '1.5.4',
     'toplAndroid': '2.1.2',
