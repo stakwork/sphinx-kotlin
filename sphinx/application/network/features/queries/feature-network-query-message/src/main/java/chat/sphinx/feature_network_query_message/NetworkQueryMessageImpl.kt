@@ -36,7 +36,7 @@ class NetworkQueryMessageImpl(
         private const val ENDPOINT_MESSAGES_READ = "/messages/%d/read"
         private const val ENDPOINT_MESSAGES = "/messages"
         private const val ENDPOINT_PAYMENT = "/payment"
-        private const val ENDPOINT_PAYMENTS = "payments"
+        private const val ENDPOINT_PAYMENTS = "/payments"
         private const val ENDPOINT_PAY_ATTACHMENT = "/purchase"
         private const val ENDPOINT_INVOICES = "/invoices"
     }
