@@ -1,5 +1,9 @@
 # ChangeLog
 
+# Version 1.0.0-beta06 (2023-10-12)
+- Adds fixes to the payment endpoint
+- Adds a progress bar to the contact list on the dashboard
+
 # Version 1.0.0-beta05 (2023-09-25)
 - Adds fixes on phone signer
 
