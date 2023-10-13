@@ -1,5 +1,9 @@
 # ChangeLog
 
+# Version 1.0.0-beta07 (2023-10-13)
+- Fixes for push notifications
+- Fixes on file attachments
+
 # Version 1.0.0-beta06 (2023-10-12)
 - Adds fixes to the payment endpoint
 - Adds a progress bar to the contact list on the dashboard
