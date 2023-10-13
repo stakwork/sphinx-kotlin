@@ -458,8 +458,7 @@ internal sealed class MessageHolderViewState(
         if (message == null){
             null
         } else {
-            null
-//            getFileAttachment(message)
+            getFileAttachment(message)
         }
     }
 
