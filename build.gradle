@@ -47,19 +47,19 @@ allprojects {
 
     plugins.withId("com.android.library") {
         extensions.getByName("android").compileOptions {
-            sourceCompatibility JavaVersion.VERSION_1_8
-            targetCompatibility JavaVersion.VERSION_1_8
+            sourceCompatibility JavaVersion.VERSION_17
+            targetCompatibility JavaVersion.VERSION_17
         }
     }
 
     plugins.withId("kotlin") {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 
     tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
         kotlinOptions {
-            jvmTarget = JavaVersion.VERSION_1_8
+            jvmTarget = JavaVersion.VERSION_17
             freeCompilerArgs += [
                     "-Xinline-classes",
                     "-Xopt-in=kotlin.RequiresOptIn",
