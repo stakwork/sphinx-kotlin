@@ -1140,6 +1140,7 @@ internal class DashboardViewModel @Inject constructor(
             // until it is.
             if (jobPushNotificationRegistration == null) {
                 jobPushNotificationRegistration = launch(mainImmediate) {
+                    pushNotificationRegistrar
                     pushNotificationRegistrar.register().let { response ->
                         @Exhaustive
                         when (response) {
