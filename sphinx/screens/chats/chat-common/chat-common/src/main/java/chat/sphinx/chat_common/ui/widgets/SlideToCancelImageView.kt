@@ -55,8 +55,8 @@ class SlideToCancelImageView : AppCompatImageView {
             slideToCancelListener?.onInteractionComplete()
         }
 
-        var result = gestureDetector.onTouchEvent(event)
-        result = super.onTouchEvent(event) || result
+        var result = event?.let { gestureDetector.onTouchEvent(it) }
+        result = super.onTouchEvent(event) || result == true
 
         return result
     }

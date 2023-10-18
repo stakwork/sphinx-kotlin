@@ -59,20 +59,18 @@ abstract class KeyboardInsetLayoutDetailFragment<
         binding.root.viewTreeObserver.addOnGlobalLayoutListener(globalLayoutListener)
 
         binding.root.addOnAttachStateChangeListener(object: View.OnAttachStateChangeListener {
-            override fun onViewAttachedToWindow(p0: View?) {}
 
-            override fun onViewDetachedFromWindow(p0: View?) {
-                removeGlobalOnLayoutListenerOn(p0)
+            override fun onViewAttachedToWindow(v: View) {}
+
+            override fun onViewDetachedFromWindow(v: View) {
+                removeGlobalOnLayoutListenerOn(v)
+
             }
         })
     }
 
     private fun removeGlobalOnLayoutListenerOn(view: View?) {
-        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1) {
-            view?.viewTreeObserver?.removeOnGlobalLayoutListener(globalLayoutListener)
-        } else {
-            view?.viewTreeObserver?.removeGlobalOnLayoutListener(globalLayoutListener)
-        }
+        view?.viewTreeObserver?.removeOnGlobalLayoutListener(globalLayoutListener)
         globalLayoutListener = null
     }
 
