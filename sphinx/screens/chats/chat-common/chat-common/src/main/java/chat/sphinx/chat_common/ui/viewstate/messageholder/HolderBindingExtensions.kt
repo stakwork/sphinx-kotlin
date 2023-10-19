@@ -844,6 +844,11 @@ internal inline fun LayoutMessageHolderBinding.setStatusHeader(
                 progressBarMessageStatusSending.goneIfFalse(statusHeader.showSendingIcon)
                 textViewMessageStatusSentBoltIcon.goneIfFalse(statusHeader.showBoltIcon)
                 layoutConstraintMessageStatusSentFailedContainer.goneIfFalse(statusHeader.showFailedContainer)
+
+                if (statusHeader.errorMessage?.isNotEmpty() == true) {
+                    textViewMessageStatusSentFailedText.text = statusHeader.errorMessage
+                }
+
             } else {
                 textViewMessageStatusReceivedTimestamp.text = statusHeader.timestamp
                 textViewMessageStatusReceivedLockIcon.goneIfFalse(statusHeader.showLockIcon)
