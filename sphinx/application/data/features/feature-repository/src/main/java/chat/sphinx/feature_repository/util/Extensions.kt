@@ -395,6 +395,7 @@ fun TransactionCallbacks.upsertMessage(
         dto.pushActual.toPush(),
         dto.person?.toMessagePerson(),
         dto.thread_uuid?.toThreadUUID(),
+        dto.error_message?.toErrorMessage(),
         MessageId(dto.id),
         dto.uuid?.toMessageUUID(),
         chatId,

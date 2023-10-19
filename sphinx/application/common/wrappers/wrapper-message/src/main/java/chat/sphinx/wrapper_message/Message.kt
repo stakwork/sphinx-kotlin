@@ -357,6 +357,7 @@ abstract class Message {
     abstract val recipientPic: PhotoUrl?
     abstract val person: MessagePerson?
     abstract val threadUUID: ThreadUUID?
+    abstract val errorMessage: ErrorMessage?
     abstract val isPinned: Boolean
 
     abstract val messageContentDecrypted: MessageContentDecrypted?
@@ -405,6 +406,7 @@ abstract class Message {
                 other.recipientPic                  == recipientPic                 &&
                 other.person                        == person                       &&
                 other.threadUUID                    == threadUUID                   &&
+                other.errorMessage                  == errorMessage                 &&
                 other.isPinned                      == isPinned                     &&
                 other.reactions.let { a ->
                     reactions.let { b ->
@@ -461,6 +463,7 @@ abstract class Message {
         result = _31 * result + recipientPic.hashCode()
         result = _31 * result + person.hashCode()
         result = _31 * result + threadUUID.hashCode()
+        result = _31 * result + errorMessage.hashCode()
         result = _31 * result + isPinned.hashCode()
         reactions?.forEach { result = _31 * result + it.hashCode() }
         purchaseItems?.forEach { result = _31 * result + it.hashCode() }
@@ -482,6 +485,7 @@ abstract class Message {
                 "giphyData=$giphyData,reactions=$reactions,purchaseItems=$purchaseItems,"       +
                 "replyMessage=$replyMessage),recipientAlias=$recipientAlias,"                   +
                 "recipientPic=$recipientPic,person=$person,threadUUID=$threadUUID,"             +
+                "errorMessage=$errorMessage"                                                    +
                 "callLink=$callLinkMessage"                                                     +
                 "isPinned=$isPinned"
     }

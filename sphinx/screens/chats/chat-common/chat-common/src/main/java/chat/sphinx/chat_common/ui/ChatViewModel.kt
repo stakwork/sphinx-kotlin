@@ -1009,7 +1009,7 @@ abstract class ChatViewModel<ARGS : NavArgs>(
                 }
             } else {
                 messageRepository.getAllMessagesToShowByChatId(getChat().id, 100).firstOrNull()?.let { messages ->
-                    delay(200)
+m                    delay(200)
 
                     messageHolderViewStateFlow.value = getMessageHolderViewStateList(messages).toList()
                     shimmerViewState.updateViewState(ShimmerViewState.Off)

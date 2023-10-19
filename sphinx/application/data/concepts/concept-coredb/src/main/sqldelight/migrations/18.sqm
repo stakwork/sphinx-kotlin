@@ -1,0 +1,3 @@
+import chat.sphinx.wrapper_message.ErrorMessage;
+
+ALTER TABLE messageDbo ADD COLUMN error_message TEXT AS ErrorMessage DEFAULT NULL;

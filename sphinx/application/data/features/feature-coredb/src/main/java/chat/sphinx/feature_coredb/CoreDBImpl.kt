@@ -154,7 +154,8 @@ abstract class CoreDBImpl(private val moshi: Moshi): CoreDB() {
                     recipient_picAdapter = PhotoUrlAdapter.getInstance(),
                     pushAdapter = PushAdapter(),
                     personAdapter = PersonAdapter(),
-                    thread_uuidAdapter = ThreadUUIDAdapter()
+                    thread_uuidAdapter = ThreadUUIDAdapter(),
+                    error_messageAdapter = ErrorMessageAdapter()
                 ),
                 messageMediaDboAdapter = MessageMediaDbo.Adapter(
                     idAdapter = MessageIdAdapter.getInstance(),
