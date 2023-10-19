@@ -14,8 +14,6 @@ android {
     defaultConfig {
         minSdkVersion versions.minSdk
         targetSdkVersion versions.targetSdk
-        versionCode VERSION_CODE.toInteger()
-        versionName VERSION_NAME
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         testInstrumentationRunnerArguments disableAnalytics: 'true'
@@ -27,6 +25,7 @@ android {
             minifyEnabled false
         }
     }
+    namespace 'chat.sphinx.web_view'
 }
 
 dependencies {
@@ -51,7 +50,6 @@ dependencies {
     implementation project(path: ':sphinx:screens-detail:common:detail-resources')
     implementation project(path: ':sphinx:application:common:logger')
 
-    implementation deps.androidx.lifecycle.hilt
     implementation deps.google.hilt
     implementation deps.lottie.sdk
     kapt kaptDeps.google.hilt

@@ -698,7 +698,7 @@ AND (
     type = 32
 )
 ORDER BY date DESC
-LIMIT ?;
+LIMIT :limit;
 
 messageGetAllToShowByChatId:
 SELECT *
@@ -762,9 +762,9 @@ WHERE id IN ?;
 messagesSearchByTerm:
 SELECT *
 FROM messageDbo
-WHERE chat_id = ?
+WHERE chat_id = :chatId
 AND status != 5
-AND LOWER(message_content_decrypted) LIKE ?
+AND LOWER(message_content_decrypted) LIKE :searchTerm
 ORDER BY date DESC;
 
 messageUpdateSeenByChatId:

@@ -1,7 +1,7 @@
 plugins {
-    id 'com.github.node-gradle.node' version '3.1.0'
     id 'java-library'
     id 'kotlin'
+    id 'com.github.node-gradle.node'
 }
 
 node {

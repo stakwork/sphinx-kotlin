@@ -4,8 +4,8 @@ plugins {
     id 'androidx.navigation.safeargs'
     id 'dagger.hilt.android.plugin'
     id 'kotlin-android'
+    id 'com.google.android.libraries.mapsplatform.secrets-gradle-plugin'
     id 'kotlin-kapt'
-    id 'com.google.android.secrets-gradle-plugin' version '1.1.0'
 }
 
 android {
@@ -17,8 +17,6 @@ android {
     defaultConfig {
         minSdkVersion versions.minSdk
         targetSdkVersion versions.targetSdk
-        versionCode VERSION_CODE.toInteger()
-        versionName VERSION_NAME
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         testInstrumentationRunnerArguments disableAnalytics: 'true'
@@ -30,6 +28,7 @@ android {
             minifyEnabled false
         }
     }
+    namespace 'chat.sphinx.chat_common'
 }
 
 dependencies {
@@ -76,7 +75,6 @@ dependencies {
     api project(path: ':sphinx:screens-detail:camera:camera-view-model-coordinator')
 
     api deps.androidx.recyclerView
-    implementation deps.androidx.lifecycle.hilt
     implementation deps.google.hilt
     kapt kaptDeps.google.hilt
 

@@ -20,3 +20,4 @@ dependencies {
     implementation deps.square.moshi
     kapt kaptDeps.square.moshiCodegen
 }
+

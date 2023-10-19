@@ -237,15 +237,15 @@ internal class ChatTribeFragment: ChatFragment<
         }
 
         boostAnimationBinding.lottieAnimationView.addAnimatorListener(object : Animator.AnimatorListener{
-            override fun onAnimationEnd(animation: Animator?) {
+            override fun onAnimationEnd(animation: Animator) {
                 boostAnimationBinding.root.gone
             }
 
-            override fun onAnimationRepeat(animation: Animator?) {}
+            override fun onAnimationRepeat(animation: Animator) {}
 
-            override fun onAnimationCancel(animation: Animator?) {}
+            override fun onAnimationCancel(animation: Animator) {}
 
-            override fun onAnimationStart(animation: Animator?) {}
+            override fun onAnimationStart(animation: Animator) {}
         })
 
         tribeFeedViewModel.shareClipHandler = { podcastClip ->

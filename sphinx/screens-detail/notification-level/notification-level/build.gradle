@@ -14,8 +14,6 @@ android {
     defaultConfig {
         minSdkVersion versions.minSdk
         targetSdkVersion versions.targetSdk
-        versionCode VERSION_CODE.toInteger()
-        versionName VERSION_NAME
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         testInstrumentationRunnerArguments disableAnalytics: 'true'
@@ -27,6 +25,7 @@ android {
             minifyEnabled false
         }
     }
+    namespace 'chat.sphinx.notification_level'
 }
 
 dependencies {
@@ -39,7 +38,6 @@ dependencies {
     implementation project(path: ':sphinx:screens-detail:common:detail-resources')
     implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-chat')
 
-    implementation deps.androidx.lifecycle.hilt
     implementation deps.google.hilt
     kapt kaptDeps.google.hilt
 }

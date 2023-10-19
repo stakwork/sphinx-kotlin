@@ -4,8 +4,8 @@ plugins {
     id 'dagger.hilt.android.plugin'
     id 'androidx.navigation.safeargs'
     id 'kotlin-android'
+    id 'com.google.android.libraries.mapsplatform.secrets-gradle-plugin'
     id 'kotlin-kapt'
-    id 'com.google.android.secrets-gradle-plugin' version '1.1.0'
 }
 
 android {
@@ -16,8 +16,6 @@ android {
     defaultConfig {
         minSdkVersion versions.minSdk
         targetSdkVersion versions.targetSdk
-        versionCode VERSION_CODE.toInteger()
-        versionName VERSION_NAME
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         testInstrumentationRunnerArguments disableAnalytics: 'true'
@@ -29,6 +27,7 @@ android {
             minifyEnabled false
         }
     }
+    namespace 'chat.sphinx.video_screen'
 }
 
 dependencies {
@@ -59,7 +58,6 @@ dependencies {
     implementation project(path: ':sphinx:application:network:concepts:queries:concept-network-query-feed-status')
 
 
-    implementation deps.androidx.lifecycle.hilt
     implementation deps.google.hilt
     implementation deps.lottie.sdk
     kapt kaptDeps.google.hilt

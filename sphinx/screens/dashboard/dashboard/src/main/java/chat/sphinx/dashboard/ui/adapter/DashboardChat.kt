@@ -34,6 +34,7 @@ sealed class DashboardChat {
 
     abstract fun getDisplayTime(today00: DateTime): String
 
+    @ExperimentalStdlibApi
     abstract fun getMessageText(context: Context): String
 
     abstract fun hasUnseenMessages(): Boolean
@@ -384,6 +385,7 @@ sealed class DashboardChat {
             override val unseenMentionsFlow: Flow<Long?>?
                 get() = null
 
+            @ExperimentalStdlibApi
             override fun getMessageText(context: Context): String {
                 return ""
             }
@@ -427,6 +429,7 @@ sealed class DashboardChat {
                 return context.getString(R.string.last_message_description_invite, contactAlias)
             }
 
+            @ExperimentalStdlibApi
             override fun getMessageText(context: Context): String {
 
                 return when (invite?.status) {
