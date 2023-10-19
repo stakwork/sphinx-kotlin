@@ -485,8 +485,8 @@ abstract class Message {
                 "giphyData=$giphyData,reactions=$reactions,purchaseItems=$purchaseItems,"       +
                 "replyMessage=$replyMessage),recipientAlias=$recipientAlias,"                   +
                 "recipientPic=$recipientPic,person=$person,threadUUID=$threadUUID,"             +
-                "errorMessage=$errorMessage"                                                    +
-                "callLink=$callLinkMessage"                                                     +
+                "errorMessage=$errorMessage,"                                                    +
+                "callLink=$callLinkMessage,"                                                     +
                 "isPinned=$isPinned"
     }
 }

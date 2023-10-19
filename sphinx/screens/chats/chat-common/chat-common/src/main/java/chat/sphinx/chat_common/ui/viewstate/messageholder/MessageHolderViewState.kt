@@ -117,6 +117,7 @@ internal sealed class MessageHolderViewState(
                     this is Sent && message.status.isFailed(),
                     message.messageContentDecrypted != null || message.messageMedia?.mediaKeyDecrypted != null,
                     message.date.messageTimeFormat(),
+                    message.errorMessage?.value?.trim()
                 )
             } else {
                 null
