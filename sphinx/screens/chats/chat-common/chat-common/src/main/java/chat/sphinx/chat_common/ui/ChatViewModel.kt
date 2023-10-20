@@ -991,6 +991,10 @@ abstract class ChatViewModel<ARGS : NavArgs>(
             return
         }
 
+        if (chatId == null) {
+            shimmerViewState.updateViewState(ShimmerViewState.Off)
+        }
+
         var isScrollDownButtonSetup = false
         messagesLoadJob = viewModelScope.launch(mainImmediate) {
             if (isThreadChat()) {
