@@ -39,8 +39,8 @@ class SphinxFullscreenImageView : AppCompatImageView {
 
     private val gestureDetector = GestureDetector(context, object: GestureDetector.SimpleOnGestureListener() {
         override fun onScroll(
-            e1: MotionEvent?,
-            e2: MotionEvent?,
+            e1: MotionEvent,
+            e2: MotionEvent,
             distanceX: Float,
             distanceY: Float
         ): Boolean {
@@ -79,7 +79,7 @@ class SphinxFullscreenImageView : AppCompatImageView {
         /**
          * On Single tap toggle visibility of the header
          */
-        override fun onSingleTapConfirmed(e: MotionEvent?): Boolean {
+        override fun onSingleTapConfirmed(e: MotionEvent): Boolean {
             if (!scaleGestureDetector.isInProgress) {
                 onSingleTapListener?.onSingleTapConfirmed()
             }
@@ -89,7 +89,7 @@ class SphinxFullscreenImageView : AppCompatImageView {
         /**
          * On Double Tap zoom in and out
          */
-        override fun onDoubleTap(e: MotionEvent?): Boolean {
+        override fun onDoubleTap(e: MotionEvent): Boolean {
             scaleFactor = if (scaleFactor == 1.0f) {
                 2.0f
             } else {

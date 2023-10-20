@@ -159,7 +159,7 @@ internal class DashboardViewModel @Inject constructor(
     
     private fun getRelayKeys() {
         repositoryDashboard.getAndSaveTransportKey()
-        repositoryDashboard.getOrCreateHMacKey()
+        repositoryDashboard.getOrCreateHMacKey(forceGet = true)
     }
 
     fun handleDeepLink(deepLink: String?) {
@@ -1140,6 +1140,7 @@ internal class DashboardViewModel @Inject constructor(
             // until it is.
             if (jobPushNotificationRegistration == null) {
                 jobPushNotificationRegistration = launch(mainImmediate) {
+                    pushNotificationRegistrar
                     pushNotificationRegistrar.register().let { response ->
                         @Exhaustive
                         when (response) {

@@ -15,8 +15,6 @@ android {
     defaultConfig {
         minSdkVersion versions.minSdk
         targetSdkVersion versions.targetSdk
-        versionCode VERSION_CODE.toInteger()
-        versionName VERSION_NAME
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         testInstrumentationRunnerArguments disableAnalytics: 'true'
@@ -28,6 +26,7 @@ android {
             minifyEnabled false
         }
     }
+    namespace 'chat.sphinx.new_contact'
 }
 
 dependencies {
@@ -37,7 +36,6 @@ dependencies {
     // Sphinx
     api project(path: ':sphinx:screens-detail:contact:contact-common')
 
-    implementation deps.androidx.lifecycle.hilt
     implementation deps.google.hilt
     kapt kaptDeps.google.hilt
 }

@@ -64,7 +64,8 @@ class MessageDboWrapper(
         get() = messageDbo.person
     override val threadUUID: ThreadUUID?
         get() = messageDbo.thread_uuid
-
+    override val errorMessage: ErrorMessage?
+        get() = messageDbo.error_message
 
     @Volatile
     @Suppress("PropertyName")

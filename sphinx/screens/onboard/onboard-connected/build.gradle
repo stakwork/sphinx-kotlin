@@ -14,8 +14,6 @@ android {
     defaultConfig {
         minSdkVersion versions.minSdk
         targetSdkVersion versions.targetSdk
-        versionCode VERSION_CODE.toInteger()
-        versionName VERSION_NAME
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         testInstrumentationRunnerArguments disableAnalytics: 'true'
@@ -27,6 +25,7 @@ android {
             minifyEnabled false
         }
     }
+    namespace 'chat.sphinx.onboard_connected'
 }
 
 dependencies {
@@ -34,7 +33,6 @@ dependencies {
     // KotlinAndroid
     implementation project(path: ':android:features:android-feature-screens')
 
-    implementation deps.androidx.lifecycle.hilt
     implementation deps.google.hilt
 
     // Sphinx

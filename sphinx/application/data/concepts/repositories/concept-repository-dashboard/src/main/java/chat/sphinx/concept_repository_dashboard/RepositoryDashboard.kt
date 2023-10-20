@@ -95,5 +95,5 @@ interface RepositoryDashboard {
 
     fun getAndSaveTransportKey()
     fun saveTransportKey()
-    fun getOrCreateHMacKey()
+    fun getOrCreateHMacKey(forceGet: Boolean = false)
 }

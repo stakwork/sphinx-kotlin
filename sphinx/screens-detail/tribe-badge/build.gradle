@@ -14,8 +14,6 @@ android {
     defaultConfig {
         minSdkVersion versions.minSdk
         targetSdkVersion versions.targetSdk
-        versionCode VERSION_CODE.toInteger()
-        versionName VERSION_NAME
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         testInstrumentationRunnerArguments disableAnalytics: 'true'
@@ -27,6 +25,7 @@ android {
             minifyEnabled false
         }
     }
+    namespace 'chat.sphinx.tribe_badge'
 }
 
 dependencies {
@@ -56,7 +55,6 @@ dependencies {
     api project(path: ':sphinx:application:network:concepts:queries:concept-network-query-people')
 
 
-    implementation deps.androidx.lifecycle.hilt
     implementation deps.google.hilt
     implementation project(path: ':sphinx:application:common:logger')
     kapt kaptDeps.google.hilt

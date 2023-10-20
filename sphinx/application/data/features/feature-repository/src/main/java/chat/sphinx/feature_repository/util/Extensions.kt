@@ -395,6 +395,7 @@ fun TransactionCallbacks.upsertMessage(
         dto.pushActual.toPush(),
         dto.person?.toMessagePerson(),
         dto.thread_uuid?.toThreadUUID(),
+        dto.error_message?.toErrorMessage(),
         MessageId(dto.id),
         dto.uuid?.toMessageUUID(),
         chatId,
@@ -411,7 +412,7 @@ fun TransactionCallbacks.upsertMessage(
         false.toFlagged()
     )
 
-    if (dto.type.toMessageType()?.isInvoicePayment()) {
+    if (dto.type.toMessageType()?.isInvoicePayment() == true) {
         dto.payment_hash?.toLightningPaymentHash()?.let {
             queries.messageUpdateInvoiceAsPaidByPaymentHash(it)
         }

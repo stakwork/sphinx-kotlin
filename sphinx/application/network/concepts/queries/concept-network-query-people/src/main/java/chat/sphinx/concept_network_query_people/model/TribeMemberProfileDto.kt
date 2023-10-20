@@ -29,7 +29,7 @@ data class TribeMemberProfileExtrasDto(
             if (coding_languages?.isNotEmpty() == true) {
                 return coding_languages?.joinToString(",") {
                     it.value
-                }
+                } ?: ""
             }
             return "-"
         }

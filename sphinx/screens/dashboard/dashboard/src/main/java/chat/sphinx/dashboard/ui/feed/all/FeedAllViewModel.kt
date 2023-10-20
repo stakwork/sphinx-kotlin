@@ -149,6 +149,7 @@ internal class FeedAllViewModel @Inject constructor(
                 goToNewsletterDetail(feed.chatId, feed.feedUrl)
             }
             is FeedType.Unknown -> {}
+            else -> {}
         }
     }
 

@@ -142,6 +142,8 @@ internal class MediaPlayerServiceControllerImpl(
                 }
                 listenerHandler.dispatch(getCurrentState())
             }
+
+            else -> {}
         }
     }
 

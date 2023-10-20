@@ -63,6 +63,7 @@ import chat.sphinx.wrapper_feed.FeedModelType;
 import chat.sphinx.wrapper_feed.FeedPlayerSpeed;
 import chat.sphinx.wrapper_feed.FeedTitle;
 import chat.sphinx.wrapper_invite.InviteString;
+import chat.sphinx.wrapper_message.ErrorMessage;
 import chat.sphinx.wrapper_message.Flagged;
 import chat.sphinx.wrapper_message.MessageContent;
 import chat.sphinx.wrapper_message.MessageContentDecrypted;
@@ -602,7 +603,8 @@ CREATE TABLE messageDbo(
     recipient_pic               TEXT            AS PhotoUrl,
     push                        INTEGER         AS Push DEFAULT 0,
     person                      TEXT            AS MessagePerson,
-    thread_uuid                 TEXT            AS ThreadUUID
+    thread_uuid                 TEXT            AS ThreadUUID,
+    error_message               TEXT            AS ErrorMessage
 );
 
 messageGetAllReactionsByUUID:
@@ -696,7 +698,7 @@ AND (
     type = 32
 )
 ORDER BY date DESC
-LIMIT ?;
+LIMIT :limit;
 
 messageGetAllToShowByChatId:
 SELECT *
@@ -760,9 +762,9 @@ WHERE id IN ?;
 messagesSearchByTerm:
 SELECT *
 FROM messageDbo
-WHERE chat_id = ?
+WHERE chat_id = :chatId
 AND status != 5
-AND LOWER(message_content_decrypted) LIKE ?
+AND LOWER(message_content_decrypted) LIKE :searchTerm
 ORDER BY date DESC;
 
 messageUpdateSeenByChatId:
@@ -803,7 +805,8 @@ messageUpsert {
         recipient_pic = :recipient_pic,
         push = :push,
         person = :person,
-        thread_uuid = :thread_uuid
+        thread_uuid = :thread_uuid,
+        error_message = :error_message
     WHERE id = :id;
 
     INSERT OR IGNORE INTO messageDbo(
@@ -832,7 +835,8 @@ messageUpsert {
         recipient_pic,
         push,
         person,
-        thread_uuid
+        thread_uuid,
+        error_message
     )
     VALUES (
         :id,
@@ -860,7 +864,8 @@ messageUpsert {
         :recipient_pic,
         :push,
         :person,
-        :thread_uuid
+        :thread_uuid,
+        :error_message
     );
 }
 

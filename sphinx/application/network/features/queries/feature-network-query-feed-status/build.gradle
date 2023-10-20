@@ -18,3 +18,4 @@ dependencies {
 
     testImplementation project(path: ':sphinx:test:test-network-query')
 }
+

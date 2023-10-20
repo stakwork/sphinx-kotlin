@@ -14,8 +14,6 @@ android {
     defaultConfig {
         minSdkVersion versions.minSdk
         targetSdkVersion versions.targetSdk
-        versionCode VERSION_CODE.toInteger()
-        versionName VERSION_NAME
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         testInstrumentationRunnerArguments disableAnalytics: 'true'
@@ -27,6 +25,7 @@ android {
             minifyEnabled false
         }
     }
+    namespace 'chat.sphinx.tribe_detail'
 }
 
 dependencies {
@@ -49,7 +48,6 @@ dependencies {
     api project(path: ':sphinx:screens-detail:common:detail-resources')
     api project(path: ':sphinx:service:concepts:concept-service-media-player')
 
-    implementation deps.androidx.lifecycle.hilt
     implementation deps.google.hilt
     implementation project(path: ':sphinx:application:common:logger')
     kapt kaptDeps.google.hilt

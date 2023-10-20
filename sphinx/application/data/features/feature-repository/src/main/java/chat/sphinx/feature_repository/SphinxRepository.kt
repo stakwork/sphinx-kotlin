@@ -2662,6 +2662,7 @@ abstract class SphinxRepository(
                                 Push.False,
                                 null,
                                 threadUUID,
+                                null,
                                 provisionalId,
                                 null,
                                 chatDbo.id,
@@ -6901,10 +6902,12 @@ abstract class SphinxRepository(
     }
 
     @OptIn(RawPasswordAccess::class, UnencryptedDataAccess::class)
-    override fun getOrCreateHMacKey() {
+    override fun getOrCreateHMacKey(forceGet: Boolean) {
         applicationScope.launch(io) {
-            relayDataHandler.retrieveRelayHMacKey()?.let {
-                return@launch
+            if (!forceGet) {
+                relayDataHandler.retrieveRelayHMacKey()?.let {
+                    return@launch
+                }
             }
             networkQueryRelayKeys.getRelayHMacKey().collect { loadResponse ->
                 @Exhaustive
