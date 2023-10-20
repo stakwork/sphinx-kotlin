@@ -1,8 +1,26 @@
 # ChangeLog
 
-# Version 1.0.0-beta07 (2023-10-13)
-- Fixes for push notifications
-- Fixes on file attachments
+# Version 1.0.0-beta08 (2023-10-20)
+App Update
+
+Build Configuration:
+
+- Gradle: 7.5
+- Java Version: 17
+- Kotlin Version: 1.6.21
+- CompileSdk: 33
+- Android Gradle Plugin: 7.4.2
+- Gradle JDK: openjdk Corretto 17.0.8.1
+
+App Libraries:
+- Coil
+- Insetter
+- Lifecycle
+- Hilt
+- Moshi
+- Navigation
+- Okhttp
+- SqlDelight
 
 # Version 1.0.0-beta06 (2023-10-12)
 - Adds fixes to the payment endpoint
