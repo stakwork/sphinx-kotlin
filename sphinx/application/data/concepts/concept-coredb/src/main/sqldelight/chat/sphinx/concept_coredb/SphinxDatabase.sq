@@ -272,6 +272,11 @@ SET price_per_message = :price_per_message,
     pin_message = :pin_message
 WHERE id = ?;
 
+CREATE INDEX idx_chat_id ON chatDbo(id);
+CREATE INDEX idx_chat_type ON chatDbo(type);
+CREATE INDEX idx_chat_latest_message_id ON chatDbo(latest_message_id);
+CREATE INDEX idx_chat_name ON chatDbo(name);
+
 CREATE TABLE contactDbo(
     id                          INTEGER         AS ContactId NOT NULL PRIMARY KEY,
     route_hint                  TEXT            AS LightningRouteHint,
