@@ -1,5 +1,8 @@
 # ChangeLog
 
+# Version 1.0.0-beta09 (2023-11-02)
+- Apply indexes to the database tables 
+
 # Version 1.0.0-beta08 (2023-10-20)
 App Update
 
