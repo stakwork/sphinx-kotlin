@@ -1,0 +1,13 @@
+
+CREATE INDEX idx_message_chat_type_status ON messageDbo(chat_id, type, status);
+CREATE INDEX idx_message_chat_type_reply_thread ON messageDbo(chat_id, type, reply_uuid, thread_uuid);
+CREATE INDEX idx_message_uuid ON messageDbo(uuid);
+CREATE INDEX idx_message_chat_date ON messageDbo(chat_id, date DESC);
+CREATE INDEX idx_message_sender_chat_type ON messageDbo(sender, chat_id, type);
+CREATE INDEX idx_message_id ON messageDbo(id);
+CREATE INDEX idx_message_muid_original_muid ON messageDbo(muid, original_muid);
+
+CREATE INDEX idx_chat_id ON chatDbo(id);
+CREATE INDEX idx_chat_type ON chatDbo(type);
+CREATE INDEX idx_chat_latest_message_id ON chatDbo(latest_message_id);
+CREATE INDEX idx_chat_name ON chatDbo(name);
