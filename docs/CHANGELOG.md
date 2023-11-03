@@ -1,5 +1,8 @@
 # ChangeLog
 
+# Version 1.0.0-beta10 (2023-11-03)
+- Fixes issue on invoice tag
+
 # Version 1.0.0-beta09 (2023-11-02)
 - Apply indexes to the database tables 
 
