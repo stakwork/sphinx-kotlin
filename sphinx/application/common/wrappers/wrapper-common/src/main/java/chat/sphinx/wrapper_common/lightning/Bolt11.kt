@@ -421,9 +421,9 @@ class Bolt11(
     }
 
     fun getMemo(): String {
-        if (tags.size > 1) {
-            (tags[1] as TaggedField.Description)?.let { descriptionTag ->
-                return descriptionTag.description
+        tags.forEach { taggedField ->
+            if (taggedField is TaggedField.Description) {
+                return taggedField.description
             }
         }
         return "-"
