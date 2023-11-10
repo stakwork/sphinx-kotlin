@@ -36,6 +36,8 @@ import chat.sphinx.wrapper_common.lightning.LightningRouteHint;
 import chat.sphinx.wrapper_common.lightning.Sat;
 import chat.sphinx.wrapper_common.message.MessageId;
 import chat.sphinx.wrapper_common.message.MessageUUID;
+import chat.sphinx.wrapper_common.server.LspPubKey;
+import chat.sphinx.wrapper_common.server.ServerIp;
 import chat.sphinx.wrapper_common.subscription.Cron;
 import chat.sphinx.wrapper_common.subscription.EndNumber;
 import chat.sphinx.wrapper_common.subscription.SubscriptionCount;
@@ -83,6 +85,45 @@ import chat.sphinx.wrapper_message_media.MediaType;
 import chat.sphinx.wrapper_rsa.RsaPublicKey;
 import java.io.File;
 import kotlin.collections.List;
+
+
+CREATE TABLE serverDbo(
+    ip                          TEXT            AS ServerIp NOT NULL PRIMARY KEY,
+    pub_key                     TEXT            AS LspPubKey
+);
+
+serverGetAll:
+SELECT *
+FROM serverDbo;
+
+serverGetPubKeyByIp:
+SELECT *
+FROM serverDbo
+WHERE ip = ?;
+
+serverUpdatePubKey:
+UPDATE serverDbo
+SET pub_key = :pub_key
+WHERE ip = ?;
+
+serverDeleteByIp:
+DELETE FROM serverDbo
+WHERE ip = ?;
+
+serverUpsert {
+    UPDATE serverDbo
+    SET pub_key = :pub_key
+    WHERE ip = :ip;
+
+    INSERT OR IGNORE INTO serverDbo(
+        ip,
+        pub_key
+    )
+    VALUES (
+        :ip,
+        :pub_key
+    );
+}
 
 CREATE TABLE chatDbo(
     id                          INTEGER         AS ChatId NOT NULL PRIMARY KEY,
