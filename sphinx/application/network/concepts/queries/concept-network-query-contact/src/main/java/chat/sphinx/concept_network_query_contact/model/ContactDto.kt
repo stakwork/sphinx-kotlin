@@ -1,6 +1,10 @@
 package chat.sphinx.concept_network_query_contact.model
 
 import chat.sphinx.concept_network_query_invite.model.InviteDto
+import chat.sphinx.wrapper_common.contact.ContactIndex
+import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
+import chat.sphinx.wrapper_common.lightning.LightningRouteHint
+import chat.sphinx.wrapper_common.lightning.ShortChannelId
 import com.squareup.moshi.JsonClass
 
 @JsonClass(generateAdapter = true)
@@ -26,7 +30,10 @@ data class ContactDto(
     val invite: InviteDto?,
     val pending: Any?,
     val blocked: Any?,
-) {
+    val scid: String?,
+    val contactIndex: Long?,
+    val contactRouteHint: String?,
+    val childPubKey: String?) {
     @Transient
     val privatePhotoActual: Boolean =
         when (private_photo) {

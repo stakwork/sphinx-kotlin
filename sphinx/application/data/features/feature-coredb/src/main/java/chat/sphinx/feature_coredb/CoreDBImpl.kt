@@ -19,6 +19,8 @@ import chat.sphinx.feature_coredb.adapters.media.MediaKeyDecryptedAdapter
 import chat.sphinx.feature_coredb.adapters.media.MediaTokenAdapter
 import chat.sphinx.feature_coredb.adapters.media.MediaTypeAdapter
 import chat.sphinx.feature_coredb.adapters.message.*
+import chat.sphinx.feature_coredb.adapters.server.IpAdapter
+import chat.sphinx.feature_coredb.adapters.server.PubKeyAdapter
 import chat.sphinx.feature_coredb.adapters.subscription.CronAdapter
 import chat.sphinx.feature_coredb.adapters.subscription.EndNumberAdapter
 import chat.sphinx.feature_coredb.adapters.subscription.SubscriptionCountAdapter
@@ -109,6 +111,11 @@ abstract class CoreDBImpl(private val moshi: Moshi): CoreDB() {
                     invite_idAdapter = InviteIdAdapter.getInstance(),
                     invite_statusAdapter = InviteStatusAdapter.getInstance(),
                     blockedAdapter = BlockedAdapter.getInstance(),
+                    scidAdapter = ScidAdapter(),
+                    contact_indexAdapter = ContactIndexAdapter(),
+                    contact_route_hintAdapter = LightningRouteHintAdapter(),
+                    child_pub_keyAdapter = LightningNodePubKeyAdapter.getInstance()
+
                 ),
                 inviteDboAdapter = InviteDbo.Adapter(
                     idAdapter = InviteIdAdapter.getInstance(),
@@ -249,6 +256,10 @@ abstract class CoreDBImpl(private val moshi: Moshi): CoreDB() {
                     item_idAdapter = FeedIdAdapter(),
                     durationAdapter = FeedItemDurationAdapter(),
                     current_timeAdapter = FeedItemDurationAdapter()
+                ),
+                serverDboAdapter = ServerDbo.Adapter(
+                    ipAdapter = IpAdapter(),
+                    pub_keyAdapter = PubKeyAdapter()
                 )
             ).sphinxDatabaseQueries
         }
