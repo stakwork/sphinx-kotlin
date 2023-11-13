@@ -6,6 +6,7 @@ import android.widget.ImageView
 import chat.sphinx.BuildConfig
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_network_client_cache.NetworkClientCache
+import chat.sphinx.concept_wallet.WalletDataHandler
 import chat.sphinx.example.concept_connect_manager.ConnectManager
 import chat.sphinx.feature_connect_manager.ConnectManagerImpl
 import chat.sphinx.feature_image_loader_android.ImageLoaderAndroid
@@ -122,10 +123,10 @@ object AppModule {
     @Provides
     @Singleton
     fun provideConnectManagerImpl(
-        walletMnemonic: WalletMnemonic
+        walletDataHandler: WalletDataHandler
     ): ConnectManagerImpl =
         ConnectManagerImpl(
-            walletMnemonic
+            walletDataHandler
         )
 
     @Provides
