@@ -6,12 +6,15 @@ import android.widget.ImageView
 import chat.sphinx.BuildConfig
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_network_client_cache.NetworkClientCache
+import chat.sphinx.example.concept_connect_manager.ConnectManager
+import chat.sphinx.feature_connect_manager.ConnectManagerImpl
 import chat.sphinx.feature_image_loader_android.ImageLoaderAndroid
 import chat.sphinx.logger.SphinxLogger
 import chat.sphinx.notification.SphinxNotificationManager
 import chat.sphinx.notification.SphinxNotificationManagerImpl
 import chat.sphinx.util.SphinxDispatchers
 import chat.sphinx.util.SphinxLoggerImpl
+import chat.sphinx.wrapper_lightning.WalletMnemonic
 import com.squareup.moshi.Moshi
 import dagger.Module
 import dagger.Provides
@@ -115,4 +118,21 @@ object AppModule {
         appContext,
         sphinxLogger
     )
+
+    @Provides
+    @Singleton
+    fun provideConnectManagerImpl(
+        walletMnemonic: WalletMnemonic
+    ): ConnectManagerImpl =
+        ConnectManagerImpl(
+            walletMnemonic
+        )
+
+    @Provides
+    @Singleton
+    fun provideConnectManager(
+        connectManagerImpl: ConnectManagerImpl
+    ): ConnectManager =
+        connectManagerImpl
+
 }
