@@ -123,10 +123,12 @@ object AppModule {
     @Provides
     @Singleton
     fun provideConnectManagerImpl(
-        walletDataHandler: WalletDataHandler
-    ): ConnectManagerImpl =
+        walletDataHandler: WalletDataHandler,
+        dispatchers: CoroutineDispatchers,
+        ): ConnectManagerImpl =
         ConnectManagerImpl(
-            walletDataHandler
+            walletDataHandler,
+            dispatchers
         )
 
     @Provides

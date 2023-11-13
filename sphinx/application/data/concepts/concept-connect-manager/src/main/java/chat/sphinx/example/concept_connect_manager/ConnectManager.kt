@@ -7,6 +7,7 @@ abstract class ConnectManager {
         mnemonicWords: String?,
     ): Pair<String?, WalletMnemonic?>
 
+
     abstract suspend fun generateXPub(
         seed: String,
         time: String,
@@ -20,7 +21,19 @@ abstract class ConnectManager {
         network: String
     ): String?
 
+    abstract fun connectToMQTT(
+        serverURI: String,
+        clientId: String,
+        key: String,
+        password: String,
+        okKey: String,
+        index: Int
+    )
+
+    abstract fun createAccount()
+
 
 }
+
 
 

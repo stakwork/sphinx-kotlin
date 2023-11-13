@@ -4,19 +4,82 @@ import chat.sphinx.concept_wallet.WalletDataHandler
 import chat.sphinx.example.concept_connect_manager.ConnectManager
 import chat.sphinx.wrapper_lightning.WalletMnemonic
 import chat.sphinx.wrapper_lightning.toWalletMnemonic
+import io.matthewnelson.concept_coroutines.CoroutineDispatchers
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
+import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken
+import org.eclipse.paho.client.mqttv3.MqttCallback
+import org.eclipse.paho.client.mqttv3.MqttClient
+import org.eclipse.paho.client.mqttv3.MqttConnectOptions
+import org.eclipse.paho.client.mqttv3.MqttException
+import org.eclipse.paho.client.mqttv3.MqttMessage
 import uniffi.sphinxrs.mnemonicFromEntropy
 import uniffi.sphinxrs.mnemonicToSeed
 import uniffi.sphinxrs.pubkeyFromSeed
+import uniffi.sphinxrs.rootSignMs
 import uniffi.sphinxrs.xpubFromSeed
 import java.security.SecureRandom
 
 class ConnectManagerImpl(
-    private val walletDataHandler: WalletDataHandler
-) : ConnectManager() {
+    private val walletDataHandler: WalletDataHandler,
+    dispatchers: CoroutineDispatchers
+): ConnectManager(),
+    CoroutineDispatchers by dispatchers
+{
 
     private var walletMnemonic: WalletMnemonic? = null
+    private var mqttClient: MqttClient? = null
+    private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+    private val mixer = "http://54.164.163.153:1883/api"
+    private val network = "regtest"
 
     // Core Functional Methods
+
+    override fun createAccount() {
+        coroutineScope.launch {
+
+            val seed = generateAndPersistMnemonic(null)
+
+            val xPub = seed.first?.let {
+                generateXPub(
+                    it,
+                    getTimestampInMilliseconds(),
+                    network
+                )
+            }
+
+            val okKey = seed.first?.let {
+                generatePubKeyFromSeed(
+                    it,
+                    0.toUInt(),
+                    getTimestampInMilliseconds(),
+                    network
+                )
+            }
+
+            val sig = seed.first?.let {
+                rootSignMs(
+                    it,
+                    getTimestampInMilliseconds(),
+                    network
+                )
+            }
+
+            if (xPub != null && sig != null && okKey != null) {
+
+                connectToMQTT(
+                    mixer,
+                    xPub,
+                    getTimestampInMilliseconds(),
+                    sig,
+                    okKey,
+                    0
+                )
+            }
+        }
+    }
 
     @OptIn(ExperimentalUnsignedTypes::class)
     override suspend fun generateAndPersistMnemonic(mnemonicWords: String?): Pair<String?, WalletMnemonic?> {
@@ -69,6 +132,67 @@ class ConnectManagerImpl(
         }
     }
 
+    override fun connectToMQTT(
+        serverURI: String,
+        clientId: String,
+        key: String,
+        password: String,
+        okKey: String,
+        index: Int
+    ) {
+
+        mqttClient = try {
+            MqttClient(serverURI, clientId, null)
+        } catch (e: MqttException) {
+            e.printStackTrace()
+            return
+        }
+
+        val options = MqttConnectOptions().apply {
+            this.userName = key
+            this.password = password.toCharArray()
+            this.keepAliveInterval = 60
+        }
+
+        try {
+            mqttClient?.connect(options)
+
+            if (mqttClient?.isConnected == true) {
+                val topics = arrayOf(
+                    "${okKey}/${index}/res/#"
+                )
+                val qos = IntArray(topics.size) { 1 }
+
+                mqttClient?.subscribe(topics, qos)
+
+                val balance = "${okKey}/${index}/req/balance"
+                val registerOkKey = "${okKey}/${index}/req/balance"
+                val message = MqttMessage()
+
+                mqttClient?.publish(balance, message)
+                mqttClient?.publish(registerOkKey, message)
+            }
+
+            mqttClient?.setCallback(object : MqttCallback {
+
+                override fun connectionLost(cause: Throwable?) {
+                    // Implement reconnection logic here
+                }
+
+                override fun messageArrived(topic: String?, message: MqttMessage?) {
+                    // Handle incoming messages here
+                }
+
+                override fun deliveryComplete(token: IMqttDeliveryToken?) {
+                    // Handle message delivery confirmation here
+                }
+            })
+
+        } catch (e: MqttException) {
+            e.printStackTrace()
+        }
+    }
+
 
     // Utility Methods
 
@@ -86,7 +210,14 @@ class ConnectManagerImpl(
         return uByteArray
     }
 
-    fun getTimestampInMilliseconds(): String =
+    private fun getTimestampInMilliseconds(): String =
         System.currentTimeMillis().toString()
+
+    private fun resetMQTT() {
+        if (mqttClient?.isConnected == true) {
+            mqttClient?.disconnect()
+        }
+        mqttClient = null
+    }
 
 }
