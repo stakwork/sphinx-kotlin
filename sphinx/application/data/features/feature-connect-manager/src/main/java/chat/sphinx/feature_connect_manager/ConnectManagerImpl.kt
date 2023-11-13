@@ -32,7 +32,7 @@ class ConnectManagerImpl(
     private var walletMnemonic: WalletMnemonic? = null
     private var mqttClient: MqttClient? = null
     private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
-    private val mixer = "http://54.164.163.153:1883/api"
+    private val mixer = "tcp://54.164.163.153:1883"
     private val network = "regtest"
 
     // Core Functional Methods
@@ -59,10 +59,12 @@ class ConnectManagerImpl(
                 )
             }
 
+            val now = getTimestampInMilliseconds()
+
             val sig = seed.first?.let {
                 rootSignMs(
                     it,
-                    getTimestampInMilliseconds(),
+                    now,
                     network
                 )
             }
@@ -72,7 +74,7 @@ class ConnectManagerImpl(
                 connectToMQTT(
                     mixer,
                     xPub,
-                    getTimestampInMilliseconds(),
+                    now,
                     sig,
                     okKey,
                     0
@@ -166,11 +168,10 @@ class ConnectManagerImpl(
                 mqttClient?.subscribe(topics, qos)
 
                 val balance = "${okKey}/${index}/req/balance"
-                val registerOkKey = "${okKey}/${index}/req/balance"
-                val message = MqttMessage()
+                val registerOkKey = "${okKey}/${index}/req/register"
 
-                mqttClient?.publish(balance, message)
-                mqttClient?.publish(registerOkKey, message)
+                mqttClient?.publish(balance, MqttMessage())
+                mqttClient?.publish(registerOkKey, MqttMessage())
             }
 
             mqttClient?.setCallback(object : MqttCallback {
