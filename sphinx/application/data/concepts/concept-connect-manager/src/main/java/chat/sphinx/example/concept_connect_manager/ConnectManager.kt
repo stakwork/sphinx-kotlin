@@ -7,7 +7,7 @@ abstract class ConnectManager {
 
     abstract val mnemonicWords: StateFlow<String?>
 
-    abstract suspend fun generateAndPersistMnemonic(
+    abstract suspend fun generateMnemonic(
         mnemonicWords: String?,
     ): Pair<String?, WalletMnemonic?>
 

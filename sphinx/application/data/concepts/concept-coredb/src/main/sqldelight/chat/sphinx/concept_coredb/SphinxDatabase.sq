@@ -38,8 +38,7 @@ import chat.sphinx.wrapper_common.lightning.Sat;
 import chat.sphinx.wrapper_common.lightning.ShortChannelId;
 import chat.sphinx.wrapper_common.message.MessageId;
 import chat.sphinx.wrapper_common.message.MessageUUID;
-import chat.sphinx.wrapper_common.server.LspPubKey;
-import chat.sphinx.wrapper_common.server.ServerIp;
+import chat.sphinx.wrapper_common.lightning.ServerIp;
 import chat.sphinx.wrapper_common.subscription.Cron;
 import chat.sphinx.wrapper_common.subscription.EndNumber;
 import chat.sphinx.wrapper_common.subscription.SubscriptionCount;
@@ -91,7 +90,7 @@ import kotlin.collections.List;
 
 CREATE TABLE serverDbo(
     ip                          TEXT            AS ServerIp NOT NULL PRIMARY KEY,
-    pub_key                     TEXT            AS LspPubKey
+    pub_key                     TEXT            AS LightningNodePubKey
 );
 
 serverGetAll:

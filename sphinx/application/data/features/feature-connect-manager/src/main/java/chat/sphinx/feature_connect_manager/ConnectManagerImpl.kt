@@ -1,5 +1,8 @@
 package chat.sphinx.feature_connect_manager
 
+import android.util.Log
+import chat.sphinx.concept_repository_contact.ContactRepository
+import chat.sphinx.concept_repository_lightning.LightningRepository
 import chat.sphinx.concept_wallet.WalletDataHandler
 import chat.sphinx.example.concept_connect_manager.ConnectManager
 import chat.sphinx.wrapper_lightning.WalletMnemonic
@@ -26,6 +29,8 @@ import java.security.SecureRandom
 
 class ConnectManagerImpl(
     private val walletDataHandler: WalletDataHandler,
+    private val contactRepository: ContactRepository,
+    private val lightningRepository: LightningRepository,
     dispatchers: CoroutineDispatchers
 ): ConnectManager(),
     CoroutineDispatchers by dispatchers
@@ -46,7 +51,7 @@ class ConnectManagerImpl(
     override fun createAccount() {
         coroutineScope.launch {
 
-            val seed = generateAndPersistMnemonic(null)
+            val seed = generateMnemonic(null)
 
             val xPub = seed.first?.let {
                 generateXPub(
@@ -90,14 +95,12 @@ class ConnectManagerImpl(
     }
 
     @OptIn(ExperimentalUnsignedTypes::class)
-    override suspend fun generateAndPersistMnemonic(mnemonicWords: String?): Pair<String?, WalletMnemonic?> {
+    override suspend fun generateMnemonic(mnemonicWords: String?): Pair<String?, WalletMnemonic?> {
         var seed: String? = null
 
         walletMnemonic = run {
             try {
-                mnemonicWords?.toWalletMnemonic()?.let { nnWalletMnemonic ->
-                    nnWalletMnemonic
-                } ?: run {
+                mnemonicWords?.toWalletMnemonic() ?: run {
                     val randomBytes = generateRandomBytes(16)
                     val randomBytesString =
                         randomBytes.joinToString("") { it.toString(16).padStart(2, '0') }
@@ -189,6 +192,9 @@ class ConnectManagerImpl(
 
                 override fun messageArrived(topic: String?, message: MqttMessage?) {
                     // Handle incoming messages here
+                    Log.d("MQTT_MESSAGES", "$topic")
+                    Log.d("MQTT_MESSAGES", "$message")
+                    Log.d("MQTT_MESSAGES", "${message?.payload}")
                 }
 
                 override fun deliveryComplete(token: IMqttDeliveryToken?) {

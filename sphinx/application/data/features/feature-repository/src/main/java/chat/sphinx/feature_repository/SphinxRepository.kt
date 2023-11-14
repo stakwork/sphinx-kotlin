@@ -111,6 +111,7 @@ import chat.sphinx.wrapper_contact.*
 import chat.sphinx.wrapper_feed.*
 import chat.sphinx.wrapper_invite.Invite
 import chat.sphinx.wrapper_io_utils.InputStreamProvider
+import chat.sphinx.wrapper_lightning.LightningServiceProvider
 import chat.sphinx.wrapper_lightning.NodeBalance
 import chat.sphinx.wrapper_lightning.NodeBalanceAll
 import chat.sphinx.wrapper_meme_server.AuthenticationChallenge
@@ -1900,6 +1901,18 @@ abstract class SphinxRepository(
                     )
                     emit(Response.Success(nodeBalanceAll))
                 }
+            }
+        }
+    }
+
+    private val lspLock = Mutex()
+
+    override suspend fun updateLSP(lsp: LightningServiceProvider) {
+        val queries = coreDB.getSphinxDatabaseQueries()
+
+        lspLock.withLock {
+            queries.transaction {
+                updateServerDbo(lsp, queries)
             }
         }
     }

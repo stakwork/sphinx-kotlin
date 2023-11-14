@@ -32,6 +32,7 @@ import chat.sphinx.wrapper_common.subscription.SubscriptionId
 import chat.sphinx.wrapper_contact.*
 import chat.sphinx.wrapper_feed.*
 import chat.sphinx.wrapper_invite.InviteString
+import chat.sphinx.wrapper_lightning.LightningServiceProvider
 import chat.sphinx.wrapper_lightning.NodeBalance
 import chat.sphinx.wrapper_message.*
 import chat.sphinx.wrapper_message_media.*
@@ -60,6 +61,16 @@ inline val MessageDto.updateChatDboLatestMessage: Boolean
     get() = type.toMessageType().show           &&
             type != MessageType.BOT_RES         &&
             status != MessageStatus.DELETED
+
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun TransactionCallbacks.updateServerDbo(
+    lsp: LightningServiceProvider,
+    queries: SphinxDatabaseQueries
+) {
+    queries.serverUpsert(lsp.pubKey, lsp.ip)
+
+}
 
 @Suppress("NOTHING_TO_INLINE")
 inline fun TransactionCallbacks.updateChatDboLatestMessage(
