@@ -1,8 +1,12 @@
 package chat.sphinx.example.concept_connect_manager
 
 import chat.sphinx.wrapper_lightning.WalletMnemonic
+import kotlinx.coroutines.flow.StateFlow
 
 abstract class ConnectManager {
+
+    abstract val mnemonicWords: StateFlow<String?>
+
     abstract suspend fun generateAndPersistMnemonic(
         mnemonicWords: String?,
     ): Pair<String?, WalletMnemonic?>

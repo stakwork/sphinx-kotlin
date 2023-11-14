@@ -16,6 +16,7 @@ import chat.sphinx.concept_relay.RelayDataHandler
 import chat.sphinx.concept_signer_manager.CheckAdminCallback
 import chat.sphinx.concept_signer_manager.SignerManager
 import chat.sphinx.concept_wallet.WalletDataHandler
+import chat.sphinx.example.concept_connect_manager.ConnectManager
 import chat.sphinx.key_restore.KeyRestore
 import chat.sphinx.key_restore.KeyRestoreResponse
 import chat.sphinx.kotlin_response.LoadResponse
@@ -118,6 +119,7 @@ internal class OnBoardConnectingViewModel @Inject constructor(
     private val networkQueryInvite: NetworkQueryInvite,
     private val networkQueryRelayKeys: NetworkQueryRelayKeys,
     private val onBoardStepHandler: OnBoardStepHandler,
+    val connectManager: ConnectManager,
     val moshi: Moshi,
     private val rsa: RSA,
 ): MotionLayoutViewModel<
@@ -182,8 +184,9 @@ internal class OnBoardConnectingViewModel @Inject constructor(
                 if (signerManager.isPhoneSignerSettingUp()) {
                     continuePhoneSignerSetup()
                 } else {
-                    submitSideEffect(OnBoardConnectingSideEffect.InvalidCode)
-                    navigator.popBackStack()
+                    connectManager.createAccount()
+//                    submitSideEffect(OnBoardConnectingSideEffect.InvalidCode)
+//                    navigator.popBackStack()
                 }
             }
         }
@@ -650,4 +653,14 @@ internal class OnBoardConnectingViewModel @Inject constructor(
             navigator.popBackStack()
         }
     }
+
+    fun showMnemonicToUser(message: String, callback: (Boolean) -> Unit) {
+        viewModelScope.launch(mainImmediate) {
+            delay(500)
+            submitSideEffect(OnBoardConnectingSideEffect.ShowMnemonicToUser(message) {
+                callback.invoke(true)
+            })
+        }
+    }
+
 }

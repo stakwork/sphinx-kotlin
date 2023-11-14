@@ -1,5 +1,8 @@
 package chat.sphinx.onboard_connecting.ui
 
+import android.app.AlertDialog
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Context
 import chat.sphinx.onboard_resources.R
 import chat.sphinx.resources.SphinxToastUtils
@@ -55,6 +58,30 @@ internal sealed class OnBoardConnectingSideEffect: SideEffect<Context>() {
     object CheckAdminFailed: OnBoardConnectingSideEffect() {
         override suspend fun execute(value: Context) {
             SphinxToastUtils().show(value, R.string.side_effect_check_admin_failed)
+        }
+    }
+
+    class ShowMnemonicToUser(
+        private val mnemonic: String,
+        private val callback: () -> Unit,
+    ): OnBoardConnectingSideEffect() {
+        override suspend fun execute(value: Context) {
+            val builder = AlertDialog.Builder(value, R.style.AlertDialogTheme)
+            builder.setTitle(value.getString(R.string.store_mnemonic))
+            builder.setMessage(mnemonic)
+            builder.setNeutralButton(android.R.string.copy) { _, _ ->
+                (value.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager)?.let { manager ->
+                    val clipData = ClipData.newPlainText("mnemonic", mnemonic)
+                    manager.setPrimaryClip(clipData)
+
+                    SphinxToastUtils().show(value, R.string.mnemonic_copied_to_clipboard)
+                }
+                callback.invoke()
+            }
+            builder.setPositiveButton(android.R.string.ok) { _, _ ->
+                callback.invoke()
+            }
+            builder.show()
         }
     }
 

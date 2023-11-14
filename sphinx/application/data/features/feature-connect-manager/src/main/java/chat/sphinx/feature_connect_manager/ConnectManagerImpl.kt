@@ -8,6 +8,8 @@ import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken
 import org.eclipse.paho.client.mqttv3.MqttCallback
@@ -34,6 +36,10 @@ class ConnectManagerImpl(
     private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private val mixer = "tcp://54.164.163.153:1883"
     private val network = "regtest"
+
+    private val _mnemonicWords = MutableStateFlow<String?>(null)
+    override val mnemonicWords: StateFlow<String?>
+        get() = _mnemonicWords
 
     // Core Functional Methods
 
@@ -97,7 +103,7 @@ class ConnectManagerImpl(
                         randomBytes.joinToString("") { it.toString(16).padStart(2, '0') }
                     val words = mnemonicFromEntropy(randomBytesString)
 
-                    words.toWalletMnemonic()// show mnemonic to user
+                    words.toWalletMnemonic()
                 }
             } catch (e: Exception) {
                 null
@@ -107,6 +113,7 @@ class ConnectManagerImpl(
         walletMnemonic?.value?.let { words ->
             try {
                 seed = mnemonicToSeed(words)
+                _mnemonicWords.value = words
             } catch (e: Exception) {}
         }
 

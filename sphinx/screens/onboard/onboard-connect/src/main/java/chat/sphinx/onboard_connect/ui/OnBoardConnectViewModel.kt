@@ -11,7 +11,6 @@ import chat.sphinx.concept_signer_manager.SignerManager
 import chat.sphinx.concept_signer_manager.SignerPhoneCallback
 import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
 import chat.sphinx.concept_wallet.WalletDataHandler
-import chat.sphinx.example.concept_connect_manager.ConnectManager
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.menu_bottom.ui.MenuBottomViewState
 import chat.sphinx.menu_bottom_phone_signer_method.PhoneSignerMethodMenuHandler
@@ -53,7 +52,6 @@ internal class OnBoardConnectViewModel @Inject constructor(
     private val scannerCoordinator: ViewModelCoordinator<ScannerRequest, ScannerResponse>,
     private val walletDataHandler: WalletDataHandler,
     private val networkQueryCrypter: NetworkQueryCrypter,
-    private val connectManager: ConnectManager,
     private val app: Application,
     val moshi: Moshi,
     val navigator: OnBoardConnectNavigator
@@ -89,7 +87,6 @@ internal class OnBoardConnectViewModel @Inject constructor(
     }
 
     init {
-        connectManager.createAccount()
         updateViewState(
             if (args.newUser) {
                 OnBoardConnectViewState.NewUser
@@ -177,7 +174,15 @@ internal class OnBoardConnectViewModel @Inject constructor(
         }
     }
 
-    fun continueToConnectingScreen(code: String) {
+    fun continueToConnectingScreen(code: String?) {
+
+        if (code == null) {
+            viewModelScope.launch(mainImmediate) {
+                navigator.toOnBoardConnectingScreen(null)
+            }
+            return
+        }
+
         val submitButtonVS = submitButtonViewStateContainer.value
         val redemptionCode = RedemptionCode.decode(code)
 

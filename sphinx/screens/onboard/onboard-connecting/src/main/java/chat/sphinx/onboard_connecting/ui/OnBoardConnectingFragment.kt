@@ -25,6 +25,7 @@ import io.matthewnelson.android_feature_screens.util.invisibleIfFalse
 import io.matthewnelson.android_feature_toast_utils.show
 import io.matthewnelson.android_feature_viewmodel.currentViewState
 import io.matthewnelson.android_feature_viewmodel.updateViewState
+import io.matthewnelson.concept_views.viewstate.collect
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -189,6 +190,18 @@ internal class OnBoardConnectingFragment: MotionLayoutFragment<
                             before.fill('0')
                             updatePinHints(viewState)
                         }
+                    }
+                }
+            }
+        }
+    }
+
+    override fun subscribeToViewStateFlow() {
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.connectManager.mnemonicWords.collect { words ->
+                if (words?.isNotEmpty() == true) {
+                    viewModel.showMnemonicToUser(words) {
+
                     }
                 }
             }
