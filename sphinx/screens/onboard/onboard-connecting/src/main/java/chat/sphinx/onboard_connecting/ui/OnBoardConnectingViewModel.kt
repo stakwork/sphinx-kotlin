@@ -13,10 +13,12 @@ import chat.sphinx.concept_network_query_relay_keys.model.PostHMacKeyDto
 import chat.sphinx.concept_network_tor.TorManager
 import chat.sphinx.concept_relay.RelayDataHandler
 import chat.sphinx.concept_repository_contact.ContactRepository
+import chat.sphinx.concept_repository_lightning.LightningRepository
 import chat.sphinx.concept_signer_manager.CheckAdminCallback
 import chat.sphinx.concept_signer_manager.SignerManager
 import chat.sphinx.concept_wallet.WalletDataHandler
 import chat.sphinx.example.concept_connect_manager.ConnectManager
+import chat.sphinx.example.wrapper_mqtt.toLspChannelInfo
 import chat.sphinx.key_restore.KeyRestore
 import chat.sphinx.key_restore.KeyRestoreResponse
 import chat.sphinx.kotlin_response.LoadResponse
@@ -27,9 +29,11 @@ import chat.sphinx.onboard_common.model.OnBoardInviterData
 import chat.sphinx.onboard_common.model.OnBoardStep
 import chat.sphinx.onboard_common.model.RedemptionCode
 import chat.sphinx.onboard_connecting.navigation.OnBoardConnectingNavigator
+import chat.sphinx.wrapper_common.lightning.ServerIp
 import chat.sphinx.wrapper_common.lightning.toLightningNodePubKey
 import chat.sphinx.wrapper_invite.InviteString
 import chat.sphinx.wrapper_invite.toValidInviteStringOrNull
+import chat.sphinx.wrapper_lightning.LightningServiceProvider
 import chat.sphinx.wrapper_lightning.toWalletMnemonic
 import chat.sphinx.wrapper_relay.*
 import chat.sphinx.wrapper_rsa.RsaPrivateKey
@@ -120,6 +124,7 @@ internal class OnBoardConnectingViewModel @Inject constructor(
     private val networkQueryRelayKeys: NetworkQueryRelayKeys,
     private val contactRepository: ContactRepository,
     private val onBoardStepHandler: OnBoardStepHandler,
+    private val lightningRepository: LightningRepository,
     val connectManager: ConnectManager,
     val moshi: Moshi,
     private val rsa: RSA,
@@ -185,6 +190,7 @@ internal class OnBoardConnectingViewModel @Inject constructor(
                 if (signerManager.isPhoneSignerSettingUp()) {
                     continuePhoneSignerSetup()
                 } else {
+                    connectManager.setLspIp("tcp://54.164.163.153:1883")
                     connectManager.createAccount()
 //                    submitSideEffect(OnBoardConnectingSideEffect.InvalidCode)
 //                    navigator.popBackStack()
@@ -661,6 +667,29 @@ internal class OnBoardConnectingViewModel @Inject constructor(
                 walletDataHandler.persistWalletMnemonic(it)
             }
             submitSideEffect(OnBoardConnectingSideEffect.ShowMnemonicToUser(words) {})
+        }
+    }
+
+    fun createOwnerWithOkKey(okKey: String) {
+        viewModelScope.launch(mainImmediate) {
+            contactRepository.createOwner(okKey)
+        }
+    }
+
+    fun updateLspData(data: String) {
+        viewModelScope.launch(mainImmediate) {
+            val lspChannelInfo = data.toLspChannelInfo(moshi)
+            val serverIp = connectManager.retrieveLspIp()
+            val serverPubKey = lspChannelInfo?.serverPubKey
+
+            if (serverIp?.isNotEmpty() == true && serverPubKey != null) {
+                lightningRepository.updateLSP(
+                    LightningServiceProvider(
+                        ServerIp(serverIp),
+                        serverPubKey
+                    )
+                )
+            }
         }
     }
 

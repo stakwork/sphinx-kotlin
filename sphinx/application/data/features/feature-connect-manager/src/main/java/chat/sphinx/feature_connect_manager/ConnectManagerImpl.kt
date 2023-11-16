@@ -37,10 +37,10 @@ class ConnectManagerImpl(
     CoroutineDispatchers by dispatchers
 {
 
+    private var mixer: String? = null
     private var walletMnemonic: WalletMnemonic? = null
     private var mqttClient: MqttClient? = null
     private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
-    private val mixer = "tcp://54.164.163.153:1883"
     private val network = "regtest"
 
     private val _connectionStateStateFlow = MutableStateFlow<ConnectionState?>(null)
@@ -81,10 +81,12 @@ class ConnectManagerImpl(
                 )
             }
 
-            if (xPub != null && sig != null && okKey != null) {
+            val serverURI = mixer
+
+            if (xPub != null && sig != null && okKey != null && serverURI != null) {
 
                 connectToMQTT(
-                    mixer,
+                    serverURI,
                     xPub,
                     now,
                     sig,
@@ -196,6 +198,8 @@ class ConnectManagerImpl(
                     Log.d("MQTT_MESSAGES", "$topic")
                     Log.d("MQTT_MESSAGES", "$message")
                     Log.d("MQTT_MESSAGES", "${message?.payload}")
+
+                    _connectionStateStateFlow.value = ConnectionState.MqttMessage(message.toString())
                 }
 
                 override fun deliveryComplete(token: IMqttDeliveryToken?) {
@@ -210,6 +214,14 @@ class ConnectManagerImpl(
 
 
     // Utility Methods
+
+    override fun setLspIp(ip: String) {
+        mixer = ip
+    }
+
+    override fun retrieveLspIp(): String? {
+        return mixer
+    }
 
     @OptIn(ExperimentalUnsignedTypes::class)
     private fun generateRandomBytes(size: Int): UByteArray {

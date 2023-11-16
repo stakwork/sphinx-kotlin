@@ -1624,6 +1624,46 @@ abstract class SphinxRepository(
         return response
     }
 
+    override suspend fun createOwner(okKey: String) {
+        val queries = coreDB.getSphinxDatabaseQueries()
+
+        val now = System.currentTimeMillis().toString()
+
+        ContactDto(
+            id = 0L,
+            route_hint = null,
+            public_key = okKey,
+            node_alias = null,
+            alias = null,
+            photo_url = null,
+            private_photo = null,
+            is_owner = true,
+            deleted = null,
+            auth_token = null,
+            status = null,
+            contact_key = null,
+            device_id = null,
+            created_at = now,
+            updated_at = now,
+            from_group = null,
+            notification_sound = null,
+            tip_amount = null,
+            invite = null,
+            pending = null,
+            blocked = null,
+            scid = null,
+            contactIndex = null,
+            contactRouteHint = null,
+            childPubKey = null
+        ).let { owner ->
+            applicationScope.launch(mainImmediate) {
+                queries.transaction {
+                    upsertContact(owner, queries)
+                }
+            }
+        }
+    }
+
     override suspend fun updateChatProfileInfo(
         chatId: ChatId,
         alias: ChatAlias?,

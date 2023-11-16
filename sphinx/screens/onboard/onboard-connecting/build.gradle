@@ -53,6 +53,9 @@ dependencies {
     implementation project(path: ':sphinx:application:network:concepts:tor:concept-network-tor')
     implementation project(path: ':sphinx:screens:authentication:authentication-resources')
     implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-contact')
+    implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-lightning')
+    implementation project(path: ':sphinx:application:common:wrappers:wrapper-mqtt')
+
 
     kapt kaptDeps.google.hilt
 

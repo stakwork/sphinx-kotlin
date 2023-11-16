@@ -8,6 +8,10 @@ abstract class ConnectManager {
 
     abstract val connectionStateStateFlow: StateFlow<ConnectionState?>
 
+    abstract fun setLspIp(ip: String)
+
+    abstract fun retrieveLspIp(): String?
+
     abstract suspend fun generateMnemonic(
         mnemonicWords: String?,
     ): Pair<String?, WalletMnemonic?>

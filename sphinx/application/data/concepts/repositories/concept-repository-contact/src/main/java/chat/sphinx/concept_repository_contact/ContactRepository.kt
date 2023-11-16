@@ -60,11 +60,6 @@ interface ContactRepository {
     suspend fun updateOwnerNameAndKey(name: String, contactKey: Password): Response<Any, ResponseError>
     suspend fun updateOwner(alias: String?, privatePhoto: PrivatePhoto?, tipAmount: Sat?): Response<Any, ResponseError>
 
-    suspend fun updateContact(
-        contactId: ContactId,
-        alias: ContactAlias?,
-        routeHint: LightningRouteHint?
-    ): Response<Any, ResponseError>
 
     suspend fun forceKeyExchange(
         contactId: ContactId,
@@ -82,4 +77,15 @@ interface ContactRepository {
     suspend fun toggleContactBlocked(contact: Contact): Response<Boolean, ResponseError>
 
     suspend fun setGithubPat(pat: String): Response<Boolean, ResponseError>
+
+    suspend fun createOwner(okKey: String)
+
+    /** Sphinx V1 (likely to be removed **/
+
+    suspend fun updateContact(
+        contactId: ContactId,
+        alias: ContactAlias?,
+        routeHint: LightningRouteHint?
+    ): Response<Any, ResponseError>
+
 }

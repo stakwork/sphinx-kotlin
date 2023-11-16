@@ -203,9 +203,11 @@ internal class OnBoardConnectingFragment: MotionLayoutFragment<
                         viewModel.persistAndShowMnemonic(connectionState.words)
                     }
                     is ConnectionState.OkKey -> {
-
+                        viewModel.createOwnerWithOkKey(connectionState.okKey)
                     }
-                    is ConnectionState.MqttMessage -> {}
+                    is ConnectionState.MqttMessage -> {
+                        viewModel.updateLspData(connectionState.message)
+                    }
                     else -> {}
                 }
             }
