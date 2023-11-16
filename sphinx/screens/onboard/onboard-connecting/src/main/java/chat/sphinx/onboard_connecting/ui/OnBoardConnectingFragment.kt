@@ -12,9 +12,9 @@ import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.authentication_resources.databinding.LayoutAuthenticationBinding
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_signer_manager.SignerManager
+import chat.sphinx.example.concept_connect_manager.model.ConnectionState
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
-import chat.sphinx.insetter_activity.addStatusBarPadding
 import chat.sphinx.onboard_connecting.R
 import chat.sphinx.onboard_connecting.databinding.FragmentOnBoardConnectingBinding
 import chat.sphinx.resources.SphinxToastUtils
@@ -25,10 +25,10 @@ import io.matthewnelson.android_feature_screens.util.invisibleIfFalse
 import io.matthewnelson.android_feature_toast_utils.show
 import io.matthewnelson.android_feature_viewmodel.currentViewState
 import io.matthewnelson.android_feature_viewmodel.updateViewState
-import io.matthewnelson.concept_views.viewstate.collect
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.sql.Connection
 import javax.annotation.meta.Exhaustive
 import javax.inject.Inject
 
@@ -198,11 +198,15 @@ internal class OnBoardConnectingFragment: MotionLayoutFragment<
 
     override fun subscribeToViewStateFlow() {
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-            viewModel.connectManager.mnemonicWords.collect { words ->
-                if (words?.isNotEmpty() == true) {
-                    viewModel.showMnemonicToUser(words) {
-
+            viewModel.connectManager.connectionStateStateFlow.collect { connectionState ->
+                when (connectionState) {
+                    is ConnectionState.MnemonicWords -> {
+                        viewModel.showMnemonicToUser(connectionState.words) {
+                        }
                     }
+                    is ConnectionState.OkKey -> {}
+                    is ConnectionState.MqttMessage -> {}
+                    else -> {}
                 }
             }
         }

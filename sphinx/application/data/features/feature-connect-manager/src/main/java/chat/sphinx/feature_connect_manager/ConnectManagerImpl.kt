@@ -5,6 +5,7 @@ import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_lightning.LightningRepository
 import chat.sphinx.concept_wallet.WalletDataHandler
 import chat.sphinx.example.concept_connect_manager.ConnectManager
+import chat.sphinx.example.concept_connect_manager.model.ConnectionState
 import chat.sphinx.wrapper_lightning.WalletMnemonic
 import chat.sphinx.wrapper_lightning.toWalletMnemonic
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
@@ -42,9 +43,9 @@ class ConnectManagerImpl(
     private val mixer = "tcp://54.164.163.153:1883"
     private val network = "regtest"
 
-    private val _mnemonicWords = MutableStateFlow<String?>(null)
-    override val mnemonicWords: StateFlow<String?>
-        get() = _mnemonicWords
+    private val _connectionStateStateFlow = MutableStateFlow<ConnectionState?>(null)
+    override val connectionStateStateFlow: StateFlow<ConnectionState?>
+        get() = _connectionStateStateFlow
 
     // Core Functional Methods
 
@@ -116,7 +117,7 @@ class ConnectManagerImpl(
         walletMnemonic?.value?.let { words ->
             try {
                 seed = mnemonicToSeed(words)
-                _mnemonicWords.value = words
+                _connectionStateStateFlow.value = ConnectionState.MnemonicWords(words)
             } catch (e: Exception) {}
         }
 
