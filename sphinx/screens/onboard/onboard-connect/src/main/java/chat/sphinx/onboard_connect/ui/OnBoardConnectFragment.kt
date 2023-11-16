@@ -95,7 +95,7 @@ internal class OnBoardConnectFragment: SideEffectFragment<
             }
 
             layoutConstrainSkipContainer.setOnClickListener {
-                viewModel.continueToConnectingScreen(null)
+                viewModel.presentLoginModal()
             }
 
             includeLayoutMnemonicWords.includeLayoutMnemonicWordsDetail.apply {

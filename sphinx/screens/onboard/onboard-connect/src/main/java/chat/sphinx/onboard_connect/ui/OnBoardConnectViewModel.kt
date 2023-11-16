@@ -37,8 +37,14 @@ import chat.sphinx.onboard_connect.viewstate.OnBoardConnectViewState
 import chat.sphinx.resources.MnemonicLanguagesUtils
 import com.squareup.moshi.Moshi
 import io.matthewnelson.android_feature_viewmodel.currentViewState
+import io.matthewnelson.concept_authentication.coordinator.AuthenticationCoordinator
+import io.matthewnelson.concept_authentication.coordinator.AuthenticationRequest
+import io.matthewnelson.concept_authentication.coordinator.AuthenticationResponse
 import io.matthewnelson.concept_views.viewstate.value
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
+import javax.annotation.meta.Exhaustive
 import javax.inject.Inject
 
 
@@ -52,6 +58,7 @@ internal class OnBoardConnectViewModel @Inject constructor(
     private val scannerCoordinator: ViewModelCoordinator<ScannerRequest, ScannerResponse>,
     private val walletDataHandler: WalletDataHandler,
     private val networkQueryCrypter: NetworkQueryCrypter,
+    private val authenticationCoordinator: AuthenticationCoordinator,
     private val app: Application,
     val moshi: Moshi,
     val navigator: OnBoardConnectNavigator
@@ -174,15 +181,7 @@ internal class OnBoardConnectViewModel @Inject constructor(
         }
     }
 
-    fun continueToConnectingScreen(code: String?) {
-
-        if (code == null) {
-            viewModelScope.launch(mainImmediate) {
-                navigator.toOnBoardConnectingScreen(null)
-            }
-            return
-        }
-
+    fun continueToConnectingScreen(code: String) {
         val submitButtonVS = submitButtonViewStateContainer.value
         val redemptionCode = RedemptionCode.decode(code)
 
@@ -214,6 +213,37 @@ internal class OnBoardConnectViewModel @Inject constructor(
             }
         }
     }
+
+    private var loginJob: Job? = null
+    fun presentLoginModal(
+    ) {
+        if (loginJob?.isActive == true) {
+            return
+        }
+
+        loginJob = viewModelScope.launch(mainImmediate) {
+            authenticationCoordinator.submitAuthenticationRequest(
+                AuthenticationRequest.LogIn()
+            ).firstOrNull().let { response ->
+                @Exhaustive
+                when (response) {
+                    null,
+                    is AuthenticationResponse.Failure -> {
+                        // will not be returned as back press for handling
+                        // a LogIn request minimizes the application until
+                        // User has authenticated
+                    }
+                    is AuthenticationResponse.Success.Authenticated -> {
+                        navigator.toOnBoardConnectingScreen(null)
+                    }
+                    is AuthenticationResponse.Success.Key -> {
+                        // will never be returned
+                    }
+                }
+            }
+        }
+    }
+
 
     fun setSignerManager(signerManager: SignerManager) {
         signerManager.setWalletDataHandler(walletDataHandler)
