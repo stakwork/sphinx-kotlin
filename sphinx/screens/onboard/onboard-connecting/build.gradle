@@ -52,6 +52,7 @@ dependencies {
     implementation project(path: ':sphinx:application:network:concepts:queries:concept-network-query-relay-keys')
     implementation project(path: ':sphinx:application:network:concepts:tor:concept-network-tor')
     implementation project(path: ':sphinx:screens:authentication:authentication-resources')
+    implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-contact')
 
     kapt kaptDeps.google.hilt
 

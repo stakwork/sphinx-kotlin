@@ -28,7 +28,6 @@ import io.matthewnelson.android_feature_viewmodel.updateViewState
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import java.sql.Connection
 import javax.annotation.meta.Exhaustive
 import javax.inject.Inject
 
@@ -201,10 +200,11 @@ internal class OnBoardConnectingFragment: MotionLayoutFragment<
             viewModel.connectManager.connectionStateStateFlow.collect { connectionState ->
                 when (connectionState) {
                     is ConnectionState.MnemonicWords -> {
-                        viewModel.showMnemonicToUser(connectionState.words) {
-                        }
+                        viewModel.persistAndShowMnemonic(connectionState.words)
                     }
-                    is ConnectionState.OkKey -> {}
+                    is ConnectionState.OkKey -> {
+
+                    }
                     is ConnectionState.MqttMessage -> {}
                     else -> {}
                 }

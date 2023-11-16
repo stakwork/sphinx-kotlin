@@ -1,7 +1,6 @@
 package chat.sphinx.onboard_connecting.ui
 
 import android.content.Context
-import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.concept_crypto_rsa.RSA
@@ -13,6 +12,7 @@ import chat.sphinx.concept_network_query_relay_keys.NetworkQueryRelayKeys
 import chat.sphinx.concept_network_query_relay_keys.model.PostHMacKeyDto
 import chat.sphinx.concept_network_tor.TorManager
 import chat.sphinx.concept_relay.RelayDataHandler
+import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_signer_manager.CheckAdminCallback
 import chat.sphinx.concept_signer_manager.SignerManager
 import chat.sphinx.concept_wallet.WalletDataHandler
@@ -30,6 +30,7 @@ import chat.sphinx.onboard_connecting.navigation.OnBoardConnectingNavigator
 import chat.sphinx.wrapper_common.lightning.toLightningNodePubKey
 import chat.sphinx.wrapper_invite.InviteString
 import chat.sphinx.wrapper_invite.toValidInviteStringOrNull
+import chat.sphinx.wrapper_lightning.toWalletMnemonic
 import chat.sphinx.wrapper_relay.*
 import chat.sphinx.wrapper_rsa.RsaPrivateKey
 import chat.sphinx.wrapper_rsa.RsaPublicKey
@@ -45,7 +46,6 @@ import io.matthewnelson.crypto_common.annotations.UnencryptedDataAccess
 import io.matthewnelson.crypto_common.clazzes.*
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import javax.annotation.meta.Exhaustive
 import javax.inject.Inject
@@ -118,6 +118,7 @@ internal class OnBoardConnectingViewModel @Inject constructor(
     private val networkQueryContact: NetworkQueryContact,
     private val networkQueryInvite: NetworkQueryInvite,
     private val networkQueryRelayKeys: NetworkQueryRelayKeys,
+    private val contactRepository: ContactRepository,
     private val onBoardStepHandler: OnBoardStepHandler,
     val connectManager: ConnectManager,
     val moshi: Moshi,
@@ -654,12 +655,12 @@ internal class OnBoardConnectingViewModel @Inject constructor(
         }
     }
 
-    fun showMnemonicToUser(message: String, callback: (Boolean) -> Unit) {
+    fun persistAndShowMnemonic(words: String) {
         viewModelScope.launch(mainImmediate) {
-            delay(500)
-            submitSideEffect(OnBoardConnectingSideEffect.ShowMnemonicToUser(message) {
-                callback.invoke(true)
-            })
+            words.toWalletMnemonic()?.let {
+                walletDataHandler.persistWalletMnemonic(it)
+            }
+            submitSideEffect(OnBoardConnectingSideEffect.ShowMnemonicToUser(words) {})
         }
     }
 
