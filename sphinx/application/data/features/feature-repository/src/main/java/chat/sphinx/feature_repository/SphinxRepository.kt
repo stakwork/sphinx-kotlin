@@ -102,6 +102,7 @@ import chat.sphinx.wrapper_common.invite.InviteStatus
 import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
 import chat.sphinx.wrapper_common.lightning.LightningRouteHint
 import chat.sphinx.wrapper_common.lightning.Sat
+import chat.sphinx.wrapper_common.lightning.toLightningNodePubKey
 import chat.sphinx.wrapper_common.lightning.toSat
 import chat.sphinx.wrapper_common.message.*
 import chat.sphinx.wrapper_common.payment.PaymentTemplate
@@ -1629,28 +1630,26 @@ abstract class SphinxRepository(
 
         val now = DateTime.nowUTC()
 
-        val owner = ContactDto(
-            id = 0L,
-            route_hint = null,
-            public_key = okKey,
-            node_alias = null,
+        val owner = Contact(
+            id = ContactId(0L),
+            routeHint = null,
+            nodePubKey = okKey.toLightningNodePubKey(),
+            nodeAlias = null,
             alias = null,
-            photo_url = null,
-            private_photo = null,
-            is_owner = true,
-            deleted = null,
-            auth_token = null,
-            status = null,
-            contact_key = null,
-            device_id = null,
-            created_at = now,
-            updated_at = now,
-            from_group = null,
-            notification_sound = null,
-            tip_amount = null,
-            invite = null,
-            pending = null,
-            blocked = null,
+            photoUrl = null,
+            privatePhoto = PrivatePhoto.False,
+            isOwner = Owner.True,
+            status = ContactStatus.AccountOwner,
+            rsaPublicKey = null,
+            deviceId = null,
+            createdAt = now.toDateTime(),
+            updatedAt = now.toDateTime(),
+            fromGroup = ContactFromGroup.False,
+            notificationSound = null,
+            tipAmount = null,
+            inviteId = null,
+            inviteStatus = null,
+            blocked = Blocked.False,
             scid = null,
             contactIndex = null,
             contactRouteHint = null,
@@ -1659,7 +1658,7 @@ abstract class SphinxRepository(
         applicationScope.launch(mainImmediate) {
             contactLock.withLock {
                 queries.transaction {
-                    upsertContact(owner, queries)
+                    upsertNewContact(owner, queries)
                 }
             }
         }
