@@ -85,6 +85,8 @@ class ConnectManagerImpl(
 
             if (xPub != null && sig != null && okKey != null && serverURI != null) {
 
+                _connectionStateStateFlow.value = ConnectionState.OkKey(okKey)
+
                 connectToMQTT(
                     serverURI,
                     xPub,

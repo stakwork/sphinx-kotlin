@@ -1627,9 +1627,9 @@ abstract class SphinxRepository(
     override suspend fun createOwner(okKey: String) {
         val queries = coreDB.getSphinxDatabaseQueries()
 
-        val now = System.currentTimeMillis().toString()
+        val now = DateTime.nowUTC()
 
-        ContactDto(
+        val owner = ContactDto(
             id = 0L,
             route_hint = null,
             public_key = okKey,
@@ -1655,13 +1655,15 @@ abstract class SphinxRepository(
             contactIndex = null,
             contactRouteHint = null,
             childPubKey = null
-        ).let { owner ->
-            applicationScope.launch(mainImmediate) {
+        )
+        applicationScope.launch(mainImmediate) {
+            contactLock.withLock {
                 queries.transaction {
                     upsertContact(owner, queries)
                 }
             }
         }
+
     }
 
     override suspend fun updateChatProfileInfo(
