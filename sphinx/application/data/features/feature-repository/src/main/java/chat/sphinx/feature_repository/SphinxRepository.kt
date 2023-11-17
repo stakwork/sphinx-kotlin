@@ -102,6 +102,7 @@ import chat.sphinx.wrapper_common.invite.InviteStatus
 import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
 import chat.sphinx.wrapper_common.lightning.LightningRouteHint
 import chat.sphinx.wrapper_common.lightning.Sat
+import chat.sphinx.wrapper_common.lightning.ShortChannelId
 import chat.sphinx.wrapper_common.lightning.toLightningNodePubKey
 import chat.sphinx.wrapper_common.lightning.toSat
 import chat.sphinx.wrapper_common.message.*
@@ -1627,7 +1628,6 @@ abstract class SphinxRepository(
 
     override suspend fun createOwner(okKey: String) {
         val queries = coreDB.getSphinxDatabaseQueries()
-
         val now = DateTime.nowUTC()
 
         val owner = Contact(
@@ -1662,7 +1662,30 @@ abstract class SphinxRepository(
                 }
             }
         }
+    }
 
+    override suspend fun updateOwnerRouteHintAndScid(
+        routeHint: LightningRouteHint,
+        scid: ShortChannelId
+    ) {
+        val queries = coreDB.getSphinxDatabaseQueries()
+        val now = DateTime.nowUTC().toDateTime()
+
+        val updatedOwner = accountOwner.value?.copy(
+            routeHint = routeHint,
+            scid = scid,
+            updatedAt = now
+        )
+
+        if (updatedOwner != null) {
+            applicationScope.launch(mainImmediate) {
+                contactLock.withLock {
+                    queries.transaction {
+                        upsertNewContact(updatedOwner, queries)
+                    }
+                }
+            }
+        }
     }
 
     override suspend fun updateChatProfileInfo(

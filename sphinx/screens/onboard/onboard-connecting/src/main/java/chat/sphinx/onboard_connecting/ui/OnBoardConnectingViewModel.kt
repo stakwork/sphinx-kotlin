@@ -30,6 +30,7 @@ import chat.sphinx.onboard_common.model.OnBoardStep
 import chat.sphinx.onboard_common.model.RedemptionCode
 import chat.sphinx.onboard_connecting.navigation.OnBoardConnectingNavigator
 import chat.sphinx.wrapper_common.lightning.ServerIp
+import chat.sphinx.wrapper_common.lightning.retrieveLightningRouteHint
 import chat.sphinx.wrapper_common.lightning.toLightningNodePubKey
 import chat.sphinx.wrapper_invite.InviteString
 import chat.sphinx.wrapper_invite.toValidInviteStringOrNull
@@ -676,11 +677,14 @@ internal class OnBoardConnectingViewModel @Inject constructor(
         }
     }
 
-    fun updateLspData(data: String) {
+    fun updateLspAndOwner(data: String) {
         viewModelScope.launch(mainImmediate) {
+
             val lspChannelInfo = data.toLspChannelInfo(moshi)
             val serverIp = connectManager.retrieveLspIp()
             val serverPubKey = lspChannelInfo?.serverPubKey
+            val scid = lspChannelInfo?.scid
+            val routeHint = retrieveLightningRouteHint(serverPubKey?.value, scid?.value)
 
             if (serverIp?.isNotEmpty() == true && serverPubKey != null) {
                 lightningRepository.updateLSP(
@@ -689,6 +693,10 @@ internal class OnBoardConnectingViewModel @Inject constructor(
                         serverPubKey
                     )
                 )
+            }
+
+            if (routeHint != null && scid != null) {
+                contactRepository.updateOwnerRouteHintAndScid(routeHint, scid)
             }
         }
     }

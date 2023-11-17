@@ -7,6 +7,11 @@ inline fun String.toLightningRouteHint(): LightningRouteHint? =
     } catch (e: IllegalArgumentException) {
         null
     }
+@Suppress("NOTHING_TO_INLINE")
+inline fun retrieveLightningRouteHint(lspPubKey: String?, scid: String?): LightningRouteHint? {
+    val routeHint = "${lspPubKey}_${scid}"
+    return routeHint.toLightningRouteHint()
+}
 
 inline val String.isValidLightningRouteHint: Boolean
     get() = isNotEmpty() && matches("^${LightningRouteHint.REGEX}\$".toRegex())
@@ -15,7 +20,7 @@ inline val String.isValidLightningRouteHint: Boolean
 value class LightningRouteHint(val value: String) {
 
     companion object {
-        const val REGEX = "[A-F0-9a-f]{66}:[0-9]+"
+        const val REGEX = "[A-F0-9a-f]{66}(:|_)[0-9]+"
     }
 
     init {

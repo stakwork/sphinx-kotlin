@@ -9,6 +9,7 @@ import chat.sphinx.wrapper_common.dashboard.InviteId
 import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
 import chat.sphinx.wrapper_common.lightning.LightningRouteHint
 import chat.sphinx.wrapper_common.lightning.Sat
+import chat.sphinx.wrapper_common.lightning.ShortChannelId
 import chat.sphinx.wrapper_contact.*
 import chat.sphinx.wrapper_invite.Invite
 import chat.sphinx.wrapper_io_utils.InputStreamProvider
@@ -79,6 +80,11 @@ interface ContactRepository {
     suspend fun setGithubPat(pat: String): Response<Boolean, ResponseError>
 
     suspend fun createOwner(okKey: String)
+
+    suspend fun updateOwnerRouteHintAndScid(
+        routeHint: LightningRouteHint,
+        scid: ShortChannelId
+    )
 
     /** Sphinx V1 (likely to be removed **/
 
