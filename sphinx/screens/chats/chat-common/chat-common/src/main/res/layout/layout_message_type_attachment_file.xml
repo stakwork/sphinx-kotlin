@@ -100,8 +100,7 @@
             app:layout_constraintBottom_toBottomOf="@id/button_attachment_file_download"
             app:layout_constraintEnd_toEndOf="@id/button_attachment_file_download"
             app:layout_constraintStart_toStartOf="@id/button_attachment_file_download"
-            app:layout_constraintTop_toTopOf="@id/button_attachment_file_download"
-            tools:visibility="visible" />
+            app:layout_constraintTop_toTopOf="@id/button_attachment_file_download" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
