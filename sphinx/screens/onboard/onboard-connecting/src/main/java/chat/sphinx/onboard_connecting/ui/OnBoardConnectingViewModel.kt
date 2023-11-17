@@ -697,6 +697,7 @@ internal class OnBoardConnectingViewModel @Inject constructor(
 
             if (routeHint != null && scid != null) {
                 contactRepository.updateOwnerRouteHintAndScid(routeHint, scid)
+                navigator.toOnBoardNameScreen()
             }
         }
     }

@@ -86,6 +86,8 @@ interface ContactRepository {
         scid: ShortChannelId
     )
 
+    suspend fun updateOwnerAlias(alias: ContactAlias)
+
     /** Sphinx V1 (likely to be removed **/
 
     suspend fun updateContact(

@@ -10,6 +10,7 @@ import chat.sphinx.onboard_connected.navigation.ToOnBoardConnectedScreen
 import chat.sphinx.onboard_connecting.navigation.OnBoardConnectingNavigator
 import chat.sphinx.onboard_desktop.navigation.ToOnBoardDesktopScreen
 import chat.sphinx.onboard_lightning.navigation.ToOnBoardLightningScreen
+import chat.sphinx.onboard_name.navigation.ToOnBoardNameScreen
 import javax.inject.Inject
 
 internal class OnBoardConnectingNavigatorImpl @Inject constructor(
@@ -21,6 +22,12 @@ internal class OnBoardConnectingNavigatorImpl @Inject constructor(
             ToOnBoardConnectedScreen(
                 popUpToId = R.id.main_primary_nav_graph
             )
+        )
+    }
+
+    override suspend fun toOnBoardNameScreen() {
+        navigationDriver.submitNavigationRequest(
+            ToOnBoardNameScreen(popUpToId = R.id.main_primary_nav_graph, null)
         )
     }
 

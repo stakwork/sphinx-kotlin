@@ -22,19 +22,19 @@ internal inline val OnBoardPictureFragmentArgs.inviterData: OnBoardInviterData
 
 class ToOnBoardPictureScreen(
     @IdRes private val popUpToId: Int,
-    private val onBoardStep: OnBoardStep.Step3_Picture,
+    private val onBoardStep: OnBoardStep.Step3_Picture?,
     private val refreshContacts: Boolean,
 ): NavigationRequest<NavController>() {
 
     override fun navigate(controller: NavController) {
         OnBoardPictureFragmentArgs.Builder(
             refreshContacts,
-            onBoardStep.inviterData.nickname,
-            onBoardStep.inviterData.pubkey?.value,
-            onBoardStep.inviterData.routeHint,
-            onBoardStep.inviterData.message,
-            onBoardStep.inviterData.action,
-            onBoardStep.inviterData.pin,
+            onBoardStep?.inviterData?.nickname,
+            onBoardStep?.inviterData?.pubkey?.value,
+            onBoardStep?.inviterData?.routeHint,
+            onBoardStep?.inviterData?.message,
+            onBoardStep?.inviterData?.action,
+            onBoardStep?.inviterData?.pin,
         ).build().let { args ->
 
             controller.navigate(
@@ -44,7 +44,6 @@ class ToOnBoardPictureScreen(
                     .setPopUpTo(popUpToId, false)
                     .build()
             )
-
         }
     }
 
