@@ -136,6 +136,13 @@ internal class DashboardViewModel @Inject constructor(
         MutableStateFlow(null)
     }
 
+    private val _networkStateFlow: MutableStateFlow<Pair<LoadResponse<Boolean, ResponseError>, Boolean>> by lazy {
+        MutableStateFlow(Pair(LoadResponse.Loading, true))
+    }
+    val networkStateFlow: StateFlow<Pair<LoadResponse<Boolean, ResponseError>, Boolean>>
+        get() = _networkStateFlow.asStateFlow()
+
+
     private lateinit var signerManager: SignerManager
 
     init {
@@ -1031,10 +1038,6 @@ internal class DashboardViewModel @Inject constructor(
         }
     }
 
-    private val _networkStateFlow: MutableStateFlow<Pair<LoadResponse<Boolean, ResponseError>, Boolean>> by lazy {
-        MutableStateFlow(Pair(LoadResponse.Loading, true))
-    }
-
     private val _restoreProgressStateFlow: MutableStateFlow<RestoreProgressViewState?> by lazy {
         MutableStateFlow(null)
     }
@@ -1048,9 +1051,6 @@ internal class DashboardViewModel @Inject constructor(
             }
         }
     }
-
-    val networkStateFlow: StateFlow<Pair<LoadResponse<Boolean, ResponseError>, Boolean>>
-        get() = _networkStateFlow.asStateFlow()
 
     val restoreProgressStateFlow: StateFlow<RestoreProgressViewState?>
         get() = _restoreProgressStateFlow.asStateFlow()
