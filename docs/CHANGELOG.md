@@ -1,5 +1,9 @@
 # ChangeLog
 
+# Version 1.0.0-beta11 (2023-11-17)
+- Fixes crashes
+- Fixes Out of Memory issues
+
 # Version 1.0.0-beta10 (2023-11-03)
 - Fixes issue on invoice tag
 
