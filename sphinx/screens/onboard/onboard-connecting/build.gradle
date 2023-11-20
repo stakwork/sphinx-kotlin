@@ -41,6 +41,7 @@ dependencies {
     api project(path: ':sphinx:screens:onboard:onboard-resources')
     api project(path: ':sphinx:application:data:concepts:concept-image-loader')
     api project(path: ':sphinx:application:data:concepts:crypto:concept-crypto-rsa')
+    api project(path: ':sphinx:application:data:concepts:concept-connect-manager')
     implementation project(path: ':sphinx:application:data:concepts:concept-wallet')
     implementation project(path: ':sphinx:activity:concepts:concept-signer-manager')
 
@@ -51,6 +52,10 @@ dependencies {
     implementation project(path: ':sphinx:application:network:concepts:queries:concept-network-query-relay-keys')
     implementation project(path: ':sphinx:application:network:concepts:tor:concept-network-tor')
     implementation project(path: ':sphinx:screens:authentication:authentication-resources')
+    implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-contact')
+    implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-lightning')
+    implementation project(path: ':sphinx:application:common:wrappers:wrapper-mqtt')
+
 
     kapt kaptDeps.google.hilt
 

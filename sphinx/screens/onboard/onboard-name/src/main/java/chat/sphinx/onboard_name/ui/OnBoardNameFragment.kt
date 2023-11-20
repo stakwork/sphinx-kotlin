@@ -50,7 +50,7 @@ internal class OnBoardNameFragment: SideEffectFragment<
 
             val name = binding.signUpNameEditText.text?.trim().toString()
 
-            viewModel.updateOwner(name, inviterData)
+            viewModel.updateOwnerAlias(name)
         }
     }
 

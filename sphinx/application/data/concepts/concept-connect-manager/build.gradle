@@ -1,0 +1,11 @@
+plugins {
+    id 'kotlin'
+    id 'java-library'
+}
+
+dependencies {
+    api project(path: ':sphinx:application:data:concepts:concept-wallet')
+    api project(path: ':sphinx:application:common:kotlin-response')
+
+    implementation deps.kotlin.coroutinesCore
+}

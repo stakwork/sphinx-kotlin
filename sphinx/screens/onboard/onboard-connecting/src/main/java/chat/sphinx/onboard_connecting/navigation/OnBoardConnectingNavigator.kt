@@ -11,6 +11,7 @@ abstract class OnBoardConnectingNavigator(
 ): Navigator<NavController>(navigationDriver) {
 
     abstract suspend fun toOnBoardConnectedScreen()
+    abstract suspend fun toOnBoardNameScreen()
 
     abstract suspend fun toOnBoardMessageScreen(onBoardStep1: OnBoardStep.Step1_WelcomeMessage)
 

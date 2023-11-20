@@ -12,9 +12,9 @@ import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.authentication_resources.databinding.LayoutAuthenticationBinding
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_signer_manager.SignerManager
+import chat.sphinx.example.concept_connect_manager.model.ConnectionState
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
-import chat.sphinx.insetter_activity.addStatusBarPadding
 import chat.sphinx.onboard_connecting.R
 import chat.sphinx.onboard_connecting.databinding.FragmentOnBoardConnectingBinding
 import chat.sphinx.resources.SphinxToastUtils
@@ -190,6 +190,25 @@ internal class OnBoardConnectingFragment: MotionLayoutFragment<
                             updatePinHints(viewState)
                         }
                     }
+                }
+            }
+        }
+    }
+
+    override fun subscribeToViewStateFlow() {
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.connectManager.connectionStateStateFlow.collect { connectionState ->
+                when (connectionState) {
+                    is ConnectionState.MnemonicWords -> {
+                        viewModel.persistAndShowMnemonic(connectionState.words)
+                    }
+                    is ConnectionState.OkKey -> {
+                        viewModel.createOwnerWithOkKey(connectionState.okKey)
+                    }
+                    is ConnectionState.MqttMessage -> {
+                        viewModel.updateLspAndOwner(connectionState.message)
+                    }
+                    else -> {}
                 }
             }
         }

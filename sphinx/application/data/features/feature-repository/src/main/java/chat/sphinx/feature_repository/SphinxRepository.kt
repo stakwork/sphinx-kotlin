@@ -102,6 +102,8 @@ import chat.sphinx.wrapper_common.invite.InviteStatus
 import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
 import chat.sphinx.wrapper_common.lightning.LightningRouteHint
 import chat.sphinx.wrapper_common.lightning.Sat
+import chat.sphinx.wrapper_common.lightning.ShortChannelId
+import chat.sphinx.wrapper_common.lightning.toLightningNodePubKey
 import chat.sphinx.wrapper_common.lightning.toSat
 import chat.sphinx.wrapper_common.message.*
 import chat.sphinx.wrapper_common.payment.PaymentTemplate
@@ -111,6 +113,7 @@ import chat.sphinx.wrapper_contact.*
 import chat.sphinx.wrapper_feed.*
 import chat.sphinx.wrapper_invite.Invite
 import chat.sphinx.wrapper_io_utils.InputStreamProvider
+import chat.sphinx.wrapper_lightning.LightningServiceProvider
 import chat.sphinx.wrapper_lightning.NodeBalance
 import chat.sphinx.wrapper_lightning.NodeBalanceAll
 import chat.sphinx.wrapper_meme_server.AuthenticationChallenge
@@ -1623,6 +1626,88 @@ abstract class SphinxRepository(
         return response
     }
 
+    override suspend fun createOwner(okKey: String) {
+        val queries = coreDB.getSphinxDatabaseQueries()
+        val now = DateTime.nowUTC()
+
+        val owner = Contact(
+            id = ContactId(0L),
+            routeHint = null,
+            nodePubKey = okKey.toLightningNodePubKey(),
+            nodeAlias = null,
+            alias = null,
+            photoUrl = null,
+            privatePhoto = PrivatePhoto.False,
+            isOwner = Owner.True,
+            status = ContactStatus.AccountOwner,
+            rsaPublicKey = null,
+            deviceId = null,
+            createdAt = now.toDateTime(),
+            updatedAt = now.toDateTime(),
+            fromGroup = ContactFromGroup.False,
+            notificationSound = null,
+            tipAmount = null,
+            inviteId = null,
+            inviteStatus = null,
+            blocked = Blocked.False,
+            scid = null,
+            contactIndex = null,
+            contactRouteHint = null,
+            childPubKey = null
+        )
+        applicationScope.launch(mainImmediate) {
+            contactLock.withLock {
+                queries.transaction {
+                    upsertNewContact(owner, queries)
+                }
+            }
+        }
+    }
+
+    override suspend fun updateOwnerRouteHintAndScid(
+        routeHint: LightningRouteHint,
+        scid: ShortChannelId
+    ) {
+        val queries = coreDB.getSphinxDatabaseQueries()
+        val now = DateTime.nowUTC().toDateTime()
+
+        val updatedOwner = accountOwner.value?.copy(
+            routeHint = routeHint,
+            scid = scid,
+            updatedAt = now
+        )
+
+        if (updatedOwner != null) {
+            applicationScope.launch(mainImmediate) {
+                contactLock.withLock {
+                    queries.transaction {
+                        upsertNewContact(updatedOwner, queries)
+                    }
+                }
+            }
+        }
+    }
+
+    override suspend fun updateOwnerAlias(alias: ContactAlias) {
+        val queries = coreDB.getSphinxDatabaseQueries()
+        val now = DateTime.nowUTC().toDateTime()
+
+        val updatedOwner = accountOwner.value?.copy(
+            alias = alias,
+            updatedAt = now
+        )
+
+        if (updatedOwner != null) {
+            applicationScope.launch(mainImmediate) {
+                contactLock.withLock {
+                    queries.transaction {
+                        upsertNewContact(updatedOwner, queries)
+                    }
+                }
+            }
+        }
+    }
+
     override suspend fun updateChatProfileInfo(
         chatId: ChatId,
         alias: ChatAlias?,
@@ -1900,6 +1985,18 @@ abstract class SphinxRepository(
                     )
                     emit(Response.Success(nodeBalanceAll))
                 }
+            }
+        }
+    }
+
+    private val lspLock = Mutex()
+
+    override suspend fun updateLSP(lsp: LightningServiceProvider) {
+        val queries = coreDB.getSphinxDatabaseQueries()
+
+        lspLock.withLock {
+            queries.transaction {
+                updateServerDbo(lsp, queries)
             }
         }
     }

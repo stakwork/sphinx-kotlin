@@ -9,6 +9,7 @@ import chat.sphinx.wrapper_common.dashboard.InviteId
 import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
 import chat.sphinx.wrapper_common.lightning.LightningRouteHint
 import chat.sphinx.wrapper_common.lightning.Sat
+import chat.sphinx.wrapper_common.lightning.ShortChannelId
 import chat.sphinx.wrapper_contact.*
 import chat.sphinx.wrapper_invite.Invite
 import chat.sphinx.wrapper_io_utils.InputStreamProvider
@@ -60,11 +61,6 @@ interface ContactRepository {
     suspend fun updateOwnerNameAndKey(name: String, contactKey: Password): Response<Any, ResponseError>
     suspend fun updateOwner(alias: String?, privatePhoto: PrivatePhoto?, tipAmount: Sat?): Response<Any, ResponseError>
 
-    suspend fun updateContact(
-        contactId: ContactId,
-        alias: ContactAlias?,
-        routeHint: LightningRouteHint?
-    ): Response<Any, ResponseError>
 
     suspend fun forceKeyExchange(
         contactId: ContactId,
@@ -82,4 +78,22 @@ interface ContactRepository {
     suspend fun toggleContactBlocked(contact: Contact): Response<Boolean, ResponseError>
 
     suspend fun setGithubPat(pat: String): Response<Boolean, ResponseError>
+
+    suspend fun createOwner(okKey: String)
+
+    suspend fun updateOwnerRouteHintAndScid(
+        routeHint: LightningRouteHint,
+        scid: ShortChannelId
+    )
+
+    suspend fun updateOwnerAlias(alias: ContactAlias)
+
+    /** Sphinx V1 (likely to be removed **/
+
+    suspend fun updateContact(
+        contactId: ContactId,
+        alias: ContactAlias?,
+        routeHint: LightningRouteHint?
+    ): Response<Any, ResponseError>
+
 }

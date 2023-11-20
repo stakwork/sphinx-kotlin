@@ -20,7 +20,6 @@ import chat.sphinx.feature_coredb.adapters.media.MediaTokenAdapter
 import chat.sphinx.feature_coredb.adapters.media.MediaTypeAdapter
 import chat.sphinx.feature_coredb.adapters.message.*
 import chat.sphinx.feature_coredb.adapters.server.IpAdapter
-import chat.sphinx.feature_coredb.adapters.server.PubKeyAdapter
 import chat.sphinx.feature_coredb.adapters.subscription.CronAdapter
 import chat.sphinx.feature_coredb.adapters.subscription.EndNumberAdapter
 import chat.sphinx.feature_coredb.adapters.subscription.SubscriptionCountAdapter
@@ -259,7 +258,7 @@ abstract class CoreDBImpl(private val moshi: Moshi): CoreDB() {
                 ),
                 serverDboAdapter = ServerDbo.Adapter(
                     ipAdapter = IpAdapter(),
-                    pub_keyAdapter = PubKeyAdapter()
+                    pub_keyAdapter = LightningNodePubKeyAdapter.getInstance()
                 )
             ).sphinxDatabaseQueries
         }

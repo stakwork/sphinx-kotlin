@@ -6,6 +6,11 @@ import android.widget.ImageView
 import chat.sphinx.BuildConfig
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_network_client_cache.NetworkClientCache
+import chat.sphinx.concept_repository_contact.ContactRepository
+import chat.sphinx.concept_repository_lightning.LightningRepository
+import chat.sphinx.concept_wallet.WalletDataHandler
+import chat.sphinx.example.concept_connect_manager.ConnectManager
+import chat.sphinx.feature_connect_manager.ConnectManagerImpl
 import chat.sphinx.feature_image_loader_android.ImageLoaderAndroid
 import chat.sphinx.logger.SphinxLogger
 import chat.sphinx.notification.SphinxNotificationManager
@@ -115,4 +120,27 @@ object AppModule {
         appContext,
         sphinxLogger
     )
+
+    @Provides
+    @Singleton
+    fun provideConnectManagerImpl(
+        walletDataHandler: WalletDataHandler,
+        contactRepository: ContactRepository,
+        lightningRepository: LightningRepository,
+        dispatchers: CoroutineDispatchers,
+        ): ConnectManagerImpl =
+        ConnectManagerImpl(
+            walletDataHandler,
+            contactRepository,
+            lightningRepository,
+            dispatchers
+        )
+
+    @Provides
+    @Singleton
+    fun provideConnectManager(
+        connectManagerImpl: ConnectManagerImpl
+    ): ConnectManager =
+        connectManagerImpl
+
 }
