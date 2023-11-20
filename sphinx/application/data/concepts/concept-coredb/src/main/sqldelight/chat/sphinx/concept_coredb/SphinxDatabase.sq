@@ -386,6 +386,13 @@ WHERE owner = 1
 ORDER BY id
 LIMIT 1;
 
+contactGetLastContactIndex:
+SELECT contact_index
+FROM contactDbo
+ORDER BY contact_index DESC
+LIMIT 1;
+
+
 contactUpsert {
     UPDATE contactDbo
     SET route_hint = :route_hint,

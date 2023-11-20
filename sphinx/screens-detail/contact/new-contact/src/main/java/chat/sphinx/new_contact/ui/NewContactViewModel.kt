@@ -1,6 +1,7 @@
 package chat.sphinx.new_contact.ui
 
 import android.app.Application
+import android.util.Log
 import android.widget.ImageView
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
@@ -11,6 +12,7 @@ import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
 import chat.sphinx.contact.ui.ContactSideEffect
 import chat.sphinx.contact.ui.ContactViewModel
 import chat.sphinx.contact.ui.ContactViewState
+import chat.sphinx.example.concept_connect_manager.ConnectManager
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.new_contact.navigation.NewContactNavigator
@@ -27,7 +29,7 @@ import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -40,6 +42,7 @@ internal class NewContactViewModel @Inject constructor(
     scannerCoordinator: ViewModelCoordinator<ScannerRequest, ScannerResponse>,
     contactRepository: ContactRepository,
     subscriptionRepository: SubscriptionRepository,
+    connectManager: ConnectManager,
     imageLoader: ImageLoader<ImageView>
 ): ContactViewModel<NewContactFragmentArgs>(
     newContactNavigator,
@@ -48,6 +51,7 @@ internal class NewContactViewModel @Inject constructor(
     contactRepository,
     subscriptionRepository,
     scannerCoordinator,
+    connectManager,
     imageLoader,
 ) {
     override val args: NewContactFragmentArgs by savedStateHandle.navArgs()
@@ -76,6 +80,21 @@ internal class NewContactViewModel @Inject constructor(
             }
         }
     }
+
+    override fun storeContact(
+        contactAlias: ContactAlias,
+        lightningNodePubKey: LightningNodePubKey,
+        lightningRouteHint: LightningRouteHint?
+    ) {
+        viewModelScope.launch(mainImmediate) {
+            val newContactIndex = contactRepository.getNewContactIndex().firstOrNull()
+
+        }
+    }
+
+
+
+    /** Sphinx V1 (likely to be removed) **/
 
     override fun saveContact(
         contactAlias: ContactAlias,

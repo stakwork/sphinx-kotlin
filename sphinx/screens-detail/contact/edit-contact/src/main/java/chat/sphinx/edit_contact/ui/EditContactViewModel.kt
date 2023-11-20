@@ -12,6 +12,7 @@ import chat.sphinx.contact.ui.ContactSideEffect
 import chat.sphinx.contact.ui.ContactViewModel
 import chat.sphinx.contact.ui.ContactViewState
 import chat.sphinx.edit_contact.navigation.EditContactNavigator
+import chat.sphinx.example.concept_connect_manager.ConnectManager
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.scanner_view_model_coordinator.request.ScannerRequest
 import chat.sphinx.scanner_view_model_coordinator.response.ScannerResponse
@@ -37,6 +38,7 @@ internal class EditContactViewModel @Inject constructor(
     scannerCoordinator: ViewModelCoordinator<ScannerRequest, ScannerResponse>,
     contactRepository: ContactRepository,
     subscriptionRepository: SubscriptionRepository,
+    connectManager: ConnectManager,
     imageLoader: ImageLoader<ImageView>,
 ): ContactViewModel<EditContactFragmentArgs>(
     editContactNavigator,
@@ -45,6 +47,7 @@ internal class EditContactViewModel @Inject constructor(
     contactRepository,
     subscriptionRepository,
     scannerCoordinator,
+    connectManager,
     imageLoader
 )
 {
@@ -80,6 +83,14 @@ internal class EditContactViewModel @Inject constructor(
             }
         }
     }
+
+    override fun storeContact(
+        contactAlias: ContactAlias,
+        lightningNodePubKey: LightningNodePubKey,
+        lightningRouteHint: LightningRouteHint?
+    ) {}
+
+    /** Sphinx V1 (likely to be removed) **/
 
     suspend fun toSubscriptionDetailScreen() {
         (navigator as EditContactNavigator).toSubscribeDetailScreen(contactId)

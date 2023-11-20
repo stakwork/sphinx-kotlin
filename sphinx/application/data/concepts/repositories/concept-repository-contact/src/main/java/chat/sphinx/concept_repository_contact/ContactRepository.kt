@@ -4,6 +4,7 @@ import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.wrapper_common.PhotoUrl
+import chat.sphinx.wrapper_common.contact.ContactIndex
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.dashboard.InviteId
 import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
@@ -88,7 +89,9 @@ interface ContactRepository {
 
     suspend fun updateOwnerAlias(alias: ContactAlias)
 
-    /** Sphinx V1 (likely to be removed **/
+    suspend fun getNewContactIndex(): Flow<ContactIndex?>
+
+    /** Sphinx V1 (likely to be removed) **/
 
     suspend fun updateContact(
         contactId: ContactId,

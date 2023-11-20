@@ -95,6 +95,7 @@ import chat.sphinx.wrapper_chat.*
 import chat.sphinx.wrapper_common.*
 import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.contact.Blocked
+import chat.sphinx.wrapper_common.contact.ContactIndex
 import chat.sphinx.wrapper_common.contact.isTrue
 import chat.sphinx.wrapper_common.dashboard.*
 import chat.sphinx.wrapper_common.feed.*
@@ -1651,7 +1652,7 @@ abstract class SphinxRepository(
             inviteStatus = null,
             blocked = Blocked.False,
             scid = null,
-            contactIndex = null,
+            contactIndex = ContactIndex(0L),
             contactRouteHint = null,
             childPubKey = null
         )
@@ -1707,6 +1708,20 @@ abstract class SphinxRepository(
             }
         }
     }
+
+    override suspend fun getNewContactIndex(): Flow<ContactIndex?> = flow {
+        emitAll(
+            coreDB.getSphinxDatabaseQueries().contactGetLastContactIndex()
+                .asFlow()
+                .mapToOneOrNull(io)
+                .map { dbContactIndex ->
+                    dbContactIndex?.contact_index?.value?.let {
+                        ContactIndex(it + 1)
+                    }
+                }
+        )
+    }
+
 
     override suspend fun updateChatProfileInfo(
         chatId: ChatId,

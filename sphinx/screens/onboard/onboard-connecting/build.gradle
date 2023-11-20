@@ -57,6 +57,7 @@ dependencies {
     implementation project(path: ':sphinx:application:common:wrappers:wrapper-mqtt')
 
 
+
     kapt kaptDeps.google.hilt
 
     testImplementation testDeps.junit
