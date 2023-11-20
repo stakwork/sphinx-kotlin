@@ -1,9 +1,12 @@
 package chat.sphinx.feature_coredb.adapters.contact
 
 import chat.sphinx.wrapper_common.contact.Blocked
+import chat.sphinx.wrapper_common.contact.ContactIndex
 import chat.sphinx.wrapper_common.contact.toBlocked
 import chat.sphinx.wrapper_common.lightning.LightningNodeAlias
 import chat.sphinx.wrapper_common.lightning.LightningRouteHint
+import chat.sphinx.wrapper_common.lightning.ShortChannelId
+import chat.sphinx.wrapper_common.lightning.toShortChannelId
 import chat.sphinx.wrapper_contact.*
 import chat.sphinx.wrapper_rsa.RsaPublicKey
 import com.squareup.sqldelight.ColumnAdapter
@@ -125,5 +128,26 @@ internal class BlockedAdapter private constructor(): ColumnAdapter<Blocked, Long
 
     override fun encode(value: Blocked): Long {
         return value.value.toLong()
+    }
+}
+
+internal class ScidAdapter: ColumnAdapter<ShortChannelId, String> {
+    override fun decode(databaseValue: String): ShortChannelId {
+        return ShortChannelId(databaseValue)
+    }
+
+    override fun encode(value: ShortChannelId): String {
+        return value.value
+    }
+}
+
+
+internal class ContactIndexAdapter: ColumnAdapter<ContactIndex, Long> {
+    override fun decode(databaseValue: Long): ContactIndex {
+        return ContactIndex(databaseValue)
+    }
+
+    override fun encode(value: ContactIndex): Long {
+        return value.value
     }
 }

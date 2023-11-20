@@ -13,6 +13,7 @@ import chat.sphinx.wrapper_chat.*
 import chat.sphinx.wrapper_common.*
 import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.contact.toBlocked
+import chat.sphinx.wrapper_common.contact.toContactIndex
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.dashboard.InviteId
@@ -264,9 +265,13 @@ inline fun TransactionCallbacks.upsertContact(dto: ContactDto, queries: SphinxDa
         dto.notification_sound?.toNotificationSound(),
         dto.tip_amount?.toSat(),
         dto.blockedActual.toBlocked(),
+        dto.scid?.toShortChannelId(),
+        dto.contactIndex?.toContactIndex(),
+        dto.contactRouteHint?.toLightningRouteHint(),
+        dto.childPubKey?.toLightningNodePubKey(),
         contactId,
         isOwner,
-        createdAt,
+        createdAt
     )
 
     dto.invite?.let { inviteDto ->

@@ -3,6 +3,7 @@ package chat.sphinx.wrapper_contact
 import chat.sphinx.wrapper_common.DateTime
 import chat.sphinx.wrapper_common.PhotoUrl
 import chat.sphinx.wrapper_common.contact.Blocked
+import chat.sphinx.wrapper_common.contact.ContactIndex
 import chat.sphinx.wrapper_common.contact.isTrue
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.dashboard.InviteId
@@ -11,6 +12,7 @@ import chat.sphinx.wrapper_common.lightning.LightningNodeAlias
 import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
 import chat.sphinx.wrapper_common.lightning.LightningRouteHint
 import chat.sphinx.wrapper_common.lightning.Sat
+import chat.sphinx.wrapper_common.lightning.ShortChannelId
 import chat.sphinx.wrapper_rsa.RsaPublicKey
 import java.net.MalformedURLException
 import java.net.URL
@@ -79,4 +81,8 @@ data class Contact(
     val inviteId: InviteId?,
     val inviteStatus: InviteStatus?,
     val blocked: Blocked,
+    val scid: ShortChannelId?,
+    val contactIndex: ContactIndex?,
+    val contactRouteHint: LightningRouteHint?,
+    val childPubKey: LightningNodePubKey?
 )

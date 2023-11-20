@@ -1,0 +1,16 @@
+import chat.sphinx.wrapper_common.contact.ContactIndex;
+import chat.sphinx.wrapper_common.lightning.LightningNodePubKey;
+import chat.sphinx.wrapper_common.lightning.LightningRouteHint;
+import chat.sphinx.wrapper_common.lightning.ShortChannelId;
+import chat.sphinx.wrapper_common.server.LspPubKey;
+import chat.sphinx.wrapper_common.server.ServerIp;
+
+CREATE TABLE serverDbo(
+    ip TEXT AS ServerIp NOT NULL PRIMARY KEY,
+    pub_key TEXT AS LspPubKey
+);
+
+ALTER TABLE contactDbo ADD COLUMN scid TEXT AS ShortChannelId;
+ALTER TABLE contactDbo ADD COLUMN contact_index INTEGER AS ContactIndex;
+ALTER TABLE contactDbo ADD COLUMN contact_route_hint TEXT AS LightningRouteHint;
+ALTER TABLE contactDbo ADD COLUMN child_pub_key TEXT AS LightningNodePubKey;

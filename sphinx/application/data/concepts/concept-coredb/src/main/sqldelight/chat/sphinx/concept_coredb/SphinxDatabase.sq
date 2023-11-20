@@ -19,6 +19,7 @@ import chat.sphinx.wrapper_common.Push;
 import chat.sphinx.wrapper_common.Seen;
 import chat.sphinx.wrapper_common.chat.ChatUUID;
 import chat.sphinx.wrapper_common.contact.Blocked;
+import chat.sphinx.wrapper_common.contact.ContactIndex;
 import chat.sphinx.wrapper_common.dashboard.ChatId;
 import chat.sphinx.wrapper_common.dashboard.ContactId;
 import chat.sphinx.wrapper_common.dashboard.DashboardItemId;
@@ -34,8 +35,11 @@ import chat.sphinx.wrapper_common.lightning.LightningPaymentHash;
 import chat.sphinx.wrapper_common.lightning.LightningPaymentRequest;
 import chat.sphinx.wrapper_common.lightning.LightningRouteHint;
 import chat.sphinx.wrapper_common.lightning.Sat;
+import chat.sphinx.wrapper_common.lightning.ShortChannelId;
 import chat.sphinx.wrapper_common.message.MessageId;
 import chat.sphinx.wrapper_common.message.MessageUUID;
+import chat.sphinx.wrapper_common.server.LspPubKey;
+import chat.sphinx.wrapper_common.server.ServerIp;
 import chat.sphinx.wrapper_common.subscription.Cron;
 import chat.sphinx.wrapper_common.subscription.EndNumber;
 import chat.sphinx.wrapper_common.subscription.SubscriptionCount;
@@ -83,6 +87,45 @@ import chat.sphinx.wrapper_message_media.MediaType;
 import chat.sphinx.wrapper_rsa.RsaPublicKey;
 import java.io.File;
 import kotlin.collections.List;
+
+
+CREATE TABLE serverDbo(
+    ip                          TEXT            AS ServerIp NOT NULL PRIMARY KEY,
+    pub_key                     TEXT            AS LspPubKey
+);
+
+serverGetAll:
+SELECT *
+FROM serverDbo;
+
+serverGetPubKeyByIp:
+SELECT *
+FROM serverDbo
+WHERE ip = ?;
+
+serverUpdatePubKey:
+UPDATE serverDbo
+SET pub_key = :pub_key
+WHERE ip = ?;
+
+serverDeleteByIp:
+DELETE FROM serverDbo
+WHERE ip = ?;
+
+serverUpsert {
+    UPDATE serverDbo
+    SET pub_key = :pub_key
+    WHERE ip = :ip;
+
+    INSERT OR IGNORE INTO serverDbo(
+        ip,
+        pub_key
+    )
+    VALUES (
+        :ip,
+        :pub_key
+    );
+}
 
 CREATE TABLE chatDbo(
     id                          INTEGER         AS ChatId NOT NULL PRIMARY KEY,
@@ -295,7 +338,11 @@ CREATE TABLE contactDbo(
     tip_amount                  INTEGER         AS Sat,
     invite_id                   INTEGER         AS InviteId,
     invite_status               INTEGER         AS InviteStatus,
-    blocked                     INTEGER         AS Blocked NOT NULL DEFAULT 0
+    blocked                     INTEGER         AS Blocked NOT NULL DEFAULT 0,
+    scid                        TEXT            AS ShortChannelId,
+    contact_index               INTEGER         AS ContactIndex,
+    contact_route_hint          TEXT            AS LightningRouteHint,
+    child_pub_key               TEXT            AS LightningNodePubKey
 );
 
 contactGetAllIds:
@@ -354,7 +401,11 @@ contactUpsert {
         updated_at = :updated_at,
         notification_sound = :notification_sound,
         tip_amount = :tip_amount,
-        blocked = :blocked
+        blocked = :blocked,
+        scid = :scid,
+        contact_index = :contact_index,
+        contact_route_hint = :contact_route_hint,
+        child_pub_key = :child_pub_key
     WHERE id = :id;
 
     INSERT OR IGNORE INTO contactDbo(
@@ -373,7 +424,11 @@ contactUpsert {
         updated_at,
         notification_sound,
         tip_amount,
-        blocked
+        blocked,
+        scid,
+        contact_index,
+        contact_route_hint,
+        child_pub_key
     )
     VALUES (
         :id,
@@ -391,7 +446,11 @@ contactUpsert {
         :updated_at,
         :notification_sound,
         :tip_amount,
-        :blocked
+        :blocked,
+        :scid,
+        :contact_index,
+        :contact_route_hint,
+        :child_pub_key
     );
 }
 
@@ -497,7 +556,7 @@ CREATE TABLE dashboardDbo(
 
 --  This is for contacts only. When a Chat of type Conversation comes in, the Contact held
 --  here is updated as `include_in_return=false`
-    include_in_return            INTEGER        AS Boolean DEFAULT 1 NOT NULL,
+    include_in_return           INTEGER         AS Boolean DEFAULT 1 NOT NULL,
 
     latest_message_id           INTEGER         AS MessageId DEFAULT NULL
 );

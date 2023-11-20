@@ -30,7 +30,11 @@ inline fun ContactDbo.toContact(): Contact =
         tip_amount,
         invite_id,
         invite_status,
-        blocked
+        blocked,
+        scid,
+        contact_index,
+        contact_route_hint,
+        child_pub_key
     )
 
 internal class ContactDboPresenterMapper(
@@ -59,7 +63,11 @@ internal class ContactDboPresenterMapper(
             value.tipAmount,
             value.inviteId,
             value.inviteStatus,
-            value.blocked
+            value.blocked,
+            value.scid,
+            value.contactIndex,
+            value.contactRouteHint,
+            value.childPubKey
         )
     }
 }
