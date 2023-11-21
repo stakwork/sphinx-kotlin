@@ -1,9 +1,6 @@
 package chat.sphinx.feature_connect_manager
 
 import android.util.Log
-import chat.sphinx.concept_repository_contact.ContactRepository
-import chat.sphinx.concept_repository_lightning.LightningRepository
-import chat.sphinx.concept_wallet.WalletDataHandler
 import chat.sphinx.example.concept_connect_manager.ConnectManager
 import chat.sphinx.example.concept_connect_manager.model.ConnectionState
 import chat.sphinx.wrapper_lightning.WalletMnemonic
@@ -29,9 +26,6 @@ import uniffi.sphinxrs.xpubFromSeed
 import java.security.SecureRandom
 
 class ConnectManagerImpl(
-    private val walletDataHandler: WalletDataHandler,
-    private val contactRepository: ContactRepository,
-    private val lightningRepository: LightningRepository,
     dispatchers: CoroutineDispatchers
 ): ConnectManager(),
     CoroutineDispatchers by dispatchers
@@ -94,6 +88,41 @@ class ConnectManagerImpl(
                     sig,
                     okKey,
                     0
+                )
+            }
+        }
+    }
+
+    override fun createContact(
+        alias: String,
+        lightningNodePubKey: String,
+        lightningRouteHint: String,
+        index: Long,
+        walletMnemonic: WalletMnemonic
+    ) {
+        coroutineScope.launch {
+
+            val seed = try {
+                mnemonicToSeed(walletMnemonic.value)
+            } catch (e: Exception) {
+                null
+            }
+
+            val now = getTimestampInMilliseconds()
+
+            val childPubKey = seed?.let {
+                generatePubKeyFromSeed(
+                    it,
+                    index.toUInt(),
+                    now,
+                    network
+                )
+            }
+
+            if (childPubKey != null) {
+                manageContactMqtt(
+                    childPubKey,
+                    index.toInt()
                 )
             }
         }
@@ -216,6 +245,34 @@ class ConnectManagerImpl(
 
 
     // Utility Methods
+    private fun manageContactMqtt(
+        childPubKey: String,
+        index: Int,
+    ) {
+        if (mqttClient?.isConnected == true) {
+            coroutineScope.launch {
+
+                // Subscribe to the topics for this contact
+                val subscribeTopic = "${childPubKey}/${index}/res/#"
+                try {
+                    mqttClient?.subscribe(subscribeTopic, 1)
+                } catch (e: MqttException) {
+                    e.printStackTrace()
+                }
+
+                // Publish to register child pub key with LSP
+                val publishTopic = "${childPubKey}/${index}/req/register"
+                try {
+                    mqttClient?.publish(publishTopic, MqttMessage())
+                } catch (e: MqttException) {
+                    e.printStackTrace()
+                }
+            }
+        } else {
+            Log.d("MQTT", "MQTT Client is not connected.")
+        }
+    }
+
 
     override fun setLspIp(ip: String) {
         mixer = ip

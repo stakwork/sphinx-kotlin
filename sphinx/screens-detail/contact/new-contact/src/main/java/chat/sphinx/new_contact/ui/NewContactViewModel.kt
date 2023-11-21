@@ -1,7 +1,6 @@
 package chat.sphinx.new_contact.ui
 
 import android.app.Application
-import android.util.Log
 import android.widget.ImageView
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
@@ -9,6 +8,7 @@ import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_subscription.SubscriptionRepository
 import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
+import chat.sphinx.concept_wallet.WalletDataHandler
 import chat.sphinx.contact.ui.ContactSideEffect
 import chat.sphinx.contact.ui.ContactViewModel
 import chat.sphinx.contact.ui.ContactViewState
@@ -42,6 +42,7 @@ internal class NewContactViewModel @Inject constructor(
     scannerCoordinator: ViewModelCoordinator<ScannerRequest, ScannerResponse>,
     contactRepository: ContactRepository,
     subscriptionRepository: SubscriptionRepository,
+    walletDataHandler: WalletDataHandler,
     connectManager: ConnectManager,
     imageLoader: ImageLoader<ImageView>
 ): ContactViewModel<NewContactFragmentArgs>(
@@ -51,6 +52,7 @@ internal class NewContactViewModel @Inject constructor(
     contactRepository,
     subscriptionRepository,
     scannerCoordinator,
+    walletDataHandler,
     connectManager,
     imageLoader,
 ) {
@@ -81,14 +83,24 @@ internal class NewContactViewModel @Inject constructor(
         }
     }
 
-    override fun storeContact(
+    override fun createContact(
         contactAlias: ContactAlias,
         lightningNodePubKey: LightningNodePubKey,
         lightningRouteHint: LightningRouteHint?
     ) {
         viewModelScope.launch(mainImmediate) {
             val newContactIndex = contactRepository.getNewContactIndex().firstOrNull()
+            val walletMnemonic = walletDataHandler.retrieveWalletMnemonic()
 
+            if (newContactIndex != null && walletMnemonic != null && lightningRouteHint != null) {
+                connectManager.createContact(
+                    contactAlias.value,
+                    lightningRouteHint.value,
+                    lightningRouteHint.value,
+                    newContactIndex.value,
+                    walletMnemonic
+                )
+            }
         }
     }
 

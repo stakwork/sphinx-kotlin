@@ -41,6 +41,13 @@ abstract class ConnectManager {
 
     abstract fun createAccount()
 
+    abstract fun createContact(
+        alias: String,
+        lightningNodePubKey: String,
+        lightningRouteHint: String,
+        index: Long,
+        walletMnemonic: WalletMnemonic
+    )
 
 }
 

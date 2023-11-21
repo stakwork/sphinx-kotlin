@@ -2,7 +2,6 @@ package chat.sphinx.contact.ui
 
 import android.app.Application
 import android.content.Context
-import android.util.Log
 import android.widget.ImageView
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavArgs
@@ -10,6 +9,7 @@ import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_subscription.SubscriptionRepository
 import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
+import chat.sphinx.concept_wallet.WalletDataHandler
 import chat.sphinx.contact.R
 import chat.sphinx.contact.navigation.ContactNavigator
 import chat.sphinx.example.concept_connect_manager.ConnectManager
@@ -17,7 +17,6 @@ import chat.sphinx.kotlin_response.Response
 import chat.sphinx.scanner_view_model_coordinator.request.ScannerFilter
 import chat.sphinx.scanner_view_model_coordinator.request.ScannerRequest
 import chat.sphinx.scanner_view_model_coordinator.response.ScannerResponse
-import chat.sphinx.wrapper_common.contact.ContactIndex
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.lightning.*
 import chat.sphinx.wrapper_contact.ContactAlias
@@ -25,7 +24,6 @@ import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 
 abstract class ContactViewModel<ARGS: NavArgs>(
@@ -35,6 +33,7 @@ abstract class ContactViewModel<ARGS: NavArgs>(
     protected val contactRepository: ContactRepository,
     protected val subscriptionRepository: SubscriptionRepository,
     protected val scannerCoordinator: ViewModelCoordinator<ScannerRequest, ScannerResponse>,
+    val walletDataHandler: WalletDataHandler,
     val connectManager: ConnectManager,
     val imageLoader: ImageLoader<ImageView>
 ): SideEffectViewModel<
@@ -119,7 +118,7 @@ abstract class ContactViewModel<ARGS: NavArgs>(
                 return@launch
             }
 
-            storeContact(
+            createContact(
                 ContactAlias(contactAlias),
                 LightningNodePubKey(lightningNodePubKey),
                 lightningRouteHint?.toLightningRouteHint(),
@@ -133,7 +132,7 @@ abstract class ContactViewModel<ARGS: NavArgs>(
         }
     }
 
-    protected abstract fun storeContact(
+    protected abstract fun createContact(
         contactAlias: ContactAlias,
         lightningNodePubKey: LightningNodePubKey,
         lightningRouteHint: LightningRouteHint?,

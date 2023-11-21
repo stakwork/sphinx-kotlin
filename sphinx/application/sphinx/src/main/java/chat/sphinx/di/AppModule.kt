@@ -130,9 +130,6 @@ object AppModule {
         dispatchers: CoroutineDispatchers,
         ): ConnectManagerImpl =
         ConnectManagerImpl(
-            walletDataHandler,
-            contactRepository,
-            lightningRepository,
             dispatchers
         )
 

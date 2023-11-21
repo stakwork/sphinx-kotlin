@@ -8,6 +8,7 @@ import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_subscription.SubscriptionRepository
 import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
+import chat.sphinx.concept_wallet.WalletDataHandler
 import chat.sphinx.contact.ui.ContactSideEffect
 import chat.sphinx.contact.ui.ContactViewModel
 import chat.sphinx.contact.ui.ContactViewState
@@ -38,6 +39,7 @@ internal class EditContactViewModel @Inject constructor(
     scannerCoordinator: ViewModelCoordinator<ScannerRequest, ScannerResponse>,
     contactRepository: ContactRepository,
     subscriptionRepository: SubscriptionRepository,
+    walletDataHandler: WalletDataHandler,
     connectManager: ConnectManager,
     imageLoader: ImageLoader<ImageView>,
 ): ContactViewModel<EditContactFragmentArgs>(
@@ -47,6 +49,7 @@ internal class EditContactViewModel @Inject constructor(
     contactRepository,
     subscriptionRepository,
     scannerCoordinator,
+    walletDataHandler,
     connectManager,
     imageLoader
 )
@@ -84,7 +87,7 @@ internal class EditContactViewModel @Inject constructor(
         }
     }
 
-    override fun storeContact(
+    override fun createContact(
         contactAlias: ContactAlias,
         lightningNodePubKey: LightningNodePubKey,
         lightningRouteHint: LightningRouteHint?
