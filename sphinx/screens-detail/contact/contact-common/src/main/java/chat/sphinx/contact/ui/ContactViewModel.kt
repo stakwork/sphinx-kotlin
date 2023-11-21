@@ -13,6 +13,7 @@ import chat.sphinx.concept_wallet.WalletDataHandler
 import chat.sphinx.contact.R
 import chat.sphinx.contact.navigation.ContactNavigator
 import chat.sphinx.example.concept_connect_manager.ConnectManager
+import chat.sphinx.wrapper_contact.NewContact
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.scanner_view_model_coordinator.request.ScannerFilter
 import chat.sphinx.scanner_view_model_coordinator.request.ScannerRequest
@@ -136,6 +137,10 @@ abstract class ContactViewModel<ARGS: NavArgs>(
         contactAlias: ContactAlias,
         lightningNodePubKey: LightningNodePubKey,
         lightningRouteHint: LightningRouteHint?,
+    )
+
+    protected abstract fun storeContact(
+        contact: NewContact
     )
 
     /** Sphinx V1 (likely to be removed) **/

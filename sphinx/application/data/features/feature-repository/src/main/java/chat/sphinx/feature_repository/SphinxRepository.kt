@@ -1665,6 +1665,46 @@ abstract class SphinxRepository(
         }
     }
 
+    override suspend fun createNewContact(contact: NewContact) {
+        val queries = coreDB.getSphinxDatabaseQueries()
+        val now = DateTime.nowUTC()
+
+        val newContact = Contact(
+            id = ContactId(contact.index.value),
+            routeHint = contact.lightningRouteHint,
+            nodePubKey = contact.lightningNodePubKey,
+            nodeAlias = null,
+            alias = contact.contactAlias,
+            photoUrl = null,
+            privatePhoto = PrivatePhoto.False,
+            isOwner = Owner.False,
+            status = ContactStatus.Pending,
+            rsaPublicKey = null,
+            deviceId = null,
+            createdAt = now.toDateTime(),
+            updatedAt = now.toDateTime(),
+            fromGroup = ContactFromGroup.False,
+            notificationSound = null,
+            tipAmount = null,
+            inviteId = null,
+            inviteStatus = null,
+            blocked = Blocked.False,
+            scid = contact.scid,
+            contactIndex = contact.index,
+            contactRouteHint = null,
+            childPubKey = contact.childPubKey
+        )
+
+        applicationScope.launch(mainImmediate) {
+            contactLock.withLock {
+                queries.transaction {
+                    upsertNewContact(newContact, queries)
+                }
+            }
+        }
+    }
+
+
     override suspend fun updateOwnerRouteHintAndScid(
         routeHint: LightningRouteHint,
         scid: ShortChannelId

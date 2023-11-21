@@ -1,5 +1,6 @@
 package chat.sphinx.new_contact.ui
 
+import android.util.Log
 import androidx.fragment.app.viewModels
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.concept_user_colors_helper.UserColorsHelper
@@ -7,9 +8,11 @@ import chat.sphinx.contact.databinding.LayoutContactBinding
 import chat.sphinx.contact.databinding.LayoutContactDetailScreenHeaderBinding
 import chat.sphinx.contact.databinding.LayoutContactSaveBinding
 import chat.sphinx.contact.ui.ContactFragment
+import chat.sphinx.example.concept_connect_manager.model.ConnectionState
 import chat.sphinx.new_contact.R
 import chat.sphinx.new_contact.databinding.FragmentNewContactBinding
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -44,4 +47,18 @@ internal class NewContactFragment: ContactFragment<
     override fun getHeaderText(): String = getString(R.string.new_contact_header_name)
 
     override fun getSaveButtonText(): String = getString(R.string.save_to_contacts_button)
+
+    override fun subscribeToViewStateFlow() {
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.connectManager.connectionStateStateFlow.collect { connectionState ->
+                when (connectionState) {
+                    is ConnectionState.Contact -> {
+                        viewModel.createContact(connectionState.contact)
+                    }
+                    else -> {}
+                }
+                super.subscribeToViewStateFlow()
+            }
+        }
+    }
 }

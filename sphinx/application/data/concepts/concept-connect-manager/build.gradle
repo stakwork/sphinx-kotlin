@@ -6,6 +6,8 @@ plugins {
 dependencies {
     api project(path: ':sphinx:application:data:concepts:concept-wallet')
     api project(path: ':sphinx:application:common:kotlin-response')
+    api project(path: ':sphinx:application:data:concepts:repositories:concept-repository-contact')
+
 
     implementation deps.kotlin.coroutinesCore
 }

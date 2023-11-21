@@ -3,6 +3,12 @@ package chat.sphinx.feature_connect_manager
 import android.util.Log
 import chat.sphinx.example.concept_connect_manager.ConnectManager
 import chat.sphinx.example.concept_connect_manager.model.ConnectionState
+import chat.sphinx.wrapper_contact.NewContact
+import chat.sphinx.wrapper_common.contact.toContactIndex
+import chat.sphinx.wrapper_common.lightning.toLightningNodePubKey
+import chat.sphinx.wrapper_common.lightning.toLightningRouteHint
+import chat.sphinx.wrapper_common.lightning.toShortChannelId
+import chat.sphinx.wrapper_contact.toContactAlias
 import chat.sphinx.wrapper_lightning.WalletMnemonic
 import chat.sphinx.wrapper_lightning.toWalletMnemonic
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
@@ -30,12 +36,12 @@ class ConnectManagerImpl(
 ): ConnectManager(),
     CoroutineDispatchers by dispatchers
 {
-
     private var mixer: String? = null
     private var walletMnemonic: WalletMnemonic? = null
     private var mqttClient: MqttClient? = null
-    private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private val network = "regtest"
+    private var newContact: NewContact? = null
+    private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
     private val _connectionStateStateFlow = MutableStateFlow<ConnectionState?>(null)
     override val connectionStateStateFlow: StateFlow<ConnectionState?>
@@ -119,10 +125,22 @@ class ConnectManagerImpl(
                 )
             }
 
-            if (childPubKey != null) {
+            val index = index.toContactIndex()
+
+            if (childPubKey != null && index != null) {
+
+                newContact = NewContact(
+                    contactAlias = alias.toContactAlias(),
+                    lightningNodePubKey = lightningNodePubKey.toLightningNodePubKey(),
+                    lightningRouteHint = lightningRouteHint.toLightningRouteHint(),
+                    index = index,
+                    childPubKey = childPubKey.toLightningNodePubKey(),
+                    scid = null
+                )
+
                 manageContactMqtt(
                     childPubKey,
-                    index.toInt()
+                    index.value.toInt()
                 )
             }
         }
@@ -230,7 +248,17 @@ class ConnectManagerImpl(
                     Log.d("MQTT_MESSAGES", "$message")
                     Log.d("MQTT_MESSAGES", "${message?.payload}")
 
-                    _connectionStateStateFlow.value = ConnectionState.MqttMessage(message.toString())
+                    val isNewContact = newContact?.childPubKey?.value?.let { topic?.contains(it) }
+
+                    if (isNewContact == true) {
+
+                        val nnNewContact = newContact?.copy(
+                            scid = extractScid(message.toString())?.toShortChannelId()
+                        )
+                        _connectionStateStateFlow.value = nnNewContact?.let {ConnectionState.Contact(it) }
+                    } else {
+                        _connectionStateStateFlow.value = ConnectionState.MqttMessage(message.toString())
+                    }
                 }
 
                 override fun deliveryComplete(token: IMqttDeliveryToken?) {
@@ -267,6 +295,7 @@ class ConnectManagerImpl(
                 } catch (e: MqttException) {
                     e.printStackTrace()
                 }
+
             }
         } else {
             Log.d("MQTT", "MQTT Client is not connected.")
@@ -304,6 +333,12 @@ class ConnectManagerImpl(
             mqttClient?.disconnect()
         }
         mqttClient = null
+    }
+
+    private fun extractScid(input: String): String? {
+        val pattern = """"scid":"(\d+)"""".toRegex()
+        val matchResult = pattern.find(input)
+        return matchResult?.groups?.get(1)?.value
     }
 
 }

@@ -13,6 +13,7 @@ import chat.sphinx.contact.ui.ContactSideEffect
 import chat.sphinx.contact.ui.ContactViewModel
 import chat.sphinx.contact.ui.ContactViewState
 import chat.sphinx.example.concept_connect_manager.ConnectManager
+import chat.sphinx.wrapper_contact.NewContact
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.new_contact.navigation.NewContactNavigator
@@ -95,7 +96,7 @@ internal class NewContactViewModel @Inject constructor(
             if (newContactIndex != null && walletMnemonic != null && lightningRouteHint != null) {
                 connectManager.createContact(
                     contactAlias.value,
-                    lightningRouteHint.value,
+                    lightningNodePubKey.value,
                     lightningRouteHint.value,
                     newContactIndex.value,
                     walletMnemonic
@@ -104,7 +105,15 @@ internal class NewContactViewModel @Inject constructor(
         }
     }
 
+    override fun storeContact(contact: NewContact) {
+        viewModelScope.launch(mainImmediate) {
+            contactRepository.createNewContact(contact)
+        }
+    }
 
+    fun createContact(contact: NewContact){
+        storeContact(contact)
+    }
 
     /** Sphinx V1 (likely to be removed) **/
 

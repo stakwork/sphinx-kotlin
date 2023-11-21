@@ -14,6 +14,7 @@ import chat.sphinx.contact.ui.ContactViewModel
 import chat.sphinx.contact.ui.ContactViewState
 import chat.sphinx.edit_contact.navigation.EditContactNavigator
 import chat.sphinx.example.concept_connect_manager.ConnectManager
+import chat.sphinx.wrapper_contact.NewContact
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.scanner_view_model_coordinator.request.ScannerRequest
 import chat.sphinx.scanner_view_model_coordinator.response.ScannerResponse
@@ -92,6 +93,8 @@ internal class EditContactViewModel @Inject constructor(
         lightningNodePubKey: LightningNodePubKey,
         lightningRouteHint: LightningRouteHint?
     ) {}
+
+    override fun storeContact(contact: NewContact) {}
 
     /** Sphinx V1 (likely to be removed) **/
 
