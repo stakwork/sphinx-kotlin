@@ -2,6 +2,7 @@ package chat.sphinx.feature_connect_manager
 
 import android.util.Log
 import chat.sphinx.example.concept_connect_manager.ConnectManager
+import chat.sphinx.example.concept_connect_manager.TopicHandler
 import chat.sphinx.example.concept_connect_manager.model.ConnectionState
 import chat.sphinx.wrapper_contact.NewContact
 import chat.sphinx.wrapper_common.contact.toContactIndex
@@ -42,6 +43,7 @@ class ConnectManagerImpl(
     private val network = "regtest"
     private var newContact: NewContact? = null
     private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+    private val topicHandlers: Map<String, TopicHandler> = setupTopicHandlers()
 
     private val _connectionStateStateFlow = MutableStateFlow<ConnectionState?>(null)
     override val connectionStateStateFlow: StateFlow<ConnectionState?>
@@ -248,17 +250,7 @@ class ConnectManagerImpl(
                     Log.d("MQTT_MESSAGES", "$message")
                     Log.d("MQTT_MESSAGES", "${message?.payload}")
 
-                    val isNewContact = newContact?.childPubKey?.value?.let { topic?.contains(it) }
-
-                    if (isNewContact == true) {
-
-                        val nnNewContact = newContact?.copy(
-                            scid = extractScid(message.toString())?.toShortChannelId()
-                        )
-                        _connectionStateStateFlow.value = nnNewContact?.let {ConnectionState.Contact(it) }
-                    } else {
-                        _connectionStateStateFlow.value = ConnectionState.MqttMessage(message.toString())
-                    }
+                    handleMqttMessage(topic, message)
                 }
 
                 override fun deliveryComplete(token: IMqttDeliveryToken?) {
@@ -268,6 +260,40 @@ class ConnectManagerImpl(
 
         } catch (e: MqttException) {
             e.printStackTrace()
+        }
+    }
+
+    private fun handleMqttMessage(topic: String?, message: MqttMessage?) {
+        parseTopic(topic)?.let { topicData ->
+            val topicHandler = topicHandlers[topicData.third]
+
+            val connectionState = topicHandler?.handle(
+                topicData.first,
+                topicData.second,
+                topicData.third,
+                message.toString()
+            )
+
+            when (connectionState) {
+                is ConnectionState.ContactRegistered -> {
+                    val isNewContact = newContact?.childPubKey?.value?.let { topic?.contains(it) }
+
+                    if (isNewContact == true) {
+                        val newContact = newContact?.copy(
+                            scid = extractScid(connectionState.message)?.toShortChannelId()
+                        )
+
+                        _connectionStateStateFlow.value = newContact?.let {
+                            ConnectionState.NewContactRegistered(it)
+                        }
+                    } else {
+                        _connectionStateStateFlow.value = connectionState
+                    }
+                }
+                else -> {
+                    _connectionStateStateFlow.value = connectionState
+                }
+            }
         }
     }
 
@@ -340,5 +366,25 @@ class ConnectManagerImpl(
         val matchResult = pattern.find(input)
         return matchResult?.groups?.get(1)?.value
     }
+
+    private fun setupTopicHandlers(): Map<String, TopicHandler> {
+        return mapOf(
+            "register" to TopicHandler.RegisterHandler,
+            "balance" to TopicHandler.BalanceHandler,
+        )
+    }
+
+    // Returns key, index and action
+    private fun parseTopic(topic: String?): Triple<String, Int, String>? {
+        val parts = topic?.split("/") ?: return null
+
+        if (parts.size < 4) return null
+        val key = parts[0]
+        val index = parts[1].toIntOrNull() ?: return null
+        val action = parts[3]
+
+        return Triple(key, index, action)
+    }
+
 
 }

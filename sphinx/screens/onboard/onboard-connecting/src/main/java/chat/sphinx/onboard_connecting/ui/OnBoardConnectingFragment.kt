@@ -205,7 +205,7 @@ internal class OnBoardConnectingFragment: MotionLayoutFragment<
                     is ConnectionState.OkKey -> {
                         viewModel.createOwnerWithOkKey(connectionState.okKey)
                     }
-                    is ConnectionState.MqttMessage -> {
+                    is ConnectionState.OwnerRegistered -> {
                         viewModel.updateLspAndOwner(connectionState.message)
                     }
                     else -> {}

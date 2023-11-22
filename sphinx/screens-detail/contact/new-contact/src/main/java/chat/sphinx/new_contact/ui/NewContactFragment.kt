@@ -52,7 +52,7 @@ internal class NewContactFragment: ContactFragment<
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.connectManager.connectionStateStateFlow.collect { connectionState ->
                 when (connectionState) {
-                    is ConnectionState.Contact -> {
+                    is ConnectionState.NewContactRegistered -> {
                         viewModel.createContact(connectionState.contact)
                     }
                     else -> {}
