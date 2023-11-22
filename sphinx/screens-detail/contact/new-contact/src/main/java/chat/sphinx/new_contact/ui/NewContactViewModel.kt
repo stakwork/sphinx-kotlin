@@ -89,7 +89,11 @@ internal class NewContactViewModel @Inject constructor(
         lightningNodePubKey: LightningNodePubKey,
         lightningRouteHint: LightningRouteHint?
     ) {
-        viewModelScope.launch(mainImmediate) {
+        if (saveContactJob?.isActive == true) {
+            return
+        }
+
+        saveContactJob = viewModelScope.launch(mainImmediate) {
             val newContactIndex = contactRepository.getNewContactIndex().firstOrNull()
             val walletMnemonic = walletDataHandler.retrieveWalletMnemonic()
 
@@ -101,6 +105,7 @@ internal class NewContactViewModel @Inject constructor(
                     newContactIndex.value,
                     walletMnemonic
                 )
+                viewStateContainer.updateViewState(ContactViewState.Saved)
             }
         }
     }
@@ -139,7 +144,6 @@ internal class NewContactViewModel @Inject constructor(
                     }
                     is Response.Error -> {
                         submitSideEffect(ContactSideEffect.Notify.FailedToSaveContact)
-
                         viewStateContainer.updateViewState(ContactViewState.Error)
                     }
                     is Response.Success -> {

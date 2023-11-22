@@ -47,11 +47,7 @@ abstract class ContactViewModel<ARGS: NavArgs>(
 
     protected abstract val fromAddFriend: Boolean
     protected abstract val contactId: ContactId?
-
-
     protected var createContactJob: Job? = null
-
-
 
     abstract fun initContactDetails()
 
