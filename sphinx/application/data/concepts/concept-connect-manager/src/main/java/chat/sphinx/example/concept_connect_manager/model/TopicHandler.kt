@@ -1,6 +1,4 @@
-package chat.sphinx.example.concept_connect_manager
-
-import chat.sphinx.example.concept_connect_manager.model.ConnectionState
+package chat.sphinx.example.concept_connect_manager.model
 
 sealed class TopicHandler {
     abstract fun handle(key: String, index: Int, action: String, message: String): ConnectionState

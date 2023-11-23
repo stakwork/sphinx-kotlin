@@ -2,7 +2,7 @@ package chat.sphinx.feature_connect_manager
 
 import android.util.Log
 import chat.sphinx.example.concept_connect_manager.ConnectManager
-import chat.sphinx.example.concept_connect_manager.TopicHandler
+import chat.sphinx.example.concept_connect_manager.model.TopicHandler
 import chat.sphinx.example.concept_connect_manager.model.ConnectionState
 import chat.sphinx.wrapper_contact.NewContact
 import chat.sphinx.wrapper_common.contact.toContactIndex
@@ -140,7 +140,7 @@ class ConnectManagerImpl(
                     scid = null
                 )
 
-                manageContactMqtt(
+                subscribeAndPublishContactMQTT(
                     childPubKey,
                     index.value.toInt()
                 )
@@ -299,7 +299,7 @@ class ConnectManagerImpl(
 
 
     // Utility Methods
-    private fun manageContactMqtt(
+    private fun subscribeAndPublishContactMQTT(
         childPubKey: String,
         index: Int,
     ) {
@@ -321,7 +321,6 @@ class ConnectManagerImpl(
                 } catch (e: MqttException) {
                     e.printStackTrace()
                 }
-
             }
         } else {
             Log.d("MQTT", "MQTT Client is not connected.")

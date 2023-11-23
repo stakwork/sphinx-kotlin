@@ -16,7 +16,6 @@ abstract class ConnectManager {
         mnemonicWords: String?,
     ): Pair<String?, WalletMnemonic?>
 
-
     abstract suspend fun generateXPub(
         seed: String,
         time: String,
