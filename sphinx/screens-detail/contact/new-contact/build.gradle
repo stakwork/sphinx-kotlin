@@ -35,7 +35,9 @@ dependencies {
     implementation project(path: ':android:features:android-feature-screens')
     // Sphinx
     api project(path: ':sphinx:screens-detail:contact:contact-common')
+    api project(path: ':sphinx:application:common:wrappers:wrapper-mqtt')
 
     implementation deps.google.hilt
+    implementation deps.square.moshi
     kapt kaptDeps.google.hilt
 }

@@ -1,6 +1,7 @@
 package chat.sphinx.new_contact.ui
 
 import android.app.Application
+import android.util.Log
 import android.widget.ImageView
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
@@ -13,6 +14,11 @@ import chat.sphinx.contact.ui.ContactSideEffect
 import chat.sphinx.contact.ui.ContactViewModel
 import chat.sphinx.contact.ui.ContactViewState
 import chat.sphinx.example.concept_connect_manager.ConnectManager
+import chat.sphinx.example.wrapper_mqtt.HopsDto
+import chat.sphinx.example.wrapper_mqtt.KeyExchangeMessageDto
+import chat.sphinx.example.wrapper_mqtt.Message
+import chat.sphinx.example.wrapper_mqtt.Sender
+import chat.sphinx.example.wrapper_mqtt.toJson
 import chat.sphinx.wrapper_contact.NewContact
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
@@ -22,9 +28,11 @@ import chat.sphinx.scanner_view_model_coordinator.response.ScannerResponse
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
 import chat.sphinx.wrapper_common.lightning.LightningRouteHint
+import chat.sphinx.wrapper_common.lightning.getLspPubKey
 import chat.sphinx.wrapper_common.lightning.toLightningNodePubKey
 import chat.sphinx.wrapper_common.lightning.toLightningRouteHint
 import chat.sphinx.wrapper_contact.ContactAlias
+import com.squareup.moshi.Moshi
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
@@ -45,6 +53,7 @@ internal class NewContactViewModel @Inject constructor(
     subscriptionRepository: SubscriptionRepository,
     walletDataHandler: WalletDataHandler,
     connectManager: ConnectManager,
+    moshi: Moshi,
     imageLoader: ImageLoader<ImageView>
 ): ContactViewModel<NewContactFragmentArgs>(
     newContactNavigator,
@@ -55,6 +64,7 @@ internal class NewContactViewModel @Inject constructor(
     scannerCoordinator,
     walletDataHandler,
     connectManager,
+    moshi,
     imageLoader,
 ) {
     override val args: NewContactFragmentArgs by savedStateHandle.navArgs()
@@ -105,11 +115,7 @@ internal class NewContactViewModel @Inject constructor(
                     lightningNodePubKey.value,
                     lightningRouteHint.value,
                     newContactIndex.value,
-                    walletMnemonic,
-                    owner.nodePubKey?.value ?: return@launch,
-                    owner.routeHint?.value ?: return@launch,
-                    owner.alias?.value ?: "",
-                    owner.photoUrl?.value ?: ""
+                    walletMnemonic
                 )
                 viewStateContainer.updateViewState(ContactViewState.Saved)
             }
@@ -124,6 +130,45 @@ internal class NewContactViewModel @Inject constructor(
 
     fun createContact(contact: NewContact){
         storeContact(contact)
+        sendKeyExchange(contact)
+    }
+
+    private fun sendKeyExchange(contact: NewContact) {
+        viewModelScope.launch(mainImmediate) {
+            val owner = contactRepository.accountOwner.value
+            val mnemonic = walletDataHandler.retrieveWalletMnemonic()
+
+            if (owner != null && mnemonic != null) {
+                val keyExchangeMessage = KeyExchangeMessageDto(
+                    "",
+                    10,
+                    Sender(
+                        owner.nodePubKey?.value ?: "",
+                        owner.routeHint?.value ?: "",
+                        contact.childPubKey?.value ?: "",
+                        "",
+                        owner.alias?.value ?: "",
+                        owner.photoUrl?.value ?: ""
+                    ),
+                    Message("")
+                ).toJson(moshi)
+
+                val hops = HopsDto(
+                    listOf<String>(
+                        contact.lightningRouteHint?.getLspPubKey() ?: "",
+                        contact.lightningNodePubKey?.value ?: ""
+                    )
+                ).toJson(moshi)
+
+                connectManager.sendKeyExchangeOnionMessage(
+                    keyExchangeMessage,
+                    hops,
+                    mnemonic,
+                    owner.nodePubKey?.value ?: ""
+                )
+            }
+        }
+
     }
 
     /** Sphinx V1 (likely to be removed) **/

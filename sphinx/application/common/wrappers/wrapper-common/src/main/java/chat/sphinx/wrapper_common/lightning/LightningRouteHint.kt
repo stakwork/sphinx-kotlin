@@ -12,9 +12,12 @@ inline fun retrieveLightningRouteHint(lspPubKey: String?, scid: String?): Lightn
     val routeHint = "${lspPubKey}_${scid}"
     return routeHint.toLightningRouteHint()
 }
+@Suppress("NOTHING_TO_INLINE")
+inline fun LightningRouteHint.getLspPubKey(): String = this.value.substringBefore('_')
 
 inline val String.isValidLightningRouteHint: Boolean
     get() = isNotEmpty() && matches("^${LightningRouteHint.REGEX}\$".toRegex())
+
 
 @JvmInline
 value class LightningRouteHint(val value: String) {

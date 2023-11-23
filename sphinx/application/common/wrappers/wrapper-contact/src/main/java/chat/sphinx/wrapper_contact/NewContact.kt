@@ -4,7 +4,6 @@ import chat.sphinx.wrapper_common.contact.ContactIndex
 import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
 import chat.sphinx.wrapper_common.lightning.LightningRouteHint
 import chat.sphinx.wrapper_common.lightning.ShortChannelId
-import chat.sphinx.wrapper_contact.ContactAlias
 
 data class NewContact(
     val contactAlias: ContactAlias?,
@@ -13,5 +12,5 @@ data class NewContact(
     val childPubKey: LightningNodePubKey?,
     val index: ContactIndex,
     val scid: ShortChannelId?,
-    val contact_key: LightningNodePubKey?
+    val contactKey: LightningNodePubKey?,
     )

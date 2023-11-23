@@ -42,4 +42,6 @@ dependencies {
     api project(path: ':sphinx:screens-detail:scanner:scanner-view-model-coordinator')
     api project(path: ':sphinx:activity:concepts:concept-user-colors-helper')
     api project(path: ':sphinx:application:data:concepts:concept-connect-manager')
+
+    implementation deps.square.moshi
 }

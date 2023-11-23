@@ -23,6 +23,7 @@ import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
 import chat.sphinx.wrapper_common.lightning.LightningRouteHint
 import chat.sphinx.wrapper_contact.ContactAlias
 import chat.sphinx.wrapper_contact.getColorKey
+import com.squareup.moshi.Moshi
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
@@ -42,6 +43,7 @@ internal class EditContactViewModel @Inject constructor(
     subscriptionRepository: SubscriptionRepository,
     walletDataHandler: WalletDataHandler,
     connectManager: ConnectManager,
+    moshi: Moshi,
     imageLoader: ImageLoader<ImageView>,
 ): ContactViewModel<EditContactFragmentArgs>(
     editContactNavigator,
@@ -52,6 +54,7 @@ internal class EditContactViewModel @Inject constructor(
     scannerCoordinator,
     walletDataHandler,
     connectManager,
+    moshi,
     imageLoader
 )
 {

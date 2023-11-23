@@ -15,7 +15,7 @@ fun HopsDto.toJson(moshi: Moshi): String {
    return adapter.toJson(this)
 }
 
-fun String.hopsDtoOrNull(moshi: Moshi): KeyExchangeMessageDto? {
+fun String.hopsDtoOrNull(moshi: Moshi): HopsDto? {
    return try {
       this.toHopsDto(moshi)
    } catch (e: Exception) {
@@ -24,7 +24,7 @@ fun String.hopsDtoOrNull(moshi: Moshi): KeyExchangeMessageDto? {
 }
 
 @Throws(JsonDataException::class)
-fun String.toHopsDto(moshi: Moshi): KeyExchangeMessageDto {
-   val adapter = moshi.adapter(KeyExchangeMessageDto::class.java)
+fun String.toHopsDto(moshi: Moshi): HopsDto {
+   val adapter = moshi.adapter(HopsDto::class.java)
    return adapter.fromJson(this) ?: throw IllegalArgumentException("Invalid JSON for HopsDto")
 }

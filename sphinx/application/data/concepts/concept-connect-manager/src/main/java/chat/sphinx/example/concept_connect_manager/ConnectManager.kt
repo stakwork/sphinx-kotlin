@@ -1,8 +1,6 @@
 package chat.sphinx.example.concept_connect_manager
 
 import chat.sphinx.example.concept_connect_manager.model.ConnectionState
-import chat.sphinx.wrapper_common.PhotoUrl
-import chat.sphinx.wrapper_common.lightning.LightningRouteHint
 import chat.sphinx.wrapper_lightning.WalletMnemonic
 import kotlinx.coroutines.flow.StateFlow
 
@@ -47,11 +45,14 @@ abstract class ConnectManager {
         lightningNodePubKey: String,
         lightningRouteHint: String,
         index: Long,
+        walletMnemonic: WalletMnemonic
+    )
+
+    abstract fun sendKeyExchangeOnionMessage(
+        keyExchangeMessage: String,
+        hops: String,
         walletMnemonic: WalletMnemonic,
-        senderOkKey: String,
-        senderRouteHint: String,
-        senderAlias: String,
-        senderPic: String
+        okKey: String
     )
 
 }

@@ -21,6 +21,7 @@ import chat.sphinx.scanner_view_model_coordinator.response.ScannerResponse
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.lightning.*
 import chat.sphinx.wrapper_contact.ContactAlias
+import com.squareup.moshi.Moshi
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
@@ -36,6 +37,7 @@ abstract class ContactViewModel<ARGS: NavArgs>(
     protected val scannerCoordinator: ViewModelCoordinator<ScannerRequest, ScannerResponse>,
     val walletDataHandler: WalletDataHandler,
     val connectManager: ConnectManager,
+    val moshi: Moshi,
     val imageLoader: ImageLoader<ImageView>
 ): SideEffectViewModel<
         Context,

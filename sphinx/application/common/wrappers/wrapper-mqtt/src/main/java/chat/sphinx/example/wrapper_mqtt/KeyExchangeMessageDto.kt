@@ -9,15 +9,20 @@ data class KeyExchangeMessageDto(
     val uuid: String,
     val type: Int,
     val sender: Sender,
-    val message: String
+    val message: Message
+)
+
+@JsonClass(generateAdapter = true)
+data class Message(
+    val content: String?
 )
 
 @JsonClass(generateAdapter = true)
 data class Sender(
     val pubkey: String,
-    val route_hint: String,
-    val contact_pubkey: String,
-    val contact_route_hint: String,
+    val route_hint: String?,
+    val contact_pubkey: String?,
+    val contact_route_hint: String?,
     val alias: String,
     val photo_url: String
 )

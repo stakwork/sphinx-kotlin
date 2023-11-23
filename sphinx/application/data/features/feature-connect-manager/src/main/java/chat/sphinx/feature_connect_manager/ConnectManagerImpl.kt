@@ -25,6 +25,7 @@ import org.eclipse.paho.client.mqttv3.MqttClient
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions
 import org.eclipse.paho.client.mqttv3.MqttException
 import org.eclipse.paho.client.mqttv3.MqttMessage
+import uniffi.sphinxrs.createOnionMsg
 import uniffi.sphinxrs.mnemonicFromEntropy
 import uniffi.sphinxrs.mnemonicToSeed
 import uniffi.sphinxrs.pubkeyFromSeed
@@ -106,11 +107,7 @@ class ConnectManagerImpl(
         lightningNodePubKey: String,
         lightningRouteHint: String,
         index: Long,
-        walletMnemonic: WalletMnemonic,
-        senderOkKey: String,
-        senderRouteHint: String,
-        senderAlias: String,
-        senderPic: String
+        walletMnemonic: WalletMnemonic
     ) {
         coroutineScope.launch {
 
@@ -142,7 +139,7 @@ class ConnectManagerImpl(
                     index = index,
                     childPubKey = childPubKey.toLightningNodePubKey(),
                     scid = null,
-                    contact_key = null
+                    contactKey = null
                 )
 
                 subscribeAndPublishContactMQTT(
@@ -269,6 +266,8 @@ class ConnectManagerImpl(
     }
 
     private fun handleMqttMessage(topic: String?, message: MqttMessage?) {
+        topic ?: return
+
         parseTopic(topic)?.let { topicData ->
             val topicHandler = topicHandlers[topicData.third]
 
@@ -281,19 +280,7 @@ class ConnectManagerImpl(
 
             when (connectionState) {
                 is ConnectionState.ContactRegistered -> {
-                    val isNewContact = newContact?.childPubKey?.value?.let { topic?.contains(it) }
-
-                    if (isNewContact == true) {
-                        val newContact = newContact?.copy(
-                            scid = extractScid(connectionState.message)?.toShortChannelId()
-                        )
-
-                        _connectionStateStateFlow.value = newContact?.let {
-                            ConnectionState.NewContactRegistered(it)
-                        }
-                    } else {
-                        _connectionStateStateFlow.value = connectionState
-                    }
+                    handleContactRegistered(topic, connectionState)
                 }
                 else -> {
                     _connectionStateStateFlow.value = connectionState
@@ -302,6 +289,69 @@ class ConnectManagerImpl(
         }
     }
 
+    private fun handleContactRegistered(topic: String, connectionState: ConnectionState.ContactRegistered) {
+        val isNewContact = newContact?.childPubKey?.value?.let { childPubKey ->
+            topic.contains(childPubKey)
+        } ?: return
+
+        if (isNewContact) {
+            val updatedNewContact = newContact?.copy(
+                scid = extractScid(connectionState.message)?.toShortChannelId()
+            )
+            _connectionStateStateFlow.value = updatedNewContact?.let {
+                ConnectionState.NewContactRegistered(it)
+            }
+        } else {
+            _connectionStateStateFlow.value = connectionState
+        }
+    }
+
+    override fun sendKeyExchangeOnionMessage(
+        keyExchangeMessage: String,
+        hops: String,
+        walletMnemonic: WalletMnemonic,
+        okKey: String
+    ) {
+        coroutineScope.launch {
+
+            val seed = try {
+                mnemonicToSeed(walletMnemonic.value)
+            } catch (e: Exception) {
+                null
+            }
+
+            val now = getTimestampInMilliseconds()
+
+            if (seed != null) {
+
+                val onion = try {
+                    createOnionMsg(
+                        seed,
+                        0.toUInt(),
+                        now,
+                        network,
+                        hops,
+                        keyExchangeMessage
+                    )
+                } catch (e: Exception) {
+                    val exception = e
+                    Log.d("onionExcep", e.toString())
+                    null
+                }
+
+                if (onion != null && mqttClient?.isConnected == true) {
+
+                    val publishTopic = "${okKey}/${0}/req/send"
+
+                    try {
+                        mqttClient?.publish(publishTopic, MqttMessage(onion))
+                    } catch (e: MqttException) {
+                        e.printStackTrace()
+                    }
+                }
+            }
+        }
+    }
 
     // Utility Methods
     private fun subscribeAndPublishContactMQTT(
