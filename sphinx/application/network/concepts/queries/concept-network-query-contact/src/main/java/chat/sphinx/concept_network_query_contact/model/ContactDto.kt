@@ -33,7 +33,9 @@ data class ContactDto(
     val scid: String?,
     val contactIndex: Long?,
     val contactRouteHint: String?,
-    val childPubKey: String?) {
+    val childPubKey: String?,
+    val contactKey: String?
+) {
     @Transient
     val privatePhotoActual: Boolean =
         when (private_photo) {

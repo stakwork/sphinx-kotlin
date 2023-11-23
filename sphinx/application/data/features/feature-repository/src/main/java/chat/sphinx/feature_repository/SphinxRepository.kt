@@ -1654,7 +1654,8 @@ abstract class SphinxRepository(
             scid = null,
             contactIndex = ContactIndex(0L),
             contactRouteHint = null,
-            childPubKey = null
+            childPubKey = null,
+            contactKey = null
         )
         applicationScope.launch(mainImmediate) {
             contactLock.withLock {
@@ -1692,7 +1693,8 @@ abstract class SphinxRepository(
             scid = contact.scid,
             contactIndex = contact.index,
             contactRouteHint = null,
-            childPubKey = contact.childPubKey
+            childPubKey = contact.childPubKey,
+            contactKey = null
         )
 
         applicationScope.launch(mainImmediate) {

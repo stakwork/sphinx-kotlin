@@ -34,7 +34,8 @@ inline fun ContactDbo.toContact(): Contact =
         scid,
         contact_index,
         contact_route_hint,
-        child_pub_key
+        child_pub_key,
+        contact_key
     )
 
 internal class ContactDboPresenterMapper(
@@ -67,7 +68,8 @@ internal class ContactDboPresenterMapper(
             value.scid,
             value.contactIndex,
             value.contactRouteHint,
-            value.childPubKey
+            value.childPubKey,
+            value.contactKey
         )
     }
 }

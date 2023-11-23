@@ -13,4 +13,5 @@ data class NewContact(
     val childPubKey: LightningNodePubKey?,
     val index: ContactIndex,
     val scid: ShortChannelId?,
+    val contact_key: LightningNodePubKey?
     )

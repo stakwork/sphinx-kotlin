@@ -106,7 +106,11 @@ class ConnectManagerImpl(
         lightningNodePubKey: String,
         lightningRouteHint: String,
         index: Long,
-        walletMnemonic: WalletMnemonic
+        walletMnemonic: WalletMnemonic,
+        senderOkKey: String,
+        senderRouteHint: String,
+        senderAlias: String,
+        senderPic: String
     ) {
         coroutineScope.launch {
 
@@ -137,7 +141,8 @@ class ConnectManagerImpl(
                     lightningRouteHint = lightningRouteHint.toLightningRouteHint(),
                     index = index,
                     childPubKey = childPubKey.toLightningNodePubKey(),
-                    scid = null
+                    scid = null,
+                    contact_key = null
                 )
 
                 subscribeAndPublishContactMQTT(

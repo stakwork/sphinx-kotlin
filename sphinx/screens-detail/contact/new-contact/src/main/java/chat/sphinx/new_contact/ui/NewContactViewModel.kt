@@ -97,13 +97,19 @@ internal class NewContactViewModel @Inject constructor(
             val newContactIndex = contactRepository.getNewContactIndex().firstOrNull()
             val walletMnemonic = walletDataHandler.retrieveWalletMnemonic()
 
-            if (newContactIndex != null && walletMnemonic != null && lightningRouteHint != null) {
+            val owner = contactRepository.accountOwner.value
+
+            if (newContactIndex != null && walletMnemonic != null && lightningRouteHint != null && owner != null) {
                 connectManager.createContact(
                     contactAlias.value,
                     lightningNodePubKey.value,
                     lightningRouteHint.value,
                     newContactIndex.value,
-                    walletMnemonic
+                    walletMnemonic,
+                    owner.nodePubKey?.value ?: return@launch,
+                    owner.routeHint?.value ?: return@launch,
+                    owner.alias?.value ?: "",
+                    owner.photoUrl?.value ?: ""
                 )
                 viewStateContainer.updateViewState(ContactViewState.Saved)
             }

@@ -275,6 +275,7 @@ inline fun TransactionCallbacks.upsertNewContact(contact: Contact, queries: Sphi
     val contactIndex = contact.contactIndex
     val contactRouteHint = contact.contactRouteHint
     val childPubKey = contact.childPubKey
+    val contactKey = contact.contactKey
 
     // Perform the upsert operation
     queries.contactUpsert(
@@ -295,6 +296,7 @@ inline fun TransactionCallbacks.upsertNewContact(contact: Contact, queries: Sphi
         contactIndex,
         contactRouteHint,
         childPubKey,
+        contactKey,
         contact.id,
         contact.isOwner,
         contact.createdAt
@@ -349,6 +351,7 @@ inline fun TransactionCallbacks.upsertContact(dto: ContactDto, queries: SphinxDa
         dto.contactIndex?.toContactIndex(),
         dto.contactRouteHint?.toLightningRouteHint(),
         dto.childPubKey?.toLightningNodePubKey(),
+        dto.contactKey?.toLightningNodePubKey(),
         contactId,
         isOwner,
         createdAt

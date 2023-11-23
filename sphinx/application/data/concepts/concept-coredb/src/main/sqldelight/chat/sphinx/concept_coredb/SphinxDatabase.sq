@@ -341,7 +341,8 @@ CREATE TABLE contactDbo(
     scid                        TEXT            AS ShortChannelId,
     contact_index               INTEGER         AS ContactIndex,
     contact_route_hint          TEXT            AS LightningRouteHint,
-    child_pub_key               TEXT            AS LightningNodePubKey
+    child_pub_key               TEXT            AS LightningNodePubKey,
+    contact_key                 TEXT            AS LightningNodePubKey
 );
 
 contactGetAllIds:
@@ -411,7 +412,8 @@ contactUpsert {
         scid = :scid,
         contact_index = :contact_index,
         contact_route_hint = :contact_route_hint,
-        child_pub_key = :child_pub_key
+        child_pub_key = :child_pub_key,
+        contact_key = : contact_key
     WHERE id = :id;
 
     INSERT OR IGNORE INTO contactDbo(
@@ -434,7 +436,8 @@ contactUpsert {
         scid,
         contact_index,
         contact_route_hint,
-        child_pub_key
+        child_pub_key,
+        contact_key
     )
     VALUES (
         :id,
@@ -456,7 +459,8 @@ contactUpsert {
         :scid,
         :contact_index,
         :contact_route_hint,
-        :child_pub_key
+        :child_pub_key,
+        :contact_key
     );
 }
 

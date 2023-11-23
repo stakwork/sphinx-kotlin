@@ -13,3 +13,4 @@ ALTER TABLE contactDbo ADD COLUMN scid TEXT AS ShortChannelId;
 ALTER TABLE contactDbo ADD COLUMN contact_index INTEGER AS ContactIndex;
 ALTER TABLE contactDbo ADD COLUMN contact_route_hint TEXT AS LightningRouteHint;
 ALTER TABLE contactDbo ADD COLUMN child_pub_key TEXT AS LightningNodePubKey;
+ALTER TABLE contactDbo ADD COLUMN contact_key TEXT AS LightningNodePubKey;
