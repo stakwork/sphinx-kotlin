@@ -6,6 +6,7 @@ import chat.sphinx.example.concept_connect_manager.model.TopicHandler
 import chat.sphinx.example.concept_connect_manager.model.ConnectionState
 import chat.sphinx.wrapper_contact.NewContact
 import chat.sphinx.wrapper_common.contact.toContactIndex
+import chat.sphinx.wrapper_common.lightning.retrieveLightningRouteHint
 import chat.sphinx.wrapper_common.lightning.toLightningNodePubKey
 import chat.sphinx.wrapper_common.lightning.toLightningRouteHint
 import chat.sphinx.wrapper_common.lightning.toShortChannelId
@@ -107,7 +108,8 @@ class ConnectManagerImpl(
         lightningNodePubKey: String,
         lightningRouteHint: String,
         index: Long,
-        walletMnemonic: WalletMnemonic
+        walletMnemonic: WalletMnemonic,
+        senderLspPubKey: String
     ) {
         coroutineScope.launch {
 
@@ -138,8 +140,9 @@ class ConnectManagerImpl(
                     lightningRouteHint = lightningRouteHint.toLightningRouteHint(),
                     index = index,
                     childPubKey = childPubKey.toLightningNodePubKey(),
+                    contactRouteHint = null ,
                     scid = null,
-                    contactKey = null
+                    senderLspPubKey = senderLspPubKey.toLightningNodePubKey()
                 )
 
                 subscribeAndPublishContactMQTT(
@@ -165,6 +168,7 @@ class ConnectManagerImpl(
                     words.toWalletMnemonic()
                 }
             } catch (e: Exception) {
+                val excep = e
                 null
             }
         }
@@ -295,9 +299,12 @@ class ConnectManagerImpl(
         } ?: return
 
         if (isNewContact) {
+            val scid = extractScid(connectionState.message)
             val updatedNewContact = newContact?.copy(
-                scid = extractScid(connectionState.message)?.toShortChannelId()
+                scid = scid?.toShortChannelId(),
+                contactRouteHint = retrieveLightningRouteHint(newContact?.senderLspPubKey?.value, scid)
             )
+
             _connectionStateStateFlow.value = updatedNewContact?.let {
                 ConnectionState.NewContactRegistered(it)
             }
@@ -334,8 +341,6 @@ class ConnectManagerImpl(
                         keyExchangeMessage
                     )
                 } catch (e: Exception) {
-                    val exception = e
-                    Log.d("onionExcep", e.toString())
                     null
                 }
 

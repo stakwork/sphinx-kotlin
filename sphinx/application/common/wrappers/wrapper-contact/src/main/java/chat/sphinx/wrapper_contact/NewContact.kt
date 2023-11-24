@@ -10,7 +10,8 @@ data class NewContact(
     val lightningNodePubKey: LightningNodePubKey?,
     val lightningRouteHint: LightningRouteHint?,
     val childPubKey: LightningNodePubKey?,
+    val contactRouteHint: LightningRouteHint?,
     val index: ContactIndex,
     val scid: ShortChannelId?,
-    val contactKey: LightningNodePubKey?,
+    val senderLspPubKey: LightningNodePubKey?,
     )

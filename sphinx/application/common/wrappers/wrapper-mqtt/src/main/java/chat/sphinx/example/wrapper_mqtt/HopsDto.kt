@@ -3,16 +3,22 @@ package chat.sphinx.example.wrapper_mqtt
 import com.squareup.moshi.JsonClass
 import com.squareup.moshi.JsonDataException
 import com.squareup.moshi.Moshi
+import com.squareup.moshi.Types
+
+@JsonClass(generateAdapter = true)
+data class PubkeyDto(
+   val pubkey: String
+)
 
 @JsonClass(generateAdapter = true)
 data class HopsDto(
-   val pubkey: List<String>
+   val pubkeys: List<PubkeyDto>
 )
 
 @Throws(AssertionError::class)
 fun HopsDto.toJson(moshi: Moshi): String {
-   val adapter = moshi.adapter(HopsDto::class.java)
-   return adapter.toJson(this)
+   val adapter = moshi.adapter<List<PubkeyDto>>(Types.newParameterizedType(List::class.java, PubkeyDto::class.java))
+   return adapter.toJson(this.pubkeys)
 }
 
 fun String.hopsDtoOrNull(moshi: Moshi): HopsDto? {

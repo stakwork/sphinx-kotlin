@@ -6,6 +6,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_repository_contact.ContactRepository
+import chat.sphinx.concept_repository_lightning.LightningRepository
 import chat.sphinx.concept_repository_subscription.SubscriptionRepository
 import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
 import chat.sphinx.concept_wallet.WalletDataHandler
@@ -44,6 +45,7 @@ internal class EditContactViewModel @Inject constructor(
     walletDataHandler: WalletDataHandler,
     connectManager: ConnectManager,
     moshi: Moshi,
+    lightningRepository: LightningRepository,
     imageLoader: ImageLoader<ImageView>,
 ): ContactViewModel<EditContactFragmentArgs>(
     editContactNavigator,
@@ -55,6 +57,7 @@ internal class EditContactViewModel @Inject constructor(
     walletDataHandler,
     connectManager,
     moshi,
+    lightningRepository,
     imageLoader
 )
 {

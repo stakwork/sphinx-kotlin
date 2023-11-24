@@ -1,12 +1,12 @@
 package chat.sphinx.new_contact.ui
 
 import android.app.Application
-import android.util.Log
 import android.widget.ImageView
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_repository_contact.ContactRepository
+import chat.sphinx.concept_repository_lightning.LightningRepository
 import chat.sphinx.concept_repository_subscription.SubscriptionRepository
 import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
 import chat.sphinx.concept_wallet.WalletDataHandler
@@ -17,6 +17,7 @@ import chat.sphinx.example.concept_connect_manager.ConnectManager
 import chat.sphinx.example.wrapper_mqtt.HopsDto
 import chat.sphinx.example.wrapper_mqtt.KeyExchangeMessageDto
 import chat.sphinx.example.wrapper_mqtt.Message
+import chat.sphinx.example.wrapper_mqtt.PubkeyDto
 import chat.sphinx.example.wrapper_mqtt.Sender
 import chat.sphinx.example.wrapper_mqtt.toJson
 import chat.sphinx.wrapper_contact.NewContact
@@ -54,6 +55,7 @@ internal class NewContactViewModel @Inject constructor(
     walletDataHandler: WalletDataHandler,
     connectManager: ConnectManager,
     moshi: Moshi,
+    lightningRepository: LightningRepository,
     imageLoader: ImageLoader<ImageView>
 ): ContactViewModel<NewContactFragmentArgs>(
     newContactNavigator,
@@ -65,6 +67,7 @@ internal class NewContactViewModel @Inject constructor(
     walletDataHandler,
     connectManager,
     moshi,
+    lightningRepository,
     imageLoader,
 ) {
     override val args: NewContactFragmentArgs by savedStateHandle.navArgs()
@@ -106,16 +109,16 @@ internal class NewContactViewModel @Inject constructor(
         saveContactJob = viewModelScope.launch(mainImmediate) {
             val newContactIndex = contactRepository.getNewContactIndex().firstOrNull()
             val walletMnemonic = walletDataHandler.retrieveWalletMnemonic()
+            val senderLsp = lightningRepository.retrieveLSP().firstOrNull()?.pubKey
 
-            val owner = contactRepository.accountOwner.value
-
-            if (newContactIndex != null && walletMnemonic != null && lightningRouteHint != null && owner != null) {
+            if (newContactIndex != null && walletMnemonic != null && lightningRouteHint != null && senderLsp != null) {
                 connectManager.createContact(
                     contactAlias.value,
                     lightningNodePubKey.value,
                     lightningRouteHint.value,
                     newContactIndex.value,
-                    walletMnemonic
+                    walletMnemonic,
+                    senderLsp.value
                 )
                 viewStateContainer.updateViewState(ContactViewState.Saved)
             }
@@ -146,7 +149,7 @@ internal class NewContactViewModel @Inject constructor(
                         owner.nodePubKey?.value ?: "",
                         owner.routeHint?.value ?: "",
                         contact.childPubKey?.value ?: "",
-                        "",
+                        contact.contactRouteHint?.value ?: "",
                         owner.alias?.value ?: "",
                         owner.photoUrl?.value ?: ""
                     ),
@@ -154,9 +157,9 @@ internal class NewContactViewModel @Inject constructor(
                 ).toJson(moshi)
 
                 val hops = HopsDto(
-                    listOf<String>(
-                        contact.lightningRouteHint?.getLspPubKey() ?: "",
-                        contact.lightningNodePubKey?.value ?: ""
+                    listOf(
+                        PubkeyDto(contact.lightningRouteHint?.getLspPubKey() ?: ""),
+                        PubkeyDto(contact.lightningNodePubKey?.value ?: "")
                     )
                 ).toJson(moshi)
 

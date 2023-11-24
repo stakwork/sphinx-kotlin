@@ -45,7 +45,8 @@ abstract class ConnectManager {
         lightningNodePubKey: String,
         lightningRouteHint: String,
         index: Long,
-        walletMnemonic: WalletMnemonic
+        walletMnemonic: WalletMnemonic,
+        senderLspPubKey: String
     )
 
     abstract fun sendKeyExchangeOnionMessage(

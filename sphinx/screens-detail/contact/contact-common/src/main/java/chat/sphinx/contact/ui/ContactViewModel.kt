@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavArgs
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_repository_contact.ContactRepository
+import chat.sphinx.concept_repository_lightning.LightningRepository
 import chat.sphinx.concept_repository_subscription.SubscriptionRepository
 import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
 import chat.sphinx.concept_wallet.WalletDataHandler
@@ -38,6 +39,7 @@ abstract class ContactViewModel<ARGS: NavArgs>(
     val walletDataHandler: WalletDataHandler,
     val connectManager: ConnectManager,
     val moshi: Moshi,
+    val lightningRepository: LightningRepository,
     val imageLoader: ImageLoader<ImageView>
 ): SideEffectViewModel<
         Context,

@@ -1692,7 +1692,7 @@ abstract class SphinxRepository(
             blocked = Blocked.False,
             scid = contact.scid,
             contactIndex = contact.index,
-            contactRouteHint = null,
+            contactRouteHint = contact.contactRouteHint,
             childPubKey = contact.childPubKey,
             contactKey = null
         )
@@ -2056,6 +2056,20 @@ abstract class SphinxRepository(
                 updateServerDbo(lsp, queries)
             }
         }
+    }
+
+    override suspend fun retrieveLSP(): Flow<LightningServiceProvider> = flow {
+        coreDB.getSphinxDatabaseQueries().serverGetAll()
+            .asFlow()
+            .mapToOneOrNull(io)
+            .mapNotNull { dbEntity ->
+                dbEntity?.ip?.let { ip ->
+                    LightningServiceProvider(ip, dbEntity.pub_key)
+                }
+            }
+            .collect { serviceProvider ->
+                emit(serviceProvider)
+            }
     }
 
     ////////////////
