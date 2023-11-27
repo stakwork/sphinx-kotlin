@@ -150,6 +150,7 @@ import java.io.InputStream
 import java.text.ParseException
 import java.util.*
 import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 import kotlin.collections.LinkedHashMap
 import kotlin.math.absoluteValue
 import kotlin.math.round
@@ -1760,6 +1761,21 @@ abstract class SphinxRepository(
                     dbContactIndex?.contact_index?.value?.let {
                         ContactIndex(it + 1)
                     }
+                }
+        )
+    }
+
+    override suspend fun getContactsChildPubKeysToIndexes(): Flow<HashMap<LightningNodePubKey, ContactIndex>?> = flow {
+        emitAll(
+            coreDB.getSphinxDatabaseQueries().contactGetChildPubKeysToIndexes()
+                .asFlow()
+                .map { query ->
+                    query.executeAsList().fold(HashMap<LightningNodePubKey, ContactIndex>()) { map, result ->
+                        if (result.contact_index != null) {
+                            map[result.child_pub_key] = result.contact_index!!
+                        }
+                        map
+                    }.takeIf { it.isNotEmpty() }
                 }
         )
     }

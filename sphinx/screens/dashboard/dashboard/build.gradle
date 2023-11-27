@@ -69,6 +69,7 @@ dependencies {
     implementation project(path: ':sphinx:service:concepts:concept-service-notification')
     implementation project(path: ':sphinx:application:common:logger')
     implementation project(path: ':sphinx:activity:concepts:concept-signer-manager')
+    implementation project(path: ':sphinx:application:data:concepts:concept-connect-manager')
 
     api project(path: ':sphinx:service:concepts:concept-service-media-player')
 

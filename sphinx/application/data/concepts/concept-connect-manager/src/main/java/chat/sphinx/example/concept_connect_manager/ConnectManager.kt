@@ -29,13 +29,11 @@ abstract class ConnectManager {
         network: String
     ): String?
 
-    abstract fun connectToMQTT(
-        serverURI: String,
-        clientId: String,
-        key: String,
-        password: String,
+    abstract fun initializeMqttAndSubscribe(
+        serverUri: String,
+        mnemonicWords: WalletMnemonic,
         okKey: String,
-        index: Int
+        contacts: HashMap<String, Int>,
     )
 
     abstract fun createAccount()

@@ -38,9 +38,9 @@ import chat.sphinx.dashboard.navigation.DashboardBottomNavBarNavigator
 import chat.sphinx.dashboard.navigation.DashboardNavDrawerNavigator
 import chat.sphinx.dashboard.navigation.DashboardNavigator
 import chat.sphinx.dashboard.ui.viewstates.*
+import chat.sphinx.example.concept_connect_manager.ConnectManager
 import chat.sphinx.kotlin_response.*
 import chat.sphinx.logger.SphinxLogger
-import chat.sphinx.logger.d
 import chat.sphinx.menu_bottom.ui.MenuBottomViewState
 import chat.sphinx.menu_bottom_scanner.ScannerMenuHandler
 import chat.sphinx.menu_bottom_scanner.ScannerMenuViewModel
@@ -66,7 +66,6 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.MotionLayoutViewModel
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
-import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.build_config.BuildConfigVersionCode
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
@@ -109,6 +108,7 @@ internal class DashboardViewModel @Inject constructor(
 
     private val scannerCoordinator: ViewModelCoordinator<ScannerRequest, ScannerResponse>,
     private val moshi: Moshi,
+    private val connectManager: ConnectManager,
 
     private val LOG: SphinxLogger,
     private val socketIOManager: SocketIOManager,
@@ -144,6 +144,7 @@ internal class DashboardViewModel @Inject constructor(
                 backgroundLoginHandler.updateLoginTime()
             }
         }
+        connectAndSubscribeToMqtt()
 
         syncFeedRecommendationsState()
 
@@ -155,6 +156,27 @@ internal class DashboardViewModel @Inject constructor(
         feedRepository.restoreContentFeedStatuses()
 
         networkRefresh(true)
+    }
+
+    private fun connectAndSubscribeToMqtt() {
+        viewModelScope.launch(mainImmediate) {
+            val contacts = contactRepository.getContactsChildPubKeysToIndexes().firstOrNull()
+                ?.mapKeys { it.key.value }
+                ?.mapValues { it.value.value.toInt() } as HashMap<String, Int>?
+
+            val mnemonic = walletDataHandler.retrieveWalletMnemonic()
+            val okKey = accountOwner.value?.nodePubKey?.value
+
+            if (contacts != null && mnemonic != null && okKey != null) {
+                connectManager.initializeMqttAndSubscribe(
+                    "tcp://54.164.163.153:1883",
+                    mnemonic,
+                    okKey,
+                    contacts
+                )
+            }
+        }
+
     }
     
     private fun getRelayKeys() {

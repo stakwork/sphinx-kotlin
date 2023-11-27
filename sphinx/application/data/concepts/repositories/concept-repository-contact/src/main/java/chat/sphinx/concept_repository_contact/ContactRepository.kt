@@ -75,6 +75,8 @@ interface ContactRepository {
 
     suspend fun getNewContactIndex(): Flow<ContactIndex?>
 
+    suspend fun getContactsChildPubKeysToIndexes(): Flow<HashMap<LightningNodePubKey, ContactIndex>?>
+
     /** Sphinx V1 (likely to be removed) **/
 
     suspend fun updateContact(

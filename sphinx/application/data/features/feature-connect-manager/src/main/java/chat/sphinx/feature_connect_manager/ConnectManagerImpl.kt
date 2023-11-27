@@ -17,10 +17,14 @@ import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import org.eclipse.paho.client.mqttv3.IMqttActionListener
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken
+import org.eclipse.paho.client.mqttv3.IMqttToken
+import org.eclipse.paho.client.mqttv3.MqttAsyncClient
 import org.eclipse.paho.client.mqttv3.MqttCallback
 import org.eclipse.paho.client.mqttv3.MqttClient
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions
@@ -41,7 +45,7 @@ class ConnectManagerImpl(
 {
     private var mixer: String? = null
     private var walletMnemonic: WalletMnemonic? = null
-    private var mqttClient: MqttClient? = null
+    private var mqttClient: MqttAsyncClient? = null
     private val network = "regtest"
     private var newContact: NewContact? = null
     private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
@@ -52,6 +56,52 @@ class ConnectManagerImpl(
         get() = _connectionStateStateFlow
 
     // Core Functional Methods
+
+
+    override fun initializeMqttAndSubscribe(
+        serverUri: String,
+        mnemonicWords: WalletMnemonic,
+        okKey: String,
+        contacts: HashMap<String, Int>
+    ) {
+        coroutineScope.launch {
+
+            val seed = try {
+                mnemonicToSeed(mnemonicWords.value)
+            } catch (e: Exception) {
+                null
+            }
+
+            val xPub = seed?.let {
+                generateXPub(
+                    it,
+                    getTimestampInMilliseconds(),
+                    network
+                )
+            }
+
+            val now = getTimestampInMilliseconds()
+
+            val sig = seed?.let {
+                rootSignMs(
+                    it,
+                    now,
+                    network
+                )
+            }
+
+            if (xPub != null && sig != null) {
+                connectToMQTT(
+                    serverUri,
+                    xPub,
+                    now,
+                    sig,
+                    okKey,
+                    contacts
+                )
+            }
+        }
+    }
 
     override fun createAccount() {
         coroutineScope.launch {
@@ -97,7 +147,7 @@ class ConnectManagerImpl(
                     now,
                     sig,
                     okKey,
-                    0
+                    null
                 )
             }
         }
@@ -204,17 +254,17 @@ class ConnectManagerImpl(
         }
     }
 
-    override fun connectToMQTT(
+    private fun connectToMQTT(
         serverURI: String,
         clientId: String,
         key: String,
         password: String,
         okKey: String,
-        index: Int
+        contacts: HashMap<String, Int>?
     ) {
 
         mqttClient = try {
-            MqttClient(serverURI, clientId, null)
+            MqttAsyncClient(serverURI, clientId, null)
         } catch (e: MqttException) {
             e.printStackTrace()
             return
@@ -223,30 +273,29 @@ class ConnectManagerImpl(
         val options = MqttConnectOptions().apply {
             this.userName = key
             this.password = password.toCharArray()
-            this.keepAliveInterval = 60
         }
 
         try {
-            mqttClient?.connect(options)
+            mqttClient?.connect(options, null, object : IMqttActionListener {
+                override fun onSuccess(asyncActionToken: IMqttToken?) {
+                    Log.d("MQTT_MESSAGES", "MQTT CONNECTED!")
+                    subscribeOwnerMQTT(okKey)
 
-            if (mqttClient?.isConnected == true) {
-                val topics = arrayOf(
-                    "${okKey}/${index}/res/#"
-                )
-                val qos = IntArray(topics.size) { 1 }
+                    contacts?.let {
+                        subscribeContacts(it)
+                    }
+                }
 
-                mqttClient?.subscribe(topics, qos)
-
-                val balance = "${okKey}/${index}/req/balance"
-                val registerOkKey = "${okKey}/${index}/req/register"
-
-                mqttClient?.publish(balance, MqttMessage())
-                mqttClient?.publish(registerOkKey, MqttMessage())
-            }
+                override fun onFailure(asyncActionToken: IMqttToken?, exception: Throwable?) {
+                    Log.d("MQTT_MESSAGES", "Failed to connect to MQTT: ${exception?.message}")
+                    // Handle connection failure here
+                }
+            })
 
             mqttClient?.setCallback(object : MqttCallback {
 
                 override fun connectionLost(cause: Throwable?) {
+                    Log.d("MQTT_MESSAGES", "MQTT DISCONNECTED! $cause ${cause?.message}")
                     // Implement reconnection logic here
                 }
 
@@ -263,9 +312,57 @@ class ConnectManagerImpl(
                     // Handle message delivery confirmation here
                 }
             })
-
         } catch (e: MqttException) {
+            Log.d("MQTT_MESSAGES", "MQTT DISCONNECTED! exception")
             e.printStackTrace()
+        }
+    }
+
+    private fun subscribeOwnerMQTT(okKey: String){
+        val topics = arrayOf("${okKey}/${0}/res/#")
+        val qos = IntArray(topics.size) { 1 }
+
+        mqttClient?.subscribe(topics, qos)
+
+//        val balance = "${okKey}/${0}/req/balance"
+        val registerOkKey = "${okKey}/${0}/req/register"
+
+        val topicsArray = arrayOf(registerOkKey)
+
+        publishTopicsSequentially(topicsArray, 0)
+    }
+
+    private fun subscribeContacts(contacts: HashMap<String, Int>) {
+        val subscribeTopic = contacts.map { (key, value) ->
+            "$key/$value/res/#"
+        }.toTypedArray()
+
+        val publishTopic = contacts.map { (key, value) ->
+            "$key/$value/req/register"
+        }.toTypedArray()
+
+        val qos = IntArray(subscribeTopic.size) { 1 }
+
+        mqttClient?.subscribe(subscribeTopic, qos)
+
+        publishTopicsSequentially(publishTopic, 0)
+    }
+
+    private fun publishTopicsSequentially(topics: Array<String>, index: Int) {
+        if (index < topics.size) {
+            val topic = topics[index]
+            val message = MqttMessage()
+
+            mqttClient?.publish(topic, message, null, object : IMqttActionListener {
+                override fun onSuccess(asyncActionToken: IMqttToken?) {
+                    // Recursively call the function with the next index
+                    publishTopicsSequentially(topics, index + 1)
+                }
+
+                override fun onFailure(asyncActionToken: IMqttToken?, exception: Throwable?) {
+                    Log.d("MQTT_MESSAGES", "Failed to publish to $topic: ${exception?.message}")
+                }
+            })
         }
     }
 
@@ -366,17 +463,11 @@ class ConnectManagerImpl(
         if (mqttClient?.isConnected == true) {
             coroutineScope.launch {
 
-                // Subscribe to the topics for this contact
                 val subscribeTopic = "${childPubKey}/${index}/res/#"
+                val publishTopic = "${childPubKey}/${index}/req/register"
+
                 try {
                     mqttClient?.subscribe(subscribeTopic, 1)
-                } catch (e: MqttException) {
-                    e.printStackTrace()
-                }
-
-                // Publish to register child pub key with LSP
-                val publishTopic = "${childPubKey}/${index}/req/register"
-                try {
                     mqttClient?.publish(publishTopic, MqttMessage())
                 } catch (e: MqttException) {
                     e.printStackTrace()

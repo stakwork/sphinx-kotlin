@@ -393,6 +393,10 @@ FROM contactDbo
 ORDER BY contact_index DESC
 LIMIT 1;
 
+contactGetChildPubKeysToIndexes:
+SELECT child_pub_key, contact_index
+FROM contactDbo
+WHERE child_pub_key IS NOT NULL;
 
 contactUpsert {
     UPDATE contactDbo
