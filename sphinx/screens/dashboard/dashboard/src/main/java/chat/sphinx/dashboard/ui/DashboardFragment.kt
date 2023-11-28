@@ -29,6 +29,7 @@ import chat.sphinx.dashboard.R
 import chat.sphinx.dashboard.databinding.FragmentDashboardBinding
 import chat.sphinx.dashboard.ui.viewstates.*
 import chat.sphinx.dashboard.ui.viewstates.DashboardMotionViewState
+import chat.sphinx.example.concept_connect_manager.model.ConnectionState
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.insetter_activity.addStatusBarPadding

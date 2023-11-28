@@ -18,6 +18,7 @@ import chat.sphinx.concept_signer_manager.CheckAdminCallback
 import chat.sphinx.concept_signer_manager.SignerManager
 import chat.sphinx.concept_wallet.WalletDataHandler
 import chat.sphinx.example.concept_connect_manager.ConnectManager
+import chat.sphinx.example.concept_connect_manager.model.ConnectionState
 import chat.sphinx.example.wrapper_mqtt.toLspChannelInfo
 import chat.sphinx.key_restore.KeyRestore
 import chat.sphinx.key_restore.KeyRestoreResponse
@@ -126,7 +127,7 @@ internal class OnBoardConnectingViewModel @Inject constructor(
     private val contactRepository: ContactRepository,
     private val onBoardStepHandler: OnBoardStepHandler,
     private val lightningRepository: LightningRepository,
-    val connectManager: ConnectManager,
+    private val connectManager: ConnectManager,
     val moshi: Moshi,
     private val rsa: RSA,
 ): MotionLayoutViewModel<
@@ -147,6 +148,7 @@ internal class OnBoardConnectingViewModel @Inject constructor(
 
             processCode()
         }
+        collectConnectionStateStateFlow()
     }
 
     fun setSignerManager(signerManager: SignerManager) {
@@ -698,6 +700,25 @@ internal class OnBoardConnectingViewModel @Inject constructor(
             if (routeHint != null && scid != null) {
                 contactRepository.updateOwnerRouteHintAndScid(routeHint, scid)
                 navigator.toOnBoardNameScreen()
+            }
+        }
+    }
+
+    private fun collectConnectionStateStateFlow() {
+        viewModelScope.launch(mainImmediate) {
+            connectManager.connectionStateStateFlow.collect { connectionState ->
+                when (connectionState) {
+                    is ConnectionState.MnemonicWords -> {
+                        persistAndShowMnemonic(connectionState.words)
+                    }
+                    is ConnectionState.OkKey -> {
+                        createOwnerWithOkKey(connectionState.okKey)
+                    }
+                    is ConnectionState.OwnerRegistered -> {
+                        updateLspAndOwner(connectionState.message)
+                    }
+                    else -> {}
+                }
             }
         }
     }

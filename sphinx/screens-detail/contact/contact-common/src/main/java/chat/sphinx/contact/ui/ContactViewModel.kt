@@ -139,9 +139,6 @@ abstract class ContactViewModel<ARGS: NavArgs>(
         lightningRouteHint: LightningRouteHint?,
     )
 
-    protected abstract fun storeContact(
-        contact: NewContact
-    )
 
     /** Sphinx V1 (likely to be removed) **/
 

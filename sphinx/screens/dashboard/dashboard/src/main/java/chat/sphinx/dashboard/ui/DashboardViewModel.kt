@@ -39,6 +39,13 @@ import chat.sphinx.dashboard.navigation.DashboardNavDrawerNavigator
 import chat.sphinx.dashboard.navigation.DashboardNavigator
 import chat.sphinx.dashboard.ui.viewstates.*
 import chat.sphinx.example.concept_connect_manager.ConnectManager
+import chat.sphinx.example.concept_connect_manager.model.ConnectionState
+import chat.sphinx.example.wrapper_mqtt.HopsDto
+import chat.sphinx.example.wrapper_mqtt.KeyExchangeMessageDto
+import chat.sphinx.example.wrapper_mqtt.Message
+import chat.sphinx.example.wrapper_mqtt.PubkeyDto
+import chat.sphinx.example.wrapper_mqtt.Sender
+import chat.sphinx.example.wrapper_mqtt.toJson
 import chat.sphinx.kotlin_response.*
 import chat.sphinx.logger.SphinxLogger
 import chat.sphinx.menu_bottom.ui.MenuBottomViewState
@@ -145,6 +152,7 @@ internal class DashboardViewModel @Inject constructor(
             }
         }
         connectAndSubscribeToMqtt()
+        collectConnectionStateStateFlow()
 
         syncFeedRecommendationsState()
 
@@ -176,9 +184,65 @@ internal class DashboardViewModel @Inject constructor(
                 )
             }
         }
-
     }
-    
+
+    private fun collectConnectionStateStateFlow() {
+        viewModelScope.launch(mainImmediate) {
+            connectManager.connectionStateStateFlow.collect { connectionState ->
+                when (connectionState) {
+                    is ConnectionState.NewContactRegistered -> {
+                        sendKeyAndStoreContact(connectionState.contact)
+                    }
+                    else -> {}
+                }
+            }
+        }
+    }
+
+    private fun sendKeyExchange(contact: NewContact) {
+        viewModelScope.launch(mainImmediate) {
+            val owner = contactRepository.accountOwner.value
+            val mnemonic = walletDataHandler.retrieveWalletMnemonic()
+
+            if (owner != null && mnemonic != null) {
+                val keyExchangeMessage = KeyExchangeMessageDto(
+                    "",
+                    10,
+                    Sender(
+                        owner.nodePubKey?.value ?: "",
+                        owner.routeHint?.value ?: "",
+                        contact.childPubKey?.value ?: "",
+                        contact.contactRouteHint?.value ?: "",
+                        owner.alias?.value ?: "",
+                        owner.photoUrl?.value ?: ""
+                    ),
+                    Message("")
+                ).toJson(moshi)
+
+                val hops = HopsDto(
+                    listOf(
+                        PubkeyDto(contact.lightningRouteHint?.getLspPubKey() ?: ""),
+                        PubkeyDto(contact.lightningNodePubKey?.value ?: "")
+                    )
+                ).toJson(moshi)
+
+                connectManager.sendKeyExchangeOnionMessage(
+                    keyExchangeMessage,
+                    hops,
+                    mnemonic,
+                    owner.nodePubKey?.value ?: ""
+                )
+            }
+        }
+    }
+
+    private fun sendKeyAndStoreContact(contact: NewContact){
+        viewModelScope.launch(mainImmediate) {
+            contactRepository.createNewContact(contact)
+            sendKeyExchange(contact)
+        }
+    }
+
     private fun getRelayKeys() {
         repositoryDashboard.getAndSaveTransportKey()
         repositoryDashboard.getOrCreateHMacKey(forceGet = true)

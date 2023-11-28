@@ -125,55 +125,6 @@ internal class NewContactViewModel @Inject constructor(
         }
     }
 
-    override fun storeContact(contact: NewContact) {
-        viewModelScope.launch(mainImmediate) {
-            contactRepository.createNewContact(contact)
-        }
-    }
-
-    fun createContact(contact: NewContact){
-        storeContact(contact)
-        sendKeyExchange(contact)
-    }
-
-    private fun sendKeyExchange(contact: NewContact) {
-        viewModelScope.launch(mainImmediate) {
-            val owner = contactRepository.accountOwner.value
-            val mnemonic = walletDataHandler.retrieveWalletMnemonic()
-
-            if (owner != null && mnemonic != null) {
-                val keyExchangeMessage = KeyExchangeMessageDto(
-                    "",
-                    10,
-                    Sender(
-                        owner.nodePubKey?.value ?: "",
-                        owner.routeHint?.value ?: "",
-                        contact.childPubKey?.value ?: "",
-                        contact.contactRouteHint?.value ?: "",
-                        owner.alias?.value ?: "",
-                        owner.photoUrl?.value ?: ""
-                    ),
-                    Message("")
-                ).toJson(moshi)
-
-                val hops = HopsDto(
-                    listOf(
-                        PubkeyDto(contact.lightningRouteHint?.getLspPubKey() ?: ""),
-                        PubkeyDto(contact.lightningNodePubKey?.value ?: "")
-                    )
-                ).toJson(moshi)
-
-                connectManager.sendKeyExchangeOnionMessage(
-                    keyExchangeMessage,
-                    hops,
-                    mnemonic,
-                    owner.nodePubKey?.value ?: ""
-                )
-            }
-        }
-
-    }
-
     /** Sphinx V1 (likely to be removed) **/
 
     override fun saveContact(

@@ -100,8 +100,6 @@ internal class EditContactViewModel @Inject constructor(
         lightningRouteHint: LightningRouteHint?
     ) {}
 
-    override fun storeContact(contact: NewContact) {}
-
     /** Sphinx V1 (likely to be removed) **/
 
     suspend fun toSubscriptionDetailScreen() {

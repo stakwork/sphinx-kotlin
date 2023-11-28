@@ -48,17 +48,4 @@ internal class NewContactFragment: ContactFragment<
 
     override fun getSaveButtonText(): String = getString(R.string.save_to_contacts_button)
 
-    override fun subscribeToViewStateFlow() {
-        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-            viewModel.connectManager.connectionStateStateFlow.collect { connectionState ->
-                when (connectionState) {
-                    is ConnectionState.NewContactRegistered -> {
-                        viewModel.createContact(connectionState.contact)
-                    }
-                    else -> {}
-                }
-                super.subscribeToViewStateFlow()
-            }
-        }
-    }
 }

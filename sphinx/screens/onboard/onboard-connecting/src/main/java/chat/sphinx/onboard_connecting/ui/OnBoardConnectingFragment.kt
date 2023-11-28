@@ -195,25 +195,6 @@ internal class OnBoardConnectingFragment: MotionLayoutFragment<
         }
     }
 
-    override fun subscribeToViewStateFlow() {
-        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-            viewModel.connectManager.connectionStateStateFlow.collect { connectionState ->
-                when (connectionState) {
-                    is ConnectionState.MnemonicWords -> {
-                        viewModel.persistAndShowMnemonic(connectionState.words)
-                    }
-                    is ConnectionState.OkKey -> {
-                        viewModel.createOwnerWithOkKey(connectionState.okKey)
-                    }
-                    is ConnectionState.OwnerRegistered -> {
-                        viewModel.updateLspAndOwner(connectionState.message)
-                    }
-                    else -> {}
-                }
-            }
-        }
-    }
-
     private fun addCharacter(viewState: OnBoardConnectingViewState.Set2_DecryptKeys, c: Char) {
         produceHapticFeedback()
         if (viewState.pinWriter.size() < 7 && !viewState.inputLock) {
