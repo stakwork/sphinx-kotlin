@@ -12,23 +12,6 @@ abstract class ConnectManager {
 
     abstract fun retrieveLspIp(): String?
 
-    abstract suspend fun generateMnemonic(
-        mnemonicWords: String?,
-    ): Pair<String?, WalletMnemonic?>
-
-    abstract suspend fun generateXPub(
-        seed: String,
-        time: String,
-        network: String
-    ): String?
-
-    abstract suspend fun generatePubKeyFromSeed(
-        seed: String,
-        index: UInt,
-        time: String,
-        network: String
-    ): String?
-
     abstract fun initializeMqttAndSubscribe(
         serverUri: String,
         mnemonicWords: WalletMnemonic,

@@ -204,7 +204,7 @@ class ConnectManagerImpl(
     }
 
     @OptIn(ExperimentalUnsignedTypes::class)
-    override suspend fun generateMnemonic(mnemonicWords: String?): Pair<String?, WalletMnemonic?> {
+    private fun generateMnemonic(mnemonicWords: String?): Pair<String?, WalletMnemonic?> {
         var seed: String? = null
 
         walletMnemonic = run {
@@ -233,7 +233,7 @@ class ConnectManagerImpl(
         return Pair(seed, walletMnemonic)
     }
 
-    override suspend fun generateXPub(seed: String, time: String, network: String): String? {
+    private fun generateXPub(seed: String, time: String, network: String): String? {
         return try {
             xpubFromSeed(seed, time, network)
         } catch (e: Exception) {
@@ -241,7 +241,7 @@ class ConnectManagerImpl(
         }
     }
 
-    override suspend fun generatePubKeyFromSeed(
+    private fun generatePubKeyFromSeed(
         seed: String,
         index: UInt,
         time: String,
