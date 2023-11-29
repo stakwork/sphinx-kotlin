@@ -17,7 +17,6 @@ import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -26,13 +25,14 @@ import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken
 import org.eclipse.paho.client.mqttv3.IMqttToken
 import org.eclipse.paho.client.mqttv3.MqttAsyncClient
 import org.eclipse.paho.client.mqttv3.MqttCallback
-import org.eclipse.paho.client.mqttv3.MqttClient
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions
 import org.eclipse.paho.client.mqttv3.MqttException
 import org.eclipse.paho.client.mqttv3.MqttMessage
+import org.json.JSONObject
 import uniffi.sphinxrs.createOnionMsg
 import uniffi.sphinxrs.mnemonicFromEntropy
 import uniffi.sphinxrs.mnemonicToSeed
+import uniffi.sphinxrs.peelOnionMsg
 import uniffi.sphinxrs.pubkeyFromSeed
 import uniffi.sphinxrs.rootSignMs
 import uniffi.sphinxrs.xpubFromSeed
@@ -49,11 +49,17 @@ class ConnectManagerImpl(
     private val network = "regtest"
     private var newContact: NewContact? = null
     private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+    private var ownerSeed: String? = null
     private val topicHandlers: Map<String, TopicHandler> = setupTopicHandlers()
 
     private val _connectionStateStateFlow = MutableStateFlow<ConnectionState?>(null)
     override val connectionStateStateFlow: StateFlow<ConnectionState?>
         get() = _connectionStateStateFlow
+
+    companion object {
+        const val KEY_EXCHANGE = 10
+        const val KEY_EXCHANGE_CONFIRMATION = 11
+    }
 
     // Core Functional Methods
 
@@ -62,7 +68,7 @@ class ConnectManagerImpl(
         serverUri: String,
         mnemonicWords: WalletMnemonic,
         okKey: String,
-        contacts: HashMap<String, Int>
+        contacts: HashMap<String, Int>?
     ) {
         coroutineScope.launch {
 
@@ -91,6 +97,8 @@ class ConnectManagerImpl(
             }
 
             if (xPub != null && sig != null) {
+                ownerSeed = seed
+
                 connectToMQTT(
                     serverUri,
                     xPub,
@@ -106,7 +114,7 @@ class ConnectManagerImpl(
     override fun createAccount() {
         coroutineScope.launch {
 
-            val seed = generateMnemonic(null)
+            val seed = generateMnemonic()
 
             val xPub = seed.first?.let {
                 generateXPub(
@@ -139,6 +147,7 @@ class ConnectManagerImpl(
 
             if (xPub != null && sig != null && okKey != null && serverURI != null) {
 
+                ownerSeed = seed.first
                 _connectionStateStateFlow.value = ConnectionState.OkKey(okKey)
 
                 connectToMQTT(
@@ -204,23 +213,18 @@ class ConnectManagerImpl(
     }
 
     @OptIn(ExperimentalUnsignedTypes::class)
-    private fun generateMnemonic(mnemonicWords: String?): Pair<String?, WalletMnemonic?> {
+    private fun generateMnemonic(): Pair<String?, WalletMnemonic?> {
         var seed: String? = null
 
-        walletMnemonic = run {
-            try {
-                mnemonicWords?.toWalletMnemonic() ?: run {
-                    val randomBytes = generateRandomBytes(16)
-                    val randomBytesString =
-                        randomBytes.joinToString("") { it.toString(16).padStart(2, '0') }
-                    val words = mnemonicFromEntropy(randomBytesString)
+        walletMnemonic = try {
+            val randomBytes = generateRandomBytes(16)
+            val randomBytesString =
+                randomBytes.joinToString("") { it.toString(16).padStart(2, '0') }
+            val words = mnemonicFromEntropy(randomBytesString)
 
-                    words.toWalletMnemonic()
-                }
-            } catch (e: Exception) {
-                val excep = e
-                null
-            }
+            words.toWalletMnemonic()
+        } catch (e: Exception) {
+            null
         }
 
         walletMnemonic?.value?.let { words ->
@@ -367,21 +371,15 @@ class ConnectManagerImpl(
     }
 
     private fun handleMqttMessage(topic: String?, message: MqttMessage?) {
-        topic ?: return
-
-        parseTopic(topic)?.let { topicData ->
-            val topicHandler = topicHandlers[topicData.third]
-
-            val connectionState = topicHandler?.handle(
-                topicData.first,
-                topicData.second,
-                topicData.third,
-                message.toString()
-            )
+        topic?.let { nnTopic ->
+            val connectionState = TopicHandler.retrieveConnectionState(nnTopic, message.toString(), message?.payload)
 
             when (connectionState) {
                 is ConnectionState.ContactRegistered -> {
-                    handleContactRegistered(topic, connectionState)
+                    handleContactRegistered(nnTopic, connectionState)
+                }
+                is ConnectionState.OnionMessage -> {
+                    handleOnionMessage(connectionState.payload)
                 }
                 else -> {
                     _connectionStateStateFlow.value = connectionState
@@ -407,6 +405,42 @@ class ConnectManagerImpl(
             }
         } else {
             _connectionStateStateFlow.value = connectionState
+        }
+    }
+
+    private fun handleOnionMessage(payload: ByteArray?) {
+        payload ?: return
+
+        coroutineScope.launch {
+            val now = getTimestampInMilliseconds()
+
+            ownerSeed?.let { seed ->
+
+                val decryptedJson = try {
+                    peelOnionMsg(
+                        seed,
+                        0.toUInt(),
+                        now,
+                        network,
+                        payload
+                    )
+                } catch (e: Exception) {
+                    Log.d("ONION_PROCESS", "This is the PeelOnionMsg EXCEPTION\n ${e.message}")
+                }
+
+                val jsonObject = JSONObject(decryptedJson.toString())
+                val messageType = jsonObject.getInt("type")
+
+                when (messageType) {
+                    KEY_EXCHANGE -> {
+                        _connectionStateStateFlow.value = ConnectionState.KeyExchangeMessage(decryptedJson.toString())
+                    }
+                    KEY_EXCHANGE_CONFIRMATION -> {}
+                    else -> {}
+                }
+
+                Log.d("ONION_PROCESS", "This is the PeelOnionMsg\n $decryptedJson")
+            }
         }
     }
 
@@ -521,20 +555,8 @@ class ConnectManagerImpl(
         return mapOf(
             "register" to TopicHandler.RegisterHandler,
             "balance" to TopicHandler.BalanceHandler,
+            "stream" to TopicHandler.StreamHandler,
         )
     }
-
-    // Returns key, index and action
-    private fun parseTopic(topic: String?): Triple<String, Int, String>? {
-        val parts = topic?.split("/") ?: return null
-
-        if (parts.size < 4) return null
-        val key = parts[0]
-        val index = parts[1].toIntOrNull() ?: return null
-        val action = parts[3]
-
-        return Triple(key, index, action)
-    }
-
 
 }

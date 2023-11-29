@@ -16,7 +16,7 @@ abstract class ConnectManager {
         serverUri: String,
         mnemonicWords: WalletMnemonic,
         okKey: String,
-        contacts: HashMap<String, Int>,
+        contacts: HashMap<String, Int>?,
     )
 
     abstract fun createAccount()

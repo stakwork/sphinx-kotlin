@@ -4,6 +4,7 @@ import android.app.Application
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import app.cash.exhaustive.Exhaustive
@@ -175,7 +176,7 @@ internal class DashboardViewModel @Inject constructor(
             val mnemonic = walletDataHandler.retrieveWalletMnemonic()
             val okKey = accountOwner.value?.nodePubKey?.value
 
-            if (contacts != null && mnemonic != null && okKey != null) {
+            if (mnemonic != null && okKey != null) {
                 connectManager.initializeMqttAndSubscribe(
                     "tcp://54.164.163.153:1883",
                     mnemonic,
