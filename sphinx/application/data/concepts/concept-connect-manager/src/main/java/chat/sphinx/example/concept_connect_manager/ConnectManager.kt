@@ -1,6 +1,7 @@
 package chat.sphinx.example.concept_connect_manager
 
 import chat.sphinx.example.concept_connect_manager.model.ConnectionState
+import chat.sphinx.wrapper_contact.NewContact
 import chat.sphinx.wrapper_lightning.WalletMnemonic
 import kotlinx.coroutines.flow.StateFlow
 
@@ -21,14 +22,7 @@ abstract class ConnectManager {
 
     abstract fun createAccount()
 
-    abstract fun createContact(
-        alias: String,
-        lightningNodePubKey: String,
-        lightningRouteHint: String,
-        index: Long,
-        walletMnemonic: WalletMnemonic,
-        senderLspPubKey: String
-    )
+    abstract fun createContact(contact: NewContact)
 
     abstract fun sendKeyExchangeOnionMessage(
         keyExchangeMessage: String,

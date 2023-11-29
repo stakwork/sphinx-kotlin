@@ -4,7 +4,6 @@ import android.app.Application
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import app.cash.exhaustive.Exhaustive
@@ -26,6 +25,7 @@ import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_dashboard_android.RepositoryDashboardAndroid
 import chat.sphinx.concept_repository_feed.FeedRepository
+import chat.sphinx.concept_repository_lightning.LightningRepository
 import chat.sphinx.concept_service_media.MediaPlayerServiceController
 import chat.sphinx.concept_service_notification.PushNotificationRegistrar
 import chat.sphinx.concept_signer_manager.SignerManager
@@ -47,6 +47,7 @@ import chat.sphinx.example.wrapper_mqtt.Message
 import chat.sphinx.example.wrapper_mqtt.PubkeyDto
 import chat.sphinx.example.wrapper_mqtt.Sender
 import chat.sphinx.example.wrapper_mqtt.toJson
+import chat.sphinx.example.wrapper_mqtt.toKeyExchangeMessageDtoOrNull
 import chat.sphinx.kotlin_response.*
 import chat.sphinx.logger.SphinxLogger
 import chat.sphinx.menu_bottom.ui.MenuBottomViewState
@@ -102,6 +103,7 @@ internal class DashboardViewModel @Inject constructor(
     private val feedRepository: FeedRepository,
     private val actionsRepository: ActionsRepository,
     private val networkQueryLightning: NetworkQueryLightning,
+    private val lightningRepository: LightningRepository,
 
     private val networkQueryVersion: NetworkQueryVersion,
     private val networkQueryAuthorizeExternal: NetworkQueryAuthorizeExternal,
@@ -192,7 +194,13 @@ internal class DashboardViewModel @Inject constructor(
             connectManager.connectionStateStateFlow.collect { connectionState ->
                 when (connectionState) {
                     is ConnectionState.NewContactRegistered -> {
-                        sendKeyAndStoreContact(connectionState.contact)
+                        sendKeyAndStoreContact(
+                            connectionState.contact,
+                            connectionState.generatedContactRouteHint.toLightningRouteHint()
+                        )
+                    }
+                    is ConnectionState.KeyExchangeMessage -> {
+                        handleKeyExchangeMessage(connectionState.message)
                     }
                     else -> {}
                 }
@@ -200,20 +208,55 @@ internal class DashboardViewModel @Inject constructor(
         }
     }
 
-    private fun sendKeyExchange(contact: NewContact) {
+    private fun handleKeyExchangeMessage(message: String) {
+        viewModelScope.launch(mainImmediate) {
+            val keyExchange = message.toKeyExchangeMessageDtoOrNull(moshi)
+            val senderLsp = lightningRepository.retrieveLSP().firstOrNull()?.pubKey
+            val newContactIndex = contactRepository.getNewContactIndex().firstOrNull()
+
+            keyExchange?.let { keyExchangeMessage ->
+                val senderInfo = keyExchangeMessage.sender
+
+                if (newContactIndex != null && senderLsp != null ) {
+
+                    val newContact = NewContact(
+                        senderInfo.alias.toContactAlias(),
+                        senderInfo.pubkey.toLightningNodePubKey(),
+                        senderInfo.routeHint?.toLightningRouteHint(),
+                        null,
+                        newContactIndex,
+                        null,
+                        senderLsp,
+                        senderInfo.contactPubkey?.toLightningNodePubKey(),
+                        senderInfo.contactRouteHint?.toLightningRouteHint()
+                    )
+
+                    connectManager.createContact(newContact)
+                }
+            }
+        }
+
+    }
+
+    private fun sendKeyExchange(
+        contact: NewContact,
+        contactRouteHint: LightningRouteHint?,
+        returnConfirmation: Boolean
+    ) {
         viewModelScope.launch(mainImmediate) {
             val owner = contactRepository.accountOwner.value
             val mnemonic = walletDataHandler.retrieveWalletMnemonic()
+            val type = if (!returnConfirmation) 10 else 11
 
             if (owner != null && mnemonic != null) {
                 val keyExchangeMessage = KeyExchangeMessageDto(
                     "",
-                    10,
+                    type,
                     Sender(
                         owner.nodePubKey?.value ?: "",
                         owner.routeHint?.value ?: "",
                         contact.childPubKey?.value ?: "",
-                        contact.contactRouteHint?.value ?: "",
+                        contactRouteHint?.value ?: "",
                         owner.alias?.value ?: "",
                         owner.photoUrl?.value ?: ""
                     ),
@@ -237,10 +280,12 @@ internal class DashboardViewModel @Inject constructor(
         }
     }
 
-    private fun sendKeyAndStoreContact(contact: NewContact){
+    private fun sendKeyAndStoreContact(contact: NewContact, contactRouteHint: LightningRouteHint?){
         viewModelScope.launch(mainImmediate) {
+            val returnConfirmation = contact.contactKey != null
+
             contactRepository.createNewContact(contact)
-            sendKeyExchange(contact)
+            sendKeyExchange(contact,contactRouteHint, returnConfirmation)
         }
     }
 

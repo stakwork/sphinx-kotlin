@@ -5,12 +5,9 @@ import chat.sphinx.example.concept_connect_manager.ConnectManager
 import chat.sphinx.example.concept_connect_manager.model.TopicHandler
 import chat.sphinx.example.concept_connect_manager.model.ConnectionState
 import chat.sphinx.wrapper_contact.NewContact
-import chat.sphinx.wrapper_common.contact.toContactIndex
 import chat.sphinx.wrapper_common.lightning.retrieveLightningRouteHint
 import chat.sphinx.wrapper_common.lightning.toLightningNodePubKey
-import chat.sphinx.wrapper_common.lightning.toLightningRouteHint
 import chat.sphinx.wrapper_common.lightning.toShortChannelId
-import chat.sphinx.wrapper_contact.toContactAlias
 import chat.sphinx.wrapper_lightning.WalletMnemonic
 import chat.sphinx.wrapper_lightning.toWalletMnemonic
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
@@ -50,7 +47,6 @@ class ConnectManagerImpl(
     private var newContact: NewContact? = null
     private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private var ownerSeed: String? = null
-    private val topicHandlers: Map<String, TopicHandler> = setupTopicHandlers()
 
     private val _connectionStateStateFlow = MutableStateFlow<ConnectionState?>(null)
     override val connectionStateStateFlow: StateFlow<ConnectionState?>
@@ -163,45 +159,27 @@ class ConnectManagerImpl(
     }
 
     override fun createContact(
-        alias: String,
-        lightningNodePubKey: String,
-        lightningRouteHint: String,
-        index: Long,
-        walletMnemonic: WalletMnemonic,
-        senderLspPubKey: String
+        contact: NewContact
     ) {
         coroutineScope.launch {
 
-            val seed = try {
-                mnemonicToSeed(walletMnemonic.value)
-            } catch (e: Exception) {
-                null
-            }
-
             val now = getTimestampInMilliseconds()
 
-            val childPubKey = seed?.let {
+            val childPubKey = ownerSeed?.let {
                 generatePubKeyFromSeed(
                     it,
-                    index.toUInt(),
+                    contact.index.value.toUInt(),
                     now,
                     network
                 )
             }
 
-            val index = index.toContactIndex()
+            val index = contact.index
 
-            if (childPubKey != null && index != null) {
+            if (childPubKey != null) {
 
-                newContact = NewContact(
-                    contactAlias = alias.toContactAlias(),
-                    lightningNodePubKey = lightningNodePubKey.toLightningNodePubKey(),
-                    lightningRouteHint = lightningRouteHint.toLightningRouteHint(),
-                    index = index,
-                    childPubKey = childPubKey.toLightningNodePubKey(),
-                    contactRouteHint = null ,
-                    scid = null,
-                    senderLspPubKey = senderLspPubKey.toLightningNodePubKey()
+                newContact = contact.copy(
+                    childPubKey = childPubKey.toLightningNodePubKey()
                 )
 
                 subscribeAndPublishContactMQTT(
@@ -375,6 +353,9 @@ class ConnectManagerImpl(
             val connectionState = TopicHandler.retrieveConnectionState(nnTopic, message.toString(), message?.payload)
 
             when (connectionState) {
+                is ConnectionState.OwnerRegistered -> {
+                    _connectionStateStateFlow.value = connectionState
+                }
                 is ConnectionState.ContactRegistered -> {
                     handleContactRegistered(nnTopic, connectionState)
                 }
@@ -394,14 +375,16 @@ class ConnectManagerImpl(
         } ?: return
 
         if (isNewContact) {
-            val scid = extractScid(connectionState.message)
+            val jsonObject = JSONObject(connectionState.message)
+            val scid = jsonObject.getString("scid")
+            val generatedContactRouteHint = retrieveLightningRouteHint(newContact?.ownLspPubKey?.value, scid) ?: return
+
             val updatedNewContact = newContact?.copy(
-                scid = scid?.toShortChannelId(),
-                contactRouteHint = retrieveLightningRouteHint(newContact?.senderLspPubKey?.value, scid)
+                scid = scid.toShortChannelId(),
             )
 
             _connectionStateStateFlow.value = updatedNewContact?.let {
-                ConnectionState.NewContactRegistered(it)
+                ConnectionState.NewContactRegistered(it, generatedContactRouteHint.value)
             }
         } else {
             _connectionStateStateFlow.value = connectionState
@@ -476,6 +459,7 @@ class ConnectManagerImpl(
                 }
 
                 if (onion != null && mqttClient?.isConnected == true) {
+                    Log.d("ONION_PROCESS", "The Onion is contain\n $keyExchangeMessage")
 
                     val publishTopic = "${okKey}/${0}/req/send"
 
@@ -549,14 +533,6 @@ class ConnectManagerImpl(
         val pattern = """"scid":"(\d+)"""".toRegex()
         val matchResult = pattern.find(input)
         return matchResult?.groups?.get(1)?.value
-    }
-
-    private fun setupTopicHandlers(): Map<String, TopicHandler> {
-        return mapOf(
-            "register" to TopicHandler.RegisterHandler,
-            "balance" to TopicHandler.BalanceHandler,
-            "stream" to TopicHandler.StreamHandler,
-        )
     }
 
 }

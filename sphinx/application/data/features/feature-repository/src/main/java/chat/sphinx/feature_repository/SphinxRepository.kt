@@ -1695,7 +1695,7 @@ abstract class SphinxRepository(
             contactIndex = contact.index,
             contactRouteHint = contact.contactRouteHint,
             childPubKey = contact.childPubKey,
-            contactKey = null
+            contactKey = contact.contactKey
         )
 
         applicationScope.launch(mainImmediate) {

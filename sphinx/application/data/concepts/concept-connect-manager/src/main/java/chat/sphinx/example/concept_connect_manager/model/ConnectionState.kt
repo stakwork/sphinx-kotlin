@@ -8,7 +8,7 @@ sealed class ConnectionState {
     data class OkKey(val okKey: String): ConnectionState()
     data class OwnerRegistered(val message: String): ConnectionState()
     data class ContactRegistered(val index: Int, val message: String): ConnectionState()
-    data class NewContactRegistered(val contact: NewContact): ConnectionState()
+    data class NewContactRegistered(val contact: NewContact, val generatedContactRouteHint: String): ConnectionState()
     data class KeyExchangeMessage(val message: String): ConnectionState()
     data class KeySend(val index: Int, val message: String, val rHash: String): ConnectionState()
     data class OnionMessage(val index: Int, val payload: ByteArray?): ConnectionState() {

@@ -20,11 +20,11 @@ data class Message(
 @JsonClass(generateAdapter = true)
 data class Sender(
     val pubkey: String,
-    val route_hint: String?,
-    val contact_pubkey: String?,
-    val contact_route_hint: String?,
+    val routeHint: String?,
+    val contactPubkey: String?,
+    val contactRouteHint: String?,
     val alias: String,
-    val photo_url: String
+    val photoUrl: String
 )
 
 @Throws(AssertionError::class)

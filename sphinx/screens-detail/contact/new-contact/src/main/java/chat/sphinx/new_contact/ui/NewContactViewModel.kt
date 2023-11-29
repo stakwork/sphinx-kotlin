@@ -14,13 +14,6 @@ import chat.sphinx.contact.ui.ContactSideEffect
 import chat.sphinx.contact.ui.ContactViewModel
 import chat.sphinx.contact.ui.ContactViewState
 import chat.sphinx.example.concept_connect_manager.ConnectManager
-import chat.sphinx.example.wrapper_mqtt.HopsDto
-import chat.sphinx.example.wrapper_mqtt.KeyExchangeMessageDto
-import chat.sphinx.example.wrapper_mqtt.Message
-import chat.sphinx.example.wrapper_mqtt.PubkeyDto
-import chat.sphinx.example.wrapper_mqtt.Sender
-import chat.sphinx.example.wrapper_mqtt.toJson
-import chat.sphinx.wrapper_contact.NewContact
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.new_contact.navigation.NewContactNavigator
@@ -29,10 +22,10 @@ import chat.sphinx.scanner_view_model_coordinator.response.ScannerResponse
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
 import chat.sphinx.wrapper_common.lightning.LightningRouteHint
-import chat.sphinx.wrapper_common.lightning.getLspPubKey
 import chat.sphinx.wrapper_common.lightning.toLightningNodePubKey
 import chat.sphinx.wrapper_common.lightning.toLightningRouteHint
 import chat.sphinx.wrapper_contact.ContactAlias
+import chat.sphinx.wrapper_contact.NewContact
 import com.squareup.moshi.Moshi
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
@@ -108,18 +101,22 @@ internal class NewContactViewModel @Inject constructor(
 
         saveContactJob = viewModelScope.launch(mainImmediate) {
             val newContactIndex = contactRepository.getNewContactIndex().firstOrNull()
-            val walletMnemonic = walletDataHandler.retrieveWalletMnemonic()
             val senderLsp = lightningRepository.retrieveLSP().firstOrNull()?.pubKey
 
-            if (newContactIndex != null && walletMnemonic != null && lightningRouteHint != null && senderLsp != null) {
-                connectManager.createContact(
-                    contactAlias.value,
-                    lightningNodePubKey.value,
-                    lightningRouteHint.value,
-                    newContactIndex.value,
-                    walletMnemonic,
-                    senderLsp.value
+            if (newContactIndex != null && lightningRouteHint != null && senderLsp != null) {
+
+                val newContact = NewContact(
+                    contactAlias,
+                    lightningNodePubKey,
+                    lightningRouteHint,
+                    null,
+                    newContactIndex,
+                    null,
+                    senderLsp,
+                    null,
+                    null
                 )
+                connectManager.createContact(newContact)
                 viewStateContainer.updateViewState(ContactViewState.Saved)
             }
         }
