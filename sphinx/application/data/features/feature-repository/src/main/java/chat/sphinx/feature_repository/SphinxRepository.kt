@@ -1670,6 +1670,7 @@ abstract class SphinxRepository(
     override suspend fun createNewContact(contact: NewContact) {
         val queries = coreDB.getSphinxDatabaseQueries()
         val now = DateTime.nowUTC()
+        val contactKey = contact.contactKey
 
         val newContact = Contact(
             id = ContactId(contact.index.value),
@@ -1677,10 +1678,10 @@ abstract class SphinxRepository(
             nodePubKey = contact.lightningNodePubKey,
             nodeAlias = null,
             alias = contact.contactAlias,
-            photoUrl = null,
+            photoUrl = contact.photoUrl,
             privatePhoto = PrivatePhoto.False,
             isOwner = Owner.False,
-            status = ContactStatus.Pending,
+            status = if (contactKey != null) ContactStatus.Confirmed else ContactStatus.Pending,
             rsaPublicKey = null,
             deviceId = null,
             createdAt = now.toDateTime(),
@@ -1695,7 +1696,7 @@ abstract class SphinxRepository(
             contactIndex = contact.index,
             contactRouteHint = contact.contactRouteHint,
             childPubKey = contact.childPubKey,
-            contactKey = contact.contactKey
+            contactKey = contactKey
         )
 
         applicationScope.launch(mainImmediate) {
@@ -1704,6 +1705,24 @@ abstract class SphinxRepository(
                     upsertNewContact(newContact, queries)
                 }
             }
+        }
+    }
+
+    override suspend fun updateContactKeyAndRouteHint(
+        contactPubKey: LightningNodePubKey,
+        contactKey: LightningNodePubKey,
+        contactRouteHint: LightningRouteHint,
+        photoUrl: PhotoUrl?
+    ) {
+        val queries = coreDB.getSphinxDatabaseQueries()
+        contactLock.withLock {
+            queries.contactUpdateContactKeyAndRouteHint(
+                contactKey,
+                contactRouteHint,
+                ContactStatus.Confirmed,
+                photoUrl,
+                contactPubKey
+            )
         }
     }
 

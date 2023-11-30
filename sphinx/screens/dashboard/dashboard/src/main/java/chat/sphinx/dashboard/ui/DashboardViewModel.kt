@@ -199,8 +199,11 @@ internal class DashboardViewModel @Inject constructor(
                             connectionState.generatedContactRouteHint.toLightningRouteHint()
                         )
                     }
-                    is ConnectionState.KeyExchangeMessage -> {
-                        handleKeyExchangeMessage(connectionState.message)
+                    is ConnectionState.KeyExchange -> {
+                        handleKeyExchangeMessage(connectionState.json)
+                    }
+                    is ConnectionState.KeyExchangeConfirmation -> {
+                        updateContactDetails(connectionState.json)
                     }
                     else -> {}
                 }
@@ -208,85 +211,104 @@ internal class DashboardViewModel @Inject constructor(
         }
     }
 
-    private fun handleKeyExchangeMessage(message: String) {
-        viewModelScope.launch(mainImmediate) {
-            val keyExchange = message.toKeyExchangeMessageDtoOrNull(moshi)
-            val senderLsp = lightningRepository.retrieveLSP().firstOrNull()?.pubKey
-            val newContactIndex = contactRepository.getNewContactIndex().firstOrNull()
+    private suspend fun updateContactDetails(json: String) {
+        val keyExchangeConfirmation = json.toKeyExchangeMessageDtoOrNull(moshi)
+        keyExchangeConfirmation?.let { keyExchangeMessage ->
 
-            keyExchange?.let { keyExchangeMessage ->
-                val senderInfo = keyExchangeMessage.sender
+        val senderInfo = keyExchangeConfirmation.sender
+            val contactPubKey = senderInfo.pubkey.toLightningNodePubKey()
+            val contactKey = senderInfo.contactPubkey?.toLightningNodePubKey()
+            val contactRouteHint = senderInfo.contactRouteHint?.toLightningRouteHint()
 
-                if (newContactIndex != null && senderLsp != null ) {
+            if (contactPubKey != null && contactKey != null && contactRouteHint != null) {
 
-                    val newContact = NewContact(
-                        senderInfo.alias.toContactAlias(),
-                        senderInfo.pubkey.toLightningNodePubKey(),
-                        senderInfo.routeHint?.toLightningRouteHint(),
-                        null,
-                        newContactIndex,
-                        null,
-                        senderLsp,
-                        senderInfo.contactPubkey?.toLightningNodePubKey(),
-                        senderInfo.contactRouteHint?.toLightningRouteHint()
-                    )
-
-                    connectManager.createContact(newContact)
-                }
+                contactRepository.updateContactKeyAndRouteHint(
+                    contactPubKey,
+                    contactKey,
+                    contactRouteHint,
+                    senderInfo.photoUrl.toPhotoUrl()
+                )
             }
-        }
 
+        }
     }
 
-    private fun sendKeyExchange(
+    private suspend fun handleKeyExchangeMessage(json: String) {
+        val keyExchange = json.toKeyExchangeMessageDtoOrNull(moshi)
+        val senderLsp = lightningRepository.retrieveLSP().firstOrNull()?.pubKey
+        val newContactIndex = contactRepository.getNewContactIndex().firstOrNull()
+
+        keyExchange?.let { keyExchangeMessage ->
+            val senderInfo = keyExchangeMessage.sender
+
+            if (newContactIndex != null && senderLsp != null) {
+
+                val newContact = NewContact(
+                    senderInfo.alias.toContactAlias(),
+                    senderInfo.pubkey.toLightningNodePubKey(),
+                    senderInfo.routeHint?.toLightningRouteHint(),
+                    null,
+                    newContactIndex,
+                    null,
+                    senderLsp,
+                    senderInfo.contactPubkey?.toLightningNodePubKey(),
+                    senderInfo.contactRouteHint?.toLightningRouteHint(),
+                    senderInfo.photoUrl.toPhotoUrl()
+                )
+
+                connectManager.createContact(newContact)
+            }
+        }
+    }
+
+    private suspend fun sendKeyExchange(
         contact: NewContact,
         contactRouteHint: LightningRouteHint?,
         returnConfirmation: Boolean
     ) {
-        viewModelScope.launch(mainImmediate) {
-            val owner = contactRepository.accountOwner.value
-            val mnemonic = walletDataHandler.retrieveWalletMnemonic()
-            val type = if (!returnConfirmation) 10 else 11
+        val owner = contactRepository.accountOwner.value
+        val mnemonic = walletDataHandler.retrieveWalletMnemonic()
+        val type = if (!returnConfirmation) 10 else 11
 
-            if (owner != null && mnemonic != null) {
-                val keyExchangeMessage = KeyExchangeMessageDto(
-                    "",
-                    type,
-                    Sender(
-                        owner.nodePubKey?.value ?: "",
-                        owner.routeHint?.value ?: "",
-                        contact.childPubKey?.value ?: "",
-                        contactRouteHint?.value ?: "",
-                        owner.alias?.value ?: "",
-                        owner.photoUrl?.value ?: ""
-                    ),
-                    Message("")
-                ).toJson(moshi)
+        if (owner != null && mnemonic != null) {
+            val keyExchangeMessage = KeyExchangeMessageDto(
+                "",
+                type,
+                Sender(
+                    owner.nodePubKey?.value ?: "",
+                    owner.routeHint?.value ?: "",
+                    contact.childPubKey?.value ?: "",
+                    contactRouteHint?.value ?: "",
+                    owner.alias?.value ?: "",
+                    owner.photoUrl?.value ?: ""
+                ),
+                Message("")
+            ).toJson(moshi)
 
-                val hops = HopsDto(
-                    listOf(
-                        PubkeyDto(contact.lightningRouteHint?.getLspPubKey() ?: ""),
-                        PubkeyDto(contact.lightningNodePubKey?.value ?: "")
-                    )
-                ).toJson(moshi)
-
-                connectManager.sendKeyExchangeOnionMessage(
-                    keyExchangeMessage,
-                    hops,
-                    mnemonic,
-                    owner.nodePubKey?.value ?: ""
+            val hops = HopsDto(
+                listOf(
+                    PubkeyDto(contact.lightningRouteHint?.getLspPubKey() ?: ""),
+                    PubkeyDto(contact.lightningNodePubKey?.value ?: "")
                 )
-            }
+            ).toJson(moshi)
+
+            connectManager.sendKeyExchangeOnionMessage(
+                keyExchangeMessage,
+                hops,
+                mnemonic,
+                owner.nodePubKey?.value ?: ""
+            )
         }
     }
 
-    private fun sendKeyAndStoreContact(contact: NewContact, contactRouteHint: LightningRouteHint?){
-        viewModelScope.launch(mainImmediate) {
-            val returnConfirmation = contact.contactKey != null
+    private suspend fun sendKeyAndStoreContact(
+        contact: NewContact,
+        contactRouteHint: LightningRouteHint?
+    ) {
+        val returnConfirmation = contact.contactKey != null
 
-            contactRepository.createNewContact(contact)
-            sendKeyExchange(contact,contactRouteHint, returnConfirmation)
-        }
+        contactRepository.createNewContact(contact)
+        sendKeyExchange(contact, contactRouteHint, returnConfirmation)
     }
 
     private fun getRelayKeys() {

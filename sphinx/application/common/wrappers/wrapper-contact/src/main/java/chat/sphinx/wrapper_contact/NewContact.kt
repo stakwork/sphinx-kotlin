@@ -1,5 +1,6 @@
 package chat.sphinx.wrapper_contact
 
+import chat.sphinx.wrapper_common.PhotoUrl
 import chat.sphinx.wrapper_common.contact.ContactIndex
 import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
 import chat.sphinx.wrapper_common.lightning.LightningRouteHint
@@ -15,4 +16,5 @@ data class NewContact(
     val ownLspPubKey: LightningNodePubKey?,
     val contactKey: LightningNodePubKey?,
     val contactRouteHint: LightningRouteHint?,
+    val photoUrl: PhotoUrl?
     )

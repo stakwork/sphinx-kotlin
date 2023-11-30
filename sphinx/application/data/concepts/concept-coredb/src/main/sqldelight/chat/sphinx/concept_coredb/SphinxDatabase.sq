@@ -489,6 +489,14 @@ UPDATE contactDbo
 SET blocked = :blocked
 WHERE id = ?;
 
+contactUpdateContactKeyAndRouteHint:
+UPDATE contactDbo
+SET contact_key = :contact_key,
+    contact_route_hint = :contact_route_hint,
+    status = :status,
+    photo_url = :photo_url
+WHERE node_pub_key = ?;
+
 contactDeleteById:
 DELETE FROM contactDbo
 WHERE id = ?;

@@ -114,6 +114,7 @@ internal class NewContactViewModel @Inject constructor(
                     null,
                     senderLsp,
                     null,
+                    null,
                     null
                 )
                 connectManager.createContact(newContact)

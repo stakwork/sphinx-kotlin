@@ -420,12 +420,10 @@ class ConnectManagerImpl(
 
                 when (messageType) {
                     KEY_EXCHANGE -> {
-                        _connectionStateStateFlow.value = ConnectionState.KeyExchangeMessage(decryptedJson.toString())
+                        _connectionStateStateFlow.value = ConnectionState.KeyExchange(decryptedJson.toString())
                     }
                     KEY_EXCHANGE_CONFIRMATION -> {
-                        Log.d("ONION_PROCESS", "This KEY CONFIRMATION ${decryptedJson}}")
-
-                        // Create the message to update the ContactKey and ContactRoutHint recevied on message 11
+                        _connectionStateStateFlow.value = ConnectionState.KeyExchangeConfirmation(decryptedJson.toString())
                     }
                     else -> {}
                 }
