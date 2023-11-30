@@ -17,9 +17,22 @@ sealed class TopicHandler {
                 "register" -> RegisterHandler.handle(topic, index, message, payload)
                 "balance" -> BalanceHandler.handle(topic, index, message, payload)
                 "stream" -> StreamHandler.handle(topic, index, message, payload)
+                "send" -> SendHandler.handle(topic, index, message, payload)
                 else -> throw IllegalArgumentException("Unknown topic key: $topic")
             }
         }
+    }
+
+    object SendHandler: TopicHandler() {
+        override fun handle(
+            topic: String,
+            index: Int,
+            message: String,
+            payload: ByteArray?
+        ): ConnectionState {
+            return ConnectionState.OnionMessage(index, payload)
+        }
+
     }
 
     object RegisterHandler: TopicHandler() {

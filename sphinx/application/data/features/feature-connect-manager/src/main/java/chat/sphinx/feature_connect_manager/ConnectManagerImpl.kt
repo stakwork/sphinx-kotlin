@@ -411,14 +411,22 @@ class ConnectManagerImpl(
                     Log.d("ONION_PROCESS", "This is the PeelOnionMsg EXCEPTION\n ${e.message}")
                 }
 
-                val jsonObject = JSONObject(decryptedJson.toString())
-                val messageType = jsonObject.getInt("type")
+                val jsonObject = try {
+                    JSONObject(decryptedJson.toString())
+                } catch (e: Exception) {
+                    null
+                }
+                val messageType = jsonObject?.getInt("type")
 
                 when (messageType) {
                     KEY_EXCHANGE -> {
                         _connectionStateStateFlow.value = ConnectionState.KeyExchangeMessage(decryptedJson.toString())
                     }
-                    KEY_EXCHANGE_CONFIRMATION -> {}
+                    KEY_EXCHANGE_CONFIRMATION -> {
+                        Log.d("ONION_PROCESS", "This KEY CONFIRMATION ${decryptedJson}}")
+
+                        // Create the message to update the ContactKey and ContactRoutHint recevied on message 11
+                    }
                     else -> {}
                 }
 
