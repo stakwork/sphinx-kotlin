@@ -4,4 +4,9 @@
     <dimen name="dashboard_chip_height">38dp</dimen>
     <dimen name="dashboard_chip_vertical_spacing">22dp</dimen>
     <dimen name="dashboard_chip_spacing">5dp</dimen>
+
+    <dimen name="recycler_view_holder_height">90dp</dimen>
+    <dimen name="dashboard_badge_count_xy">26dp</dimen>
+    <dimen name="dashboard_badge_count_padding_horizontal">6dp</dimen>
+
 </resources>
