@@ -17,6 +17,7 @@ import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.feed.FeedType
+import chat.sphinx.wrapper_contact.NewContact
 import chat.sphinx.wrapper_meme_server.PublicAttachmentInfo
 import chat.sphinx.wrapper_message.Message
 import chat.sphinx.wrapper_podcast.FeedSearchResultRow

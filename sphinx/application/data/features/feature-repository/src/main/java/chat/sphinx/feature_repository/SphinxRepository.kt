@@ -1699,10 +1699,50 @@ abstract class SphinxRepository(
             contactKey = contactKey
         )
 
+        val newChat = Chat(
+            id = ChatId(contact.index.value),
+            uuid = ChatUUID("${contact.index.value}"),
+            name = ChatName(contact.contactAlias?.value ?: "unknown"),
+            photoUrl = contact.photoUrl,
+            type = ChatType.Conversation,
+            status = if (contactKey != null) ChatStatus.Approved else ChatStatus.Pending,
+            contactIds = listOf(ContactId(0), ContactId(contact.index.value)),
+            isMuted = ChatMuted.False,
+            createdAt = now.toDateTime(),
+            groupKey = null,
+            host = null,
+            pricePerMessage = null,
+            escrowAmount = null,
+            unlisted = ChatUnlisted.False,
+            privateTribe = ChatPrivate.False,
+            ownerPubKey = null,
+            seen = Seen.False,
+            metaData = null,
+            myPhotoUrl = null,
+            myAlias = null,
+            pendingContactIds = emptyList(),
+            latestMessageId = null,
+            contentSeenAt = null,
+            pinedMessage = null,
+            notify = NotificationLevel.SeeAll
+        )
+
         applicationScope.launch(mainImmediate) {
             contactLock.withLock {
                 queries.transaction {
                     upsertNewContact(newContact, queries)
+                }
+            }
+            chatLock.withLock {
+                queries.transaction {
+                    upsertNewChat(
+                        newChat,
+                        moshi,
+                        SynchronizedMap<ChatId, Seen>(),
+                        queries,
+                        newContact,
+                        accountOwner.value?.nodePubKey
+                    )
                 }
             }
         }
@@ -1715,6 +1755,9 @@ abstract class SphinxRepository(
         photoUrl: PhotoUrl?
     ) {
         val queries = coreDB.getSphinxDatabaseQueries()
+        val contactIndex = queries.contactGetIndexByOkKey(contactPubKey)
+            .executeAsList().getOrNull(0)?.contact_index
+
         contactLock.withLock {
             queries.contactUpdateContactKeyAndRouteHint(
                 contactKey,
@@ -1723,6 +1766,12 @@ abstract class SphinxRepository(
                 photoUrl,
                 contactPubKey
             )
+        }
+
+        contactIndex?.value?.let { chatIndex ->
+            chatLock.withLock {
+                queries.chatUpdateSatusById(ChatStatus.Approved, ChatId(chatIndex))
+            }
         }
     }
 

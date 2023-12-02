@@ -8,5 +8,9 @@
     <dimen name="recycler_view_holder_height">90dp</dimen>
     <dimen name="dashboard_badge_count_xy">26dp</dimen>
     <dimen name="dashboard_badge_count_padding_horizontal">6dp</dimen>
+    <dimen name="dashboard_search_bar_height">58dp</dimen>
+    <dimen name="dashboard_header_network_xy">24dp</dimen>
+
+    <dimen name="dashboard_progress_bar_status">16dp</dimen>
 
 </resources>

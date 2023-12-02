@@ -4,6 +4,7 @@ import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.ImageView
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.*
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -339,14 +340,32 @@ internal class ChatListAdapter(
                 textViewChatHolderCenteredName.text = chatName
 
                 // Lock
-                val encryptedChat = dashboardChat.isEncrypted()
-                imageViewChatHolderLock.invisibleIfFalse(encryptedChat)
-                imageViewChatHolderCenteredLock.invisibleIfFalse(encryptedChat)
+//                val encryptedChat = dashboardChat.isEncrypted()
+//                imageViewChatHolderLock.invisibleIfFalse(encryptedChat)
+//                imageViewChatHolderCenteredLock.invisibleIfFalse(encryptedChat)
 
-                val chatHasMessages = (dashboardChat as? DashboardChat.Active)?.message != null
-                val activeChatOrInvite = ((dashboardChat is DashboardChat.Active && chatHasMessages) || dashboardChat is DashboardChat.Inactive.Invite)
-                layoutConstraintDashboardChatHolderMessage.invisibleIfFalse(activeChatOrInvite)
-                layoutConstraintDashboardChatNoMessageHolder.invisibleIfFalse(!activeChatOrInvite)
+//                val chatHasMessages = (dashboardChat as? DashboardChat.Active)?.message != null
+//                val activeChatOrInvite = ((dashboardChat is DashboardChat.Active && chatHasMessages) || dashboardChat is DashboardChat.Inactive.Invite)
+//                layoutConstraintDashboardChatHolderMessage.invisibleIfFalse(activeChatOrInvite)
+//                layoutConstraintDashboardChatNoMessageHolder.invisibleIfFalse(!activeChatOrInvite)
+
+                if (dashboardChat is DashboardChat.Active.Conversation) {
+                    imageViewChatHolderLock.text = getString(R.string.material_icon_name_lock)
+                    progressBarChatStatus.gone
+                    textViewChatStatus.gone
+                }
+                if (dashboardChat is DashboardChat.Inactive.Conversation) {
+                    imageViewChatHolderLock.text = getString(R.string.material_icon_name_lock_open)
+                    progressBarChatStatus.visible
+                    textViewChatStatus.visible
+
+                    textViewChatStatus.setTextColor(
+                        ContextCompat.getColor(
+                            binding.root.context,
+                            R.color.sphinxOrange
+                        )
+                    )
+                }
 
                 // Time
                 textViewChatHolderTime.text = dashboardChat.getDisplayTime(today00)

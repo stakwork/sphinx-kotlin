@@ -375,17 +375,25 @@ class ConnectManagerImpl(
         } ?: return
 
         if (isNewContact) {
-            val jsonObject = JSONObject(connectionState.message)
-            val scid = jsonObject.getString("scid")
+
+            val jsonObject = try {
+                JSONObject(connectionState.message)
+            } catch (e: Exception) {
+                null
+            }
+
+            val scid = jsonObject?.getString("scid")
             val generatedContactRouteHint = retrieveLightningRouteHint(newContact?.ownLspPubKey?.value, scid) ?: return
 
             val updatedNewContact = newContact?.copy(
-                scid = scid.toShortChannelId(),
+                scid = scid?.toShortChannelId(),
             )
 
             _connectionStateStateFlow.value = updatedNewContact?.let {
                 ConnectionState.NewContactRegistered(it, generatedContactRouteHint.value)
             }
+            newContact = null
+
         } else {
             _connectionStateStateFlow.value = connectionState
         }

@@ -154,6 +154,11 @@ CREATE TABLE chatDbo(
     pin_message                 TEXT            AS MessageUUID DEFAULT NULL
 );
 
+chatUpdateSatusById:
+UPDATE chatDbo
+SET status = :status
+WHERE id = ?;
+
 chatUpdateLatestMessage:
 UPDATE chatDbo
 SET latest_message_id = :latest_message_id
@@ -397,6 +402,11 @@ contactGetChildPubKeysToIndexes:
 SELECT child_pub_key, contact_index
 FROM contactDbo
 WHERE child_pub_key IS NOT NULL;
+
+contactGetIndexByOkKey:
+SELECT contact_index
+FROM contactDbo
+WHERE node_pub_key = ?;
 
 contactUpsert {
     UPDATE contactDbo
