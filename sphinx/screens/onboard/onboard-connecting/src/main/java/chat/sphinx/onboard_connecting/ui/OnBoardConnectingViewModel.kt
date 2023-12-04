@@ -679,7 +679,7 @@ internal class OnBoardConnectingViewModel @Inject constructor(
         }
     }
 
-    fun updateLspAndOwner(data: String) {
+    private fun updateLspAndOwner(data: String) {
         viewModelScope.launch(mainImmediate) {
 
             val lspChannelInfo = data.toLspChannelInfo(moshi)

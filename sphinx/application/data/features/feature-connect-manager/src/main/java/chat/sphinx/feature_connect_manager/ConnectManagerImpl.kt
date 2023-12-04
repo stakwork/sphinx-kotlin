@@ -57,55 +57,7 @@ class ConnectManagerImpl(
         const val KEY_EXCHANGE_CONFIRMATION = 11
     }
 
-    // Core Functional Methods
-
-
-    override fun initializeMqttAndSubscribe(
-        serverUri: String,
-        mnemonicWords: WalletMnemonic,
-        okKey: String,
-        contacts: HashMap<String, Int>?
-    ) {
-        coroutineScope.launch {
-
-            val seed = try {
-                mnemonicToSeed(mnemonicWords.value)
-            } catch (e: Exception) {
-                null
-            }
-
-            val xPub = seed?.let {
-                generateXPub(
-                    it,
-                    getTimestampInMilliseconds(),
-                    network
-                )
-            }
-
-            val now = getTimestampInMilliseconds()
-
-            val sig = seed?.let {
-                rootSignMs(
-                    it,
-                    now,
-                    network
-                )
-            }
-
-            if (xPub != null && sig != null) {
-                ownerSeed = seed
-
-                connectToMQTT(
-                    serverUri,
-                    xPub,
-                    now,
-                    sig,
-                    okKey,
-                    contacts
-                )
-            }
-        }
-    }
+    // Key Generation and Management
 
     override fun createAccount() {
         coroutineScope.launch {
@@ -158,38 +110,6 @@ class ConnectManagerImpl(
         }
     }
 
-    override fun createContact(
-        contact: NewContact
-    ) {
-        coroutineScope.launch {
-
-            val now = getTimestampInMilliseconds()
-
-            val childPubKey = ownerSeed?.let {
-                generatePubKeyFromSeed(
-                    it,
-                    contact.index.value.toUInt(),
-                    now,
-                    network
-                )
-            }
-
-            val index = contact.index
-
-            if (childPubKey != null) {
-
-                newContact = contact.copy(
-                    childPubKey = childPubKey.toLightningNodePubKey()
-                )
-
-                subscribeAndPublishContactMQTT(
-                    childPubKey,
-                    index.value.toInt()
-                )
-            }
-        }
-    }
-
     @OptIn(ExperimentalUnsignedTypes::class)
     private fun generateMnemonic(): Pair<String?, WalletMnemonic?> {
         var seed: String? = null
@@ -233,6 +153,87 @@ class ConnectManagerImpl(
             pubkeyFromSeed(seed, index, time, network)
         } catch (e: Exception) {
             null
+        }
+    }
+
+    override fun createContact(
+        contact: NewContact
+    ) {
+        coroutineScope.launch {
+
+            val now = getTimestampInMilliseconds()
+
+            val childPubKey = ownerSeed?.let {
+                generatePubKeyFromSeed(
+                    it,
+                    contact.index.value.toUInt(),
+                    now,
+                    network
+                )
+            }
+
+            val index = contact.index
+
+            if (childPubKey != null) {
+
+                newContact = contact.copy(
+                    childPubKey = childPubKey.toLightningNodePubKey()
+                )
+
+                subscribeAndPublishContactMQTT(
+                    childPubKey,
+                    index.value.toInt()
+                )
+            }
+        }
+    }
+
+    // MQTT Connection Management
+
+    override fun initializeMqttAndSubscribe(
+        serverUri: String,
+        mnemonicWords: WalletMnemonic,
+        okKey: String,
+        contacts: HashMap<String, Int>?
+    ) {
+        coroutineScope.launch {
+
+            val seed = try {
+                mnemonicToSeed(mnemonicWords.value)
+            } catch (e: Exception) {
+                null
+            }
+
+            val xPub = seed?.let {
+                generateXPub(
+                    it,
+                    getTimestampInMilliseconds(),
+                    network
+                )
+            }
+
+            val now = getTimestampInMilliseconds()
+
+            val sig = seed?.let {
+                rootSignMs(
+                    it,
+                    now,
+                    network
+                )
+            }
+
+            if (xPub != null && sig != null) {
+                ownerSeed = seed
+
+                connectToMQTT(
+                    serverUri,
+                    xPub,
+                    now,
+                    sig,
+                    okKey,
+                    contacts
+                )
+            }
         }
     }
 
@@ -328,6 +329,74 @@ class ConnectManagerImpl(
         mqttClient?.subscribe(subscribeTopic, qos)
 
         publishTopicsSequentially(publishTopic, 0)
+    }
+
+    private fun subscribeAndPublishContactMQTT(
+        childPubKey: String,
+        index: Int,
+    ) {
+        if (mqttClient?.isConnected == true) {
+            coroutineScope.launch {
+
+                val subscribeTopic = "${childPubKey}/${index}/res/#"
+                val publishTopic = "${childPubKey}/${index}/req/register"
+
+                try {
+                    mqttClient?.subscribe(subscribeTopic, 1)
+                    mqttClient?.publish(publishTopic, MqttMessage())
+                } catch (e: MqttException) {
+                    e.printStackTrace()
+                }
+            }
+        } else {
+            Log.d("MQTT", "MQTT Client is not connected.")
+        }
+    }
+
+    override fun sendKeyExchangeOnionMessage(
+        keyExchangeMessage: String,
+        hops: String,
+        walletMnemonic: WalletMnemonic,
+        okKey: String
+    ) {
+        coroutineScope.launch {
+
+            val seed = try {
+                mnemonicToSeed(walletMnemonic.value)
+            } catch (e: Exception) {
+                null
+            }
+
+            val now = getTimestampInMilliseconds()
+
+            if (seed != null) {
+
+                val onion = try {
+                    createOnionMsg(
+                        seed,
+                        0.toUInt(),
+                        now,
+                        network,
+                        hops,
+                        keyExchangeMessage
+                    )
+                } catch (e: Exception) {
+                    null
+                }
+
+                if (onion != null && mqttClient?.isConnected == true) {
+                    Log.d("ONION_PROCESS", "The Onion is contain\n $keyExchangeMessage")
+
+                    val publishTopic = "${okKey}/${0}/req/send"
+
+                    try {
+                        mqttClient?.publish(publishTopic, MqttMessage(onion))
+                    } catch (e: MqttException) {
+                        e.printStackTrace()
+                    }
+                }
+            }
+        }
     }
 
     private fun publishTopicsSequentially(topics: Array<String>, index: Int) {
@@ -441,76 +510,6 @@ class ConnectManagerImpl(
         }
     }
 
-    override fun sendKeyExchangeOnionMessage(
-        keyExchangeMessage: String,
-        hops: String,
-        walletMnemonic: WalletMnemonic,
-        okKey: String
-    ) {
-        coroutineScope.launch {
-
-            val seed = try {
-                mnemonicToSeed(walletMnemonic.value)
-            } catch (e: Exception) {
-                null
-            }
-
-            val now = getTimestampInMilliseconds()
-
-            if (seed != null) {
-
-                val onion = try {
-                    createOnionMsg(
-                        seed,
-                        0.toUInt(),
-                        now,
-                        network,
-                        hops,
-                        keyExchangeMessage
-                    )
-                } catch (e: Exception) {
-                    null
-                }
-
-                if (onion != null && mqttClient?.isConnected == true) {
-                    Log.d("ONION_PROCESS", "The Onion is contain\n $keyExchangeMessage")
-
-                    val publishTopic = "${okKey}/${0}/req/send"
-
-                    try {
-                        mqttClient?.publish(publishTopic, MqttMessage(onion))
-                    } catch (e: MqttException) {
-                        e.printStackTrace()
-                    }
-                }
-            }
-        }
-    }
-
-    // Utility Methods
-    private fun subscribeAndPublishContactMQTT(
-        childPubKey: String,
-        index: Int,
-    ) {
-        if (mqttClient?.isConnected == true) {
-            coroutineScope.launch {
-
-                val subscribeTopic = "${childPubKey}/${index}/res/#"
-                val publishTopic = "${childPubKey}/${index}/req/register"
-
-                try {
-                    mqttClient?.subscribe(subscribeTopic, 1)
-                    mqttClient?.publish(publishTopic, MqttMessage())
-                } catch (e: MqttException) {
-                    e.printStackTrace()
-                }
-            }
-        } else {
-            Log.d("MQTT", "MQTT Client is not connected.")
-        }
-    }
-
-
     override fun setLspIp(ip: String) {
         mixer = ip
     }
@@ -518,6 +517,9 @@ class ConnectManagerImpl(
     override fun retrieveLspIp(): String? {
         return mixer
     }
+
+
+    // Utility Methods
 
     @OptIn(ExperimentalUnsignedTypes::class)
     private fun generateRandomBytes(size: Int): UByteArray {
@@ -541,12 +543,6 @@ class ConnectManagerImpl(
             mqttClient?.disconnect()
         }
         mqttClient = null
-    }
-
-    private fun extractScid(input: String): String? {
-        val pattern = """"scid":"(\d+)"""".toRegex()
-        val matchResult = pattern.find(input)
-        return matchResult?.groups?.get(1)?.value
     }
 
 }

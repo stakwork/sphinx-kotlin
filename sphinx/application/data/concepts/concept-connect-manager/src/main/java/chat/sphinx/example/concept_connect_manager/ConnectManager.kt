@@ -9,27 +9,22 @@ abstract class ConnectManager {
 
     abstract val connectionStateStateFlow: StateFlow<ConnectionState?>
 
-    abstract fun setLspIp(ip: String)
-
-    abstract fun retrieveLspIp(): String?
-
+    abstract fun createAccount()
+    abstract fun createContact(contact: NewContact)
     abstract fun initializeMqttAndSubscribe(
         serverUri: String,
         mnemonicWords: WalletMnemonic,
         okKey: String,
         contacts: HashMap<String, Int>?,
     )
-
-    abstract fun createAccount()
-
-    abstract fun createContact(contact: NewContact)
-
     abstract fun sendKeyExchangeOnionMessage(
         keyExchangeMessage: String,
         hops: String,
         walletMnemonic: WalletMnemonic,
         okKey: String
     )
+    abstract fun setLspIp(ip: String)
+    abstract fun retrieveLspIp(): String?
 
 }
 
