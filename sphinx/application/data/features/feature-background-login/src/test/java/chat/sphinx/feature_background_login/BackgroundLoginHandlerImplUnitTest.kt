@@ -3,6 +3,7 @@ package chat.sphinx.feature_background_login
 import chat.sphinx.concept_background_login.BackgroundLoginHandler
 import io.matthewnelson.test_feature_authentication_core.AuthenticationCoreDefaultsTestHelper
 import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.runTest
 import org.junit.Assert
 import org.junit.Test
 
@@ -15,7 +16,7 @@ class BackgroundLoginHandlerImplUnitTest: AuthenticationCoreDefaultsTestHelper()
 
     @Test
     fun `everything fails if not logged in for first time`() =
-        testDispatcher.runBlockingTest {
+        runTest {
             Assert.assertNull(backgroundLoginHandler.attemptBackgroundLogin())
             Assert.assertFalse(backgroundLoginHandler.updateLoginTime())
             Assert.assertFalse(backgroundLoginHandler.updateSetting(2))

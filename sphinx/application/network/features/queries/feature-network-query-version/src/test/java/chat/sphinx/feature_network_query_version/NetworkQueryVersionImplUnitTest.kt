@@ -8,6 +8,7 @@ import chat.sphinx.kotlin_response.message
 import chat.sphinx.test_network_query.NetworkQueryTestHelper
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.runTest
 import org.junit.Assert
 import org.junit.Test
 
@@ -17,7 +18,7 @@ class NetworkQueryVersionImplUnitTest: NetworkQueryTestHelper() {
 
     @Test
     fun `getAppVersions returns success`() =
-        testDispatcher.runBlockingTest {
+        runTest {
             getCredentials()?.let {
                 nqVersion.getAppVersions().collect { loadResponse ->
 
@@ -26,7 +27,7 @@ class NetworkQueryVersionImplUnitTest: NetworkQueryTestHelper() {
                         is Response.Error -> {
                             // will fail on error
                             loadResponse.exception?.printStackTrace()
-                            Assert.fail(loadResponse.message)
+                            fail(loadResponse.message)
                         }
                         is Response.Success -> {
                         }

@@ -17,6 +17,7 @@ import io.matthewnelson.crypto_common.clazzes.UnencryptedString
 import io.matthewnelson.crypto_common.clazzes.toUnencryptedString
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.runTest
 import org.junit.Assert
 import org.junit.Test
 
@@ -208,14 +209,14 @@ class RSAImplUnitTest: NetworkQueryTestHelper() {
 
     @Test
     fun `key generation success`() =
-        testDispatcher.runBlockingTest {
+        runTest {
             generateKeys(KeySize._1024, PKCSType.PKCS1)
             generateKeys(KeySize._1024, PKCSType.PKCS8)
         }
 
     @Test
     fun `message decryption from linux client success`() =
-        testDispatcher.runBlockingTest {
+        runTest {
             getCredentials()?.let {
 
                 fun printError() {
@@ -250,7 +251,7 @@ class RSAImplUnitTest: NetworkQueryTestHelper() {
 
     @Test
     fun `message decryption success`() =
-        testDispatcher.runBlockingTest {
+        runTest {
             getCredentials()?.let { creds ->
                 val privateKey = RsaPrivateKey(creds.privKey.toCharArray())
 
@@ -296,7 +297,7 @@ class RSAImplUnitTest: NetworkQueryTestHelper() {
 
     @Test
     fun `public private key encryption success`() =
-        testDispatcher.runBlockingTest {
+        runTest {
             // Generate new Public/Private key pair
             val keys = generateKeys(
                 keySize = KeySize._4096,
@@ -322,7 +323,7 @@ class RSAImplUnitTest: NetworkQueryTestHelper() {
 
     @Test
     fun `signature verification success`() =
-        testDispatcher.runBlockingTest {
+        runTest {
             val keys = generateKeys(
                 keySize = KeySize._1024,
                 pkcsType = PKCSType.PKCS1

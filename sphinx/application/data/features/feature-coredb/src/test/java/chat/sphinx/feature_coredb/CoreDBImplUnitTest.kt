@@ -14,6 +14,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert
 import org.junit.Before
@@ -78,7 +79,7 @@ class CoreDBImplUnitTest: CoroutineTestHelper() {
 
     @Test
     fun `getSphinxDatabaseQueries suspends until initialization is complete`() =
-        testDispatcher.runBlockingTest {
+        runTest {
             var queries: SphinxDatabaseQueries? = null
             launch {
                 queries = testCoreDB.getSphinxDatabaseQueries()
@@ -93,7 +94,7 @@ class CoreDBImplUnitTest: CoroutineTestHelper() {
 
     @Test
     fun `getSphinxDatabaseQueries cancels quietly when scope is cancelled`() =
-        testDispatcher.runBlockingTest {
+        runTest {
             var queries: SphinxDatabaseQueries? = null
             val newScope = CoroutineScope(dispatchers.main)
             newScope.launch {
@@ -112,7 +113,7 @@ class CoreDBImplUnitTest: CoroutineTestHelper() {
 
     @Test
     fun `getSphinxDatabaseQueries returns immediately if initialization is already had`() =
-        testDispatcher.runBlockingTest {
+        runTest {
             testCoreDB.initializeDatabase(testHandler.generateEncryptionKey())
             Assert.assertNotNull(testCoreDB.getSphinxDatabaseQueries())
         }

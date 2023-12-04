@@ -42,6 +42,7 @@ import io.matthewnelson.crypto_common.clazzes.Password
 import io.matthewnelson.test_feature_authentication_core.AuthenticationCoreDefaultsTestHelper
 import io.matthewnelson.test_feature_authentication_core.TestEncryptionKeyHandler
 import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.runTest
 import okhttp3.Cache
 import okio.base64.decodeBase64ToArray
 import org.cryptonode.jncryptor.AES256JNCryptor
@@ -255,7 +256,8 @@ abstract class NetworkQueryTestHelper: AuthenticationCoreDefaultsTestHelper() {
     }
 
     @Before
-    fun setupNetworkQueryTestHelper() = testDispatcher.runBlockingTest {
+    fun setupNetworkQueryTestHelper() =
+    runTest {
         testDirectory.create()
         getCredentials()?.let { creds ->
             // Set our raw private/public keys in the test handler so when we login

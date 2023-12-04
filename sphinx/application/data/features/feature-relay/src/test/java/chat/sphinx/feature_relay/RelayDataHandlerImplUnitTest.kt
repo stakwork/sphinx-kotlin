@@ -11,6 +11,7 @@ import chat.sphinx.wrapper_relay.RelayUrl
 import io.matthewnelson.k_openssl.isSalted
 import io.matthewnelson.test_feature_authentication_core.AuthenticationCoreDefaultsTestHelper
 import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.runTest
 import org.junit.Assert
 import org.junit.Test
 
@@ -42,7 +43,7 @@ class RelayDataHandlerImplUnitTest: AuthenticationCoreDefaultsTestHelper() {
 
     @Test
     fun `login is required for anything to work`() =
-        testDispatcher.runBlockingTest {
+        runTest {
             Assert.assertFalse(relayHandler.persistRelayUrl(RelayUrl(RAW_URL)))
             Assert.assertNull(relayHandler.retrieveRelayUrl())
             Assert.assertFalse(relayHandler.persistAuthorizationToken(AuthorizationToken(RAW_JWT)))
@@ -51,7 +52,7 @@ class RelayDataHandlerImplUnitTest: AuthenticationCoreDefaultsTestHelper() {
 
     @Test
     fun `persisted data is encrypted`() =
-        testDispatcher.runBlockingTest {
+        runTest {
             login()
 
             Assert.assertTrue(relayHandler.persistRelayUrl(RelayUrl(RAW_URL)))
@@ -67,7 +68,7 @@ class RelayDataHandlerImplUnitTest: AuthenticationCoreDefaultsTestHelper() {
 
     @Test
     fun `clearing JavaWebToken updates storage properly`() =
-        testDispatcher.runBlockingTest {
+        runTest {
             login()
 
             relayHandler.persistAuthorizationToken(AuthorizationToken(RAW_JWT))

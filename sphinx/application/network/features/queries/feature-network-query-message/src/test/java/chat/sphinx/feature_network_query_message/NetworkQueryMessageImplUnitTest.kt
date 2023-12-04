@@ -10,6 +10,7 @@ import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.message.MessagePagination
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.runTest
 import org.junit.Assert
 import org.junit.Test
 
@@ -17,7 +18,7 @@ class NetworkQueryMessageImplUnitTest: NetworkQueryTestHelper() {
 
     @Test
     fun `getMessages returns success`() =
-        testDispatcher.runBlockingTest {
+        runTest {
             getCredentials()?.let {
                 // get all available messages
                 nqMessage.getMessages(null).collect { loadResponse ->
@@ -39,7 +40,7 @@ class NetworkQueryMessageImplUnitTest: NetworkQueryTestHelper() {
 
     @Test
     fun `pagination returns correct number when limited`() =
-        testDispatcher.runBlockingTest {
+        runTest {
             getCredentials()?.let {
 
                 val expectedListSize = 10
@@ -73,7 +74,7 @@ class NetworkQueryMessageImplUnitTest: NetworkQueryTestHelper() {
 
     @Test
     fun `pagination returns correct offset`() =
-        testDispatcher.runBlockingTest {
+        runTest {
             getCredentials()?.let {
                 val limit = 2
                 val offset = 8
@@ -107,7 +108,7 @@ class NetworkQueryMessageImplUnitTest: NetworkQueryTestHelper() {
 
     @Test
     fun `getPayments returns success`() =
-        testDispatcher.runBlockingTest {
+        runTest {
             getCredentials()?.let {
                 nqMessage.getPayments().collect { loadResponse ->
 
@@ -127,7 +128,7 @@ class NetworkQueryMessageImplUnitTest: NetworkQueryTestHelper() {
 
     @Test
     fun `readMessages returns success`() =
-        testDispatcher.runBlockingTest {
+        runTest {
             getCredentials()?.let {
                 nqMessage.readMessages(ChatId(1)).collect { loadResponse ->
 

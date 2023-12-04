@@ -10,6 +10,7 @@ import chat.sphinx.test_network_query.NetworkQueryTestHelper
 import chat.sphinx.wrapper_common.subscription.SubscriptionId
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.runTest
 import org.junit.Assert
 import org.junit.Test
 
@@ -17,7 +18,7 @@ class NetworkQuerySubscriptionImplUnitTest: NetworkQueryTestHelper() {
 
     @Test
     fun `getSubscriptions returns success`() =
-        testDispatcher.runBlockingTest {
+        runTest {
             getCredentials()?.let {
                 nqSubscription.getSubscriptions().collect { loadResponse ->
 
@@ -38,7 +39,7 @@ class NetworkQuerySubscriptionImplUnitTest: NetworkQueryTestHelper() {
 
     @Test
     fun `getSubscriptionById returns success`() =
-        testDispatcher.runBlockingTest {
+        runTest {
             getCredentials()?.let {
                 var subscription: SubscriptionDto? = null
 
@@ -86,7 +87,7 @@ class NetworkQuerySubscriptionImplUnitTest: NetworkQueryTestHelper() {
 
     @Test
     fun `getSubscriptionById returns error if Id doesn't exist`() =
-        testDispatcher.runBlockingTest {
+        runTest {
             getCredentials()?.let {
                 var lastSubIdPlus1: Long? = null
 

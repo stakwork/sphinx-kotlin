@@ -8,6 +8,7 @@ import chat.sphinx.kotlin_response.message
 import chat.sphinx.test_network_query.NetworkQueryTestHelper
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.runTest
 import org.junit.Assert
 import org.junit.Test
 
@@ -15,7 +16,7 @@ class NetworkQueryLightningImplUnitTest: NetworkQueryTestHelper() {
 
     @Test
     fun `getInvoices returns success`() =
-        testDispatcher.runBlockingTest {
+        runTest {
             getCredentials()?.let {
                 nqLightning.getInvoices().collect { loadResponse ->
 
@@ -35,7 +36,7 @@ class NetworkQueryLightningImplUnitTest: NetworkQueryTestHelper() {
 
     @Test
     fun `getChannels returns success`() =
-        testDispatcher.runBlockingTest {
+        runTest {
             getCredentials()?.let {
                 nqLightning.getChannels().collect { loadResponse ->
 
@@ -55,7 +56,7 @@ class NetworkQueryLightningImplUnitTest: NetworkQueryTestHelper() {
 
     @Test
     fun `getBalance returns success`() =
-        testDispatcher.runBlockingTest {
+        runTest {
             getCredentials()?.let {
                 nqLightning.getBalance().collect { loadResponse ->
 
@@ -75,7 +76,7 @@ class NetworkQueryLightningImplUnitTest: NetworkQueryTestHelper() {
 
     @Test
     fun `getBalanceAll returns success`() =
-        testDispatcher.runBlockingTest {
+        runTest {
             getCredentials()?.let {
                 nqLightning.getBalanceAll().collect { loadResponse ->
 

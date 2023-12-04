@@ -9,6 +9,7 @@ import chat.sphinx.kotlin_response.message
 import chat.sphinx.test_network_query.NetworkQueryTestHelper
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.runTest
 import org.junit.Assert
 import org.junit.Test
 
@@ -22,7 +23,7 @@ class NetworkQueryPeopleImplUnitTest: NetworkQueryTestHelper() {
 
     @Test
     fun `verifyExternal returns success`() =
-        testDispatcher.runBlockingTest {
+        runTest {
             getCredentials()?.let {
 
                 var data = PeopleProfileDto(0,"https://sphinx.chat","sampleName","","", listOf(), 0,"")
