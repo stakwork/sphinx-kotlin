@@ -47,5 +47,6 @@ dependencies {
     implementation deps.kotlinx.serialization
     implementation deps.msgpack.sdk
     implementation deps.square.moshi
+    testImplementation 'org.testng:testng:6.9.6'
 
 }
