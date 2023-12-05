@@ -307,8 +307,18 @@ internal class DashboardViewModel @Inject constructor(
     ) {
         val returnConfirmation = contact.contactKey != null
 
-        contactRepository.createNewContact(contact)
-        sendKeyExchange(contact, contactRouteHint, returnConfirmation)
+        contact.lightningNodePubKey?.let {
+            val exitingOkKey = contactRepository.getContactByPubKey(it).firstOrNull()
+
+            if (exitingOkKey == null) {
+                contactRepository.createNewContact(contact)
+                sendKeyExchange(contact, contactRouteHint, returnConfirmation)
+            }
+            else {
+                // handle toast
+            }
+        }
+
     }
 
     private fun getRelayKeys() {
