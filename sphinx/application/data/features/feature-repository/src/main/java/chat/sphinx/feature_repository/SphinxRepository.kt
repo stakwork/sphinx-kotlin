@@ -1701,7 +1701,7 @@ abstract class SphinxRepository(
 
         val newChat = Chat(
             id = ChatId(contact.index.value),
-            uuid = ChatUUID("${contact.index.value}"),
+            uuid = ChatUUID("${UUID.randomUUID()}"),
             name = ChatName(contact.contactAlias?.value ?: "unknown"),
             photoUrl = contact.photoUrl,
             type = ChatType.Conversation,
