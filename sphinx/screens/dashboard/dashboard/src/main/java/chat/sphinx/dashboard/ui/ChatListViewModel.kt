@@ -148,6 +148,12 @@ internal class ChatListViewModel @Inject constructor(
                                 val contact: Contact = repositoryDashboard.getContactById(contactId)
                                     .firstOrNull() ?: continue
 
+                                if (contact.status is ContactStatus.Pending) {
+                                    newList.add(
+                                        DashboardChat.Inactive.Conversation(contact)
+                                    )
+                                }
+
                                 if (!contact.isBlocked() && chat.status is ChatStatus.Approved) {
                                     contactsAdded.add(contactId)
                                     
@@ -170,41 +176,6 @@ internal class ChatListViewModel @Inject constructor(
                                         repositoryDashboard.getUnseenMentionsByChatId(chat.id)
                                     )
                                 )
-                            }
-                        }
-                    }
-
-                    if (contactsCollectionInitialized) {
-                        withContext(default) {
-                            for (contact in _contactsStateFlow.value) {
-
-                                if (contact.status is ContactStatus.Pending) {
-                                    newList.add(
-                                        DashboardChat.Inactive.Conversation(contact)
-                                    )
-                                }
-
-//                                if (!contactsAdded.contains(contact.id)) {
-//                                    if (contact.isInviteContact()) {
-//                                        var contactInvite: Invite? = null
-//
-//                                        contact.inviteId?.let { inviteId ->
-//                                            contactInvite = withContext(io) {
-//                                                repositoryDashboard.getInviteById(inviteId).firstOrNull()
-//                                            }
-//                                        }
-//                                        if (contactInvite != null) {
-//                                            newList.add(
-//                                                DashboardChat.Inactive.Invite(contact, contactInvite)
-//                                            )
-//                                            continue
-//                                        }
-//                                    }
-//                                    newList.add(
-//                                        DashboardChat.Inactive.Conversation(contact)
-//                                    )
-//                                }
-
                             }
                         }
                     }

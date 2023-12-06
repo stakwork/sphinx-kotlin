@@ -101,9 +101,10 @@ internal class NewContactViewModel @Inject constructor(
 
         saveContactJob = viewModelScope.launch(mainImmediate) {
             val newContactIndex = contactRepository.getNewContactIndex().firstOrNull()
+            val exitingOkKey = contactRepository.getContactByPubKey(lightningNodePubKey).firstOrNull()
             val senderLsp = lightningRepository.retrieveLSP().firstOrNull()?.pubKey
 
-            if (newContactIndex != null && lightningRouteHint != null && senderLsp != null) {
+            if (newContactIndex != null && lightningRouteHint != null && senderLsp != null && exitingOkKey == null) {
 
                 val newContact = NewContact(
                     contactAlias,

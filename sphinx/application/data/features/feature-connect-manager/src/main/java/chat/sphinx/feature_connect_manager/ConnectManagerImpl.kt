@@ -293,6 +293,8 @@ class ConnectManagerImpl(
                 }
 
                 override fun deliveryComplete(token: IMqttDeliveryToken?) {
+                    Log.d("MQTT_MESSAGES", "deliveryComplete ${token}")
+                    Log.d("MQTT_MESSAGES", "deliveryComplete ${token?.message}")
                     // Handle message delivery confirmation here
                 }
             })
@@ -309,9 +311,10 @@ class ConnectManagerImpl(
         mqttClient?.subscribe(topics, qos)
 
 //        val balance = "${okKey}/${0}/req/balance"
+        val registerMsg = "${okKey}/${0}/req/msgs"
         val registerOkKey = "${okKey}/${0}/req/register"
 
-        val topicsArray = arrayOf(registerOkKey)
+        val topicsArray = arrayOf(registerOkKey, registerMsg)
 
         publishTopicsSequentially(topicsArray, null,0)
     }
