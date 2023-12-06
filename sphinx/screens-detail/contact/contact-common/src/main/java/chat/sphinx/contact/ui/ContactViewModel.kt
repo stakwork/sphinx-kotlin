@@ -66,10 +66,12 @@ abstract class ContactViewModel<ARGS: NavArgs>(
                 ScannerRequest(
                     filter = object : ScannerFilter() {
                         override suspend fun checkData(data: String): Response<Any, String> {
-                            if (data.toLightningNodePubKey() != null) {
+                            val scannedString = data.split(":")
+
+                            if (scannedString.getOrNull(0)?.toLightningNodePubKey() != null) {
                                 return Response.Success(Any())
                             }
-                            if (data.toVirtualLightningNodeAddress() != null) {
+                            if (scannedString.getOrNull(1)?.toLightningRouteHint() != null) {
                                 return Response.Success(Any())
                             }
                             return Response.Error("QR code is not a Lightning Node Public Key")
@@ -78,19 +80,17 @@ abstract class ContactViewModel<ARGS: NavArgs>(
                 )
             )
             if (response is Response.Success) {
-                val contactInfoSideEffect : ContactSideEffect? = response.value.value.toLightningNodePubKey()?.let { lightningNodePubKey ->
-                    ContactSideEffect.ContactInfo(lightningNodePubKey)
-                } ?: response.value.value.toVirtualLightningNodeAddress()?.let { virtualNodeAddress ->
-                    virtualNodeAddress.getPubKey()?.let { lightningNodePubKey ->
-                        ContactSideEffect.ContactInfo(
-                            lightningNodePubKey,
-                            virtualNodeAddress.getRouteHint()
-                        )
-                    }
-                }
+                val contactInfo = response.value.value.split(":")
+                val contactOkKey = contactInfo.getOrNull(0)?.toLightningNodePubKey()
+                val contactRouteHint = contactInfo.getOrNull(1)?.toLightningRouteHint()
 
-                if (contactInfoSideEffect != null) {
-                    submitSideEffect(contactInfoSideEffect)
+                if (contactOkKey != null && contactRouteHint != null) {
+                    submitSideEffect(
+                        ContactSideEffect.ContactInfo(
+                            contactOkKey,
+                            contactRouteHint
+                        )
+                    )
                 }
             }
         }
