@@ -18,9 +18,37 @@ sealed class TopicHandler {
                 "balance" -> BalanceHandler.handle(topic, index, message, payload)
                 "stream" -> StreamHandler.handle(topic, index, message, payload)
                 "send" -> SendHandler.handle(topic, index, message, payload)
+                "msgs"-> MessageHandler.handle(topic, index, message, payload)
+                "settle"-> SettleHandler.handle(topic, index, message, payload)
                 else -> throw IllegalArgumentException("Unknown topic key: $topic")
             }
         }
+    }
+    object SettleHandler: TopicHandler() {
+        override fun handle(
+            topic: String,
+            index: Int,
+            message: String,
+            payload: ByteArray?
+        ): ConnectionState {
+            return ConnectionState.OnionMessage(index, payload)
+        }
+    }
+
+    object MessageHandler: TopicHandler() {
+        override fun handle(
+            topic: String,
+            index: Int,
+            message: String,
+            payload: ByteArray?
+        ): ConnectionState {
+            val pom = topic
+            val pom1 = message
+            val pom2 = payload
+
+            return ConnectionState.OnionMessage(index, payload)
+        }
+
     }
 
     object SendHandler: TopicHandler() {
@@ -32,7 +60,6 @@ sealed class TopicHandler {
         ): ConnectionState {
             return ConnectionState.OnionMessage(index, payload)
         }
-
     }
 
     object RegisterHandler: TopicHandler() {

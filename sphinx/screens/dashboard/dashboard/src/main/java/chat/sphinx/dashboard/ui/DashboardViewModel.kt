@@ -44,6 +44,7 @@ import chat.sphinx.example.concept_connect_manager.model.ConnectionState
 import chat.sphinx.example.wrapper_mqtt.HopsDto
 import chat.sphinx.example.wrapper_mqtt.KeyExchangeMessageDto
 import chat.sphinx.example.wrapper_mqtt.Message
+import chat.sphinx.example.wrapper_mqtt.MessagesFetchRequest
 import chat.sphinx.example.wrapper_mqtt.PubkeyDto
 import chat.sphinx.example.wrapper_mqtt.Sender
 import chat.sphinx.example.wrapper_mqtt.toJson
@@ -59,6 +60,7 @@ import chat.sphinx.scanner_view_model_coordinator.response.ScannerResponse
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_common.*
 import chat.sphinx.wrapper_common.chat.ChatUUID
+import chat.sphinx.wrapper_common.contact.ContactIndex
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.RestoreProgressViewState
 import chat.sphinx.wrapper_common.feed.*
@@ -171,9 +173,21 @@ internal class DashboardViewModel @Inject constructor(
 
     private fun connectAndSubscribeToMqtt() {
         viewModelScope.launch(mainImmediate) {
-            val contacts = contactRepository.getContactsChildPubKeysToIndexes().firstOrNull()
+            val contactsMap = contactRepository.getContactsChildPubKeysToIndexes().firstOrNull()
                 ?.mapKeys { it.key.value }
-                ?.mapValues { it.value.value.toInt() } as HashMap<String, Int>?
+                ?.mapValues { it.value.value.toInt() }
+
+            val contactsInfoList = contactsMap?.map { (childPubKeyString, contactIndexInt) ->
+                   // TODO() get id of the last message for that contact
+
+                val messagesFetchRequest = MessagesFetchRequest(0, 1000).toJson(moshi)
+
+                ContactInfo(
+                    childPubKey = LightningNodePubKey(childPubKeyString),
+                    contactIndex = ContactIndex(contactIndexInt.toLong()),
+                    messagesFetchRequest = messagesFetchRequest
+                )
+            }
 
             val mnemonic = walletDataHandler.retrieveWalletMnemonic()
             val okKey = accountOwner.value?.nodePubKey?.value
@@ -183,11 +197,12 @@ internal class DashboardViewModel @Inject constructor(
                     "tcp://54.164.163.153:1883",
                     mnemonic,
                     okKey,
-                    contacts
+                    contactsInfoList
                 )
             }
         }
     }
+
 
     private fun collectConnectionStateStateFlow() {
         viewModelScope.launch(mainImmediate) {

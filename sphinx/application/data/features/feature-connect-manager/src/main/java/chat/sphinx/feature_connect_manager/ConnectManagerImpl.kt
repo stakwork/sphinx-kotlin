@@ -8,6 +8,7 @@ import chat.sphinx.wrapper_contact.NewContact
 import chat.sphinx.wrapper_common.lightning.retrieveLightningRouteHint
 import chat.sphinx.wrapper_common.lightning.toLightningNodePubKey
 import chat.sphinx.wrapper_common.lightning.toShortChannelId
+import chat.sphinx.wrapper_contact.ContactInfo
 import chat.sphinx.wrapper_lightning.WalletMnemonic
 import chat.sphinx.wrapper_lightning.toWalletMnemonic
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
@@ -194,7 +195,7 @@ class ConnectManagerImpl(
         serverUri: String,
         mnemonicWords: WalletMnemonic,
         okKey: String,
-        contacts: HashMap<String, Int>?
+        contacts: List<ContactInfo>?
     ) {
         coroutineScope.launch {
 
@@ -243,7 +244,7 @@ class ConnectManagerImpl(
         key: String,
         password: String,
         okKey: String,
-        contacts: HashMap<String, Int>?
+        contacts: List<ContactInfo>?
     ) {
 
         mqttClient = try {
@@ -312,23 +313,27 @@ class ConnectManagerImpl(
 
         val topicsArray = arrayOf(registerOkKey)
 
-        publishTopicsSequentially(topicsArray, 0)
+        publishTopicsSequentially(topicsArray, null,0)
     }
 
-    private fun subscribeContacts(contacts: HashMap<String, Int>) {
-        val subscribeTopic = contacts.map { (key, value) ->
-            "$key/$value/res/#"
+    private fun subscribeContacts(contacts: List<ContactInfo>) {
+        val subscribeTopic = contacts.map { contactInfo ->
+            "${contactInfo.childPubKey.value}/${contactInfo.contactIndex.value}/res/#"
         }.toTypedArray()
 
-        val publishTopic = contacts.map { (key, value) ->
-            "$key/$value/req/register"
+        val publishTopic = contacts.map { contactInfo ->
+            "${contactInfo.childPubKey.value}/${contactInfo.contactIndex.value}/req/register"
+        }.toTypedArray()
+
+        val messages = contacts.map { contactInfo ->
+            contactInfo.messagesFetchRequest
         }.toTypedArray()
 
         val qos = IntArray(subscribeTopic.size) { 1 }
 
         mqttClient?.subscribe(subscribeTopic, qos)
 
-        publishTopicsSequentially(publishTopic, 0)
+        publishTopicsSequentially(publishTopic, messages, 0)
     }
 
     private fun subscribeAndPublishContactMQTT(
@@ -399,15 +404,15 @@ class ConnectManagerImpl(
         }
     }
 
-    private fun publishTopicsSequentially(topics: Array<String>, index: Int) {
+    private fun publishTopicsSequentially(topics: Array<String>, messages: Array<String>?, index: Int) {
         if (index < topics.size) {
             val topic = topics[index]
-            val message = MqttMessage()
+            val message = if (messages != null) MqttMessage(messages.getOrNull(index)?.toByteArray()) else MqttMessage()
 
             mqttClient?.publish(topic, message, null, object : IMqttActionListener {
                 override fun onSuccess(asyncActionToken: IMqttToken?) {
                     // Recursively call the function with the next index
-                    publishTopicsSequentially(topics, index + 1)
+                    publishTopicsSequentially(topics, messages, index + 1)
                 }
 
                 override fun onFailure(asyncActionToken: IMqttToken?, exception: Throwable?) {
