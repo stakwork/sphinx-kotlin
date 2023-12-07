@@ -51,6 +51,7 @@ import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_chat.model.AddMember
 import chat.sphinx.concept_repository_chat.model.CreateTribe
 import chat.sphinx.concept_repository_connect_manager.ConnectManagerRepository
+import chat.sphinx.concept_repository_connect_manager.model.ConnectionManagerState
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_dashboard.RepositoryDashboard
 import chat.sphinx.concept_repository_feed.FeedRepository
@@ -68,6 +69,9 @@ import chat.sphinx.concept_socket_io.SphinxSocketIOMessageListener
 import chat.sphinx.concept_wallet.WalletDataHandler
 import chat.sphinx.conceptcoredb.*
 import chat.sphinx.example.concept_connect_manager.ConnectManager
+import chat.sphinx.example.concept_connect_manager.ConnectManagerListener
+import chat.sphinx.example.concept_connect_manager.model.ConnectionState
+import chat.sphinx.example.wrapper_mqtt.toLspChannelInfo
 import chat.sphinx.feature_repository.mappers.action_track.*
 import chat.sphinx.feature_repository.mappers.chat.ChatDboPresenterMapper
 import chat.sphinx.feature_repository.mappers.contact.ContactDboPresenterMapper
@@ -106,7 +110,9 @@ import chat.sphinx.wrapper_common.invite.InviteStatus
 import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
 import chat.sphinx.wrapper_common.lightning.LightningRouteHint
 import chat.sphinx.wrapper_common.lightning.Sat
+import chat.sphinx.wrapper_common.lightning.ServerIp
 import chat.sphinx.wrapper_common.lightning.ShortChannelId
+import chat.sphinx.wrapper_common.lightning.retrieveLightningRouteHint
 import chat.sphinx.wrapper_common.lightning.toLightningNodePubKey
 import chat.sphinx.wrapper_common.lightning.toSat
 import chat.sphinx.wrapper_common.message.*
@@ -204,7 +210,8 @@ abstract class SphinxRepository(
     FeedRepository,
     ConnectManagerRepository,
     CoroutineDispatchers by dispatchers,
-    SphinxSocketIOMessageListener
+    SphinxSocketIOMessageListener,
+    ConnectManagerListener
 {
 
     companion object {
@@ -231,6 +238,76 @@ abstract class SphinxRepository(
     }
 
 
+    ////////////////////////
+    /// Connect Manager ///
+    //////////////////////
+
+    override val connectionManagerState: MutableStateFlow<ConnectionManagerState?> by lazy {
+        MutableStateFlow(null)
+    }
+
+    init {
+        connectManager.addListener(this)
+    }
+
+    override fun onMnemonicWords(words: String) {
+        applicationScope.launch(io) {
+            words.toWalletMnemonic()?.let {
+                walletDataHandler.persistWalletMnemonic(it)
+            }
+        }
+        connectionManagerState.value = ConnectionManagerState.MnemonicWords(words)
+    }
+
+    override fun onOkKey(okKey: String) {
+        applicationScope.launch(io) {
+            createOwner(okKey)
+        }
+    }
+
+    override fun onOwnerRegistered(message: String) {
+        applicationScope.launch(mainImmediate) {
+
+            val lspChannelInfo = message.toLspChannelInfo(moshi)
+            val serverIp = connectManager.retrieveLspIp()
+            val serverPubKey = lspChannelInfo?.serverPubKey
+            val scid = lspChannelInfo?.scid
+            val routeHint = retrieveLightningRouteHint(serverPubKey?.value, scid?.value)
+
+            if (serverIp?.isNotEmpty() == true && serverPubKey != null) {
+                updateLSP(
+                    LightningServiceProvider(
+                        ServerIp(serverIp),
+                        serverPubKey
+                    )
+                )
+            }
+
+            if (routeHint != null && scid != null) {
+                updateOwnerRouteHintAndScid(routeHint, scid)
+                connectionManagerState.value = ConnectionManagerState.OwnerRegistered
+            }
+        }
+    }
+
+    fun collectConnectionStateStateFlow() {
+        applicationScope.launch(io) {
+            connectManager.connectionStateStateFlow.collect { connectionState ->
+                when (connectionState) {
+                    is ConnectionState.MnemonicWords -> {
+                    }
+                    is ConnectionState.OkKey -> {
+                        createOwnerWithOkKey(connectionState.okKey)
+                    }
+                    is ConnectionState.OwnerRegistered -> {
+                        updateLspAndOwner(connectionState.message)
+                    }
+                    else -> {}
+                }
+            }
+        }
+    }
+
     override fun createOwnerAccount() {
         connectManager.createAccount()
     }
@@ -239,17 +316,30 @@ abstract class SphinxRepository(
         connectManager.setLspIp(lspIp)
     }
 
-    override suspend fun persistAndShowMnemonic(words: String) {
-        words.toWalletMnemonic()?.let {
-            walletDataHandler.persistWalletMnemonic(it)
-        }
-    }
-
-    override fun createOwnerWithOkKey(okKey: String) {
+    override suspend fun createOwnerWithOkKey(okKey: String) {
+        createOwner(okKey)
         super.createOwnerWithOkKey(okKey)
     }
 
-    override fun updateLspAndOwner(data: String) {
+    override suspend fun updateLspAndOwner(data: String) {
+        val lspChannelInfo = data.toLspChannelInfo(moshi)
+        val serverIp = connectManager.retrieveLspIp()
+        val serverPubKey = lspChannelInfo?.serverPubKey
+        val scid = lspChannelInfo?.scid
+        val routeHint = retrieveLightningRouteHint(serverPubKey?.value, scid?.value)
+
+        if (serverIp?.isNotEmpty() == true && serverPubKey != null) {
+            updateLSP(
+                LightningServiceProvider(
+                    ServerIp(serverIp),
+                    serverPubKey
+                )
+            )
+        }
+
+        if (routeHint != null && scid != null) {
+            updateOwnerRouteHintAndScid(routeHint, scid)
+        }
         super.updateLspAndOwner(data)
     }
 
@@ -257,7 +347,7 @@ abstract class SphinxRepository(
     /// SocketIO ///
     ////////////////
     init {
-        socketIOManager.addListener(this)
+//        socketIOManager.addListener(this)
     }
 
     override var updatedContactIds: MutableList<ContactId> = mutableListOf()
@@ -1689,11 +1779,9 @@ abstract class SphinxRepository(
             childPubKey = null,
             contactKey = null
         )
-        applicationScope.launch(mainImmediate) {
-            contactLock.withLock {
-                queries.transaction {
-                    upsertNewContact(owner, queries)
-                }
+        contactLock.withLock {
+            queries.transaction {
+                upsertNewContact(owner, queries)
             }
         }
     }

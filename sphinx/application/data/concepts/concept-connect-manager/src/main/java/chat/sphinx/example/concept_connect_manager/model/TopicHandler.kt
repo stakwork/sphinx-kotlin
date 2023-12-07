@@ -42,10 +42,6 @@ sealed class TopicHandler {
             message: String,
             payload: ByteArray?
         ): ConnectionState {
-            val pom = topic
-            val pom1 = message
-            val pom2 = payload
-
             return ConnectionState.OnionMessage(index, payload)
         }
 

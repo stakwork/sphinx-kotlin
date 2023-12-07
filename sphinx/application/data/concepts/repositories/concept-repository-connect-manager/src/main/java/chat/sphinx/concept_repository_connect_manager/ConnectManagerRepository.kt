@@ -1,15 +1,17 @@
 package chat.sphinx.concept_repository_connect_manager
 
+import chat.sphinx.concept_repository_connect_manager.model.ConnectionManagerState
+import kotlinx.coroutines.flow.MutableStateFlow
+
 interface ConnectManagerRepository {
 
-//    val pim = "tcp://54.164.163.153:1883"
+    val connectionManagerState: MutableStateFlow<ConnectionManagerState?>
+
 
     fun setLspIp(lspIp: String)
     fun createOwnerAccount()
-
-    suspend fun persistAndShowMnemonic(words: String) {}
-    fun createOwnerWithOkKey(okKey: String) {}
-    fun updateLspAndOwner(data: String) {}
+    suspend fun createOwnerWithOkKey(okKey: String) {}
+    suspend fun updateLspAndOwner(data: String) {}
 
 
 }

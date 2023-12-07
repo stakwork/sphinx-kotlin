@@ -2,6 +2,7 @@ package chat.sphinx.feature_connect_manager
 
 import android.util.Log
 import chat.sphinx.example.concept_connect_manager.ConnectManager
+import chat.sphinx.example.concept_connect_manager.ConnectManagerListener
 import chat.sphinx.example.concept_connect_manager.model.TopicHandler
 import chat.sphinx.example.concept_connect_manager.model.ConnectionState
 import chat.sphinx.wrapper_contact.NewContact
@@ -97,7 +98,10 @@ class ConnectManagerImpl(
             if (xPub != null && sig != null && okKey != null && serverURI != null) {
 
                 ownerSeed = seed.first
-                _connectionStateStateFlow.value = ConnectionState.OkKey(okKey)
+
+                notifyListeners {
+                    onOkKey(okKey)
+                }
 
                 connectToMQTT(
                     serverURI,
@@ -129,7 +133,11 @@ class ConnectManagerImpl(
         walletMnemonic?.value?.let { words ->
             try {
                 seed = mnemonicToSeed(words)
-                _connectionStateStateFlow.value = ConnectionState.MnemonicWords(words)
+
+                notifyListeners {
+                    onMnemonicWords(words)
+                }
+
             } catch (e: Exception) {}
         }
 
@@ -370,7 +378,7 @@ class ConnectManagerImpl(
                 }
             }
         } else {
-            Log.d("MQTT", "MQTT Client is not connected.")
+            Log.d("MQTT_MESSAGES", "MQTT Client is not connected.")
         }
     }
 
@@ -450,7 +458,9 @@ class ConnectManagerImpl(
 
             when (connectionState) {
                 is ConnectionState.OwnerRegistered -> {
-                    _connectionStateStateFlow.value = connectionState
+                    notifyListeners {
+                        onOwnerRegistered(connectionState.message)
+                    }
                 }
                 is ConnectionState.ContactRegistered -> {
                     handleContactRegistered(nnTopic, connectionState)
@@ -570,6 +580,49 @@ class ConnectManagerImpl(
             mqttClient?.disconnect()
         }
         mqttClient = null
+    }
+
+
+    private val synchronizedListeners = SynchronizedListenerHolder()
+
+    override fun addListener(listener: ConnectManagerListener): Boolean {
+        return synchronizedListeners.addListener(listener)
+    }
+
+    override fun removeListener(listener: ConnectManagerListener): Boolean {
+        return synchronizedListeners.removeListener(listener)
+    }
+
+    private fun notifyListeners(action: ConnectManagerListener.() -> Unit) {
+        synchronizedListeners.forEachListener { listener ->
+            action(listener)
+        }
+    }
+
+    private inner class SynchronizedListenerHolder {
+        private val listeners: LinkedHashSet<ConnectManagerListener> = LinkedHashSet()
+
+        fun addListener(listener: ConnectManagerListener): Boolean = synchronized(this) {
+            listeners.add(listener).also {
+                if (it) {
+                    // Log listener registration
+                }
+            }
+        }
+
+        fun removeListener(listener: ConnectManagerListener): Boolean = synchronized(this) {
+            listeners.remove(listener).also {
+                if (it) {
+                    // Log listener removal
+                }
+            }
+        }
+
+        fun forEachListener(action: (ConnectManagerListener) -> Unit) {
+            synchronized(this) {
+                listeners.forEach(action)
+            }
+        }
     }
 
 }
