@@ -157,6 +157,98 @@ inline fun TransactionCallbacks.updateChatTribeData(
     )
 }
 
+inline fun TransactionCallbacks.upsertNewChat(
+    chat: Chat, // Replaced ChatDto with Chat
+    moshi: Moshi,
+    chatSeenMap: SynchronizedMap<ChatId, Seen>,
+    queries: SphinxDatabaseQueries,
+    contact: Contact? = null, // Replaced ContactDto with Contact
+    ownerPubKey: LightningNodePubKey? = null
+) {
+    val seen = chat.seen
+    val chatId = chat.id
+    val chatType = chat.type
+    val createdAt = chat.createdAt
+    val contactIds = chat.contactIds
+    val muted = chat.isMuted
+    val chatPhotoUrl = chat.photoUrl
+    val pricePerMessage = chat.pricePerMessage
+    val escrowAmount = chat.escrowAmount
+    val chatName = chat.name
+    val adminPubKey = chat.ownerPubKey
+    val pinedMessage = chat.pinedMessage
+
+    queries.chatUpsert(
+        chatName,
+        chatPhotoUrl,
+        chat.status,
+        contactIds,
+        muted,
+        chat.groupKey,
+        chat.host,
+        chat.unlisted,
+        chat.privateTribe,
+        chat.ownerPubKey,
+        seen,
+        null,
+        chat.myPhotoUrl,
+        chat.myAlias,
+        chat.pendingContactIds,
+        chat.notify,
+        pinedMessage,
+        chatId,
+        chat.uuid,
+        chatType,
+        createdAt,
+        pricePerMessage,
+        escrowAmount
+    )
+
+    if (
+        chatType.isTribe() &&
+        (ownerPubKey == adminPubKey) &&
+        (pricePerMessage != null || escrowAmount != null || pinedMessage != null)
+    ) {
+        queries.chatUpdateTribeData(
+            pricePerMessage,
+            escrowAmount,
+            chatName,
+            chatPhotoUrl,
+            pinedMessage,
+            chatId
+        )
+    }
+
+    val conversationContactId: ContactId? = if (chatType.isConversation()) {
+        contactIds.elementAtOrNull(1)?.let { contactId ->
+            queries.dashboardUpdateIncludeInReturn(false, contactId)
+            contactId
+        }
+    } else {
+        null
+    }
+
+    queries.dashboardUpsert(
+        if (conversationContactId != null && contact != null) {
+            contact.alias?.value
+        } else {
+            contact?.alias?.value ?: " "
+        },
+        muted,
+        seen,
+        if (conversationContactId != null && contact != null) {
+            contact.photoUrl
+        } else {
+            chatPhotoUrl
+        },
+        chatId,
+        conversationContactId,
+        createdAt
+    )
+
+    chatSeenMap.withLock { it[ChatId(chat.id.value)] = seen }
+}
+
 @Suppress("NOTHING_TO_INLINE", "SpellCheckingInspection")
 inline fun TransactionCallbacks.upsertChat(
     dto: ChatDto,
@@ -275,6 +367,7 @@ inline fun TransactionCallbacks.upsertNewContact(contact: Contact, queries: Sphi
     val contactIndex = contact.contactIndex
     val contactRouteHint = contact.contactRouteHint
     val childPubKey = contact.childPubKey
+    val contactKey = contact.contactKey
 
     // Perform the upsert operation
     queries.contactUpsert(
@@ -295,6 +388,7 @@ inline fun TransactionCallbacks.upsertNewContact(contact: Contact, queries: Sphi
         contactIndex,
         contactRouteHint,
         childPubKey,
+        contactKey,
         contact.id,
         contact.isOwner,
         contact.createdAt
@@ -349,6 +443,7 @@ inline fun TransactionCallbacks.upsertContact(dto: ContactDto, queries: SphinxDa
         dto.contactIndex?.toContactIndex(),
         dto.contactRouteHint?.toLightningRouteHint(),
         dto.childPubKey?.toLightningNodePubKey(),
+        dto.contactKey?.toLightningNodePubKey(),
         contactId,
         isOwner,
         createdAt

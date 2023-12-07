@@ -6,11 +6,14 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_repository_contact.ContactRepository
+import chat.sphinx.concept_repository_lightning.LightningRepository
 import chat.sphinx.concept_repository_subscription.SubscriptionRepository
 import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
+import chat.sphinx.concept_wallet.WalletDataHandler
 import chat.sphinx.contact.ui.ContactSideEffect
 import chat.sphinx.contact.ui.ContactViewModel
 import chat.sphinx.contact.ui.ContactViewState
+import chat.sphinx.example.concept_connect_manager.ConnectManager
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.new_contact.navigation.NewContactNavigator
@@ -22,12 +25,14 @@ import chat.sphinx.wrapper_common.lightning.LightningRouteHint
 import chat.sphinx.wrapper_common.lightning.toLightningNodePubKey
 import chat.sphinx.wrapper_common.lightning.toLightningRouteHint
 import chat.sphinx.wrapper_contact.ContactAlias
+import chat.sphinx.wrapper_contact.NewContact
+import com.squareup.moshi.Moshi
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -40,6 +45,10 @@ internal class NewContactViewModel @Inject constructor(
     scannerCoordinator: ViewModelCoordinator<ScannerRequest, ScannerResponse>,
     contactRepository: ContactRepository,
     subscriptionRepository: SubscriptionRepository,
+    walletDataHandler: WalletDataHandler,
+    connectManager: ConnectManager,
+    moshi: Moshi,
+    lightningRepository: LightningRepository,
     imageLoader: ImageLoader<ImageView>
 ): ContactViewModel<NewContactFragmentArgs>(
     newContactNavigator,
@@ -48,6 +57,10 @@ internal class NewContactViewModel @Inject constructor(
     contactRepository,
     subscriptionRepository,
     scannerCoordinator,
+    walletDataHandler,
+    connectManager,
+    moshi,
+    lightningRepository,
     imageLoader,
 ) {
     override val args: NewContactFragmentArgs by savedStateHandle.navArgs()
@@ -77,6 +90,42 @@ internal class NewContactViewModel @Inject constructor(
         }
     }
 
+    override fun createContact(
+        contactAlias: ContactAlias,
+        lightningNodePubKey: LightningNodePubKey,
+        lightningRouteHint: LightningRouteHint?
+    ) {
+        if (saveContactJob?.isActive == true) {
+            return
+        }
+
+        saveContactJob = viewModelScope.launch(mainImmediate) {
+            val newContactIndex = contactRepository.getNewContactIndex().firstOrNull()
+            val exitingOkKey = contactRepository.getContactByPubKey(lightningNodePubKey).firstOrNull()
+            val senderLsp = lightningRepository.retrieveLSP().firstOrNull()?.pubKey
+
+            if (newContactIndex != null && lightningRouteHint != null && senderLsp != null && exitingOkKey == null) {
+
+                val newContact = NewContact(
+                    contactAlias,
+                    lightningNodePubKey,
+                    lightningRouteHint,
+                    null,
+                    newContactIndex,
+                    null,
+                    senderLsp,
+                    null,
+                    null,
+                    null
+                )
+                connectManager.createContact(newContact)
+                viewStateContainer.updateViewState(ContactViewState.Saved)
+            }
+        }
+    }
+
+    /** Sphinx V1 (likely to be removed) **/
+
     override fun saveContact(
         contactAlias: ContactAlias,
         lightningNodePubKey: LightningNodePubKey,
@@ -99,7 +148,6 @@ internal class NewContactViewModel @Inject constructor(
                     }
                     is Response.Error -> {
                         submitSideEffect(ContactSideEffect.Notify.FailedToSaveContact)
-
                         viewStateContainer.updateViewState(ContactViewState.Error)
                     }
                     is Response.Success -> {

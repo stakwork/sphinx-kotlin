@@ -36,7 +36,7 @@ internal class OnBoardNameViewModel @Inject constructor(
         }
     }
 
-    /** Sphinx V1 (likely to be removed **/
+    /** Sphinx V1 (likely to be removed) **/
 //
 //    private var ownerUpdateJob: Job? = null
 //    fun updateOwner(name: String, inviterData: OnBoardInviterData) {

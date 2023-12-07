@@ -84,5 +84,6 @@ data class Contact(
     val scid: ShortChannelId?,
     val contactIndex: ContactIndex?,
     val contactRouteHint: LightningRouteHint?,
-    val childPubKey: LightningNodePubKey?
+    val childPubKey: LightningNodePubKey?,
+    val contactKey: LightningNodePubKey?
 )

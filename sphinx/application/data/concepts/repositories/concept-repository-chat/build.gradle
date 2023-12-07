@@ -7,6 +7,7 @@ dependencies {
     api project(path: ':sphinx:application:common:kotlin-response')
     api project(path: ':sphinx:application:common:wrappers:wrapper-chat')
     api project(path: ':sphinx:application:common:wrappers:wrapper-meme-server')
+    api project(path: ':sphinx:application:common:wrappers:wrapper-contact')
 
     implementation project(path: ':sphinx:application:network:concepts:queries:concept-network-query-chat')
 

@@ -25,6 +25,7 @@ import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_dashboard_android.RepositoryDashboardAndroid
 import chat.sphinx.concept_repository_feed.FeedRepository
+import chat.sphinx.concept_repository_lightning.LightningRepository
 import chat.sphinx.concept_service_media.MediaPlayerServiceController
 import chat.sphinx.concept_service_notification.PushNotificationRegistrar
 import chat.sphinx.concept_signer_manager.SignerManager
@@ -38,9 +39,18 @@ import chat.sphinx.dashboard.navigation.DashboardBottomNavBarNavigator
 import chat.sphinx.dashboard.navigation.DashboardNavDrawerNavigator
 import chat.sphinx.dashboard.navigation.DashboardNavigator
 import chat.sphinx.dashboard.ui.viewstates.*
+import chat.sphinx.example.concept_connect_manager.ConnectManager
+import chat.sphinx.example.concept_connect_manager.model.ConnectionState
+import chat.sphinx.example.wrapper_mqtt.HopsDto
+import chat.sphinx.example.wrapper_mqtt.KeyExchangeMessageDto
+import chat.sphinx.example.wrapper_mqtt.Message
+import chat.sphinx.example.wrapper_mqtt.MessagesFetchRequest
+import chat.sphinx.example.wrapper_mqtt.PubkeyDto
+import chat.sphinx.example.wrapper_mqtt.Sender
+import chat.sphinx.example.wrapper_mqtt.toJson
+import chat.sphinx.example.wrapper_mqtt.toKeyExchangeMessageDtoOrNull
 import chat.sphinx.kotlin_response.*
 import chat.sphinx.logger.SphinxLogger
-import chat.sphinx.logger.d
 import chat.sphinx.menu_bottom.ui.MenuBottomViewState
 import chat.sphinx.menu_bottom_scanner.ScannerMenuHandler
 import chat.sphinx.menu_bottom_scanner.ScannerMenuViewModel
@@ -50,6 +60,7 @@ import chat.sphinx.scanner_view_model_coordinator.response.ScannerResponse
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_common.*
 import chat.sphinx.wrapper_common.chat.ChatUUID
+import chat.sphinx.wrapper_common.contact.ContactIndex
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.RestoreProgressViewState
 import chat.sphinx.wrapper_common.feed.*
@@ -66,7 +77,6 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.MotionLayoutViewModel
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
-import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.build_config.BuildConfigVersionCode
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
@@ -95,6 +105,7 @@ internal class DashboardViewModel @Inject constructor(
     private val feedRepository: FeedRepository,
     private val actionsRepository: ActionsRepository,
     private val networkQueryLightning: NetworkQueryLightning,
+    private val lightningRepository: LightningRepository,
 
     private val networkQueryVersion: NetworkQueryVersion,
     private val networkQueryAuthorizeExternal: NetworkQueryAuthorizeExternal,
@@ -109,6 +120,7 @@ internal class DashboardViewModel @Inject constructor(
 
     private val scannerCoordinator: ViewModelCoordinator<ScannerRequest, ScannerResponse>,
     private val moshi: Moshi,
+    private val connectManager: ConnectManager,
 
     private val LOG: SphinxLogger,
     private val socketIOManager: SocketIOManager,
@@ -144,6 +156,8 @@ internal class DashboardViewModel @Inject constructor(
                 backgroundLoginHandler.updateLoginTime()
             }
         }
+        connectAndSubscribeToMqtt()
+        collectConnectionStateStateFlow()
 
         syncFeedRecommendationsState()
 
@@ -156,7 +170,162 @@ internal class DashboardViewModel @Inject constructor(
 
         networkRefresh(true)
     }
-    
+
+    private fun connectAndSubscribeToMqtt() {
+        viewModelScope.launch(mainImmediate) {
+            val contactsMap = contactRepository.getContactsChildPubKeysToIndexes().firstOrNull()
+                ?.mapKeys { it.key.value }
+                ?.mapValues { it.value.value.toInt() }
+
+            val contactsInfoList = contactsMap?.map { (childPubKeyString, contactIndexInt) ->
+                   // TODO() get id of the last message for that contact
+
+                val messagesFetchRequest = MessagesFetchRequest(0, 1000).toJson(moshi)
+
+                ContactInfo(
+                    childPubKey = LightningNodePubKey(childPubKeyString),
+                    contactIndex = ContactIndex(contactIndexInt.toLong()),
+                    messagesFetchRequest = messagesFetchRequest
+                )
+            }
+
+            val mnemonic = walletDataHandler.retrieveWalletMnemonic()
+            val okKey = accountOwner.value?.nodePubKey?.value
+
+            if (mnemonic != null && okKey != null) {
+                connectManager.initializeMqttAndSubscribe(
+                    "tcp://54.164.163.153:1883",
+                    mnemonic,
+                    okKey,
+                    contactsInfoList
+                )
+            }
+        }
+    }
+
+
+    private fun collectConnectionStateStateFlow() {
+        viewModelScope.launch(mainImmediate) {
+            connectManager.connectionStateStateFlow.collect { connectionState ->
+                when (connectionState) {
+                    is ConnectionState.NewContactRegistered -> {
+                        sendKeyAndStoreContact(
+                            connectionState.contact,
+                            connectionState.generatedContactRouteHint.toLightningRouteHint()
+                        )
+                    }
+                    is ConnectionState.KeyExchange -> {
+                        handleKeyExchangeMessage(connectionState.json)
+                    }
+                    is ConnectionState.KeyExchangeConfirmation -> {
+                        updateContactDetails(connectionState.json)
+                    }
+                    else -> {}
+                }
+            }
+        }
+    }
+
+    private suspend fun updateContactDetails(json: String) {
+        val keyExchangeConfirmation = json.toKeyExchangeMessageDtoOrNull(moshi)
+        keyExchangeConfirmation?.let { keyExchangeMessage ->
+
+        val senderInfo = keyExchangeConfirmation.sender
+            val contactPubKey = senderInfo.pubkey.toLightningNodePubKey()
+            val contactKey = senderInfo.contactPubkey?.toLightningNodePubKey()
+            val contactRouteHint = senderInfo.contactRouteHint?.toLightningRouteHint()
+
+            if (contactPubKey != null && contactKey != null && contactRouteHint != null) {
+
+                contactRepository.updateContactKeyAndRouteHint(
+                    contactPubKey,
+                    contactKey,
+                    contactRouteHint,
+                    senderInfo.photoUrl.toPhotoUrl()
+                )
+            }
+
+        }
+    }
+
+    private suspend fun handleKeyExchangeMessage(json: String) {
+        val keyExchange = json.toKeyExchangeMessageDtoOrNull(moshi)
+        val senderLsp = lightningRepository.retrieveLSP().firstOrNull()?.pubKey
+        val newContactIndex = contactRepository.getNewContactIndex().firstOrNull()
+
+        keyExchange?.let { keyExchangeMessage ->
+            val senderInfo = keyExchangeMessage.sender
+
+            if (newContactIndex != null && senderLsp != null) {
+
+                val newContact = NewContact(
+                    senderInfo.alias.toContactAlias(),
+                    senderInfo.pubkey.toLightningNodePubKey(),
+                    senderInfo.routeHint?.toLightningRouteHint(),
+                    null,
+                    newContactIndex,
+                    null,
+                    senderLsp,
+                    senderInfo.contactPubkey?.toLightningNodePubKey(),
+                    senderInfo.contactRouteHint?.toLightningRouteHint(),
+                    senderInfo.photoUrl.toPhotoUrl()
+                )
+
+                connectManager.createContact(newContact)
+            }
+        }
+    }
+
+    private suspend fun sendKeyExchange(
+        contact: NewContact,
+        contactRouteHint: LightningRouteHint?,
+        returnConfirmation: Boolean
+    ) {
+        val owner = contactRepository.accountOwner.value
+        val mnemonic = walletDataHandler.retrieveWalletMnemonic()
+        val type = if (!returnConfirmation) 10 else 11
+
+        if (owner != null && mnemonic != null) {
+            val keyExchangeMessage = KeyExchangeMessageDto(
+                "",
+                type,
+                Sender(
+                    owner.nodePubKey?.value ?: "",
+                    owner.routeHint?.value ?: "",
+                    contact.childPubKey?.value ?: "",
+                    contactRouteHint?.value ?: "",
+                    owner.alias?.value ?: "",
+                    owner.photoUrl?.value ?: ""
+                ),
+                Message("")
+            ).toJson(moshi)
+
+            val hops = HopsDto(
+                listOf(
+                    PubkeyDto(contact.lightningRouteHint?.getLspPubKey() ?: ""),
+                    PubkeyDto(contact.lightningNodePubKey?.value ?: "")
+                )
+            ).toJson(moshi)
+
+            connectManager.sendKeyExchangeOnionMessage(
+                keyExchangeMessage,
+                hops,
+                mnemonic,
+                owner.nodePubKey?.value ?: ""
+            )
+        }
+    }
+
+    private suspend fun sendKeyAndStoreContact(
+        contact: NewContact,
+        contactRouteHint: LightningRouteHint?
+    ) {
+        val returnConfirmation = contact.contactKey != null
+
+        contactRepository.createNewContact(contact)
+        sendKeyExchange(contact, contactRouteHint, returnConfirmation)
+    }
+
     private fun getRelayKeys() {
         repositoryDashboard.getAndSaveTransportKey()
         repositoryDashboard.getOrCreateHMacKey(forceGet = true)

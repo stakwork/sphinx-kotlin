@@ -154,6 +154,11 @@ CREATE TABLE chatDbo(
     pin_message                 TEXT            AS MessageUUID DEFAULT NULL
 );
 
+chatUpdateSatusById:
+UPDATE chatDbo
+SET status = :status
+WHERE id = ?;
+
 chatUpdateLatestMessage:
 UPDATE chatDbo
 SET latest_message_id = :latest_message_id
@@ -341,7 +346,8 @@ CREATE TABLE contactDbo(
     scid                        TEXT            AS ShortChannelId,
     contact_index               INTEGER         AS ContactIndex,
     contact_route_hint          TEXT            AS LightningRouteHint,
-    child_pub_key               TEXT            AS LightningNodePubKey
+    child_pub_key               TEXT            AS LightningNodePubKey,
+    contact_key                 TEXT            AS LightningNodePubKey
 );
 
 contactGetAllIds:
@@ -386,6 +392,22 @@ WHERE owner = 1
 ORDER BY id
 LIMIT 1;
 
+contactGetLastContactIndex:
+SELECT contact_index
+FROM contactDbo
+ORDER BY contact_index DESC
+LIMIT 1;
+
+contactGetChildPubKeysToIndexes:
+SELECT child_pub_key, contact_index
+FROM contactDbo
+WHERE child_pub_key IS NOT NULL;
+
+contactGetIndexByOkKey:
+SELECT contact_index
+FROM contactDbo
+WHERE node_pub_key = ?;
+
 contactUpsert {
     UPDATE contactDbo
     SET route_hint = :route_hint,
@@ -404,7 +426,8 @@ contactUpsert {
         scid = :scid,
         contact_index = :contact_index,
         contact_route_hint = :contact_route_hint,
-        child_pub_key = :child_pub_key
+        child_pub_key = :child_pub_key,
+        contact_key = : contact_key
     WHERE id = :id;
 
     INSERT OR IGNORE INTO contactDbo(
@@ -427,7 +450,8 @@ contactUpsert {
         scid,
         contact_index,
         contact_route_hint,
-        child_pub_key
+        child_pub_key,
+        contact_key
     )
     VALUES (
         :id,
@@ -449,7 +473,8 @@ contactUpsert {
         :scid,
         :contact_index,
         :contact_route_hint,
-        :child_pub_key
+        :child_pub_key,
+        :contact_key
     );
 }
 
@@ -473,6 +498,14 @@ contactUpdateBlocked:
 UPDATE contactDbo
 SET blocked = :blocked
 WHERE id = ?;
+
+contactUpdateContactKeyAndRouteHint:
+UPDATE contactDbo
+SET contact_key = :contact_key,
+    contact_route_hint = :contact_route_hint,
+    status = :status,
+    photo_url = :photo_url
+WHERE node_pub_key = ?;
 
 contactDeleteById:
 DELETE FROM contactDbo

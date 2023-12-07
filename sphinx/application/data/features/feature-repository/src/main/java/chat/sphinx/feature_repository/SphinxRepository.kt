@@ -95,6 +95,7 @@ import chat.sphinx.wrapper_chat.*
 import chat.sphinx.wrapper_common.*
 import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.contact.Blocked
+import chat.sphinx.wrapper_common.contact.ContactIndex
 import chat.sphinx.wrapper_common.contact.isTrue
 import chat.sphinx.wrapper_common.dashboard.*
 import chat.sphinx.wrapper_common.feed.*
@@ -149,6 +150,7 @@ import java.io.InputStream
 import java.text.ParseException
 import java.util.*
 import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 import kotlin.collections.LinkedHashMap
 import kotlin.math.absoluteValue
 import kotlin.math.round
@@ -1651,9 +1653,10 @@ abstract class SphinxRepository(
             inviteStatus = null,
             blocked = Blocked.False,
             scid = null,
-            contactIndex = null,
+            contactIndex = ContactIndex(0L),
             contactRouteHint = null,
-            childPubKey = null
+            childPubKey = null,
+            contactKey = null
         )
         applicationScope.launch(mainImmediate) {
             contactLock.withLock {
@@ -1663,6 +1666,115 @@ abstract class SphinxRepository(
             }
         }
     }
+
+    override suspend fun createNewContact(contact: NewContact) {
+        val queries = coreDB.getSphinxDatabaseQueries()
+        val now = DateTime.nowUTC()
+        val contactKey = contact.contactKey
+
+        val newContact = Contact(
+            id = ContactId(contact.index.value),
+            routeHint = contact.lightningRouteHint,
+            nodePubKey = contact.lightningNodePubKey,
+            nodeAlias = null,
+            alias = contact.contactAlias,
+            photoUrl = contact.photoUrl,
+            privatePhoto = PrivatePhoto.False,
+            isOwner = Owner.False,
+            status = if (contactKey != null) ContactStatus.Confirmed else ContactStatus.Pending,
+            rsaPublicKey = null,
+            deviceId = null,
+            createdAt = now.toDateTime(),
+            updatedAt = now.toDateTime(),
+            fromGroup = ContactFromGroup.False,
+            notificationSound = null,
+            tipAmount = null,
+            inviteId = null,
+            inviteStatus = null,
+            blocked = Blocked.False,
+            scid = contact.scid,
+            contactIndex = contact.index,
+            contactRouteHint = contact.contactRouteHint,
+            childPubKey = contact.childPubKey,
+            contactKey = contactKey
+        )
+
+        val newChat = Chat(
+            id = ChatId(contact.index.value),
+            uuid = ChatUUID("${UUID.randomUUID()}"),
+            name = ChatName(contact.contactAlias?.value ?: "unknown"),
+            photoUrl = contact.photoUrl,
+            type = ChatType.Conversation,
+            status = if (contactKey != null) ChatStatus.Approved else ChatStatus.Pending,
+            contactIds = listOf(ContactId(0), ContactId(contact.index.value)),
+            isMuted = ChatMuted.False,
+            createdAt = now.toDateTime(),
+            groupKey = null,
+            host = null,
+            pricePerMessage = null,
+            escrowAmount = null,
+            unlisted = ChatUnlisted.False,
+            privateTribe = ChatPrivate.False,
+            ownerPubKey = null,
+            seen = Seen.False,
+            metaData = null,
+            myPhotoUrl = null,
+            myAlias = null,
+            pendingContactIds = emptyList(),
+            latestMessageId = null,
+            contentSeenAt = null,
+            pinedMessage = null,
+            notify = NotificationLevel.SeeAll
+        )
+
+        applicationScope.launch(mainImmediate) {
+            contactLock.withLock {
+                queries.transaction {
+                    upsertNewContact(newContact, queries)
+                }
+            }
+            chatLock.withLock {
+                queries.transaction {
+                    upsertNewChat(
+                        newChat,
+                        moshi,
+                        SynchronizedMap<ChatId, Seen>(),
+                        queries,
+                        newContact,
+                        accountOwner.value?.nodePubKey
+                    )
+                }
+            }
+        }
+    }
+
+    override suspend fun updateContactKeyAndRouteHint(
+        contactPubKey: LightningNodePubKey,
+        contactKey: LightningNodePubKey,
+        contactRouteHint: LightningRouteHint,
+        photoUrl: PhotoUrl?
+    ) {
+        val queries = coreDB.getSphinxDatabaseQueries()
+        val contactIndex = queries.contactGetIndexByOkKey(contactPubKey)
+            .executeAsList().getOrNull(0)?.contact_index
+
+        contactLock.withLock {
+            queries.contactUpdateContactKeyAndRouteHint(
+                contactKey,
+                contactRouteHint,
+                ContactStatus.Confirmed,
+                photoUrl,
+                contactPubKey
+            )
+        }
+
+        contactIndex?.value?.let { chatIndex ->
+            chatLock.withLock {
+                queries.chatUpdateSatusById(ChatStatus.Approved, ChatId(chatIndex))
+            }
+        }
+    }
+
 
     override suspend fun updateOwnerRouteHintAndScid(
         routeHint: LightningRouteHint,
@@ -1707,6 +1819,35 @@ abstract class SphinxRepository(
             }
         }
     }
+
+    override suspend fun getNewContactIndex(): Flow<ContactIndex?> = flow {
+        emitAll(
+            coreDB.getSphinxDatabaseQueries().contactGetLastContactIndex()
+                .asFlow()
+                .mapToOneOrNull(io)
+                .map { dbContactIndex ->
+                    dbContactIndex?.contact_index?.value?.let {
+                        ContactIndex(it + 1)
+                    }
+                }
+        )
+    }
+
+    override suspend fun getContactsChildPubKeysToIndexes(): Flow<HashMap<LightningNodePubKey, ContactIndex>?> = flow {
+        emitAll(
+            coreDB.getSphinxDatabaseQueries().contactGetChildPubKeysToIndexes()
+                .asFlow()
+                .map { query ->
+                    query.executeAsList().fold(HashMap<LightningNodePubKey, ContactIndex>()) { map, result ->
+                        if (result.contact_index != null) {
+                            map[result.child_pub_key] = result.contact_index!!
+                        }
+                        map
+                    }.takeIf { it.isNotEmpty() }
+                }
+        )
+    }
+
 
     override suspend fun updateChatProfileInfo(
         chatId: ChatId,
@@ -1999,6 +2140,20 @@ abstract class SphinxRepository(
                 updateServerDbo(lsp, queries)
             }
         }
+    }
+
+    override suspend fun retrieveLSP(): Flow<LightningServiceProvider> = flow {
+        coreDB.getSphinxDatabaseQueries().serverGetAll()
+            .asFlow()
+            .mapToOneOrNull(io)
+            .mapNotNull { dbEntity ->
+                dbEntity?.ip?.let { ip ->
+                    LightningServiceProvider(ip, dbEntity.pub_key)
+                }
+            }
+            .collect { serviceProvider ->
+                emit(serviceProvider)
+            }
     }
 
     ////////////////

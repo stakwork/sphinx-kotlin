@@ -404,11 +404,13 @@ internal interface _UniFFILib : Library {
     ): RustBuffer.ByValue
     fun uniffi_sphinxrs_fn_func_peel_onion_msg(`seed`: RustBuffer.ByValue,`idx`: Int,`time`: RustBuffer.ByValue,`network`: RustBuffer.ByValue,`payload`: RustBuffer.ByValue,_uniffi_out_err: RustCallStatus, 
     ): RustBuffer.ByValue
-    fun uniffi_sphinxrs_fn_func_peel_payment(`seed`: RustBuffer.ByValue,`idx`: Int,`time`: RustBuffer.ByValue,`network`: RustBuffer.ByValue,`payload`: RustBuffer.ByValue,`rhash`: RustBuffer.ByValue,_uniffi_out_err: RustCallStatus, 
+    fun uniffi_sphinxrs_fn_func_peel_payment(`seed`: RustBuffer.ByValue,`idx`: Int,`time`: RustBuffer.ByValue,`network`: RustBuffer.ByValue,`payload`: RustBuffer.ByValue,`rhash`: RustBuffer.ByValue,`curHeight`: Int,`cltvExpiry`: Int,_uniffi_out_err: RustCallStatus, 
     ): RustBuffer.ByValue
-    fun uniffi_sphinxrs_fn_func_peel_payment_msg(`seed`: RustBuffer.ByValue,`idx`: Int,`time`: RustBuffer.ByValue,`network`: RustBuffer.ByValue,`payload`: RustBuffer.ByValue,`rhash`: RustBuffer.ByValue,_uniffi_out_err: RustCallStatus, 
+    fun uniffi_sphinxrs_fn_func_peel_payment_msg(`seed`: RustBuffer.ByValue,`idx`: Int,`time`: RustBuffer.ByValue,`network`: RustBuffer.ByValue,`payload`: RustBuffer.ByValue,`rhash`: RustBuffer.ByValue,`curHeight`: Int,`cltvExpiry`: Int,_uniffi_out_err: RustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_sphinxrs_fn_func_sign_ms(`seed`: RustBuffer.ByValue,`idx`: Int,`time`: RustBuffer.ByValue,`network`: RustBuffer.ByValue,_uniffi_out_err: RustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_sphinxrs_fn_func_sign_bytes(`seed`: RustBuffer.ByValue,`idx`: Int,`time`: RustBuffer.ByValue,`network`: RustBuffer.ByValue,`msg`: RustBuffer.ByValue,_uniffi_out_err: RustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_sphinxrs_fn_func_pubkey_from_seed(`seed`: RustBuffer.ByValue,`idx`: Int,`time`: RustBuffer.ByValue,`network`: RustBuffer.ByValue,_uniffi_out_err: RustCallStatus, 
     ): RustBuffer.ByValue
@@ -469,6 +471,8 @@ internal interface _UniFFILib : Library {
     fun uniffi_sphinxrs_checksum_func_peel_payment_msg(
     ): Short
     fun uniffi_sphinxrs_checksum_func_sign_ms(
+    ): Short
+    fun uniffi_sphinxrs_checksum_func_sign_bytes(
     ): Short
     fun uniffi_sphinxrs_checksum_func_pubkey_from_seed(
     ): Short
@@ -553,13 +557,16 @@ private fun uniffiCheckApiChecksums(lib: _UniFFILib) {
     if (lib.uniffi_sphinxrs_checksum_func_peel_onion_msg() != 57967.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_sphinxrs_checksum_func_peel_payment() != 42434.toShort()) {
+    if (lib.uniffi_sphinxrs_checksum_func_peel_payment() != 64189.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_sphinxrs_checksum_func_peel_payment_msg() != 11902.toShort()) {
+    if (lib.uniffi_sphinxrs_checksum_func_peel_payment_msg() != 51863.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_sphinxrs_checksum_func_sign_ms() != 54469.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_sphinxrs_checksum_func_sign_bytes() != 41645.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_sphinxrs_checksum_func_pubkey_from_seed() != 3734.toShort()) {
@@ -1413,19 +1420,19 @@ fun `peelOnionMsg`(`seed`: String, `idx`: UInt, `time`: String, `network`: Strin
 
 @Throws(SphinxException::class)
 
-fun `peelPayment`(`seed`: String, `idx`: UInt, `time`: String, `network`: String, `payload`: ByteArray, `rhash`: String): ByteArray {
+fun `peelPayment`(`seed`: String, `idx`: UInt, `time`: String, `network`: String, `payload`: ByteArray, `rhash`: String, `curHeight`: UInt, `cltvExpiry`: UInt): ByteArray {
     return FfiConverterByteArray.lift(
     rustCallWithError(SphinxException) { _status ->
-    _UniFFILib.INSTANCE.uniffi_sphinxrs_fn_func_peel_payment(FfiConverterString.lower(`seed`),FfiConverterUInt.lower(`idx`),FfiConverterString.lower(`time`),FfiConverterString.lower(`network`),FfiConverterByteArray.lower(`payload`),FfiConverterString.lower(`rhash`),_status)
+    _UniFFILib.INSTANCE.uniffi_sphinxrs_fn_func_peel_payment(FfiConverterString.lower(`seed`),FfiConverterUInt.lower(`idx`),FfiConverterString.lower(`time`),FfiConverterString.lower(`network`),FfiConverterByteArray.lower(`payload`),FfiConverterString.lower(`rhash`),FfiConverterUInt.lower(`curHeight`),FfiConverterUInt.lower(`cltvExpiry`),_status)
 })
 }
 
 @Throws(SphinxException::class)
 
-fun `peelPaymentMsg`(`seed`: String, `idx`: UInt, `time`: String, `network`: String, `payload`: ByteArray, `rhash`: String): String {
+fun `peelPaymentMsg`(`seed`: String, `idx`: UInt, `time`: String, `network`: String, `payload`: ByteArray, `rhash`: String, `curHeight`: UInt, `cltvExpiry`: UInt): String {
     return FfiConverterString.lift(
     rustCallWithError(SphinxException) { _status ->
-    _UniFFILib.INSTANCE.uniffi_sphinxrs_fn_func_peel_payment_msg(FfiConverterString.lower(`seed`),FfiConverterUInt.lower(`idx`),FfiConverterString.lower(`time`),FfiConverterString.lower(`network`),FfiConverterByteArray.lower(`payload`),FfiConverterString.lower(`rhash`),_status)
+    _UniFFILib.INSTANCE.uniffi_sphinxrs_fn_func_peel_payment_msg(FfiConverterString.lower(`seed`),FfiConverterUInt.lower(`idx`),FfiConverterString.lower(`time`),FfiConverterString.lower(`network`),FfiConverterByteArray.lower(`payload`),FfiConverterString.lower(`rhash`),FfiConverterUInt.lower(`curHeight`),FfiConverterUInt.lower(`cltvExpiry`),_status)
 })
 }
 
@@ -1435,6 +1442,15 @@ fun `signMs`(`seed`: String, `idx`: UInt, `time`: String, `network`: String): St
     return FfiConverterString.lift(
     rustCallWithError(SphinxException) { _status ->
     _UniFFILib.INSTANCE.uniffi_sphinxrs_fn_func_sign_ms(FfiConverterString.lower(`seed`),FfiConverterUInt.lower(`idx`),FfiConverterString.lower(`time`),FfiConverterString.lower(`network`),_status)
+})
+}
+
+@Throws(SphinxException::class)
+
+fun `signBytes`(`seed`: String, `idx`: UInt, `time`: String, `network`: String, `msg`: ByteArray): String {
+    return FfiConverterString.lift(
+    rustCallWithError(SphinxException) { _status ->
+    _UniFFILib.INSTANCE.uniffi_sphinxrs_fn_func_sign_bytes(FfiConverterString.lower(`seed`),FfiConverterUInt.lower(`idx`),FfiConverterString.lower(`time`),FfiConverterString.lower(`network`),FfiConverterByteArray.lower(`msg`),_status)
 })
 }
 

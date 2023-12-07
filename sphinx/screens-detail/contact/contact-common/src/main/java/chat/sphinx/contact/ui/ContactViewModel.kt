@@ -7,10 +7,14 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavArgs
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_repository_contact.ContactRepository
+import chat.sphinx.concept_repository_lightning.LightningRepository
 import chat.sphinx.concept_repository_subscription.SubscriptionRepository
 import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
+import chat.sphinx.concept_wallet.WalletDataHandler
 import chat.sphinx.contact.R
 import chat.sphinx.contact.navigation.ContactNavigator
+import chat.sphinx.example.concept_connect_manager.ConnectManager
+import chat.sphinx.wrapper_contact.NewContact
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.scanner_view_model_coordinator.request.ScannerFilter
 import chat.sphinx.scanner_view_model_coordinator.request.ScannerRequest
@@ -18,20 +22,24 @@ import chat.sphinx.scanner_view_model_coordinator.response.ScannerResponse
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.lightning.*
 import chat.sphinx.wrapper_contact.ContactAlias
+import com.squareup.moshi.Moshi
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
-import io.matthewnelson.concept_views.viewstate.ViewStateContainer
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
-abstract class ContactViewModel<ARGS: NavArgs> (
+abstract class ContactViewModel<ARGS: NavArgs>(
     val navigator: ContactNavigator,
     dispatchers: CoroutineDispatchers,
     private val app: Application,
     protected val contactRepository: ContactRepository,
     protected val subscriptionRepository: SubscriptionRepository,
     protected val scannerCoordinator: ViewModelCoordinator<ScannerRequest, ScannerResponse>,
+    val walletDataHandler: WalletDataHandler,
+    val connectManager: ConnectManager,
+    val moshi: Moshi,
+    val lightningRepository: LightningRepository,
     val imageLoader: ImageLoader<ImageView>
 ): SideEffectViewModel<
         Context,
@@ -43,6 +51,7 @@ abstract class ContactViewModel<ARGS: NavArgs> (
 
     protected abstract val fromAddFriend: Boolean
     protected abstract val contactId: ContactId?
+    protected var createContactJob: Job? = null
 
     abstract fun initContactDetails()
 
@@ -57,10 +66,12 @@ abstract class ContactViewModel<ARGS: NavArgs> (
                 ScannerRequest(
                     filter = object : ScannerFilter() {
                         override suspend fun checkData(data: String): Response<Any, String> {
-                            if (data.toLightningNodePubKey() != null) {
+                            val scannedString = data.split(":")
+
+                            if (scannedString.getOrNull(0)?.toLightningNodePubKey() != null) {
                                 return Response.Success(Any())
                             }
-                            if (data.toVirtualLightningNodeAddress() != null) {
+                            if (scannedString.getOrNull(1)?.toLightningRouteHint() != null) {
                                 return Response.Success(Any())
                             }
                             return Response.Error("QR code is not a Lightning Node Public Key")
@@ -69,19 +80,17 @@ abstract class ContactViewModel<ARGS: NavArgs> (
                 )
             )
             if (response is Response.Success) {
-                val contactInfoSideEffect : ContactSideEffect? = response.value.value.toLightningNodePubKey()?.let { lightningNodePubKey ->
-                    ContactSideEffect.ContactInfo(lightningNodePubKey)
-                } ?: response.value.value.toVirtualLightningNodeAddress()?.let { virtualNodeAddress ->
-                    virtualNodeAddress.getPubKey()?.let { lightningNodePubKey ->
-                        ContactSideEffect.ContactInfo(
-                            lightningNodePubKey,
-                            virtualNodeAddress.getRouteHint()
-                        )
-                    }
-                }
+                val contactInfo = response.value.value.split(":")
+                val contactOkKey = contactInfo.getOrNull(0)?.toLightningNodePubKey()
+                val contactRouteHint = contactInfo.getOrNull(1)?.toLightningRouteHint()
 
-                if (contactInfoSideEffect != null) {
-                    submitSideEffect(contactInfoSideEffect)
+                if (contactOkKey != null && contactRouteHint != null) {
+                    submitSideEffect(
+                        ContactSideEffect.ContactInfo(
+                            contactOkKey,
+                            contactRouteHint
+                        )
+                    )
                 }
             }
         }
@@ -94,6 +103,7 @@ abstract class ContactViewModel<ARGS: NavArgs> (
         }
 
         saveContactJob = viewModelScope.launch {
+
             if (contactAlias.isNullOrEmpty()) {
                 submitSideEffect(ContactSideEffect.Notify.NicknameAndAddressRequired)
                 return@launch
@@ -109,13 +119,28 @@ abstract class ContactViewModel<ARGS: NavArgs> (
                 return@launch
             }
 
-            saveContact(
+            createContact(
                 ContactAlias(contactAlias),
                 LightningNodePubKey(lightningNodePubKey),
-                lightningRouteHint?.toLightningRouteHint()
+                lightningRouteHint?.toLightningRouteHint(),
             )
+
+//            saveContact(
+//                ContactAlias(contactAlias),
+//                LightningNodePubKey(lightningNodePubKey),
+//                lightningRouteHint?.toLightningRouteHint()
+//            )
         }
     }
+
+    protected abstract fun createContact(
+        contactAlias: ContactAlias,
+        lightningNodePubKey: LightningNodePubKey,
+        lightningRouteHint: LightningRouteHint?,
+    )
+
+
+    /** Sphinx V1 (likely to be removed) **/
 
     protected abstract fun saveContact(
         contactAlias: ContactAlias,

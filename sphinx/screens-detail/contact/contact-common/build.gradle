@@ -41,4 +41,9 @@ dependencies {
     api project(path: ':sphinx:application:common:resources')
     api project(path: ':sphinx:screens-detail:scanner:scanner-view-model-coordinator')
     api project(path: ':sphinx:activity:concepts:concept-user-colors-helper')
+    api project(path: ':sphinx:application:data:concepts:concept-connect-manager')
+    api project(path: ':sphinx:application:data:concepts:repositories:concept-repository-lightning')
+
+
+    implementation deps.square.moshi
 }

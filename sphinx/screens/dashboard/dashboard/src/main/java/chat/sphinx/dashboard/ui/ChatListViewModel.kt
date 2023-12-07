@@ -2,6 +2,7 @@ package chat.sphinx.dashboard.ui
 
 import android.app.Application
 import android.content.Context
+import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.concept_repository_chat.ChatRepository
@@ -16,6 +17,7 @@ import chat.sphinx.kotlin_response.Response
 import chat.sphinx.tribes_discover_view_model_coordinator.request.TribesDiscoverRequest
 import chat.sphinx.tribes_discover_view_model_coordinator.response.TribesDiscoverResponse
 import chat.sphinx.wrapper_chat.Chat
+import chat.sphinx.wrapper_chat.ChatStatus
 import chat.sphinx.wrapper_chat.ChatType
 import chat.sphinx.wrapper_chat.isConversation
 import chat.sphinx.wrapper_common.chat.ChatUUID
@@ -146,9 +148,15 @@ internal class ChatListViewModel @Inject constructor(
                                 val contact: Contact = repositoryDashboard.getContactById(contactId)
                                     .firstOrNull() ?: continue
 
-                                if (!contact.isBlocked()) {
-                                    contactsAdded.add(contactId)
+                                if (contact.status is ContactStatus.Pending) {
+                                    newList.add(
+                                        DashboardChat.Inactive.Conversation(contact)
+                                    )
+                                }
 
+                                if (!contact.isBlocked() && chat.status is ChatStatus.Approved) {
+                                    contactsAdded.add(contactId)
+                                    
                                     newList.add(
                                         DashboardChat.Active.Conversation(
                                             chat,
@@ -168,35 +176,6 @@ internal class ChatListViewModel @Inject constructor(
                                         repositoryDashboard.getUnseenMentionsByChatId(chat.id)
                                     )
                                 )
-                            }
-                        }
-                    }
-
-                    if (contactsCollectionInitialized) {
-                        withContext(default) {
-                            for (contact in _contactsStateFlow.value) {
-
-                                if (!contactsAdded.contains(contact.id)) {
-                                    if (contact.isInviteContact()) {
-                                        var contactInvite: Invite? = null
-
-                                        contact.inviteId?.let { inviteId ->
-                                            contactInvite = withContext(io) {
-                                                repositoryDashboard.getInviteById(inviteId).firstOrNull()
-                                            }
-                                        }
-                                        if (contactInvite != null) {
-                                            newList.add(
-                                                DashboardChat.Inactive.Invite(contact, contactInvite)
-                                            )
-                                            continue
-                                        }
-                                    }
-                                    newList.add(
-                                        DashboardChat.Inactive.Conversation(contact)
-                                    )
-                                }
-
                             }
                         }
                     }

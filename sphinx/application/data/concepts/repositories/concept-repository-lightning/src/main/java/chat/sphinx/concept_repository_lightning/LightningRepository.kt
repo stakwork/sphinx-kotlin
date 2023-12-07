@@ -22,4 +22,5 @@ interface LightningRepository {
     ): Flow<LoadResponse<NodeBalanceAll, ResponseError>>
 
     suspend fun updateLSP(lsp: LightningServiceProvider)
+    suspend fun retrieveLSP(): Flow<LightningServiceProvider>
 }

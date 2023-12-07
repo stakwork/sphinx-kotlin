@@ -113,8 +113,8 @@ abstract class CoreDBImpl(private val moshi: Moshi): CoreDB() {
                     scidAdapter = ScidAdapter(),
                     contact_indexAdapter = ContactIndexAdapter(),
                     contact_route_hintAdapter = LightningRouteHintAdapter(),
-                    child_pub_keyAdapter = LightningNodePubKeyAdapter.getInstance()
-
+                    child_pub_keyAdapter = LightningNodePubKeyAdapter.getInstance(),
+                    contact_keyAdapter = LightningNodePubKeyAdapter.getInstance()
                 ),
                 inviteDboAdapter = InviteDbo.Adapter(
                     idAdapter = InviteIdAdapter.getInstance(),
