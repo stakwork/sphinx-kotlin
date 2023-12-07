@@ -301,8 +301,6 @@ class ConnectManagerImpl(
                 }
 
                 override fun deliveryComplete(token: IMqttDeliveryToken?) {
-                    Log.d("MQTT_MESSAGES", "deliveryComplete ${token}")
-                    Log.d("MQTT_MESSAGES", "deliveryComplete ${token?.message}")
                     // Handle message delivery confirmation here
                 }
             })
@@ -495,9 +493,12 @@ class ConnectManagerImpl(
                 scid = scid?.toShortChannelId(),
             )
 
-            _connectionStateStateFlow.value = updatedNewContact?.let {
-                ConnectionState.NewContactRegistered(it, generatedContactRouteHint.value)
+            updatedNewContact?.let {
+                notifyListeners {
+                    onNewContactRegistered(it, generatedContactRouteHint.value)
+                }
             }
+
             newContact = null
 
         } else {
@@ -534,10 +535,14 @@ class ConnectManagerImpl(
 
                 when (messageType) {
                     KEY_EXCHANGE -> {
-                        _connectionStateStateFlow.value = ConnectionState.KeyExchange(decryptedJson.toString())
+                        notifyListeners {
+                            onKeyExchange(decryptedJson.toString())
+                        }
                     }
                     KEY_EXCHANGE_CONFIRMATION -> {
-                        _connectionStateStateFlow.value = ConnectionState.KeyExchangeConfirmation(decryptedJson.toString())
+                        notifyListeners {
+                            onKeyExchangeConfirmation(decryptedJson.toString())
+                        }
                     }
                     else -> {}
                 }

@@ -37,13 +37,9 @@ interface ConnectManagerListener {
     fun onMnemonicWords(words: String)
     fun onOkKey(okKey: String)
     fun onOwnerRegistered(message: String)
-//    fun onContactRegistered(index: Int, message: String)
-//    fun onNewContactRegistered(contact: NewContact, generatedContactRouteHint: String)
-//    fun onKeyExchange(json: String)
-//    fun onKeyExchangeConfirmation(json: String)
-//    fun onKeySend(index: Int, message: String, rHash: String)
-//    fun onOnionMessage(index: Int, payload: ByteArray?)
-//    fun onErrorMessage(message: String)
+    fun onNewContactRegistered(contact: NewContact, generatedContactRouteHint: String)
+    fun onKeyExchange(json: String)
+    fun onKeyExchangeConfirmation(json: String)
 
 }
 

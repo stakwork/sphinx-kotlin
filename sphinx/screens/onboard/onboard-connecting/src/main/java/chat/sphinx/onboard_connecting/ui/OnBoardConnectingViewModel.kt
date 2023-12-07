@@ -14,8 +14,6 @@ import chat.sphinx.concept_network_tor.TorManager
 import chat.sphinx.concept_relay.RelayDataHandler
 import chat.sphinx.concept_repository_connect_manager.ConnectManagerRepository
 import chat.sphinx.concept_repository_connect_manager.model.ConnectionManagerState
-import chat.sphinx.concept_repository_contact.ContactRepository
-import chat.sphinx.concept_repository_lightning.LightningRepository
 import chat.sphinx.concept_signer_manager.CheckAdminCallback
 import chat.sphinx.concept_signer_manager.SignerManager
 import chat.sphinx.concept_wallet.WalletDataHandler
@@ -119,9 +117,7 @@ internal class OnBoardConnectingViewModel @Inject constructor(
     private val networkQueryContact: NetworkQueryContact,
     private val networkQueryInvite: NetworkQueryInvite,
     private val networkQueryRelayKeys: NetworkQueryRelayKeys,
-    private val contactRepository: ContactRepository,
     private val onBoardStepHandler: OnBoardStepHandler,
-    private val lightningRepository: LightningRepository,
     private val connectManagerRepository: ConnectManagerRepository,
     val moshi: Moshi,
     private val rsa: RSA,
