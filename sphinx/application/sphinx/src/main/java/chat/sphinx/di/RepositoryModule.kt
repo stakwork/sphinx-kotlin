@@ -22,6 +22,7 @@ import chat.sphinx.concept_network_query_verify_external.NetworkQueryAuthorizeEx
 import chat.sphinx.concept_relay.RelayDataHandler
 import chat.sphinx.concept_repository_actions.ActionsRepository
 import chat.sphinx.concept_repository_chat.ChatRepository
+import chat.sphinx.concept_repository_connect_manager.ConnectManagerRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_dashboard_android.RepositoryDashboardAndroid
 import chat.sphinx.concept_repository_feed.FeedRepository
@@ -30,7 +31,9 @@ import chat.sphinx.concept_repository_media.RepositoryMedia
 import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.concept_repository_subscription.SubscriptionRepository
 import chat.sphinx.concept_socket_io.SocketIOManager
+import chat.sphinx.concept_wallet.WalletDataHandler
 import chat.sphinx.database.SphinxCoreDBImpl
+import chat.sphinx.example.concept_connect_manager.ConnectManager
 import chat.sphinx.feature_coredb.CoreDBImpl
 import chat.sphinx.feature_meme_server.MemeServerTokenHandlerImpl
 import chat.sphinx.feature_repository.mappers.contact.toContact
@@ -151,6 +154,8 @@ object RepositoryModule {
         networkQueryFeedSearch: NetworkQueryFeedSearch,
         networkQueryRelayKeys: NetworkQueryRelayKeys,
         networkQueryFeedStatus: NetworkQueryFeedStatus,
+        connectManager: ConnectManager,
+        walletDataHandler: WalletDataHandler,
         rsa: RSA,
         socketIOManager: SocketIOManager,
         sphinxNotificationManager: SphinxNotificationManager,
@@ -183,6 +188,8 @@ object RepositoryModule {
             networkQueryFeedSearch,
             networkQueryRelayKeys,
             networkQueryFeedStatus,
+            connectManager,
+            walletDataHandler,
             rsa,
             socketIOManager,
             sphinxNotificationManager,
@@ -242,6 +249,12 @@ object RepositoryModule {
     fun provideActionsRepository(
         sphinxRepositoryAndroid: SphinxRepositoryAndroid
     ): ActionsRepository =
+        sphinxRepositoryAndroid
+
+    @Provides
+    fun provideConnectManagerRepository(
+        sphinxRepositoryAndroid: SphinxRepositoryAndroid
+    ): ConnectManagerRepository =
         sphinxRepositoryAndroid
 }
 

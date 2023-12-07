@@ -50,6 +50,7 @@ import chat.sphinx.concept_repository_actions.ActionsRepository
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_chat.model.AddMember
 import chat.sphinx.concept_repository_chat.model.CreateTribe
+import chat.sphinx.concept_repository_connect_manager.ConnectManagerRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_dashboard.RepositoryDashboard
 import chat.sphinx.concept_repository_feed.FeedRepository
@@ -64,7 +65,9 @@ import chat.sphinx.concept_repository_subscription.SubscriptionRepository
 import chat.sphinx.concept_socket_io.SocketIOManager
 import chat.sphinx.concept_socket_io.SphinxSocketIOMessage
 import chat.sphinx.concept_socket_io.SphinxSocketIOMessageListener
+import chat.sphinx.concept_wallet.WalletDataHandler
 import chat.sphinx.conceptcoredb.*
+import chat.sphinx.example.concept_connect_manager.ConnectManager
 import chat.sphinx.feature_repository.mappers.action_track.*
 import chat.sphinx.feature_repository.mappers.chat.ChatDboPresenterMapper
 import chat.sphinx.feature_repository.mappers.contact.ContactDboPresenterMapper
@@ -117,6 +120,7 @@ import chat.sphinx.wrapper_io_utils.InputStreamProvider
 import chat.sphinx.wrapper_lightning.LightningServiceProvider
 import chat.sphinx.wrapper_lightning.NodeBalance
 import chat.sphinx.wrapper_lightning.NodeBalanceAll
+import chat.sphinx.wrapper_lightning.toWalletMnemonic
 import chat.sphinx.wrapper_meme_server.AuthenticationChallenge
 import chat.sphinx.wrapper_meme_server.PublicAttachmentInfo
 import chat.sphinx.wrapper_message.*
@@ -183,6 +187,8 @@ abstract class SphinxRepository(
     private val networkQueryFeedSearch: NetworkQueryFeedSearch,
     private val networkQueryRelayKeys: NetworkQueryRelayKeys,
     private val networkQueryFeedStatus: NetworkQueryFeedStatus,
+    private val connectManager: ConnectManager,
+    private val walletDataHandler: WalletDataHandler,
     private val rsa: RSA,
     private val socketIOManager: SocketIOManager,
     private val sphinxNotificationManager: SphinxNotificationManager,
@@ -196,8 +202,10 @@ abstract class SphinxRepository(
     RepositoryMedia,
     ActionsRepository,
     FeedRepository,
+    ConnectManagerRepository,
     CoroutineDispatchers by dispatchers,
-    SphinxSocketIOMessageListener {
+    SphinxSocketIOMessageListener
+{
 
     companion object {
         const val TAG: String = "SphinxRepository"
@@ -220,6 +228,29 @@ abstract class SphinxRepository(
 
         const val AUTHENTICATION_ERROR = 401
 
+    }
+
+
+    override fun createOwnerAccount() {
+        connectManager.createAccount()
+    }
+
+    override fun setLspIp(lspIp: String) {
+        connectManager.setLspIp(lspIp)
+    }
+
+    override suspend fun persistAndShowMnemonic(words: String) {
+        words.toWalletMnemonic()?.let {
+            walletDataHandler.persistWalletMnemonic(it)
+        }
+    }
+
+    override fun createOwnerWithOkKey(okKey: String) {
+        super.createOwnerWithOkKey(okKey)
+    }
+
+    override fun updateLspAndOwner(data: String) {
+        super.updateLspAndOwner(data)
     }
 
     ////////////////

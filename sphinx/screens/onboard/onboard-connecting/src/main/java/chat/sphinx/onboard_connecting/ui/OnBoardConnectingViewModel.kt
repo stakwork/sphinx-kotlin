@@ -12,6 +12,7 @@ import chat.sphinx.concept_network_query_relay_keys.NetworkQueryRelayKeys
 import chat.sphinx.concept_network_query_relay_keys.model.PostHMacKeyDto
 import chat.sphinx.concept_network_tor.TorManager
 import chat.sphinx.concept_relay.RelayDataHandler
+import chat.sphinx.concept_repository_connect_manager.ConnectManagerRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_lightning.LightningRepository
 import chat.sphinx.concept_signer_manager.CheckAdminCallback
@@ -128,6 +129,7 @@ internal class OnBoardConnectingViewModel @Inject constructor(
     private val onBoardStepHandler: OnBoardStepHandler,
     private val lightningRepository: LightningRepository,
     private val connectManager: ConnectManager,
+    private val connectManagerRepository: ConnectManagerRepository,
     val moshi: Moshi,
     private val rsa: RSA,
 ): MotionLayoutViewModel<
@@ -193,8 +195,9 @@ internal class OnBoardConnectingViewModel @Inject constructor(
                 if (signerManager.isPhoneSignerSettingUp()) {
                     continuePhoneSignerSetup()
                 } else {
-                    connectManager.setLspIp("tcp://54.164.163.153:1883")
-                    connectManager.createAccount()
+                    connectManagerRepository.setLspIp("tcp://54.164.163.153:1883")
+                    connectManagerRepository.createOwnerAccount()
+
 //                    submitSideEffect(OnBoardConnectingSideEffect.InvalidCode)
 //                    navigator.popBackStack()
                 }
