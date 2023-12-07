@@ -305,19 +305,32 @@ class ConnectManagerImpl(
     }
 
     private fun subscribeOwnerMQTT(okKey: String){
+        // Balance is causing a error because is not implemented yet.
+        // The body message belongs to registerMsg
+
         val topics = arrayOf("${okKey}/${0}/res/#")
         val qos = IntArray(topics.size) { 1 }
 
         mqttClient?.subscribe(topics, qos)
 
-//        val balance = "${okKey}/${0}/req/balance"
-        val registerMsg = "${okKey}/${0}/req/msgs"
+    //  val balance = "${okKey}/${0}/req/balance"
         val registerOkKey = "${okKey}/${0}/req/register"
+        val registerMsg = "${okKey}/${0}/req/msgs"
 
+
+        val body = """
+        {
+            "since": 0,
+            "limit": 1000
+        }
+        """.trimIndent()
+
+        val mqttmessages = arrayOf("", body)
         val topicsArray = arrayOf(registerOkKey, registerMsg)
 
-        publishTopicsSequentially(topicsArray, null,0)
+        publishTopicsSequentially(topicsArray, mqttmessages,0)
     }
+
 
     private fun subscribeContacts(contacts: List<ContactInfo>) {
         val subscribeTopic = contacts.map { contactInfo ->
@@ -410,7 +423,13 @@ class ConnectManagerImpl(
     private fun publishTopicsSequentially(topics: Array<String>, messages: Array<String>?, index: Int) {
         if (index < topics.size) {
             val topic = topics[index]
-            val message = if (messages != null) MqttMessage(messages.getOrNull(index)?.toByteArray()) else MqttMessage()
+            val mqttMessage = messages?.getOrNull(index)
+
+            val message = if (mqttMessage?.isNotEmpty() == true) {
+                MqttMessage(mqttMessage.toByteArray())
+            } else {
+                MqttMessage()
+            }
 
             mqttClient?.publish(topic, message, null, object : IMqttActionListener {
                 override fun onSuccess(asyncActionToken: IMqttToken?) {
