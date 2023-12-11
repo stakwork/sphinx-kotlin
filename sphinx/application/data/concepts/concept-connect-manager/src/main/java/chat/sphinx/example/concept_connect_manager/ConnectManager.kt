@@ -27,7 +27,20 @@ abstract class ConnectManager {
     abstract fun setLspIp(ip: String)
     abstract fun retrieveLspIp(): String?
 
+    abstract fun addListener(listener: ConnectManagerListener): Boolean
+    abstract fun removeListener(listener: ConnectManagerListener): Boolean
+
 }
 
+interface ConnectManagerListener {
+
+    fun onMnemonicWords(words: String)
+    fun onOkKey(okKey: String)
+    fun onOwnerRegistered(message: String)
+    fun onNewContactRegistered(contact: NewContact, generatedContactRouteHint: String)
+    fun onKeyExchange(json: String)
+    fun onKeyExchangeConfirmation(json: String)
+
+}
 
 

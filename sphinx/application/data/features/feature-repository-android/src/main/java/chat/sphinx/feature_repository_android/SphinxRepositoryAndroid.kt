@@ -26,17 +26,16 @@ import chat.sphinx.concept_relay.RelayDataHandler
 import chat.sphinx.concept_repository_dashboard.DashboardItem
 import chat.sphinx.concept_repository_dashboard_android.RepositoryDashboardAndroid
 import chat.sphinx.concept_socket_io.SocketIOManager
+import chat.sphinx.concept_wallet.WalletDataHandler
 import chat.sphinx.conceptcoredb.DashboardDbo
 import chat.sphinx.conceptcoredb.SphinxDatabaseQueries
+import chat.sphinx.example.concept_connect_manager.ConnectManager
 import chat.sphinx.feature_repository.SphinxRepository
-import chat.sphinx.kotlin_response.Response
-import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.logger.SphinxLogger
 import chat.sphinx.notification.SphinxNotificationManager
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.dashboard.InviteId
-import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_contact.Contact
 import com.squareup.moshi.Moshi
 import com.squareup.sqldelight.android.paging3.QueryPagingSource
@@ -74,6 +73,8 @@ class SphinxRepositoryAndroid(
     networkQueryFeedSearch: NetworkQueryFeedSearch,
     networkQueryRelayKeys: NetworkQueryRelayKeys,
     networkQueryFeedStatus: NetworkQueryFeedStatus,
+    connectManager: ConnectManager,
+    walletDataHandler: WalletDataHandler,
     rsa: RSA,
     socketIOManager: SocketIOManager,
     sphinxNotificationManager: SphinxNotificationManager,
@@ -105,6 +106,8 @@ class SphinxRepositoryAndroid(
     networkQueryFeedSearch,
     networkQueryRelayKeys,
     networkQueryFeedStatus,
+    connectManager,
+    walletDataHandler,
     rsa,
     socketIOManager,
     sphinxNotificationManager,

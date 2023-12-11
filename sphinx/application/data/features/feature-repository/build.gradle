@@ -29,6 +29,7 @@ dependencies {
     api project(path: ':sphinx:application:data:concepts:repositories:concept-repository-message')
     api project(path: ':sphinx:application:data:concepts:repositories:concept-repository-subscription')
     api project(path: ':sphinx:application:data:concepts:repositories:concept-repository-feed')
+    api project(path: ':sphinx:application:data:concepts:repositories:concept-repository-connect-manager')
 
     api project(path: ':sphinx:application:network:concepts:concept-meme-input-stream')
     api project(path: ':sphinx:application:network:concepts:queries:concept-network-query-meme-server')
@@ -45,6 +46,9 @@ dependencies {
     api project(path: ':sphinx:application:network:concepts:queries:concept-network-query-redeem-badge-token')
     api project(path: ':sphinx:application:network:concepts:queries:concept-network-query-relay-keys')
     api project(path: ':sphinx:application:network:concepts:queries:concept-network-query-feed-status')
+    api project(path: ':sphinx:application:data:concepts:concept-connect-manager')
+    api project(path: ':sphinx:application:data:concepts:concept-wallet')
+
 
     api project(path: ':sphinx:application:network:concepts:concept-socket-io')
 

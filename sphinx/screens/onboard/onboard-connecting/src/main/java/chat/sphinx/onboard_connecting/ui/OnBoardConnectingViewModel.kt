@@ -12,14 +12,11 @@ import chat.sphinx.concept_network_query_relay_keys.NetworkQueryRelayKeys
 import chat.sphinx.concept_network_query_relay_keys.model.PostHMacKeyDto
 import chat.sphinx.concept_network_tor.TorManager
 import chat.sphinx.concept_relay.RelayDataHandler
-import chat.sphinx.concept_repository_contact.ContactRepository
-import chat.sphinx.concept_repository_lightning.LightningRepository
+import chat.sphinx.concept_repository_connect_manager.ConnectManagerRepository
+import chat.sphinx.concept_repository_connect_manager.model.ConnectionManagerState
 import chat.sphinx.concept_signer_manager.CheckAdminCallback
 import chat.sphinx.concept_signer_manager.SignerManager
 import chat.sphinx.concept_wallet.WalletDataHandler
-import chat.sphinx.example.concept_connect_manager.ConnectManager
-import chat.sphinx.example.concept_connect_manager.model.ConnectionState
-import chat.sphinx.example.wrapper_mqtt.toLspChannelInfo
 import chat.sphinx.key_restore.KeyRestore
 import chat.sphinx.key_restore.KeyRestoreResponse
 import chat.sphinx.kotlin_response.LoadResponse
@@ -30,13 +27,9 @@ import chat.sphinx.onboard_common.model.OnBoardInviterData
 import chat.sphinx.onboard_common.model.OnBoardStep
 import chat.sphinx.onboard_common.model.RedemptionCode
 import chat.sphinx.onboard_connecting.navigation.OnBoardConnectingNavigator
-import chat.sphinx.wrapper_common.lightning.ServerIp
-import chat.sphinx.wrapper_common.lightning.retrieveLightningRouteHint
 import chat.sphinx.wrapper_common.lightning.toLightningNodePubKey
 import chat.sphinx.wrapper_invite.InviteString
 import chat.sphinx.wrapper_invite.toValidInviteStringOrNull
-import chat.sphinx.wrapper_lightning.LightningServiceProvider
-import chat.sphinx.wrapper_lightning.toWalletMnemonic
 import chat.sphinx.wrapper_relay.*
 import chat.sphinx.wrapper_rsa.RsaPrivateKey
 import chat.sphinx.wrapper_rsa.RsaPublicKey
@@ -124,10 +117,8 @@ internal class OnBoardConnectingViewModel @Inject constructor(
     private val networkQueryContact: NetworkQueryContact,
     private val networkQueryInvite: NetworkQueryInvite,
     private val networkQueryRelayKeys: NetworkQueryRelayKeys,
-    private val contactRepository: ContactRepository,
     private val onBoardStepHandler: OnBoardStepHandler,
-    private val lightningRepository: LightningRepository,
-    private val connectManager: ConnectManager,
+    private val connectManagerRepository: ConnectManagerRepository,
     val moshi: Moshi,
     private val rsa: RSA,
 ): MotionLayoutViewModel<
@@ -193,8 +184,9 @@ internal class OnBoardConnectingViewModel @Inject constructor(
                 if (signerManager.isPhoneSignerSettingUp()) {
                     continuePhoneSignerSetup()
                 } else {
-                    connectManager.setLspIp("tcp://54.164.163.153:1883")
-                    connectManager.createAccount()
+                    connectManagerRepository.setLspIp("tcp://54.164.163.153:1883")
+                    connectManagerRepository.createOwnerAccount()
+
 //                    submitSideEffect(OnBoardConnectingSideEffect.InvalidCode)
 //                    navigator.popBackStack()
                 }
@@ -664,58 +656,15 @@ internal class OnBoardConnectingViewModel @Inject constructor(
         }
     }
 
-    fun persistAndShowMnemonic(words: String) {
-        viewModelScope.launch(mainImmediate) {
-            words.toWalletMnemonic()?.let {
-                walletDataHandler.persistWalletMnemonic(it)
-            }
-            submitSideEffect(OnBoardConnectingSideEffect.ShowMnemonicToUser(words) {})
-        }
-    }
-
-    fun createOwnerWithOkKey(okKey: String) {
-        viewModelScope.launch(mainImmediate) {
-            contactRepository.createOwner(okKey)
-        }
-    }
-
-    private fun updateLspAndOwner(data: String) {
-        viewModelScope.launch(mainImmediate) {
-
-            val lspChannelInfo = data.toLspChannelInfo(moshi)
-            val serverIp = connectManager.retrieveLspIp()
-            val serverPubKey = lspChannelInfo?.serverPubKey
-            val scid = lspChannelInfo?.scid
-            val routeHint = retrieveLightningRouteHint(serverPubKey?.value, scid?.value)
-
-            if (serverIp?.isNotEmpty() == true && serverPubKey != null) {
-                lightningRepository.updateLSP(
-                    LightningServiceProvider(
-                        ServerIp(serverIp),
-                        serverPubKey
-                    )
-                )
-            }
-
-            if (routeHint != null && scid != null) {
-                contactRepository.updateOwnerRouteHintAndScid(routeHint, scid)
-                navigator.toOnBoardNameScreen()
-            }
-        }
-    }
-
     private fun collectConnectionStateStateFlow() {
         viewModelScope.launch(mainImmediate) {
-            connectManager.connectionStateStateFlow.collect { connectionState ->
+            connectManagerRepository.connectionManagerState.collect { connectionState ->
                 when (connectionState) {
-                    is ConnectionState.MnemonicWords -> {
-                        persistAndShowMnemonic(connectionState.words)
+                    is ConnectionManagerState.MnemonicWords -> {
+                        submitSideEffect(OnBoardConnectingSideEffect.ShowMnemonicToUser(connectionState.words) {})
                     }
-                    is ConnectionState.OkKey -> {
-                        createOwnerWithOkKey(connectionState.okKey)
-                    }
-                    is ConnectionState.OwnerRegistered -> {
-                        updateLspAndOwner(connectionState.message)
+                    is ConnectionManagerState.OwnerRegistered -> {
+                        navigator.toOnBoardNameScreen()
                     }
                     else -> {}
                 }

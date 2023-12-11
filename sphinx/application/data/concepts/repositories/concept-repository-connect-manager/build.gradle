@@ -1,0 +1,16 @@
+plugins {
+    id 'java-library'
+    id 'kotlin'
+}
+
+dependencies {
+    // Sphinx
+    api project(path: ':sphinx:application:common:kotlin-response')
+    api project(path: ':sphinx:application:common:wrappers:wrapper-chat')
+    api project(path: ':sphinx:application:common:wrappers:wrapper-contact')
+    api project(path: ':sphinx:application:common:wrappers:wrapper-lightning')
+    api project(path: ':sphinx:application:common:wrappers:wrapper-message')
+    api project(path: ':sphinx:application:common:wrappers:wrapper-mqtt')
+
+    implementation deps.kotlin.coroutinesCore
+}
