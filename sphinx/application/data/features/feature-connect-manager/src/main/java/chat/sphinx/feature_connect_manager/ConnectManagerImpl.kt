@@ -5,10 +5,9 @@ import chat.sphinx.example.concept_connect_manager.ConnectManager
 import chat.sphinx.example.concept_connect_manager.ConnectManagerListener
 import chat.sphinx.example.concept_connect_manager.model.TopicHandler
 import chat.sphinx.example.concept_connect_manager.model.ConnectionState
+import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
 import chat.sphinx.wrapper_contact.NewContact
 import chat.sphinx.wrapper_common.lightning.retrieveLightningRouteHint
-import chat.sphinx.wrapper_common.lightning.toLightningNodePubKey
-import chat.sphinx.wrapper_common.lightning.toShortChannelId
 import chat.sphinx.wrapper_contact.ContactInfo
 import chat.sphinx.wrapper_lightning.WalletMnemonic
 import chat.sphinx.wrapper_lightning.toWalletMnemonic
@@ -46,9 +45,9 @@ class ConnectManagerImpl(
     private var walletMnemonic: WalletMnemonic? = null
     private var mqttClient: MqttAsyncClient? = null
     private val network = "regtest"
-    private var newContact: NewContact? = null
     private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private var ownerSeed: String? = null
+    private var ownerLspPubKey: LightningNodePubKey? = null
 
     private val _connectionStateStateFlow = MutableStateFlow<ConnectionState?>(null)
     override val connectionStateStateFlow: StateFlow<ConnectionState?>
@@ -185,10 +184,6 @@ class ConnectManagerImpl(
 
             if (childPubKey != null) {
 
-                newContact = contact.copy(
-                    childPubKey = childPubKey.toLightningNodePubKey()
-                )
-
                 subscribeAndPublishContactMQTT(
                     childPubKey,
                     index.value.toInt()
@@ -203,7 +198,8 @@ class ConnectManagerImpl(
         serverUri: String,
         mnemonicWords: WalletMnemonic,
         okKey: String,
-        contacts: List<ContactInfo>?
+        contacts: List<ContactInfo>?,
+        lspPubKey: LightningNodePubKey?
     ) {
         coroutineScope.launch {
 
@@ -233,6 +229,7 @@ class ConnectManagerImpl(
 
             if (xPub != null && sig != null) {
                 ownerSeed = seed
+                ownerLspPubKey = lspPubKey
 
                 connectToMQTT(
                     serverUri,
@@ -473,36 +470,30 @@ class ConnectManagerImpl(
         }
     }
 
-    private fun handleContactRegistered(topic: String, connectionState: ConnectionState.ContactRegistered) {
-        val isNewContact = newContact?.childPubKey?.value?.let { childPubKey ->
-            topic.contains(childPubKey)
-        } ?: return
+    private fun handleContactRegistered(
+        topic: String,
+        connectionState: ConnectionState.ContactRegistered
+    ) {
 
-        if (isNewContact) {
+        val jsonObject = try {
+            JSONObject(connectionState.message)
+        } catch (e: Exception) {
+            null
+        }
 
-            val jsonObject = try {
-                JSONObject(connectionState.message)
-            } catch (e: Exception) {
-                null
+        val scid = jsonObject?.getString("scid") ?: return
+        val generatedContactRouteHint = retrieveLightningRouteHint(ownerLspPubKey?.value, scid) ?: return
+
+        connectionState.childPubKey?.let { childKey ->
+
+            notifyListeners {
+                onNewContactRegistered(
+                    connectionState.index,
+                    childKey,
+                    scid,
+                    generatedContactRouteHint.value
+                )
             }
-
-            val scid = jsonObject?.getString("scid")
-            val generatedContactRouteHint = retrieveLightningRouteHint(newContact?.ownLspPubKey?.value, scid) ?: return
-
-            val updatedNewContact = newContact?.copy(
-                scid = scid?.toShortChannelId(),
-            )
-
-            updatedNewContact?.let {
-                notifyListeners {
-                    onNewContactRegistered(it, generatedContactRouteHint.value)
-                }
-            }
-
-            newContact = null
-
-        } else {
-            _connectionStateStateFlow.value = connectionState
         }
     }
 

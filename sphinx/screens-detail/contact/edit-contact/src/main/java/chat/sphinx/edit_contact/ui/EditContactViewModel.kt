@@ -5,6 +5,7 @@ import android.widget.ImageView
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.concept_image_loader.ImageLoader
+import chat.sphinx.concept_repository_connect_manager.ConnectManagerRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_lightning.LightningRepository
 import chat.sphinx.concept_repository_subscription.SubscriptionRepository
@@ -15,7 +16,6 @@ import chat.sphinx.contact.ui.ContactViewModel
 import chat.sphinx.contact.ui.ContactViewState
 import chat.sphinx.edit_contact.navigation.EditContactNavigator
 import chat.sphinx.example.concept_connect_manager.ConnectManager
-import chat.sphinx.wrapper_contact.NewContact
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.scanner_view_model_coordinator.request.ScannerRequest
 import chat.sphinx.scanner_view_model_coordinator.response.ScannerResponse
@@ -43,7 +43,7 @@ internal class EditContactViewModel @Inject constructor(
     contactRepository: ContactRepository,
     subscriptionRepository: SubscriptionRepository,
     walletDataHandler: WalletDataHandler,
-    connectManager: ConnectManager,
+    connectManagerRepository: ConnectManagerRepository,
     moshi: Moshi,
     lightningRepository: LightningRepository,
     imageLoader: ImageLoader<ImageView>,
@@ -55,7 +55,7 @@ internal class EditContactViewModel @Inject constructor(
     subscriptionRepository,
     scannerCoordinator,
     walletDataHandler,
-    connectManager,
+    connectManagerRepository,
     moshi,
     lightningRepository,
     imageLoader

@@ -43,6 +43,7 @@ dependencies {
     api project(path: ':sphinx:activity:concepts:concept-user-colors-helper')
     api project(path: ':sphinx:application:data:concepts:concept-connect-manager')
     api project(path: ':sphinx:application:data:concepts:repositories:concept-repository-lightning')
+    api project(path: ':sphinx:application:data:concepts:repositories:concept-repository-connect-manager')
 
 
     implementation deps.square.moshi

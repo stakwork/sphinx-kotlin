@@ -5,6 +5,7 @@ import android.widget.ImageView
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.concept_image_loader.ImageLoader
+import chat.sphinx.concept_repository_connect_manager.ConnectManagerRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_lightning.LightningRepository
 import chat.sphinx.concept_repository_subscription.SubscriptionRepository
@@ -46,7 +47,7 @@ internal class NewContactViewModel @Inject constructor(
     contactRepository: ContactRepository,
     subscriptionRepository: SubscriptionRepository,
     walletDataHandler: WalletDataHandler,
-    connectManager: ConnectManager,
+    connectManagerRepository: ConnectManagerRepository,
     moshi: Moshi,
     lightningRepository: LightningRepository,
     imageLoader: ImageLoader<ImageView>
@@ -58,7 +59,7 @@ internal class NewContactViewModel @Inject constructor(
     subscriptionRepository,
     scannerCoordinator,
     walletDataHandler,
-    connectManager,
+    connectManagerRepository,
     moshi,
     lightningRepository,
     imageLoader,
@@ -102,9 +103,8 @@ internal class NewContactViewModel @Inject constructor(
         saveContactJob = viewModelScope.launch(mainImmediate) {
             val newContactIndex = contactRepository.getNewContactIndex().firstOrNull()
             val exitingOkKey = contactRepository.getContactByPubKey(lightningNodePubKey).firstOrNull()
-            val senderLsp = lightningRepository.retrieveLSP().firstOrNull()?.pubKey
 
-            if (newContactIndex != null && lightningRouteHint != null && senderLsp != null && exitingOkKey == null) {
+            if (newContactIndex != null && lightningRouteHint != null && exitingOkKey == null) {
 
                 val newContact = NewContact(
                     contactAlias,
@@ -113,12 +113,13 @@ internal class NewContactViewModel @Inject constructor(
                     null,
                     newContactIndex,
                     null,
-                    senderLsp,
+                    null,
                     null,
                     null,
                     null
                 )
-                connectManager.createContact(newContact)
+
+                connectManagerRepository.createContact(newContact)
                 viewStateContainer.updateViewState(ContactViewState.Saved)
             }
         }

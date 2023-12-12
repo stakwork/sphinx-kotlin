@@ -1,9 +1,11 @@
 package chat.sphinx.example.concept_connect_manager.model
 
+import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
+
 sealed class ConnectionState {
 
     data class OwnerRegistered(val message: String): ConnectionState()
-    data class ContactRegistered(val index: Int, val message: String): ConnectionState()
+    data class ContactRegistered(val index: Int, val message: String, val childPubKey: String?): ConnectionState()
     data class KeySend(val index: Int, val message: String, val rHash: String): ConnectionState()
     data class OnionMessage(val index: Int, val payload: ByteArray?): ConnectionState() {
         override fun equals(other: Any?): Boolean {

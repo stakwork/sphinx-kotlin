@@ -12,7 +12,6 @@ import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.authentication_resources.databinding.LayoutAuthenticationBinding
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_signer_manager.SignerManager
-import chat.sphinx.example.concept_connect_manager.model.ConnectionState
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.onboard_connecting.R

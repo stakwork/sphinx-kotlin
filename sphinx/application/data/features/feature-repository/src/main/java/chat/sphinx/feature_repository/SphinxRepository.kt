@@ -318,13 +318,15 @@ abstract class SphinxRepository(
 
             val mnemonic = walletDataHandler.retrieveWalletMnemonic()
             val okKey = accountOwner.value?.nodePubKey?.value
+            val senderLsp = retrieveLSP().firstOrNull()?.pubKey
 
             if (mnemonic != null && okKey != null) {
                 connectManager.initializeMqttAndSubscribe(
                     "tcp://54.164.163.153:1883",
                     mnemonic,
                     okKey,
-                    contactsInfoList
+                    contactsInfoList,
+                    senderLsp
                 )
             }
         }
@@ -332,6 +334,13 @@ abstract class SphinxRepository(
 
     override fun createOwnerAccount() {
         connectManager.createAccount()
+    }
+
+    override fun createContact(contact: NewContact) {
+        applicationScope.launch(io) {
+            createNewContact(contact)
+            connectManager.createContact(contact)
+        }
     }
 
     override fun setLspIp(lspIp: String) {
@@ -343,12 +352,22 @@ abstract class SphinxRepository(
         super.createOwnerWithOkKey(okKey)
     }
 
-    override fun onNewContactRegistered(contact: NewContact, generatedContactRouteHint: String) {
+    override fun onNewContactRegistered(
+        index: Int,
+        childPubKey: String,
+        scid: String,
+        contactRouteHint: String
+    ) {
         applicationScope.launch(io) {
-            val returnConfirmation = contact.contactKey != null
+            val returnConfirmation = getContactById(ContactId(index.toLong())).firstOrNull()?.contactKey != null
 
-            createNewContact(contact)
-            sendKeyExchange(contact, generatedContactRouteHint.toLightningRouteHint(), returnConfirmation)
+            updateChildPubKeyAndScidByIndex(
+                ContactIndex(index.toLong()),
+                LightningNodePubKey(childPubKey),
+                ShortChannelId(scid)
+            )
+
+            sendKeyExchange(index, contactRouteHint.toLightningRouteHint(), returnConfirmation)
         }
     }
 
@@ -387,15 +406,17 @@ abstract class SphinxRepository(
     }
 
     override suspend fun sendKeyExchange(
-        contact: NewContact,
+        index: Int,
         contactRouteHint: LightningRouteHint?,
         returnConfirmation: Boolean
     ) {
+        val contact = getContactById(ContactId(index.toLong())).firstOrNull()
+
         val owner = accountOwner.value
         val mnemonic = walletDataHandler.retrieveWalletMnemonic()
         val type = if (!returnConfirmation) 10 else 11
 
-        if (owner != null && mnemonic != null) {
+        if (owner != null && mnemonic != null && contact != null) {
             val keyExchangeMessage = KeyExchangeMessageDto(
                 "",
                 type,
@@ -412,8 +433,8 @@ abstract class SphinxRepository(
 
             val hops = HopsDto(
                 listOf(
-                    PubkeyDto(contact.lightningRouteHint?.getLspPubKey() ?: ""),
-                    PubkeyDto(contact.lightningNodePubKey?.value ?: "")
+                    PubkeyDto(contact.routeHint?.getLspPubKey() ?: ""),
+                    PubkeyDto(contact.nodePubKey?.value ?: "")
                 )
             ).toJson(moshi)
 
@@ -431,10 +452,13 @@ abstract class SphinxRepository(
         val senderLsp = retrieveLSP().firstOrNull()?.pubKey
         val newContactIndex = getNewContactIndex().firstOrNull()
 
+
         keyExchange?.let { keyExchangeMessage ->
             val senderInfo = keyExchangeMessage.sender
+            val exitingOkKey = senderInfo.pubkey.toLightningNodePubKey()
+                ?.let { getContactByPubKey(it).firstOrNull() }
 
-            if (newContactIndex != null && senderLsp != null) {
+            if (newContactIndex != null && senderLsp != null && exitingOkKey == null) {
 
                 val newContact = NewContact(
                     senderInfo.alias.toContactAlias(),
@@ -449,6 +473,7 @@ abstract class SphinxRepository(
                     senderInfo.photoUrl.toPhotoUrl()
                 )
 
+                createNewContact(newContact)
                 connectManager.createContact(newContact)
             }
         }
@@ -465,7 +490,7 @@ abstract class SphinxRepository(
 
             if (contactPubKey != null && contactKey != null && contactRouteHint != null) {
 
-                updateContactKeyAndRouteHint(
+                updateContactKeyAndRouteHintByOkKey(
                     contactPubKey,
                     contactKey,
                     contactRouteHint,
@@ -1999,7 +2024,7 @@ abstract class SphinxRepository(
         }
     }
 
-    override suspend fun updateContactKeyAndRouteHint(
+    override suspend fun updateContactKeyAndRouteHintByOkKey(
         contactPubKey: LightningNodePubKey,
         contactKey: LightningNodePubKey,
         contactRouteHint: LightningRouteHint,
@@ -2026,6 +2051,21 @@ abstract class SphinxRepository(
         }
     }
 
+    override suspend fun updateChildPubKeyAndScidByIndex(
+        contactIndex: ContactIndex,
+        childPubKey: LightningNodePubKey,
+        scid: ShortChannelId
+    ) {
+        val queries = coreDB.getSphinxDatabaseQueries()
+
+        contactLock.withLock {
+            queries.contactUpdateChildPubKeyAndScidByIndex(
+                childPubKey,
+                scid,
+                contactIndex
+            )
+        }
+    }
 
     override suspend fun updateOwnerRouteHintAndScid(
         routeHint: LightningRouteHint,
