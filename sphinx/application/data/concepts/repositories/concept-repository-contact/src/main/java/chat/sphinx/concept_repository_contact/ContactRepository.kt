@@ -67,17 +67,24 @@ interface ContactRepository {
 
     suspend fun createNewContact(contact: NewContact)
 
-    suspend fun updateContactKeyAndRouteHint(
+    suspend fun updateContactKeyAndRouteHintByOkKey(
         contactPubKey: LightningNodePubKey,
         contactKey: LightningNodePubKey,
         contactRouteHint: LightningRouteHint,
         photoUrl: PhotoUrl?
     )
 
+    suspend fun updateChildPubKeyAndScidByIndex(
+        contactIndex: ContactIndex,
+        childPubKey: LightningNodePubKey,
+        scid: ShortChannelId
+    )
+
     suspend fun updateOwnerRouteHintAndScid(
         routeHint: LightningRouteHint,
         scid: ShortChannelId
     )
+
     suspend fun updateOwnerAlias(alias: ContactAlias)
 
     suspend fun getNewContactIndex(): Flow<ContactIndex?>

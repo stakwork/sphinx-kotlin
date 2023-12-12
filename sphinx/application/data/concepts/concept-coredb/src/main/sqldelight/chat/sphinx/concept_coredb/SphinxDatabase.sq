@@ -507,6 +507,12 @@ SET contact_key = :contact_key,
     photo_url = :photo_url
 WHERE node_pub_key = ?;
 
+contactUpdateChildPubKeyAndScidByIndex:
+UPDATE contactDbo
+SET child_pub_key = :child_pub_key,
+    scid = :scid
+WHERE contact_index = :contact_index;
+
 contactDeleteById:
 DELETE FROM contactDbo
 WHERE id = ?;

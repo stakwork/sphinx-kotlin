@@ -1,6 +1,7 @@
 package chat.sphinx.example.concept_connect_manager
 
 import chat.sphinx.example.concept_connect_manager.model.ConnectionState
+import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
 import chat.sphinx.wrapper_contact.ContactInfo
 import chat.sphinx.wrapper_contact.NewContact
 import chat.sphinx.wrapper_lightning.WalletMnemonic
@@ -17,7 +18,8 @@ abstract class ConnectManager {
         mnemonicWords: WalletMnemonic,
         okKey: String,
         contacts: List<ContactInfo>?,
-    )
+        lspPubKey: LightningNodePubKey?,
+        )
     abstract fun sendKeyExchangeOnionMessage(
         keyExchangeMessage: String,
         hops: String,
@@ -37,7 +39,7 @@ interface ConnectManagerListener {
     fun onMnemonicWords(words: String)
     fun onOkKey(okKey: String)
     fun onOwnerRegistered(message: String)
-    fun onNewContactRegistered(contact: NewContact, generatedContactRouteHint: String)
+    fun onNewContactRegistered(index: Int, childPubKey: String, scid: String, contactRouteHint: String)
     fun onKeyExchange(json: String)
     fun onKeyExchangeConfirmation(json: String)
 

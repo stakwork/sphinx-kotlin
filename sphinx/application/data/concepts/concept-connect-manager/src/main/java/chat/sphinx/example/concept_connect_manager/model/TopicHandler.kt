@@ -68,7 +68,8 @@ sealed class TopicHandler {
             return if (index == 0) {
                 ConnectionState.OwnerRegistered(message)
             } else {
-                ConnectionState.ContactRegistered(index, message)
+                val childPubKey = topic.split("/").getOrNull(0)
+                ConnectionState.ContactRegistered(index, message, childPubKey)
             }
         }
     }
