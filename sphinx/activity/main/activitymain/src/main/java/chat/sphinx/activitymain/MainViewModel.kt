@@ -22,6 +22,7 @@ import chat.sphinx.wrapper_common.StorageData
 import chat.sphinx.wrapper_common.StorageLimit.DEFAULT_STORAGE_LIMIT
 import chat.sphinx.wrapper_common.StorageLimit.STORAGE_LIMIT_KEY
 import chat.sphinx.wrapper_common.calculateUserStorageLimit
+import chat.sphinx.wrapper_common.chat.PushNotificationLink
 import chat.sphinx.wrapper_common.toFileSize
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_activity.NavigationViewModel
@@ -36,7 +37,7 @@ import kotlinx.coroutines.flow.collect
 import javax.inject.Inject
 
 @HiltViewModel
-internal class MainViewModel @Inject constructor(
+class MainViewModel @Inject constructor(
     private val authenticationCoordinator: AuthenticationCoordinator,
     private val authenticationStateManager: AuthenticationStateManager,
     val authenticationDriver: AuthenticationNavigationDriver,
@@ -83,6 +84,20 @@ internal class MainViewModel @Inject constructor(
                     popUpToId = R.id.main_primary_nav_graph,
                     updateBackgroundLoginTime = false,
                     deepLink = deepLink
+                )
+            )
+        }
+    }
+
+    suspend fun handlePushNotification(chatId: Long) {
+        val pushNotificationLink = PushNotificationLink("sphinx.chat://?action=push&chatId=$chatId")
+
+        if (authenticationStateManager.authenticationStateFlow.value == AuthenticationState.NotRequired) {
+            navigationDriver.submitNavigationRequest(
+                ToDashboardScreen(
+                    popUpToId = R.id.main_primary_nav_graph,
+                    updateBackgroundLoginTime = false,
+                    deepLink = pushNotificationLink.value
                 )
             )
         }
