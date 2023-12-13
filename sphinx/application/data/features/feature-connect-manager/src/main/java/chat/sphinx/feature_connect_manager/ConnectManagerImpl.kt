@@ -377,21 +377,16 @@ class ConnectManagerImpl(
         }
     }
 
-    override fun sendKeyExchangeOnionMessage(
-        keyExchangeMessage: String,
+    override fun sendMessage(
+        sphinxMessage: String,
         hops: String,
-        walletMnemonic: WalletMnemonic,
         okKey: String
     ) {
         coroutineScope.launch {
 
-            val seed = try {
-                mnemonicToSeed(walletMnemonic.value)
-            } catch (e: Exception) {
-                null
-            }
-
             val now = getTimestampInMilliseconds()
+
+            val seed = ownerSeed
 
             if (seed != null) {
 
@@ -402,14 +397,14 @@ class ConnectManagerImpl(
                         now,
                         network,
                         hops,
-                        keyExchangeMessage
+                        sphinxMessage
                     )
                 } catch (e: Exception) {
                     null
                 }
 
                 if (onion != null && mqttClient?.isConnected == true) {
-                    Log.d("ONION_PROCESS", "The Onion is contain\n $keyExchangeMessage")
+                    Log.d("ONION_PROCESS", "The Onion is contain\n $sphinxMessage")
 
                     val publishTopic = "${okKey}/${0}/req/send"
 

@@ -348,16 +348,6 @@ internal class ChatContactViewModel @Inject constructor(
     }
 
     override suspend fun sendMessage(builder: SendMessage.Builder): SendMessage? {
-        getContact()?.let { nnContact ->
-            if (nnContact.rsaPublicKey == null) {
-                viewModelScope.launch(mainImmediate) {
-                    submitSideEffect(
-                        ChatSideEffect.NotEncryptedContact
-                    )
-                }
-                return null
-            }
-        }
 
         builder.setContactId(contactId)
         builder.setChatId(chatId)
