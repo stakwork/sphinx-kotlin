@@ -1,7 +1,6 @@
 package chat.sphinx.dashboard.ui
 
 import android.content.Context
-import android.content.res.ColorStateList
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -10,7 +9,6 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.constraintlayout.motion.widget.MotionLayout
 import androidx.core.content.ContextCompat
-import androidx.core.view.ViewCompat.setBackgroundTintList
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
@@ -28,18 +26,17 @@ import chat.sphinx.concept_signer_manager.SignerManager
 import chat.sphinx.dashboard.R
 import chat.sphinx.dashboard.databinding.FragmentDashboardBinding
 import chat.sphinx.dashboard.ui.viewstates.*
-import chat.sphinx.dashboard.ui.viewstates.DashboardMotionViewState
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.insetter_activity.addStatusBarPadding
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
-import chat.sphinx.menu_bottom.databinding.LayoutMenuBottomBinding
 import chat.sphinx.menu_bottom_scanner.BottomScannerMenu
 import chat.sphinx.resources.databinding.LayoutPodcastPlayerFooterBinding
-import chat.sphinx.wrapper_view.Px
 import chat.sphinx.swipe_reveal_layout.SwipeRevealLayout
+import chat.sphinx.wrapper_common.chat.PushNotificationLink
 import chat.sphinx.wrapper_common.lightning.*
+import chat.sphinx.wrapper_view.Px
 import com.google.android.material.tabs.TabLayoutMediator
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.motionlayout.MotionLayoutFragment
@@ -50,7 +47,6 @@ import io.matthewnelson.concept_views.viewstate.collect
 import io.matthewnelson.concept_views.viewstate.value
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -117,10 +113,28 @@ internal class DashboardFragment : MotionLayoutFragment<
 
         viewModel.networkRefresh(false)
 
+        handleDeepLinks()
+        handlePushNotification()
+
+        activity?.intent = null
+    }
+
+    private fun handleDeepLinks() {
         activity?.intent?.dataString?.let { deepLink ->
             viewModel.handleDeepLink(deepLink)
             activity?.intent?.data = null
         }
+    }
+
+    private fun handlePushNotification() {
+        val chatId = activity?.intent?.extras?.getString("chat_id")?.toLongOrNull() ?: activity?.intent?.extras?.getLong("chat_id")
+        chatId?.let { nnChatId ->
+            viewModel.handleDeepLink(
+                PushNotificationLink("sphinx.chat://?action=push&chatId=$nnChatId").value
+            )
+        }
+
+        activity?.intent = null
     }
 
     override fun onRefresh() {

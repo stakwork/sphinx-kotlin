@@ -7,7 +7,6 @@ import android.os.Build
 import android.os.Bundle
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
-import androidx.annotation.RequiresApi
 import androidx.constraintlayout.motion.widget.MotionLayout
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
@@ -27,12 +26,12 @@ import dagger.hilt.android.AndroidEntryPoint
 import dev.chrisbanes.insetter.applyInsetter
 import io.matthewnelson.android_feature_navigation.requests.PopBackStack
 import io.matthewnelson.android_feature_viewmodel.updateViewState
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import chat.sphinx.resources.R as R_common
 
+
 @AndroidEntryPoint
-internal class MainActivity: MotionLayoutNavigationActivity<
+class MainActivity: MotionLayoutNavigationActivity<
         MainViewState,
         MainViewModel,
         PrimaryNavigationDriver,
@@ -72,6 +71,8 @@ internal class MainActivity: MotionLayoutNavigationActivity<
         private var statusBarInsets: InsetPadding? = null
         private var navigationBarInsets: InsetPadding? = null
         private var keyboardInsets: InsetPadding? = null
+
+        var isActive = false
     }
 
     override val statusBarInsetHeight: InsetPadding by lazy(LazyThreadSafetyMode.NONE) {
@@ -122,6 +123,10 @@ internal class MainActivity: MotionLayoutNavigationActivity<
         binding.viewMainInputLock.setOnClickListener { viewModel }
         askNotificationPermission()
         addWindowInsetChangeListener()
+
+        intent.extras?.getString("chat_id")?.toLongOrNull()?.let { chatId ->
+            handlePushNotification(chatId)
+        }
     }
 
     override fun onStart() {
@@ -165,7 +170,11 @@ internal class MainActivity: MotionLayoutNavigationActivity<
         }
     }
 
+    override fun onResume() {
+        super.onResume()
 
+        isActive = true
+    }
 
     override fun onStop() {
         super.onStop()
@@ -175,6 +184,8 @@ internal class MainActivity: MotionLayoutNavigationActivity<
         if (sessionDepth == 0) {
             viewModel.saveContentFeedStatuses()
         }
+
+        isActive = false
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -183,6 +194,8 @@ internal class MainActivity: MotionLayoutNavigationActivity<
         intent.dataString?.let { deepLink ->
             handleDeepLink(deepLink)
         }
+
+        setIntent(intent)
     }
 
     private fun askNotificationPermission() {
@@ -203,9 +216,16 @@ internal class MainActivity: MotionLayoutNavigationActivity<
             }
         }
     }
+
     private fun handleDeepLink(deepLink: String) {
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.handleDeepLink(deepLink)
+        }
+    }
+
+    private fun handlePushNotification(chatId: Long) {
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.handlePushNotification(chatId)
         }
     }
 
@@ -237,16 +257,16 @@ internal class MainActivity: MotionLayoutNavigationActivity<
     // To Handle swipe behaviour
     override fun onTransitionCompleted(motionLayout: MotionLayout?, currentId: Int) {
         transitionInProgress = false
-            if (
-                currentId == MainViewState.DetailScreenInactive.endSetId &&
-                detailNavController.previousBackStackEntry != null
-            ) {
-                lifecycleScope.launch {
-                    viewModel.detailDriver.submitNavigationRequest(
-                        PopBackStack(R.id.navigation_detail_blank_fragment)
-                    )
-                }
+        if (
+            currentId == MainViewState.DetailScreenInactive.endSetId &&
+            detailNavController.previousBackStackEntry != null
+        ) {
+            lifecycleScope.launch {
+                viewModel.detailDriver.submitNavigationRequest(
+                    PopBackStack(R.id.navigation_detail_blank_fragment)
+                )
             }
+        }
     }
 
     override fun onBackPressed() {
@@ -295,6 +315,8 @@ internal class MainActivity: MotionLayoutNavigationActivity<
 
         viewModel.syncActions()
         viewModel.getDeleteExcessFileIfApplicable()
+
+        isActive = false
     }
 
     override var isKeyboardVisible: Boolean = false
