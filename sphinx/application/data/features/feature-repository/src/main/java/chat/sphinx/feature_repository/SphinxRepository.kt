@@ -382,6 +382,12 @@ abstract class SphinxRepository(
         }
     }
 
+    override fun onTextMessageReceived(json: String) {
+        applicationScope.launch(io) {
+            mqttTextMessageReceived(json)
+        }
+    }
+
     override suspend fun updateLspAndOwner(data: String) {
         val lspChannelInfo = data.toLspChannelInfo(moshi)
         val serverIp = connectManager.retrieveLspIp()
@@ -475,6 +481,68 @@ abstract class SphinxRepository(
                 connectManager.createContact(newContact)
             }
         }
+    }
+
+    override suspend fun mqttTextMessageReceived(json: String) {
+        val queries = coreDB.getSphinxDatabaseQueries()
+        val textMessage = json.toSphinxChatMessageNull(moshi)
+            textMessage?.let { message ->
+                val messageContent = message.message.content
+                val sender = message.sender
+
+                // Implement getContactByContactPubkey:
+                val contact = getContactByPubKey(LightningNodePubKey(sender.pubkey)).firstOrNull()
+                val messageId = queries.messageGetMaxId().executeAsOneOrNull()?.MAX?.plus(1) ?: 0
+
+                if (contact != null) {
+
+                    val newMessage = NewMessage(
+                        id = MessageId(messageId),
+                        uuid = MessageUUID(message.uuid),
+                        chatId = ChatId(contact.contactIndex?.value ?: 0L),
+                        type = MessageType.Message,
+                        sender = contact.id,
+                        receiver = ContactId(0),
+                        amount = Sat(0),
+                        date = DateTime.nowUTC().toDateTime(),
+                        expirationDate = null,
+                        messageContent = null,
+                        status = MessageStatus.Confirmed,
+                        seen = Seen.False,
+                        senderAlias = null,
+                        senderPic = null,
+                        originalMUID = null,
+                        replyUUID = null,
+                        flagged = Flagged.False,
+                        recipientAlias = null,
+                        recipientPic = null,
+                        person = null,
+                        threadUUID = null,
+                        errorMessage = null,
+                        isPinned = false,
+                        messageContentDecrypted = MessageContentDecrypted(messageContent.toString()),
+                        messageDecryptionError = false,
+                        messageDecryptionException = null,
+                        messageMedia = null,
+                        feedBoost = null,
+                        callLinkMessage = null,
+                        podcastClip = null,
+                        giphyData = null,
+                        reactions = null,
+                        purchaseItems = null,
+                        replyMessage = null,
+                        thread = null
+                    )
+
+                    messageLock.withLock {
+                        queries.transaction {
+                            upsertNewMessage(newMessage, queries, null)
+                        }
+                    }
+                }
+            }
+
+
     }
 
     override suspend fun updateContactDetails(json: String) {
@@ -6526,6 +6594,8 @@ abstract class SphinxRepository(
 
         return response
     }
+
+
 
     override suspend fun addTribeMember(addMember: AddMember): Response<Any, ResponseError> {
         var response: Response<Any, ResponseError> =

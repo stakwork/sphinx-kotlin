@@ -533,6 +533,67 @@ inline fun TransactionCallbacks.updateInviteStatus(
     queries.inviteUpdateStatus(inviteStatus, inviteId)
 }
 
+fun TransactionCallbacks.upsertNewMessage(
+    message: NewMessage,
+    queries: SphinxDatabaseQueries,
+    fileName: FileName? = null
+) {
+    val chatId: ChatId = message.chatId
+
+    message.messageMedia?.mediaToken?.let { mediaToken ->
+
+        if (mediaToken.value.isEmpty()) return
+
+        queries.messageMediaUpsert(
+            (message.messageMedia?.mediaKey?.value ?: "").toMediaKey(),
+            (message.messageMedia?.mediaType?.value ?: "").toMediaType(),
+            MediaToken(mediaToken.value),
+            MessageId(message.id.value),
+            chatId,
+            (message.messageMedia?.mediaKeyDecrypted?.value ?: "").toMediaKeyDecrypted(),
+            message.messageMedia?.localFile,
+            fileName
+        )
+    }
+
+    queries.messageUpsert(
+        message.status.value.toMessageStatus(),
+        message.seen.value.toSeen(),
+        message.senderAlias?.value?.toSenderAlias(),
+        message.senderPic?.value?.toPhotoUrl(),
+        message.originalMUID?.value?.toMessageMUID(),
+        message.replyUUID?.value?.toReplyUUID(),
+        message.type.value.toMessageType(),
+        message.recipientAlias?.value?.toRecipientAlias(),
+        message.recipientPic?.value?.toPhotoUrl(),
+        Push.False,
+        message.person?.value?.toMessagePerson(),
+        message.threadUUID?.value?.toThreadUUID(),
+        message.errorMessage?.value?.toErrorMessage(),
+        MessageId(message.id.value),
+        message.uuid?.value?.toMessageUUID(),
+        chatId,
+        ContactId(message.sender.value),
+        message.receiver?.let { ContactId(it.value) },
+        Sat(message.amount.value),
+        message.paymentHash?.value?.toLightningPaymentHash(),
+        message.paymentRequest?.value?.toLightningPaymentRequestOrNull(),
+        message.date,
+        message.expirationDate,
+        message.messageContent?.value?.toMessageContent(),
+        message.messageContentDecrypted?.value?.toMessageContentDecrypted(),
+        message.messageMedia?.mediaToken?.getMUIDFromMediaToken()?.value?.toMessageMUID(),
+        message.flagged.value.toFlagged()
+    )
+
+    if (message.type.isInvoicePayment()) {
+        message.paymentHash?.let {
+            queries.messageUpdateInvoiceAsPaidByPaymentHash(LightningPaymentHash(it.value))
+        }
+    }
+}
+
+
 @Suppress("SpellCheckingInspection")
 fun TransactionCallbacks.upsertMessage(
     dto: MessageDto,

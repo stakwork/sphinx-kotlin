@@ -56,6 +56,7 @@ class ConnectManagerImpl(
     companion object {
         const val KEY_EXCHANGE = 10
         const val KEY_EXCHANGE_CONFIRMATION = 11
+        const val TEXT_MESSAGE = 0
     }
 
     // Key Generation and Management
@@ -515,6 +516,7 @@ class ConnectManagerImpl(
                 val jsonObject = try {
                     JSONObject(decryptedJson.toString())
                 } catch (e: Exception) {
+                    val exce = e
                     null
                 }
                 val messageType = jsonObject?.getInt("type")
@@ -528,6 +530,11 @@ class ConnectManagerImpl(
                     KEY_EXCHANGE_CONFIRMATION -> {
                         notifyListeners {
                             onKeyExchangeConfirmation(decryptedJson.toString())
+                        }
+                    }
+                    TEXT_MESSAGE -> {
+                        notifyListeners {
+                            onTextMessageReceived(decryptedJson.toString())
                         }
                     }
                     else -> {}

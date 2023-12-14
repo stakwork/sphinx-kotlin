@@ -43,6 +43,8 @@ interface ConnectManagerListener {
     fun onKeyExchange(json: String)
     fun onKeyExchangeConfirmation(json: String)
 
+    fun onTextMessageReceived(json: String)
+
 }
 
 
