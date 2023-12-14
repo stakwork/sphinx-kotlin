@@ -5,7 +5,7 @@ import chat.sphinx.activitymain.R
 import io.matthewnelson.android_concept_views.MotionLayoutViewState
 
 @Suppress("ClassName")
-internal sealed class MainViewState: MotionLayoutViewState<MainViewState>() {
+sealed class MainViewState: MotionLayoutViewState<MainViewState>() {
 
     object DetailScreenActive: MainViewState() {
         override val startSetId: Int
