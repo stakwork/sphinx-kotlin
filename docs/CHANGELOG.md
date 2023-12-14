@@ -1,5 +1,9 @@
 # ChangeLog
 
+# Version 1.0.0-beta12 (2023-12-13)
+- Improves push notifications handling
+- Enables Create Tribe for virtual nodes
+
 # Version 1.0.0-beta11 (2023-11-17)
 - Fixes crashes
 - Fixes Out of Memory issues
