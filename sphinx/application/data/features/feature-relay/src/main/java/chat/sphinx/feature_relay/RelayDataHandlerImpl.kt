@@ -294,7 +294,7 @@ class RelayDataHandlerImpl(
         } ?: false
     }
 
-    suspend fun persistRelayHMacKeyImpl(key: RelayHMacKey?, privateKey: Password): Boolean {
+    private suspend fun persistRelayHMacKeyImpl(key: RelayHMacKey?, privateKey: Password): Boolean {
         lock.withLock {
             if (key == null) {
                 authenticationStorage.putString(RELAY_H_MAC_KEY, null)

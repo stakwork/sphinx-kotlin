@@ -668,3 +668,22 @@ inline fun TransactionCallbacks.updateSubscriptionStatus(
     queries.feedUpdateSubscribe(subscribed, feedId)
     queries.contentFeedStatusUpdateSubscriptionStatus(subscribed, feedId)
 }
+
+fun TransactionCallbacks.clearDatabase(
+    queries: SphinxDatabaseQueries
+) {
+    queries.chatDeleteAll()
+    queries.contactDeleteAll()
+    queries.inviteDeleteAll()
+    queries.dashboardDeleteAll()
+    queries.messageDeleteAll()
+    queries.messageMediaDeleteAll()
+    queries.subscriptionDeleteAll()
+    queries.feedDeleteAll()
+    queries.feedItemDeleteAll()
+    queries.feedModelDeleteAll()
+    queries.feedDestinationDeleteAll()
+    queries.actionTrackDeleteAll()
+    queries.contentFeedStatusDeleteAll()
+    queries.contentEpisodeStatusDeleteAll()
+}

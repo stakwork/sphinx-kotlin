@@ -19,4 +19,6 @@ abstract class ProfileNavigator(
                 PopBackStack()
         )
     }
+
+    abstract suspend fun toOnBoardWelcomeScreen()
 }

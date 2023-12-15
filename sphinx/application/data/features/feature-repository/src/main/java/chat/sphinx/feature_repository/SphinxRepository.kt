@@ -7753,4 +7753,20 @@ abstract class SphinxRepository(
     override fun setAppLog(log: String) {
         appLogsStateFlow.value = appLogsStateFlow.value + log + "\n"
     }
+
+    override suspend fun clearDatabase() {
+        val queries = coreDB.getSphinxDatabaseQueries()
+
+        messageLock.withLock {
+            chatLock.withLock {
+                withContext(io) {
+                    queries.transaction {
+                        clearDatabase(
+                            queries
+                        )
+                    }
+                }
+            }
+        }
+    }
 }

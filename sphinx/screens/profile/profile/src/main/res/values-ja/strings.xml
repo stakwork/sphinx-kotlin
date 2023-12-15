@@ -31,6 +31,9 @@
     <string name="failed_to_process_image">写真をアップロードできませんでした</string>
     <string name="image_uploaded_successfully">写真をアップロードしました</string>
     <string name="invalid_meeting_server_url">Invalid Meeting Server Url</string>
+    <string name="profile_delete_account">Delete Account</string>
+    <string name="profile_delete_account_description">Are you sure you want to delete your account and data? This action can not be undone</string>
+    <string name="profile_delete_account_error">There was an error deleting your account, please try again later</string>
 
     <string name="empty_or_null_relay_url">新しいRelay URLの入力は必須です</string>
     <string name="invalid_relay_url">新しいRelay URLは無効です</string>

@@ -45,7 +45,9 @@ dependencies {
     implementation project(path: ':sphinx:application:common:logger')
     implementation project(path: ':sphinx:application:common:wrappers:wrapper-message-media')
     implementation project(path: ':sphinx:application:common:resources')
+    implementation project(path: ':sphinx:screens:onboard:key-restore')
 
+    implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-dashboard-android')
     implementation project(path: ':sphinx:application:data:concepts:concept-background-login')
     implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-media')
     implementation project(path: ':sphinx:application:data:concepts:concept-image-loader')
@@ -57,6 +59,7 @@ dependencies {
 
 
     implementation project(path: ':sphinx:application:network:concepts:queries:concept-network-query-relay-keys')
+    implementation project(path: ':sphinx:application:network:concepts:queries:concept-network-query-contact')
     implementation project(path: ':sphinx:application:network:concepts:queries:concept-network-query-crypter')
     implementation project(path: ':sphinx:application:network:concepts:tor:concept-network-tor')
 
