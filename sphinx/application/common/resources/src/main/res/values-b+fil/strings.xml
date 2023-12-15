@@ -12,6 +12,8 @@
     <string name="decryption_error">DECRYPTION ERROR...</string>
     <string name="null_name_error">ERROR: NULL NAME</string>
     <string name="public_key">Pampublikong susi</string>
+    <string name="confirm">Confirm</string>
+    <string name="cancel">Cancel</string>
     <string name="_1">1</string>
     <string name="_2">2</string>
     <string name="_3">3</string>

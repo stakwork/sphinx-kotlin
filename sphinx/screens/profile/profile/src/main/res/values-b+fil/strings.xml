@@ -41,5 +41,8 @@
     <string name="github_pat_message">Bumuo ng Personal Access Token sa github gamit ang repo scope</string>
     <string name="github_pat_succeed">Matagumpay na naitakda ang Github Personal Access Token</string>
     <string name="github_pat_failed">Github Personal Access Token could not be set</string>
+    <string name="profile_delete_account">Delete Account</string>
+    <string name="profile_delete_account_description">Are you sure you want to delete your account and data? This action can not be undone</string>
+    <string name="profile_delete_account_error">There was an error deleting your account, please try again later</string>
 
 </resources>
