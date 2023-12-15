@@ -486,6 +486,7 @@ abstract class SphinxRepository(
     override suspend fun mqttTextMessageReceived(json: String) {
         val queries = coreDB.getSphinxDatabaseQueries()
         val textMessage = json.toSphinxChatMessageNull(moshi)
+
             textMessage?.let { message ->
                 val messageContent = message.message.content
                 val sender = message.sender
@@ -541,8 +542,6 @@ abstract class SphinxRepository(
                     }
                 }
             }
-
-
     }
 
     override suspend fun updateContactDetails(json: String) {
@@ -3180,7 +3179,7 @@ abstract class SphinxRepository(
 //                LOG.w(TAG, "Owner's RSA public key was null")
 //                return@launch
 //            }
-//
+
 //            // encrypt text
 //            val message: Pair<MessageContentDecrypted, MessageContent>? =
 //                messageText(sendMessage, moshi)?.let { msgText ->
@@ -3206,7 +3205,7 @@ abstract class SphinxRepository(
 //                        }
 //                    }
 //                }
-//
+
 //            // media attachment
 //            val media: Triple<Password, MediaKey, AttachmentInfo>? =
 //                if (sendMessage.giphyData == null) {
@@ -3238,11 +3237,11 @@ abstract class SphinxRepository(
 //            if (message == null && media == null && !sendMessage.isTribePayment) {
 //                return@launch
 //            }
-//
-//            val pricePerMessage = chat?.pricePerMessage?.value ?: 0
-//            val escrowAmount = chat?.escrowAmount?.value ?: 0
-//            val priceToMeet = sendMessage.priceToMeet?.value ?: 0
-//            val messagePrice = (pricePerMessage + escrowAmount + priceToMeet).toSat() ?: Sat(0)
+
+            val pricePerMessage = chat?.pricePerMessage?.value ?: 0
+            val escrowAmount = chat?.escrowAmount?.value ?: 0
+            val priceToMeet = sendMessage.priceToMeet?.value ?: 0
+            val messagePrice = (pricePerMessage + escrowAmount + priceToMeet).toSat() ?: Sat(0)
 //
 //            val messageType = when {
 //                (media != null) -> {
@@ -3261,39 +3260,39 @@ abstract class SphinxRepository(
 //                    MessageType.Message
 //                }
 //            }
-//
+
 //            //If is tribe payment, reply UUID is sent to identify recipient. But it's not a response
-//            val replyUUID = when {
-//                (sendMessage.isTribePayment) -> {
-//                    null
-//                }
-//                else -> {
-//                    sendMessage.replyUUID
-//                }
-//            }
-//
-//            val threadUUID = when {
-//                (sendMessage.isTribePayment) -> {
-//                    null
-//                }
-//                else -> {
-//                    sendMessage.threadUUID
-//                }
-//            }
-//
-//            val provisionalMessageId: MessageId? = chat?.let { chatDbo ->
-//                // Build provisional message and insert
-//                provisionalMessageLock.withLock {
-//                    val currentProvisionalId: MessageId? = withContext(io) {
-//                        queries.messageGetLowestProvisionalMessageId().executeAsOneOrNull()
-//                    }
-//
-//                    val provisionalId = MessageId((currentProvisionalId?.value ?: 0L) - 1)
-//
-//                    withContext(io) {
-//
-//                        queries.transaction {
-//
+            val replyUUID = when {
+                (sendMessage.isTribePayment) -> {
+                    null
+                }
+                else -> {
+                    sendMessage.replyUUID
+                }
+            }
+
+            val threadUUID = when {
+                (sendMessage.isTribePayment) -> {
+                    null
+                }
+                else -> {
+                    sendMessage.threadUUID
+                }
+            }
+
+            val provisionalMessageId: MessageId? = chat?.let { chatDbo ->
+                // Build provisional message and insert
+                provisionalMessageLock.withLock {
+                    val currentProvisionalId: MessageId? = withContext(io) {
+                        queries.messageGetLowestProvisionalMessageId().executeAsOneOrNull()
+                    }
+
+                    val provisionalId = MessageId((currentProvisionalId?.value ?: 0L) - 1)
+
+                    withContext(io) {
+
+                        queries.transaction {
+
 //                            if (media != null) {
 //                                queries.messageMediaUpsert(
 //                                    media.second,
@@ -3306,37 +3305,40 @@ abstract class SphinxRepository(
 //                                    sendMessage.attachmentInfo?.fileName
 //                                )
 //                            }
-//
-//                            queries.messageUpsert(
-//                                MessageStatus.Pending,
-//                                Seen.True,
-//                                chatDbo.myAlias?.value?.toSenderAlias(),
-//                                chatDbo.myPhotoUrl,
-//                                null,
-//                                replyUUID,
-//                                messageType,
-//                                null,
-//                                null,
-//                                Push.False,
-//                                null,
-//                                threadUUID,
-//                                null,
-//                                provisionalId,
-//                                null,
-//                                chatDbo.id,
-//                                owner.id,
-//                                sendMessage.contactId,
-//                                sendMessage.tribePaymentAmount ?: messagePrice,
-//                                null,
-//                                null,
-//                                DateTime.nowUTC().toDateTime(),
-//                                null,
-//                                message?.second,
-//                                message?.first,
-//                                null,
-//                                false.toFlagged()
-//                            )
-//
+
+                            // The following parms are set to null to make the upsert to work
+                            // type, message_content, message_decrypted, status
+
+                            queries.messageUpsert(
+                                MessageStatus.Confirmed,
+                                Seen.True,
+                                chatDbo.myAlias?.value?.toSenderAlias(),
+                                chatDbo.myPhotoUrl,
+                                null,
+                                replyUUID,
+                                MessageType.Message,
+                                null,
+                                null,
+                                Push.False,
+                                null,
+                                threadUUID,
+                                null,
+                                provisionalId,
+                                null,
+                                chatDbo.id,
+                                owner?.id ?: ContactId(0L),
+                                sendMessage.contactId,
+                                sendMessage.tribePaymentAmount ?: messagePrice,
+                                null,
+                                null,
+                                DateTime.nowUTC().toDateTime(),
+                                null,
+                                null,
+                                sendMessage.text?.toMessageContentDecrypted(),
+                                null,
+                                false.toFlagged()
+                            )
+
 //                            if (media != null) {
 //                                queries.messageMediaUpsert(
 //                                    media.second,
@@ -3349,13 +3351,13 @@ abstract class SphinxRepository(
 //                                    sendMessage.attachmentInfo?.fileName
 //                                )
 //                            }
-//                        }
-//
-//                        provisionalId
-//                    }
-//                }
-//            }
-//
+                        }
+
+                        provisionalId
+                    }
+                }
+            }
+
 //            val isPaidTextMessage =
 //                sendMessage.attachmentInfo?.mediaType?.isSphinxText == true &&
 //                        sendMessage.paidMessagePrice?.value ?: 0 > 0
@@ -3380,7 +3382,7 @@ abstract class SphinxRepository(
 //            } else {
 //                null
 //            }
-
+//
 //            val postMemeServerDto: PostMemeServerUploadDto? = if (media != null) {
 //                val token = memeServerTokenHandler.retrieveAuthenticationToken(MediaHost.DEFAULT)
 //                    ?: provisionalMessageId?.let { provId ->
@@ -3420,9 +3422,9 @@ abstract class SphinxRepository(
 //            } else {
 //                null
 //            }
-
+//
 //            val amount = messagePrice.value + (sendMessage.tribePaymentAmount ?: Sat(0)).value
-
+//
 //            val postMessageDto: PostMessageDto = try {
 //                PostMessageDto(
 //                    sendMessage.chatId?.value,
