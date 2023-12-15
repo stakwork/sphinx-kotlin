@@ -31,6 +31,9 @@
     <string name="failed_to_process_image">圖片上傳失敗</string>
     <string name="image_uploaded_successfully">圖片上傳成功</string>
     <string name="invalid_meeting_server_url">Invalid Meeting Server Url</string>
+    <string name="profile_delete_account">Delete Account</string>
+    <string name="profile_delete_account_description">Are you sure you want to delete your account and data? This action can not be undone</string>
+    <string name="profile_delete_account_error">There was an error deleting your account, please try again later</string>
 
     <string name="empty_or_null_relay_url">Relay URL 不可無填</string>
     <string name="invalid_relay_url">更新 Relay URL 失敗</string>

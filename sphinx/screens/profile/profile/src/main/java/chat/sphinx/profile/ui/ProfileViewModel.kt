@@ -1,7 +1,10 @@
 package chat.sphinx.profile.ui
 
+import android.app.Activity
+import android.app.AlarmManager
 import android.app.Application
 import android.content.Context
+import android.content.Intent
 import android.os.Environment
 import android.os.StatFs
 import android.webkit.URLUtil
@@ -10,14 +13,17 @@ import app.cash.exhaustive.Exhaustive
 import chat.sphinx.camera_view_model_coordinator.request.CameraRequest
 import chat.sphinx.camera_view_model_coordinator.response.CameraResponse
 import chat.sphinx.concept_background_login.BackgroundLoginHandler
+import chat.sphinx.concept_network_query_contact.NetworkQueryContact
 import chat.sphinx.concept_network_query_relay_keys.NetworkQueryRelayKeys
 import chat.sphinx.concept_network_tor.TorManager
 import chat.sphinx.concept_relay.RelayDataHandler
 import chat.sphinx.concept_repository_contact.ContactRepository
+import chat.sphinx.concept_repository_dashboard_android.RepositoryDashboardAndroid
 import chat.sphinx.concept_repository_feed.FeedRepository
 import chat.sphinx.concept_repository_lightning.LightningRepository
 import chat.sphinx.concept_repository_media.RepositoryMedia
 import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
+import chat.sphinx.key_restore.KeyRestore
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
@@ -26,6 +32,7 @@ import chat.sphinx.menu_bottom_profile_pic.PictureMenuHandler
 import chat.sphinx.menu_bottom_profile_pic.PictureMenuViewModel
 import chat.sphinx.menu_bottom_profile_pic.UpdatingImageViewState
 import chat.sphinx.profile.R
+import chat.sphinx.profile.navigation.ProfileNavigator
 import chat.sphinx.wrapper_common.*
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.message.SphinxCallLink
@@ -58,11 +65,13 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.Serializable
 import okio.base64.encodeBase64
 import org.cryptonode.jncryptor.AES256JNCryptor
 import org.cryptonode.jncryptor.CryptorException
 import javax.inject.Inject
-import kotlinx.serialization.Serializable
+import kotlin.system.exitProcess
+
 
 @Serializable
 data class SampleClass(
@@ -95,13 +104,17 @@ internal class ProfileViewModel @Inject constructor(
     private val authenticationCoordinator: AuthenticationCoordinator,
     private val backgroundLoginHandler: BackgroundLoginHandler,
     private val cameraCoordinator: ViewModelCoordinator<CameraRequest, CameraResponse>,
+    private val repositoryDashboard: RepositoryDashboardAndroid<Any>,
     private val contactRepository: ContactRepository,
     private val lightningRepository: LightningRepository,
     private val feedRepository: FeedRepository,
     private val repositoryMedia: RepositoryMedia,
     private val networkQueryRelayKeys: NetworkQueryRelayKeys,
+    private val networkQueryContact: NetworkQueryContact,
     private val relayDataHandler: RelayDataHandler,
     private val torManager: TorManager,
+    private val keyRestore: KeyRestore,
+    private val navigator: ProfileNavigator,
     private val LOG: SphinxLogger,
     val moshi: Moshi
 ): SideEffectViewModel<
@@ -227,6 +240,61 @@ internal class ProfileViewModel @Inject constructor(
                     }
                 }
             })
+        }
+    }
+
+    private var deleteAccountJob: Job? = null
+    fun deleteAccount() {
+        if (deleteAccountJob?.isActive == true) return
+
+        deleteAccountJob = viewModelScope.launch(mainImmediate) {
+            submitSideEffect(ProfileSideEffect.DeleteAccountConfirmation {
+                deleteRelayAccount()
+            })
+        }
+    }
+
+    private fun deleteRelayAccount() {
+        viewModelScope.launch(mainImmediate) {
+            networkQueryContact.deleteAccount().collect{ loadResponse ->
+                @javax.annotation.meta.Exhaustive
+                when (loadResponse) {
+                    is LoadResponse.Loading -> {}
+                    is Response.Error -> {
+                        submitSideEffect(ProfileSideEffect.DeleteAccountError)
+                    }
+                    is Response.Success -> {
+                        deleteData()
+                    }
+                }
+            }
+        }
+    }
+
+    private fun deleteData() {
+        val appContext: Context = app.applicationContext
+
+        val sharedPreferences: List<String> = listOf(
+            "sphinx_colors",
+            "signer_settings",
+            "storage_limit",
+            "general_settings",
+            "server_urls"
+        )
+
+        for (sp in sharedPreferences) {
+            appContext.getSharedPreferences(sp, Context.MODE_PRIVATE).edit().clear().let { editor ->
+                if (!editor.commit()) {
+                    editor.apply()
+                }
+            }
+        }
+
+        viewModelScope.launch(mainImmediate) {
+            keyRestore.clearAll()
+            repositoryDashboard.clearDatabase()
+
+            navigator.toOnBoardWelcomeScreen()
         }
     }
 

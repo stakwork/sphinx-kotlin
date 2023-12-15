@@ -101,6 +101,10 @@ abstract class NetworkQueryContact {
         url: RelayUrl
     ): Flow<LoadResponse<Any, ResponseError>>
 
+    abstract fun deleteAccount(
+        relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>? = null
+    ): Flow<LoadResponse<Any, ResponseError>>
+
     //    app.post('/contacts/:id/keys', contacts.exchangeKeys)
     //    app.post('/contacts', contacts.createContact)
 }

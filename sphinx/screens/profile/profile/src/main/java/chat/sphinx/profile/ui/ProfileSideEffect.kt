@@ -9,6 +9,7 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.FrameLayout
 import chat.sphinx.profile.R
+import chat.sphinx.resources.R as R_common
 import chat.sphinx.resources.SphinxToastUtils
 import chat.sphinx.wrapper_relay.RelayUrl
 import io.matthewnelson.android_feature_toast_utils.show
@@ -176,6 +177,28 @@ internal sealed class ProfileSideEffect: SideEffect<Context>() {
     object FailedToSetGithubPat: ProfileSideEffect() {
         override suspend fun execute(value: Context) {
             SphinxToastUtils(true).show(value, R.string.github_pat_failed)
+        }
+    }
+
+    class DeleteAccountConfirmation(
+        private val confirmCallback: () -> Unit
+    ): ProfileSideEffect() {
+
+        override suspend fun execute(value: Context) {
+            val builder = AlertDialog.Builder(value, R.style.AlertDialogTheme)
+            builder.setTitle(R.string.profile_delete_account)
+            builder.setMessage(value.getString(R.string.profile_delete_account_description))
+            builder.setPositiveButton(R_common.string.confirm) { _, _ ->
+                confirmCallback()
+            }
+            builder.setOnCancelListener {}
+            builder.show()
+        }
+    }
+
+    object DeleteAccountError: ProfileSideEffect() {
+        override suspend fun execute(value: Context) {
+            SphinxToastUtils().show(value, R.string.profile_delete_account_error)
         }
     }
 

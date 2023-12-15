@@ -15,6 +15,8 @@
     <string name="decryption_error">解密失敗...</string>
     <string name="null_name_error">錯誤: 無填 姓名</string>
     <string name="public_key">節點住址</string>
+    <string name="confirm">Confirm</string>
+    <string name="cancel">Cancel</string>
     <string name="loading_dots">Loading ...</string>
 
     <!--  Media Type Labels -->
