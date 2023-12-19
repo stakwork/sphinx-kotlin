@@ -28,7 +28,6 @@ import chat.sphinx.concept_network_query_invite.NetworkQueryInvite
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_network_query_lightning.model.balance.BalanceDto
 import chat.sphinx.concept_network_query_meme_server.NetworkQueryMemeServer
-import chat.sphinx.concept_network_query_meme_server.model.PostMemeServerUploadDto
 import chat.sphinx.concept_network_query_message.NetworkQueryMessage
 import chat.sphinx.concept_network_query_message.model.*
 import chat.sphinx.concept_network_query_people.NetworkQueryPeople
@@ -71,12 +70,12 @@ import chat.sphinx.conceptcoredb.*
 import chat.sphinx.example.concept_connect_manager.ConnectManager
 import chat.sphinx.example.concept_connect_manager.ConnectManagerListener
 import chat.sphinx.example.wrapper_mqtt.HopsDto
-import chat.sphinx.example.wrapper_mqtt.KeyExchangeMessageDto
+import chat.sphinx.example.wrapper_mqtt.SphinxChatMessage
 import chat.sphinx.example.wrapper_mqtt.MessagesFetchRequest
 import chat.sphinx.example.wrapper_mqtt.PubkeyDto
 import chat.sphinx.example.wrapper_mqtt.Sender
 import chat.sphinx.example.wrapper_mqtt.toJson
-import chat.sphinx.example.wrapper_mqtt.toKeyExchangeMessageDtoOrNull
+import chat.sphinx.example.wrapper_mqtt.toSphinxChatMessageNull
 import chat.sphinx.example.wrapper_mqtt.toLspChannelInfo
 import chat.sphinx.feature_repository.mappers.action_track.*
 import chat.sphinx.feature_repository.mappers.chat.ChatDboPresenterMapper
@@ -383,6 +382,12 @@ abstract class SphinxRepository(
         }
     }
 
+    override fun onTextMessageReceived(json: String) {
+        applicationScope.launch(io) {
+            mqttTextMessageReceived(json)
+        }
+    }
+
     override suspend fun updateLspAndOwner(data: String) {
         val lspChannelInfo = data.toLspChannelInfo(moshi)
         val serverIp = connectManager.retrieveLspIp()
@@ -417,7 +422,7 @@ abstract class SphinxRepository(
         val type = if (!returnConfirmation) 10 else 11
 
         if (owner != null && mnemonic != null && contact != null) {
-            val keyExchangeMessage = KeyExchangeMessageDto(
+            val keyExchangeMessage = SphinxChatMessage(
                 "",
                 type,
                 Sender(
@@ -438,17 +443,16 @@ abstract class SphinxRepository(
                 )
             ).toJson(moshi)
 
-            connectManager.sendKeyExchangeOnionMessage(
+            connectManager.sendMessage(
                 keyExchangeMessage,
                 hops,
-                mnemonic,
                 owner.nodePubKey?.value ?: ""
             )
         }
     }
 
     override suspend fun handleKeyExchangeMessage(json: String) {
-        val keyExchange = json.toKeyExchangeMessageDtoOrNull(moshi)
+        val keyExchange = json.toSphinxChatMessageNull(moshi)
         val senderLsp = retrieveLSP().firstOrNull()?.pubKey
         val newContactIndex = getNewContactIndex().firstOrNull()
 
@@ -479,8 +483,69 @@ abstract class SphinxRepository(
         }
     }
 
+    override suspend fun mqttTextMessageReceived(json: String) {
+        val queries = coreDB.getSphinxDatabaseQueries()
+        val textMessage = json.toSphinxChatMessageNull(moshi)
+
+            textMessage?.let { message ->
+                val messageContent = message.message.content
+                val sender = message.sender
+
+                // Implement getContactByContactPubkey:
+                val contact = getContactByPubKey(LightningNodePubKey(sender.pubkey)).firstOrNull()
+                val messageId = queries.messageGetMaxId().executeAsOneOrNull()?.MAX?.plus(1) ?: 0
+
+                if (contact != null) {
+
+                    val newMessage = NewMessage(
+                        id = MessageId(messageId),
+                        uuid = MessageUUID(message.uuid),
+                        chatId = ChatId(contact.contactIndex?.value ?: 0L),
+                        type = MessageType.Message,
+                        sender = contact.id,
+                        receiver = ContactId(0),
+                        amount = Sat(0),
+                        date = DateTime.nowUTC().toDateTime(),
+                        expirationDate = null,
+                        messageContent = null,
+                        status = MessageStatus.Confirmed,
+                        seen = Seen.False,
+                        senderAlias = null,
+                        senderPic = null,
+                        originalMUID = null,
+                        replyUUID = null,
+                        flagged = Flagged.False,
+                        recipientAlias = null,
+                        recipientPic = null,
+                        person = null,
+                        threadUUID = null,
+                        errorMessage = null,
+                        isPinned = false,
+                        messageContentDecrypted = MessageContentDecrypted(messageContent.toString()),
+                        messageDecryptionError = false,
+                        messageDecryptionException = null,
+                        messageMedia = null,
+                        feedBoost = null,
+                        callLinkMessage = null,
+                        podcastClip = null,
+                        giphyData = null,
+                        reactions = null,
+                        purchaseItems = null,
+                        replyMessage = null,
+                        thread = null
+                    )
+
+                    messageLock.withLock {
+                        queries.transaction {
+                            upsertNewMessage(newMessage, queries, null)
+                        }
+                    }
+                }
+            }
+    }
+
     override suspend fun updateContactDetails(json: String) {
-        val keyExchangeConfirmation = json.toKeyExchangeMessageDtoOrNull(moshi)
+        val keyExchangeConfirmation = json.toSphinxChatMessageNull(moshi)
         keyExchangeConfirmation?.let { keyExchangeMessage ->
 
             val senderInfo = keyExchangeConfirmation.sender
@@ -498,6 +563,41 @@ abstract class SphinxRepository(
                 )
             }
         }
+    }
+
+    fun sendNewMessage(
+        owner: Contact,
+        contact: Contact,
+        messageContent: String,
+        contactRouteHint: LightningRouteHint
+    ) {
+
+        val newMessage = SphinxChatMessage(
+            "",
+            0,
+            Sender(
+                owner.nodePubKey?.value ?: "",
+                owner.routeHint?.value ?: "",
+                contact.childPubKey?.value ?: "",
+                contactRouteHint.value ?: "",
+                owner.alias?.value ?: "",
+                owner.photoUrl?.value ?: ""
+            ),
+            chat.sphinx.example.wrapper_mqtt.Message(messageContent)
+        ).toJson(moshi)
+
+        val hops = HopsDto(
+            listOf(
+                PubkeyDto(contact.routeHint?.getLspPubKey() ?: ""),
+                PubkeyDto(contact.nodePubKey?.value ?: "")
+            )
+        ).toJson(moshi)
+
+        connectManager.sendMessage(
+            newMessage,
+            hops,
+            owner.nodePubKey?.value ?: ""
+        )
     }
 
     ////////////////
@@ -3054,100 +3154,114 @@ abstract class SphinxRepository(
                     owner
                 }
 
-            val ownerPubKey = owner?.rsaPublicKey
+            val contactRouteHint = retrieveLightningRouteHint(
+                retrieveLSP().firstOrNull()?.pubKey?.value,
+                contact?.scid?.value
+            )
 
-            if (owner == null) {
-                LOG.w(TAG, "Owner returned null")
-                return@launch
+            if (owner != null && contact != null && contactRouteHint != null) {
+                sendNewMessage(
+                    owner,
+                    contact,
+                    sendMessage.text ?: "",
+                    contactRouteHint
+                )
             }
 
-            if (ownerPubKey == null) {
-                LOG.w(TAG, "Owner's RSA public key was null")
-                return@launch
-            }
+//            val ownerPubKey = owner?.rsaPublicKey
+//
+//            if (owner == null) {
+//                LOG.w(TAG, "Owner returned null")
+//                return@launch
+//            }
+//
+//            if (ownerPubKey == null) {
+//                LOG.w(TAG, "Owner's RSA public key was null")
+//                return@launch
+//            }
 
-            // encrypt text
-            val message: Pair<MessageContentDecrypted, MessageContent>? =
-                messageText(sendMessage, moshi)?.let { msgText ->
+//            // encrypt text
+//            val message: Pair<MessageContentDecrypted, MessageContent>? =
+//                messageText(sendMessage, moshi)?.let { msgText ->
+//
+//                    val response = rsa.encrypt(
+//                        ownerPubKey,
+//                        UnencryptedString(msgText),
+//                        formatOutput = false,
+//                        dispatcher = default,
+//                    )
+//
+//                    @Exhaustive
+//                    when (response) {
+//                        is Response.Error -> {
+//                            LOG.e(TAG, response.message, response.exception)
+//                            null
+//                        }
+//                        is Response.Success -> {
+//                            Pair(
+//                                MessageContentDecrypted(msgText),
+//                                MessageContent(response.value.value)
+//                            )
+//                        }
+//                    }
+//                }
 
-                    val response = rsa.encrypt(
-                        ownerPubKey,
-                        UnencryptedString(msgText),
-                        formatOutput = false,
-                        dispatcher = default,
-                    )
-
-                    @Exhaustive
-                    when (response) {
-                        is Response.Error -> {
-                            LOG.e(TAG, response.message, response.exception)
-                            null
-                        }
-                        is Response.Success -> {
-                            Pair(
-                                MessageContentDecrypted(msgText),
-                                MessageContent(response.value.value)
-                            )
-                        }
-                    }
-                }
-
-            // media attachment
-            val media: Triple<Password, MediaKey, AttachmentInfo>? =
-                if (sendMessage.giphyData == null) {
-                    sendMessage.attachmentInfo?.let { info ->
-                        val password = PasswordGenerator(MEDIA_KEY_SIZE).password
-
-                        val response = rsa.encrypt(
-                            ownerPubKey,
-                            UnencryptedString(password.value.joinToString("")),
-                            formatOutput = false,
-                            dispatcher = default,
-                        )
-
-                        @Exhaustive
-                        when (response) {
-                            is Response.Error -> {
-                                LOG.e(TAG, response.message, response.exception)
-                                null
-                            }
-                            is Response.Success -> {
-                                Triple(password, MediaKey(response.value.value), info)
-                            }
-                        }
-                    }
-                } else {
-                    null
-                }
-
-            if (message == null && media == null && !sendMessage.isTribePayment) {
-                return@launch
-            }
+//            // media attachment
+//            val media: Triple<Password, MediaKey, AttachmentInfo>? =
+//                if (sendMessage.giphyData == null) {
+//                    sendMessage.attachmentInfo?.let { info ->
+//                        val password = PasswordGenerator(MEDIA_KEY_SIZE).password
+//
+//                        val response = rsa.encrypt(
+//                            ownerPubKey,
+//                            UnencryptedString(password.value.joinToString("")),
+//                            formatOutput = false,
+//                            dispatcher = default,
+//                        )
+//
+//                        @Exhaustive
+//                        when (response) {
+//                            is Response.Error -> {
+//                                LOG.e(TAG, response.message, response.exception)
+//                                null
+//                            }
+//                            is Response.Success -> {
+//                                Triple(password, MediaKey(response.value.value), info)
+//                            }
+//                        }
+//                    }
+//                } else {
+//                    null
+//                }
+//
+//            if (message == null && media == null && !sendMessage.isTribePayment) {
+//                return@launch
+//            }
 
             val pricePerMessage = chat?.pricePerMessage?.value ?: 0
             val escrowAmount = chat?.escrowAmount?.value ?: 0
             val priceToMeet = sendMessage.priceToMeet?.value ?: 0
             val messagePrice = (pricePerMessage + escrowAmount + priceToMeet).toSat() ?: Sat(0)
+//
+//            val messageType = when {
+//                (media != null) -> {
+//                    MessageType.Attachment
+//                }
+//                (sendMessage.isBoost) -> {
+//                    MessageType.Boost
+//                }
+//                (sendMessage.isCall) -> {
+//                    MessageType.CallLink
+//                }
+//                (sendMessage.isTribePayment) -> {
+//                    MessageType.DirectPayment
+//                }
+//                else -> {
+//                    MessageType.Message
+//                }
+//            }
 
-            val messageType = when {
-                (media != null) -> {
-                    MessageType.Attachment
-                }
-                (sendMessage.isBoost) -> {
-                    MessageType.Boost
-                }
-                (sendMessage.isCall) -> {
-                    MessageType.CallLink
-                }
-                (sendMessage.isTribePayment) -> {
-                    MessageType.DirectPayment
-                }
-                else -> {
-                    MessageType.Message
-                }
-            }
-
-            //If is tribe payment, reply UUID is sent to identify recipient. But it's not a response
+//            //If is tribe payment, reply UUID is sent to identify recipient. But it's not a response
             val replyUUID = when {
                 (sendMessage.isTribePayment) -> {
                     null
@@ -3179,27 +3293,30 @@ abstract class SphinxRepository(
 
                         queries.transaction {
 
-                            if (media != null) {
-                                queries.messageMediaUpsert(
-                                    media.second,
-                                    media.third.mediaType,
-                                    MediaToken.PROVISIONAL_TOKEN,
-                                    provisionalId,
-                                    chatDbo.id,
-                                    MediaKeyDecrypted(media.first.value.joinToString("")),
-                                    media.third.file,
-                                    sendMessage.attachmentInfo?.fileName
-                                )
-                            }
+//                            if (media != null) {
+//                                queries.messageMediaUpsert(
+//                                    media.second,
+//                                    media.third.mediaType,
+//                                    MediaToken.PROVISIONAL_TOKEN,
+//                                    provisionalId,
+//                                    chatDbo.id,
+//                                    MediaKeyDecrypted(media.first.value.joinToString("")),
+//                                    media.third.file,
+//                                    sendMessage.attachmentInfo?.fileName
+//                                )
+//                            }
+
+                            // The following parms are set to null to make the upsert to work
+                            // type, message_content, message_decrypted, status
 
                             queries.messageUpsert(
-                                MessageStatus.Pending,
+                                MessageStatus.Confirmed,
                                 Seen.True,
                                 chatDbo.myAlias?.value?.toSenderAlias(),
                                 chatDbo.myPhotoUrl,
                                 null,
                                 replyUUID,
-                                messageType,
+                                MessageType.Message,
                                 null,
                                 null,
                                 Push.False,
@@ -3209,31 +3326,31 @@ abstract class SphinxRepository(
                                 provisionalId,
                                 null,
                                 chatDbo.id,
-                                owner.id,
+                                owner?.id ?: ContactId(0L),
                                 sendMessage.contactId,
                                 sendMessage.tribePaymentAmount ?: messagePrice,
                                 null,
                                 null,
                                 DateTime.nowUTC().toDateTime(),
                                 null,
-                                message?.second,
-                                message?.first,
+                                null,
+                                sendMessage.text?.toMessageContentDecrypted(),
                                 null,
                                 false.toFlagged()
                             )
 
-                            if (media != null) {
-                                queries.messageMediaUpsert(
-                                    media.second,
-                                    media.third.mediaType,
-                                    MediaToken.PROVISIONAL_TOKEN,
-                                    provisionalId,
-                                    chatDbo.id,
-                                    MediaKeyDecrypted(media.first.value.joinToString("")),
-                                    media.third.file,
-                                    sendMessage.attachmentInfo?.fileName
-                                )
-                            }
+//                            if (media != null) {
+//                                queries.messageMediaUpsert(
+//                                    media.second,
+//                                    media.third.mediaType,
+//                                    MediaToken.PROVISIONAL_TOKEN,
+//                                    provisionalId,
+//                                    chatDbo.id,
+//                                    MediaKeyDecrypted(media.first.value.joinToString("")),
+//                                    media.third.file,
+//                                    sendMessage.attachmentInfo?.fileName
+//                                )
+//                            }
                         }
 
                         provisionalId
@@ -3241,109 +3358,109 @@ abstract class SphinxRepository(
                 }
             }
 
-            val isPaidTextMessage =
-                sendMessage.attachmentInfo?.mediaType?.isSphinxText == true &&
-                        sendMessage.paidMessagePrice?.value ?: 0 > 0
+//            val isPaidTextMessage =
+//                sendMessage.attachmentInfo?.mediaType?.isSphinxText == true &&
+//                        sendMessage.paidMessagePrice?.value ?: 0 > 0
+//
+//            val messageContent: String? = if (isPaidTextMessage) null else message?.second?.value
+//
+//            val remoteTextMap: Map<String, String>? =
+//                if (isPaidTextMessage) null else getRemoteTextMap(
+//                    UnencryptedString(message?.first?.value ?: ""),
+//                    contact,
+//                    chat
+//                )
+//
+//            val mediaKeyMap: Map<String, String>? = if (media != null) {
+//                getMediaKeyMap(
+//                    owner.id,
+//                    media.second,
+//                    UnencryptedString(media.first.value.joinToString("")),
+//                    contact,
+//                    chat
+//                )
+//            } else {
+//                null
+//            }
+//
+//            val postMemeServerDto: PostMemeServerUploadDto? = if (media != null) {
+//                val token = memeServerTokenHandler.retrieveAuthenticationToken(MediaHost.DEFAULT)
+//                    ?: provisionalMessageId?.let { provId ->
+//                        withContext(io) {
+//                            queries.messageUpdateStatus(MessageStatus.Failed, provId)
+//                        }
+//
+//                        return@launch
+//                    } ?: return@launch
+//
+//                val response = networkQueryMemeServer.uploadAttachmentEncrypted(
+//                    token,
+//                    media.third.mediaType,
+//                    media.third.file,
+//                    media.third.fileName,
+//                    media.first,
+//                    MediaHost.DEFAULT,
+//                )
+//
+//                @Exhaustive
+//                when (response) {
+//                    is Response.Error -> {
+//                        LOG.e(TAG, response.message, response.exception)
+//
+//                        provisionalMessageId?.let { provId ->
+//                            withContext(io) {
+//                                queries.messageUpdateStatus(MessageStatus.Failed, provId)
+//                            }
+//                        }
+//
+//                        return@launch
+//                    }
+//                    is Response.Success -> {
+//                        response.value
+//                    }
+//                }
+//            } else {
+//                null
+//            }
+//
+//            val amount = messagePrice.value + (sendMessage.tribePaymentAmount ?: Sat(0)).value
+//
+//            val postMessageDto: PostMessageDto = try {
+//                PostMessageDto(
+//                    sendMessage.chatId?.value,
+//                    sendMessage.contactId?.value,
+//                    amount,
+//                    messagePrice.value,
+//                    sendMessage.replyUUID?.value,
+//                    messageContent,
+//                    remoteTextMap,
+//                    mediaKeyMap,
+//                    postMemeServerDto?.mime,
+//                    postMemeServerDto?.muid,
+//                    sendMessage.paidMessagePrice?.value,
+//                    sendMessage.isBoost,
+//                    sendMessage.isCall,
+//                    sendMessage.isTribePayment,
+//                    sendMessage.threadUUID?.value
+//                )
+//            } catch (e: IllegalArgumentException) {
+//                LOG.e(TAG, "Failed to create PostMessageDto", e)
+//
+//                provisionalMessageId?.let { provId ->
+//                    withContext(io) {
+//                        queries.messageUpdateStatus(MessageStatus.Failed, provId)
+//                    }
+//                }
+//
+//                return@launch
+//            }
 
-            val messageContent: String? = if (isPaidTextMessage) null else message?.second?.value
-
-            val remoteTextMap: Map<String, String>? =
-                if (isPaidTextMessage) null else getRemoteTextMap(
-                    UnencryptedString(message?.first?.value ?: ""),
-                    contact,
-                    chat
-                )
-
-            val mediaKeyMap: Map<String, String>? = if (media != null) {
-                getMediaKeyMap(
-                    owner.id,
-                    media.second,
-                    UnencryptedString(media.first.value.joinToString("")),
-                    contact,
-                    chat
-                )
-            } else {
-                null
-            }
-
-            val postMemeServerDto: PostMemeServerUploadDto? = if (media != null) {
-                val token = memeServerTokenHandler.retrieveAuthenticationToken(MediaHost.DEFAULT)
-                    ?: provisionalMessageId?.let { provId ->
-                        withContext(io) {
-                            queries.messageUpdateStatus(MessageStatus.Failed, provId)
-                        }
-
-                        return@launch
-                    } ?: return@launch
-
-                val response = networkQueryMemeServer.uploadAttachmentEncrypted(
-                    token,
-                    media.third.mediaType,
-                    media.third.file,
-                    media.third.fileName,
-                    media.first,
-                    MediaHost.DEFAULT,
-                )
-
-                @Exhaustive
-                when (response) {
-                    is Response.Error -> {
-                        LOG.e(TAG, response.message, response.exception)
-
-                        provisionalMessageId?.let { provId ->
-                            withContext(io) {
-                                queries.messageUpdateStatus(MessageStatus.Failed, provId)
-                            }
-                        }
-
-                        return@launch
-                    }
-                    is Response.Success -> {
-                        response.value
-                    }
-                }
-            } else {
-                null
-            }
-
-            val amount = messagePrice.value + (sendMessage.tribePaymentAmount ?: Sat(0)).value
-
-            val postMessageDto: PostMessageDto = try {
-                PostMessageDto(
-                    sendMessage.chatId?.value,
-                    sendMessage.contactId?.value,
-                    amount,
-                    messagePrice.value,
-                    sendMessage.replyUUID?.value,
-                    messageContent,
-                    remoteTextMap,
-                    mediaKeyMap,
-                    postMemeServerDto?.mime,
-                    postMemeServerDto?.muid,
-                    sendMessage.paidMessagePrice?.value,
-                    sendMessage.isBoost,
-                    sendMessage.isCall,
-                    sendMessage.isTribePayment,
-                    sendMessage.threadUUID?.value
-                )
-            } catch (e: IllegalArgumentException) {
-                LOG.e(TAG, "Failed to create PostMessageDto", e)
-
-                provisionalMessageId?.let { provId ->
-                    withContext(io) {
-                        queries.messageUpdateStatus(MessageStatus.Failed, provId)
-                    }
-                }
-
-                return@launch
-            }
-
-            sendMessage(
-                provisionalMessageId,
-                postMessageDto,
-                message?.first,
-                media
-            )
+//            sendMessage(
+//                provisionalMessageId,
+//                postMessageDto,
+//                message?.first,
+//                media
+//            )
         }
     }
 
@@ -6479,6 +6596,8 @@ abstract class SphinxRepository(
 
         return response
     }
+
+
 
     override suspend fun addTribeMember(addMember: AddMember): Response<Any, ResponseError> {
         var response: Response<Any, ResponseError> =

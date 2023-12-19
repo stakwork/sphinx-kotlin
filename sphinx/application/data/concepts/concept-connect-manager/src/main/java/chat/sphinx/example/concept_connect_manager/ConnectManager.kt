@@ -20,12 +20,12 @@ abstract class ConnectManager {
         contacts: List<ContactInfo>?,
         lspPubKey: LightningNodePubKey?,
         )
-    abstract fun sendKeyExchangeOnionMessage(
-        keyExchangeMessage: String,
+    abstract fun sendMessage(
+        sphinxMessage: String,
         hops: String,
-        walletMnemonic: WalletMnemonic,
         okKey: String
     )
+
     abstract fun setLspIp(ip: String)
     abstract fun retrieveLspIp(): String?
 
@@ -42,6 +42,8 @@ interface ConnectManagerListener {
     fun onNewContactRegistered(index: Int, childPubKey: String, scid: String, contactRouteHint: String)
     fun onKeyExchange(json: String)
     fun onKeyExchangeConfirmation(json: String)
+
+    fun onTextMessageReceived(json: String)
 
 }
 

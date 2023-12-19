@@ -100,4 +100,6 @@ interface MessageRepository {
         messageId: MessageId,
         type: MessageType,
     ): LoadResponse<Any, ResponseError>
+
+    suspend fun mqttTextMessageReceived(json: String)
 }

@@ -5,7 +5,7 @@ import com.squareup.moshi.JsonDataException
 import com.squareup.moshi.Moshi
 
 @JsonClass(generateAdapter = true)
-data class KeyExchangeMessageDto(
+data class SphinxChatMessage(
     val uuid: String,
     val type: Int,
     val sender: Sender,
@@ -28,21 +28,21 @@ data class Sender(
 )
 
 @Throws(AssertionError::class)
-fun KeyExchangeMessageDto.toJson(moshi: Moshi): String {
-    val adapter = moshi.adapter(KeyExchangeMessageDto::class.java)
+fun SphinxChatMessage.toJson(moshi: Moshi): String {
+    val adapter = moshi.adapter(SphinxChatMessage::class.java)
     return adapter.toJson(this)
 }
 
-fun String.toKeyExchangeMessageDtoOrNull(moshi: Moshi): KeyExchangeMessageDto? {
+fun String.toSphinxChatMessageNull(moshi: Moshi): SphinxChatMessage? {
     return try {
-        this.toKeyExchangeMessageDto(moshi)
+        this.toSphinxChatMessage(moshi)
     } catch (e: Exception) {
         null
     }
 }
 
 @Throws(JsonDataException::class)
-fun String.toKeyExchangeMessageDto(moshi: Moshi): KeyExchangeMessageDto {
-    val adapter = moshi.adapter(KeyExchangeMessageDto::class.java)
+fun String.toSphinxChatMessage(moshi: Moshi): SphinxChatMessage {
+    val adapter = moshi.adapter(SphinxChatMessage::class.java)
     return adapter.fromJson(this) ?: throw IllegalArgumentException("Invalid JSON for KeyExchangeMessageDto")
 }
