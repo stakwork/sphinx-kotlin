@@ -27,7 +27,9 @@ import org.eclipse.paho.client.mqttv3.MqttConnectOptions
 import org.eclipse.paho.client.mqttv3.MqttException
 import org.eclipse.paho.client.mqttv3.MqttMessage
 import org.json.JSONObject
+import uniffi.sphinxrs.RunReturn
 import uniffi.sphinxrs.createOnionMsg
+import uniffi.sphinxrs.handle
 import uniffi.sphinxrs.mnemonicFromEntropy
 import uniffi.sphinxrs.mnemonicToSeed
 import uniffi.sphinxrs.peelOnionMsg
@@ -48,6 +50,7 @@ class ConnectManagerImpl(
     private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private var ownerSeed: String? = null
     private var ownerLspPubKey: LightningNodePubKey? = null
+    private var mutableUserState: ByteArray? = null
 
     private val _connectionStateStateFlow = MutableStateFlow<ConnectionState?>(null)
     override val connectionStateStateFlow: StateFlow<ConnectionState?>
@@ -65,6 +68,9 @@ class ConnectManagerImpl(
         coroutineScope.launch {
 
             val seed = generateMnemonic()
+            val now = getTimestampInMilliseconds()
+
+            val serverURI = mixer
 
             val xPub = seed.first?.let {
                 generateXPub(
@@ -77,13 +83,12 @@ class ConnectManagerImpl(
             val okKey = seed.first?.let {
                 generatePubKeyFromSeed(
                     it,
-                    0.toUInt(),
+                    0.toULong(),
                     getTimestampInMilliseconds(),
                     network
                 )
             }
 
-            val now = getTimestampInMilliseconds()
 
             val sig = seed.first?.let {
                 rootSignMs(
@@ -93,7 +98,6 @@ class ConnectManagerImpl(
                 )
             }
 
-            val serverURI = mixer
 
             if (xPub != null && sig != null && okKey != null && serverURI != null) {
 
@@ -154,7 +158,7 @@ class ConnectManagerImpl(
 
     private fun generatePubKeyFromSeed(
         seed: String,
-        index: UInt,
+        index: ULong,
         time: String,
         network: String
     ): String? {
@@ -175,7 +179,7 @@ class ConnectManagerImpl(
             val childPubKey = ownerSeed?.let {
                 generatePubKeyFromSeed(
                     it,
-                    contact.index.value.toUInt(),
+                    contact.index.value.toULong(),
                     now,
                     network
                 )
@@ -199,7 +203,7 @@ class ConnectManagerImpl(
         serverUri: String,
         mnemonicWords: WalletMnemonic,
         okKey: String,
-        contacts: List<ContactInfo>?,
+        userState: ByteArray?,
         lspPubKey: LightningNodePubKey?
     ) {
         coroutineScope.launch {
@@ -229,8 +233,10 @@ class ConnectManagerImpl(
             }
 
             if (xPub != null && sig != null) {
+
                 ownerSeed = seed
                 ownerLspPubKey = lspPubKey
+                mutableUserState = userState
 
                 connectToMQTT(
                     serverUri,
@@ -238,7 +244,7 @@ class ConnectManagerImpl(
                     now,
                     sig,
                     okKey,
-                    contacts
+                    null
                 )
             }
         }
@@ -295,7 +301,22 @@ class ConnectManagerImpl(
                     Log.d("MQTT_MESSAGES", "$message")
                     Log.d("MQTT_MESSAGES", "${message?.payload}")
 
-                    handleMqttMessage(topic, message)
+                    if (topic != null && message?.payload != null) {
+
+                        val a = handle(
+                            topic,
+                            message.payload,
+                            ownerSeed ?: "",
+                            getTimestampInMilliseconds(),
+                            mutableUserState ?: ByteArray(0),
+                            "ale",
+                            ""
+                        )
+
+                        Log.d("MQTT_MESSAGES", " this is handle ${a}")
+                    }
+
+//                    handleMqttMessage(topic, message)
                 }
 
                 override fun deliveryComplete(token: IMqttDeliveryToken?) {
@@ -307,6 +328,7 @@ class ConnectManagerImpl(
             e.printStackTrace()
         }
     }
+
 
     private fun subscribeOwnerMQTT(okKey: String){
         // Balance is causing a error because is not implemented yet.
@@ -394,7 +416,7 @@ class ConnectManagerImpl(
                 val onion = try {
                     createOnionMsg(
                         seed,
-                        0.toUInt(),
+                        0.toULong(),
                         now,
                         network,
                         hops,
@@ -466,6 +488,74 @@ class ConnectManagerImpl(
         }
     }
 
+    fun handleRr(rr: RunReturn, client: MqttAsyncClient) {
+        // Set updated state into db
+        rr.stateMp?.let {
+            mutableUserState = it
+
+            notifyListeners {
+                onUpdateUserState(it)
+            }
+        }
+
+        // Publish to topic 0
+        rr.topic0?.let { topic ->
+            Log.d("MQTT_MESSAGES", "=> topic_0 $topic")
+            val pld = rr.payload0 ?: ByteArray(0)
+            client.publish(topic, MqttMessage(pld))
+        }
+
+        // Publish to topic 1
+        rr.topic1?.let { topic ->
+            Log.d("MQTT_MESSAGES", "=> topic_1 $topic")
+            val pld = rr.payload1 ?: ByteArray(0)
+            client.publish(topic, MqttMessage(pld))
+        }
+
+        // Publish to topic 2
+        rr.topic2?.let { topic ->
+            Log.d("MQTT_MESSAGES", "=> topic_2 $topic")
+            val pld = rr.payload2 ?: ByteArray(0)
+            client.publish(topic, MqttMessage(pld))
+        }
+
+        // Set your balance
+        rr.newBalance?.let { newBalance ->
+            Log.d("MQTT_MESSAGES", "===> BALANCE ${newBalance.toLong()}")
+            // BALANCE = newBalance.toLong()
+        }
+
+        // Incoming message json
+        rr.msg?.let { msg ->
+            Log.d("MQTT_MESSAGES", "=> received msg $msg, ${rr.msgUuid}, ${rr.msgIndex}")
+        }
+
+        // Incoming sender info json
+        rr.msgSender?.let { msgSender ->
+            Log.d("MQTT_MESSAGES", "=> received msg_sender $msgSender")
+        }
+
+        // Print my contact info
+        rr.myContactInfo?.let { myContactInfo ->
+            Log.d("MQTT_MESSAGES", "=> my_contact_info $myContactInfo")
+        }
+
+        // Sent
+        rr.sentStatus?.let { sentStatus ->
+            Log.d("MQTT_MESSAGES", "=> sent_status $sentStatus")
+        }
+
+        // Settled
+        rr.settledStatus?.let { settledStatus ->
+            Log.d("MQTT_MESSAGES", "=> settled_status $settledStatus")
+        }
+
+        // Incoming error string
+        rr.error?.let { error ->
+            Log.d("MQTT_MESSAGES", "=> error $error")
+        }
+    }
+
     private fun handleContactRegistered(
         topic: String,
         connectionState: ConnectionState.ContactRegistered
@@ -504,7 +594,7 @@ class ConnectManagerImpl(
                 val decryptedJson = try {
                     peelOnionMsg(
                         seed,
-                        0.toUInt(),
+                        0.toULong(),
                         now,
                         network,
                         payload
@@ -516,7 +606,6 @@ class ConnectManagerImpl(
                 val jsonObject = try {
                     JSONObject(decryptedJson.toString())
                 } catch (e: Exception) {
-                    val exce = e
                     null
                 }
                 val messageType = jsonObject?.getInt("type")

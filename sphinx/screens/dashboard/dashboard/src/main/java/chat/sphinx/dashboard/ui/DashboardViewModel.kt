@@ -3,7 +3,9 @@ package chat.sphinx.dashboard.ui
 import android.app.Application
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.net.Uri
+import android.util.Base64
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import app.cash.exhaustive.Exhaustive
@@ -23,6 +25,7 @@ import chat.sphinx.concept_relay.RelayDataHandler
 import chat.sphinx.concept_repository_actions.ActionsRepository
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_connect_manager.ConnectManagerRepository
+import chat.sphinx.concept_repository_connect_manager.model.ConnectionManagerState
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_dashboard_android.RepositoryDashboardAndroid
 import chat.sphinx.concept_repository_feed.FeedRepository
@@ -62,6 +65,8 @@ import chat.sphinx.wrapper_contact.*
 import chat.sphinx.wrapper_feed.*
 import chat.sphinx.wrapper_lightning.NodeBalance
 import chat.sphinx.wrapper_relay.RelayUrl
+import com.ensarsarajcic.kotlinx.serialization.msgpack.MsgPack
+import com.ensarsarajcic.kotlinx.serialization.msgpack.MsgPackDynamicSerializer
 import com.squareup.moshi.Moshi
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
@@ -72,6 +77,8 @@ import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
+import org.json.JSONException
+import org.json.JSONObject
 import javax.inject.Inject
 
 @HiltViewModel
@@ -138,7 +145,16 @@ internal class DashboardViewModel @Inject constructor(
         MutableStateFlow(null)
     }
 
+    companion object {
+        const val USER_STATE_SHARED_PREFERENCES = "user_state_settings"
+        const val ONION_STATE_KEY = "onion_state"
+
+    }
+
     private lateinit var signerManager: SignerManager
+
+    private val userStateSharedPreferences: SharedPreferences =
+        app.getSharedPreferences(USER_STATE_SHARED_PREFERENCES, Context.MODE_PRIVATE)
 
     init {
         if (args.updateBackgroundLoginTime) {
@@ -146,7 +162,8 @@ internal class DashboardViewModel @Inject constructor(
                 backgroundLoginHandler.updateLoginTime()
             }
         }
-        connectManagerRepository.connectAndSubscribeToMqtt()
+        connectManagerRepository.connectAndSubscribeToMqtt(getUserState())
+        collectConnectionStateStateFlow()
 
         syncFeedRecommendationsState()
 
@@ -158,6 +175,98 @@ internal class DashboardViewModel @Inject constructor(
         feedRepository.restoreContentFeedStatuses()
 
         networkRefresh(true)
+    }
+
+
+    private fun collectConnectionStateStateFlow() {
+        viewModelScope.launch(mainImmediate) {
+            connectManagerRepository.connectionManagerState.collect { connectionState ->
+                when (connectionState) {
+                    is ConnectionManagerState.UserState -> {
+                        storeUserState(connectionState.userState)
+                    }
+                    else -> {}
+                }
+            }
+        }
+    }
+
+    private fun storeUserState(state: ByteArray) {
+        try {
+            val decoded = MsgPack.decodeFromByteArray(MsgPackDynamicSerializer, state)
+
+            (decoded as? MutableMap<String, ByteArray>)?.let {
+                storeUserStateOnSharedPreferences(it)
+            }
+
+        } catch (e: Exception) {
+        }
+    }
+
+    private fun getUserState(): ByteArray? {
+        return try {
+            val userState = retrieveUserStateMap()
+            val encoded = MsgPack.encodeToByteArray(MsgPackDynamicSerializer, userState)
+
+            encoded
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    private fun storeUserStateOnSharedPreferences(newUserState: MutableMap<String, ByteArray>) {
+        val existingUserState = retrieveUserStateMap()
+        existingUserState.putAll(newUserState)
+
+        val encodedString = encodeMapToBase64(existingUserState)
+        val editor = userStateSharedPreferences.edit()
+
+        editor.putString(ONION_STATE_KEY, encodedString)
+        editor.apply()
+    }
+
+    private fun retrieveUserStateMap(): MutableMap<String, ByteArray> {
+        val encodedString = userStateSharedPreferences.getString(ONION_STATE_KEY, null)
+
+        val result = encodedString?.let {
+            decodeBase64ToMap(it)
+        } ?: mutableMapOf()
+
+        return result
+    }
+
+    private fun encodeMapToBase64(map: MutableMap<String, ByteArray>): String {
+        val encodedMap = mutableMapOf<String, String>()
+
+        for ((key, value) in map) {
+            encodedMap[key] = Base64.encodeToString(value, Base64.DEFAULT)
+        }
+
+        val result = (encodedMap as Map<*, *>?)?.let { JSONObject(it).toString() } ?: ""
+
+        return result
+    }
+
+    private fun decodeBase64ToMap(encodedString: String): MutableMap<String, ByteArray> {
+        if (encodedString.isEmpty()) {
+            return mutableMapOf()
+        }
+
+        val decodedMap = mutableMapOf<String, ByteArray>()
+
+        try {
+            val jsonObject = JSONObject(encodedString)
+            val keys = jsonObject.keys()
+
+            while (keys.hasNext()) {
+                val key = keys.next()
+                val encodedValue = jsonObject.getString(key)
+                val decodedValue = Base64.decode(encodedValue, Base64.DEFAULT)
+                decodedMap[key] = decodedValue
+            }
+        } catch (e: JSONException) { }
+
+        return decodedMap
     }
 
     private fun getRelayKeys() {

@@ -2,7 +2,6 @@ package chat.sphinx.example.concept_connect_manager
 
 import chat.sphinx.example.concept_connect_manager.model.ConnectionState
 import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
-import chat.sphinx.wrapper_contact.ContactInfo
 import chat.sphinx.wrapper_contact.NewContact
 import chat.sphinx.wrapper_lightning.WalletMnemonic
 import kotlinx.coroutines.flow.StateFlow
@@ -17,7 +16,7 @@ abstract class ConnectManager {
         serverUri: String,
         mnemonicWords: WalletMnemonic,
         okKey: String,
-        contacts: List<ContactInfo>?,
+        userState: ByteArray?,
         lspPubKey: LightningNodePubKey?,
         )
     abstract fun sendMessage(
@@ -44,6 +43,8 @@ interface ConnectManagerListener {
     fun onKeyExchangeConfirmation(json: String)
 
     fun onTextMessageReceived(json: String)
+
+    fun onUpdateUserState(userState: ByteArray)
 
 }
 

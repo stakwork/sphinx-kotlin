@@ -297,7 +297,7 @@ abstract class SphinxRepository(
         }
     }
 
-    override fun connectAndSubscribeToMqtt() {
+    override fun connectAndSubscribeToMqtt(userState: ByteArray?) {
         applicationScope.launch(mainImmediate) {
             val contactsMap = getContactsChildPubKeysToIndexes().firstOrNull()
                 ?.mapKeys { it.key.value }
@@ -321,10 +321,10 @@ abstract class SphinxRepository(
 
             if (mnemonic != null && okKey != null) {
                 connectManager.initializeMqttAndSubscribe(
-                    "tcp://54.164.163.153:1883",
+                    "tcp://34.229.52.200:1883",
                     mnemonic,
                     okKey,
-                    contactsInfoList,
+                    userState,
                     senderLsp
                 )
             }
@@ -386,6 +386,11 @@ abstract class SphinxRepository(
         applicationScope.launch(io) {
             mqttTextMessageReceived(json)
         }
+    }
+
+    override fun onUpdateUserState(userState: ByteArray) {
+        connectionManagerState.value = ConnectionManagerState.UserState(userState)
+
     }
 
     override suspend fun updateLspAndOwner(data: String) {

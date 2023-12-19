@@ -82,7 +82,9 @@ dependencies {
     implementation deps.jna.sdk
     implementation deps.lottie.sdk
     implementation deps.square.moshi
+    implementation deps.msgpack.sdk
     kapt kaptDeps.google.hilt
+
 
     testImplementation testDeps.junit
 

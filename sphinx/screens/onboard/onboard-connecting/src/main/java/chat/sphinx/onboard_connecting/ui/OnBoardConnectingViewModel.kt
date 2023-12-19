@@ -184,7 +184,7 @@ internal class OnBoardConnectingViewModel @Inject constructor(
                 if (signerManager.isPhoneSignerSettingUp()) {
                     continuePhoneSignerSetup()
                 } else {
-                    connectManagerRepository.setLspIp("tcp://54.164.163.153:1883")
+                    connectManagerRepository.setLspIp("tcp://34.229.52.200:1883")
                     connectManagerRepository.createOwnerAccount()
 
 //                    submitSideEffect(OnBoardConnectingSideEffect.InvalidCode)
