@@ -29,12 +29,16 @@ import org.eclipse.paho.client.mqttv3.MqttMessage
 import org.json.JSONObject
 import uniffi.sphinxrs.RunReturn
 import uniffi.sphinxrs.createOnionMsg
+import uniffi.sphinxrs.getSubscriptionTopic
 import uniffi.sphinxrs.handle
+import uniffi.sphinxrs.initialSetup
 import uniffi.sphinxrs.mnemonicFromEntropy
 import uniffi.sphinxrs.mnemonicToSeed
 import uniffi.sphinxrs.peelOnionMsg
 import uniffi.sphinxrs.pubkeyFromSeed
 import uniffi.sphinxrs.rootSignMs
+import uniffi.sphinxrs.setBlockheight
+import uniffi.sphinxrs.setNetwork
 import uniffi.sphinxrs.xpubFromSeed
 import java.security.SecureRandom
 
@@ -80,16 +84,6 @@ class ConnectManagerImpl(
                 )
             }
 
-            val okKey = seed.first?.let {
-                generatePubKeyFromSeed(
-                    it,
-                    0.toULong(),
-                    getTimestampInMilliseconds(),
-                    network
-                )
-            }
-
-
             val sig = seed.first?.let {
                 rootSignMs(
                     it,
@@ -99,20 +93,15 @@ class ConnectManagerImpl(
             }
 
 
-            if (xPub != null && sig != null && okKey != null && serverURI != null) {
+            if (xPub != null && sig != null && serverURI != null) {
 
                 ownerSeed = seed.first
-
-                notifyListeners {
-                    onOkKey(okKey)
-                }
 
                 connectToMQTT(
                     serverURI,
                     xPub,
                     now,
                     sig,
-                    okKey,
                     null
                 )
             }
@@ -243,7 +232,6 @@ class ConnectManagerImpl(
                     xPub,
                     now,
                     sig,
-                    okKey,
                     null
                 )
             }
@@ -255,7 +243,6 @@ class ConnectManagerImpl(
         clientId: String,
         key: String,
         password: String,
-        okKey: String,
         contacts: List<ContactInfo>?
     ) {
 
@@ -275,11 +262,8 @@ class ConnectManagerImpl(
             mqttClient?.connect(options, null, object : IMqttActionListener {
                 override fun onSuccess(asyncActionToken: IMqttToken?) {
                     Log.d("MQTT_MESSAGES", "MQTT CONNECTED!")
-                    subscribeOwnerMQTT(okKey)
 
-                    contacts?.let {
-                        subscribeContacts(it)
-                    }
+                    subscribeOwnerMQTT()
                 }
 
                 override fun onFailure(asyncActionToken: IMqttToken?, exception: Throwable?) {
@@ -330,33 +314,41 @@ class ConnectManagerImpl(
     }
 
 
-    private fun subscribeOwnerMQTT(okKey: String){
-        // Balance is causing a error because is not implemented yet.
-        // The body message belongs to registerMsg
+    private fun subscribeOwnerMQTT() {
 
-        val topics = arrayOf("${okKey}/${0}/res/#")
-        val qos = IntArray(topics.size) { 1 }
+        try {
+            mqttClient?.let { client ->
+                // Network setup and handling
+                val networkSetup = setNetwork(network)
+                handleRr(networkSetup, client)
 
-        mqttClient?.subscribe(topics, qos)
+                // Block height setup and handling
+                val blockSetup = setBlockheight(0.toUInt())
+                handleRr(blockSetup, client)
 
-    //  val balance = "${okKey}/${0}/req/balance"
-        val registerOkKey = "${okKey}/${0}/req/register"
-        val registerMsg = "${okKey}/${0}/req/msgs"
+                // Subscribe to MQTT topic
+                val subtopic = getSubscriptionTopic(
+                    ownerSeed!!,
+                    getTimestampInMilliseconds(),
+                    mutableUserState ?: ByteArray(0),
+                )
 
+                val qos = IntArray(1) { 1 }
+                client.subscribe(arrayOf(subtopic), qos)
 
-        val body = """
-        {
-            "since": 0,
-            "limit": 1000
+                // Initial setup and handling
+                val rr2 = initialSetup(
+                    ownerSeed!!,
+                    getTimestampInMilliseconds(),
+                    mutableUserState!!
+                )
+
+                handleRr(rr2, client)
+            }
+        } catch (e: Exception) {
+
         }
-        """.trimIndent()
-
-        val mqttmessages = arrayOf("", body)
-        val topicsArray = arrayOf(registerOkKey, registerMsg)
-
-        publishTopicsSequentially(topicsArray, mqttmessages,0)
     }
-
 
     private fun subscribeContacts(contacts: List<ContactInfo>) {
         val subscribeTopic = contacts.map { contactInfo ->
@@ -488,7 +480,7 @@ class ConnectManagerImpl(
         }
     }
 
-    fun handleRr(rr: RunReturn, client: MqttAsyncClient) {
+    private fun handleRr(rr: RunReturn, client: MqttAsyncClient) {
         // Set updated state into db
         rr.stateMp?.let {
             mutableUserState = it
@@ -496,6 +488,8 @@ class ConnectManagerImpl(
             notifyListeners {
                 onUpdateUserState(it)
             }
+            Log.d("MQTT_MESSAGES", "=> stateMp $it")
+
         }
 
         // Publish to topic 0

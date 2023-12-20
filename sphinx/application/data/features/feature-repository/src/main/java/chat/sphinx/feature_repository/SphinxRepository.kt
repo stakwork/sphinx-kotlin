@@ -390,7 +390,6 @@ abstract class SphinxRepository(
 
     override fun onUpdateUserState(userState: ByteArray) {
         connectionManagerState.value = ConnectionManagerState.UserState(userState)
-
     }
 
     override suspend fun updateLspAndOwner(data: String) {
