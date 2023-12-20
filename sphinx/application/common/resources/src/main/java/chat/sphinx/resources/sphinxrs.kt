@@ -836,6 +836,7 @@ data class RunReturn (
     var `payload2`: ByteArray?, 
     var `stateMp`: ByteArray?, 
     var `msg`: String?, 
+    var `msgType`: UByte?, 
     var `msgUuid`: String?, 
     var `msgIndex`: String?, 
     var `msgSender`: String?, 
@@ -859,6 +860,7 @@ public object FfiConverterTypeRunReturn: FfiConverterRustBuffer<RunReturn> {
             FfiConverterOptionalByteArray.read(buf),
             FfiConverterOptionalByteArray.read(buf),
             FfiConverterOptionalString.read(buf),
+            FfiConverterOptionalUByte.read(buf),
             FfiConverterOptionalString.read(buf),
             FfiConverterOptionalString.read(buf),
             FfiConverterOptionalString.read(buf),
@@ -879,6 +881,7 @@ public object FfiConverterTypeRunReturn: FfiConverterRustBuffer<RunReturn> {
             FfiConverterOptionalByteArray.allocationSize(value.`payload2`) +
             FfiConverterOptionalByteArray.allocationSize(value.`stateMp`) +
             FfiConverterOptionalString.allocationSize(value.`msg`) +
+            FfiConverterOptionalUByte.allocationSize(value.`msgType`) +
             FfiConverterOptionalString.allocationSize(value.`msgUuid`) +
             FfiConverterOptionalString.allocationSize(value.`msgIndex`) +
             FfiConverterOptionalString.allocationSize(value.`msgSender`) +
@@ -898,6 +901,7 @@ public object FfiConverterTypeRunReturn: FfiConverterRustBuffer<RunReturn> {
             FfiConverterOptionalByteArray.write(value.`payload2`, buf)
             FfiConverterOptionalByteArray.write(value.`stateMp`, buf)
             FfiConverterOptionalString.write(value.`msg`, buf)
+            FfiConverterOptionalUByte.write(value.`msgType`, buf)
             FfiConverterOptionalString.write(value.`msgUuid`, buf)
             FfiConverterOptionalString.write(value.`msgIndex`, buf)
             FfiConverterOptionalString.write(value.`msgSender`, buf)
@@ -1524,6 +1528,35 @@ public object FfiConverterTypeSphinxError : FfiConverterRustBuffer<SphinxExcepti
         }.let { /* this makes the `when` an expression, which ensures it is exhaustive */ }
     }
 
+}
+
+
+
+
+public object FfiConverterOptionalUByte: FfiConverterRustBuffer<UByte?> {
+    override fun read(buf: ByteBuffer): UByte? {
+        if (buf.get().toInt() == 0) {
+            return null
+        }
+        return FfiConverterUByte.read(buf)
+    }
+
+    override fun allocationSize(value: UByte?): Int {
+        if (value == null) {
+            return 1
+        } else {
+            return 1 + FfiConverterUByte.allocationSize(value)
+        }
+    }
+
+    override fun write(value: UByte?, buf: ByteBuffer) {
+        if (value == null) {
+            buf.put(0)
+        } else {
+            buf.put(1)
+            FfiConverterUByte.write(value, buf)
+        }
+    }
 }
 
 
