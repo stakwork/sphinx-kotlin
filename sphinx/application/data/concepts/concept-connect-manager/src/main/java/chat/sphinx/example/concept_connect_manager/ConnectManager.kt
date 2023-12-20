@@ -36,8 +36,7 @@ abstract class ConnectManager {
 interface ConnectManagerListener {
 
     fun onMnemonicWords(words: String)
-    fun onOkKey(okKey: String)
-    fun onOwnerRegistered(message: String)
+    fun onOwnerRegistered(okKey: String, routeHint: String)
     fun onNewContactRegistered(index: Int, childPubKey: String, scid: String, contactRouteHint: String)
     fun onKeyExchange(json: String)
     fun onKeyExchangeConfirmation(json: String)

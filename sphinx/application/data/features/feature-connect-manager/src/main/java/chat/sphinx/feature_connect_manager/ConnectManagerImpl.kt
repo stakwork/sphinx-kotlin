@@ -287,7 +287,7 @@ class ConnectManagerImpl(
 
                     if (topic != null && message?.payload != null) {
 
-                        val a = handle(
+                        val runReturn = handle(
                             topic,
                             message.payload,
                             ownerSeed ?: "",
@@ -297,7 +297,11 @@ class ConnectManagerImpl(
                             ""
                         )
 
-                        Log.d("MQTT_MESSAGES", " this is handle ${a}")
+                        mqttClient?.let { client ->
+                            handleRr(runReturn, client)
+                        }
+
+                        Log.d("MQTT_MESSAGES", " this is handle ${runReturn}")
                     }
 
 //                    handleMqttMessage(topic, message)
@@ -464,7 +468,7 @@ class ConnectManagerImpl(
             when (connectionState) {
                 is ConnectionState.OwnerRegistered -> {
                     notifyListeners {
-                        onOwnerRegistered(connectionState.message)
+//                        onOwnerRegistered(connectionState.message,)
                     }
                 }
                 is ConnectionState.ContactRegistered -> {
@@ -532,6 +536,16 @@ class ConnectManagerImpl(
         // Print my contact info
         rr.myContactInfo?.let { myContactInfo ->
             Log.d("MQTT_MESSAGES", "=> my_contact_info $myContactInfo")
+            val parts = myContactInfo.split("_", limit = 2)
+
+            val okKey = parts.getOrNull(0)
+            val routeHint = parts.getOrNull(1)
+
+            if (okKey != null && routeHint != null) {
+                notifyListeners {
+                    onOwnerRegistered(okKey, routeHint)
+                }
+            }
         }
 
         // Sent

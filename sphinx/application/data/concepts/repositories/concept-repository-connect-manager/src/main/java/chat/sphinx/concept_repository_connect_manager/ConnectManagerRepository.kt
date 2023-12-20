@@ -13,7 +13,6 @@ interface ConnectManagerRepository {
     fun createContact(contact: NewContact)
     fun connectAndSubscribeToMqtt(userState: ByteArray?) {}
     fun setLspIp(lspIp: String)
-    suspend fun createOwnerWithOkKey(okKey: String) {}
     suspend fun updateLspAndOwner(data: String) {}
     suspend fun sendKeyExchange(
         index: Int,

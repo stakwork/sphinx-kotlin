@@ -118,10 +118,12 @@ import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.lightning.ServerIp
 import chat.sphinx.wrapper_common.lightning.ShortChannelId
 import chat.sphinx.wrapper_common.lightning.getLspPubKey
+import chat.sphinx.wrapper_common.lightning.getScid
 import chat.sphinx.wrapper_common.lightning.retrieveLightningRouteHint
 import chat.sphinx.wrapper_common.lightning.toLightningNodePubKey
 import chat.sphinx.wrapper_common.lightning.toLightningRouteHint
 import chat.sphinx.wrapper_common.lightning.toSat
+import chat.sphinx.wrapper_common.lightning.toShortChannelId
 import chat.sphinx.wrapper_common.message.*
 import chat.sphinx.wrapper_common.payment.PaymentTemplate
 import chat.sphinx.wrapper_common.subscription.EndNumber
@@ -266,32 +268,27 @@ abstract class SphinxRepository(
         connectionManagerState.value = ConnectionManagerState.MnemonicWords(words)
     }
 
-    override fun onOkKey(okKey: String) {
-        applicationScope.launch(io) {
-            createOwner(okKey)
-        }
-    }
-
-    override fun onOwnerRegistered(message: String) {
+    override fun onOwnerRegistered(okKey: String, routeHint: String) {
         applicationScope.launch(mainImmediate) {
+            val scid = routeHint.toLightningRouteHint()?.getScid()
 
-            val lspChannelInfo = message.toLspChannelInfo(moshi)
-            val serverIp = connectManager.retrieveLspIp()
-            val serverPubKey = lspChannelInfo?.serverPubKey
-            val scid = lspChannelInfo?.scid
-            val routeHint = retrieveLightningRouteHint(serverPubKey?.value, scid?.value)
+//            val lspChannelInfo = okKey.toLspChannelInfo(moshi)
+//            val serverIp = connectManager.retrieveLspIp()
+//            val serverPubKey = lspChannelInfo?.serverPubKey
+//            val scid = lspChannelInfo?.scid
+//            val routeHint = retrieveLightningRouteHint(serverPubKey?.value, scid?.value)
+//
+//            if (serverIp?.isNotEmpty() == true && serverPubKey != null) {
+//                updateLSP(
+//                    LightningServiceProvider(
+//                        ServerIp(serverIp),
+//                        serverPubKey
+//                    )
+//                )
+//            }
 
-            if (serverIp?.isNotEmpty() == true && serverPubKey != null) {
-                updateLSP(
-                    LightningServiceProvider(
-                        ServerIp(serverIp),
-                        serverPubKey
-                    )
-                )
-            }
-
-            if (routeHint != null && scid != null) {
-                updateOwnerRouteHintAndScid(routeHint, scid)
+            if (scid != null) {
+                createOwner(okKey, routeHint, scid)
                 connectionManagerState.value = ConnectionManagerState.OwnerRegistered
             }
         }
@@ -344,11 +341,6 @@ abstract class SphinxRepository(
 
     override fun setLspIp(lspIp: String) {
         connectManager.setLspIp(lspIp)
-    }
-
-    override suspend fun createOwnerWithOkKey(okKey: String) {
-        createOwner(okKey)
-        super.createOwnerWithOkKey(okKey)
     }
 
     override fun onNewContactRegistered(
@@ -2010,13 +2002,13 @@ abstract class SphinxRepository(
         return response
     }
 
-    override suspend fun createOwner(okKey: String) {
+    override suspend fun createOwner(okKey: String, routeHint: String, shortChannelId: String) {
         val queries = coreDB.getSphinxDatabaseQueries()
         val now = DateTime.nowUTC()
 
         val owner = Contact(
             id = ContactId(0L),
-            routeHint = null,
+            routeHint = routeHint.toLightningRouteHint(),
             nodePubKey = okKey.toLightningNodePubKey(),
             nodeAlias = null,
             alias = null,
@@ -2034,7 +2026,7 @@ abstract class SphinxRepository(
             inviteId = null,
             inviteStatus = null,
             blocked = Blocked.False,
-            scid = null,
+            scid = shortChannelId.toShortChannelId(),
             contactIndex = ContactIndex(0L),
             contactRouteHint = null,
             childPubKey = null,
