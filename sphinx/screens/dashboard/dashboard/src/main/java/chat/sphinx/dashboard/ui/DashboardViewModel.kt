@@ -206,9 +206,7 @@ internal class DashboardViewModel @Inject constructor(
     private fun getUserState(): ByteArray? {
         return try {
             val userState = retrieveUserStateMap()
-            val encoded = MsgPack.encodeToByteArray(MsgPackDynamicSerializer, userState)
-
-            encoded
+            MsgPack.encodeToByteArray(MsgPackDynamicSerializer, userState)
         } catch (e: Exception) {
             null
         }

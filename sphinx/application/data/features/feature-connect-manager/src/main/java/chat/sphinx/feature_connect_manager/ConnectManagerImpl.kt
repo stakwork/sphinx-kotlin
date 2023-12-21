@@ -92,7 +92,6 @@ class ConnectManagerImpl(
                 )
             }
 
-
             if (xPub != null && sig != null && serverURI != null) {
 
                 ownerSeed = seed.first
@@ -101,8 +100,7 @@ class ConnectManagerImpl(
                     serverURI,
                     xPub,
                     now,
-                    sig,
-                    null
+                    sig
                 )
             }
         }
@@ -192,8 +190,7 @@ class ConnectManagerImpl(
         serverUri: String,
         mnemonicWords: WalletMnemonic,
         okKey: String,
-        userState: ByteArray?,
-        lspPubKey: LightningNodePubKey?
+        userState: ByteArray?
     ) {
         coroutineScope.launch {
 
@@ -224,7 +221,7 @@ class ConnectManagerImpl(
             if (xPub != null && sig != null) {
 
                 ownerSeed = seed
-                ownerLspPubKey = lspPubKey
+//                ownerLspPubKey = lspPubKey
                 mutableUserState = userState
 
                 connectToMQTT(
@@ -232,7 +229,6 @@ class ConnectManagerImpl(
                     xPub,
                     now,
                     sig,
-                    null
                 )
             }
         }
@@ -243,7 +239,6 @@ class ConnectManagerImpl(
         clientId: String,
         key: String,
         password: String,
-        contacts: List<ContactInfo>?
     ) {
 
         mqttClient = try {

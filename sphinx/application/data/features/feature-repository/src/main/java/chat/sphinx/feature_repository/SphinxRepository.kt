@@ -314,15 +314,14 @@ abstract class SphinxRepository(
 
             val mnemonic = walletDataHandler.retrieveWalletMnemonic()
             val okKey = accountOwner.value?.nodePubKey?.value
-            val senderLsp = retrieveLSP().firstOrNull()?.pubKey
+//            val senderLsp = retrieveLSP().firstOrNull()?.pubKey
 
             if (mnemonic != null && okKey != null) {
                 connectManager.initializeMqttAndSubscribe(
                     "tcp://34.229.52.200:1883",
                     mnemonic,
                     okKey,
-                    userState,
-                    senderLsp
+                    userState
                 )
             }
         }
