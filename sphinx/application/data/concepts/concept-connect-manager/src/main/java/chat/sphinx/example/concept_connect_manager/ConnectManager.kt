@@ -1,6 +1,7 @@
 package chat.sphinx.example.concept_connect_manager
 
 import chat.sphinx.example.concept_connect_manager.model.ConnectionState
+import chat.sphinx.example.concept_connect_manager.model.OwnerInfo
 import chat.sphinx.wrapper_contact.NewContact
 import chat.sphinx.wrapper_lightning.WalletMnemonic
 import kotlinx.coroutines.flow.StateFlow
@@ -8,15 +9,15 @@ import kotlinx.coroutines.flow.StateFlow
 abstract class ConnectManager {
 
     abstract val connectionStateStateFlow: StateFlow<ConnectionState?>
+    abstract val ownerInfoStateFlow: StateFlow<OwnerInfo?>
 
     abstract fun createAccount()
     abstract fun createContact(contact: NewContact)
     abstract fun initializeMqttAndSubscribe(
         serverUri: String,
         mnemonicWords: WalletMnemonic,
-        okKey: String,
-        userState: ByteArray?,
-        )
+        ownerInfo: OwnerInfo
+    )
     abstract fun sendMessage(
         sphinxMessage: String,
         hops: String,

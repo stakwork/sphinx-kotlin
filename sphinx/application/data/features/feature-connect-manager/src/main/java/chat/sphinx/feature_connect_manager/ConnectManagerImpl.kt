@@ -5,6 +5,7 @@ import chat.sphinx.example.concept_connect_manager.ConnectManager
 import chat.sphinx.example.concept_connect_manager.ConnectManagerListener
 import chat.sphinx.example.concept_connect_manager.model.TopicHandler
 import chat.sphinx.example.concept_connect_manager.model.ConnectionState
+import chat.sphinx.example.concept_connect_manager.model.OwnerInfo
 import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
 import chat.sphinx.wrapper_contact.NewContact
 import chat.sphinx.wrapper_common.lightning.retrieveLightningRouteHint
@@ -28,6 +29,7 @@ import org.eclipse.paho.client.mqttv3.MqttException
 import org.eclipse.paho.client.mqttv3.MqttMessage
 import org.json.JSONObject
 import uniffi.sphinxrs.RunReturn
+import uniffi.sphinxrs.addContact
 import uniffi.sphinxrs.createOnionMsg
 import uniffi.sphinxrs.getSubscriptionTopic
 import uniffi.sphinxrs.handle
@@ -54,11 +56,16 @@ class ConnectManagerImpl(
     private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private var ownerSeed: String? = null
     private var ownerLspPubKey: LightningNodePubKey? = null
-    private var mutableUserState: ByteArray? = null
 
     private val _connectionStateStateFlow = MutableStateFlow<ConnectionState?>(null)
     override val connectionStateStateFlow: StateFlow<ConnectionState?>
         get() = _connectionStateStateFlow
+
+    private val _ownerInfoStateFlow: MutableStateFlow<OwnerInfo?> by lazy {
+        MutableStateFlow(null)
+    }
+    override val ownerInfoStateFlow: StateFlow<OwnerInfo?>
+        get() = _ownerInfoStateFlow
 
     companion object {
         const val KEY_EXCHANGE = 10
@@ -160,27 +167,37 @@ class ConnectManagerImpl(
         contact: NewContact
     ) {
         coroutineScope.launch {
-
             val now = getTimestampInMilliseconds()
 
-            val childPubKey = ownerSeed?.let {
-                generatePubKeyFromSeed(
-                    it,
-                    contact.index.value.toULong(),
-                    now,
-                    network
-                )
-            }
+            addContact(
+                ownerSeed!!,
+                now,
+                ownerInfoStateFlow.value?.userState!!,
+                contact.lightningNodePubKey?.value!!,
+                contact.contactRouteHint?.value!!,
+                ownerInfoStateFlow.value?.alias!!,
+                ownerInfoStateFlow.value?.picture!!,
+                0.toULong()
+            )
 
-            val index = contact.index
-
-            if (childPubKey != null) {
-
-                subscribeAndPublishContactMQTT(
-                    childPubKey,
-                    index.value.toInt()
-                )
-            }
+//            val childPubKey = ownerSeed?.let {
+//                generatePubKeyFromSeed(
+//                    it,
+//                    contact.index.value.toULong(),
+//                    now,
+//                    network
+//                )
+//            }
+//
+//            val index = contact.index
+//
+//            if (childPubKey != null) {
+//
+//                subscribeAndPublishContactMQTT(
+//                    childPubKey,
+//                    index.value.toInt()
+//                )
+//            }
         }
     }
 
@@ -189,8 +206,7 @@ class ConnectManagerImpl(
     override fun initializeMqttAndSubscribe(
         serverUri: String,
         mnemonicWords: WalletMnemonic,
-        okKey: String,
-        userState: ByteArray?
+        ownerInfo: OwnerInfo
     ) {
         coroutineScope.launch {
 
@@ -221,8 +237,7 @@ class ConnectManagerImpl(
             if (xPub != null && sig != null) {
 
                 ownerSeed = seed
-//                ownerLspPubKey = lspPubKey
-                mutableUserState = userState
+                _ownerInfoStateFlow.value = ownerInfo
 
                 connectToMQTT(
                     serverUri,
@@ -287,13 +302,13 @@ class ConnectManagerImpl(
                             message.payload,
                             ownerSeed ?: "",
                             getTimestampInMilliseconds(),
-                            mutableUserState ?: ByteArray(0),
+                            ownerInfoStateFlow.value?.userState ?: ByteArray(0),
                             "ale",
                             ""
                         )
 
                         mqttClient?.let { client ->
-                            handleRr(runReturn, client)
+                            runReturnHandle(runReturn, client)
                         }
 
                         Log.d("MQTT_MESSAGES", " this is handle ${runReturn}")
@@ -319,17 +334,17 @@ class ConnectManagerImpl(
             mqttClient?.let { client ->
                 // Network setup and handling
                 val networkSetup = setNetwork(network)
-                handleRr(networkSetup, client)
+                runReturnHandle(networkSetup, client)
 
                 // Block height setup and handling
                 val blockSetup = setBlockheight(0.toUInt())
-                handleRr(blockSetup, client)
+                runReturnHandle(blockSetup, client)
 
                 // Subscribe to MQTT topic
                 val subtopic = getSubscriptionTopic(
                     ownerSeed!!,
                     getTimestampInMilliseconds(),
-                    mutableUserState ?: ByteArray(0),
+                    ownerInfoStateFlow.value?.userState ?: ByteArray(0),
                 )
 
                 val qos = IntArray(1) { 1 }
@@ -339,10 +354,10 @@ class ConnectManagerImpl(
                 val rr2 = initialSetup(
                     ownerSeed!!,
                     getTimestampInMilliseconds(),
-                    mutableUserState!!
+                    ownerInfoStateFlow.value?.userState!!
                 )
 
-                handleRr(rr2, client)
+                runReturnHandle(rr2, client)
             }
         } catch (e: Exception) {
 
@@ -479,10 +494,13 @@ class ConnectManagerImpl(
         }
     }
 
-    private fun handleRr(rr: RunReturn, client: MqttAsyncClient) {
+    private fun runReturnHandle(rr: RunReturn, client: MqttAsyncClient) {
         // Set updated state into db
         rr.stateMp?.let {
-            mutableUserState = it
+
+            _ownerInfoStateFlow.value = ownerInfoStateFlow.value?.copy(
+                userState = it
+            )
 
             notifyListeners {
                 onUpdateUserState(it)

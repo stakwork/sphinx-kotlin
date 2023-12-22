@@ -69,6 +69,7 @@ import chat.sphinx.concept_wallet.WalletDataHandler
 import chat.sphinx.conceptcoredb.*
 import chat.sphinx.example.concept_connect_manager.ConnectManager
 import chat.sphinx.example.concept_connect_manager.ConnectManagerListener
+import chat.sphinx.example.concept_connect_manager.model.OwnerInfo
 import chat.sphinx.example.wrapper_mqtt.HopsDto
 import chat.sphinx.example.wrapper_mqtt.SphinxChatMessage
 import chat.sphinx.example.wrapper_mqtt.MessagesFetchRequest
@@ -296,32 +297,20 @@ abstract class SphinxRepository(
 
     override fun connectAndSubscribeToMqtt(userState: ByteArray?) {
         applicationScope.launch(mainImmediate) {
-            val contactsMap = getContactsChildPubKeysToIndexes().firstOrNull()
-                ?.mapKeys { it.key.value }
-                ?.mapValues { it.value.value.toInt() }
-
-            val contactsInfoList = contactsMap?.map { (childPubKeyString, contactIndexInt) ->
-                // TODO() get id of the last message for that contact
-
-                val messagesFetchRequest = MessagesFetchRequest(0, 1000).toJson(moshi)
-
-                ContactInfo(
-                    childPubKey = LightningNodePubKey(childPubKeyString),
-                    contactIndex = ContactIndex(contactIndexInt.toLong()),
-                    messagesFetchRequest = messagesFetchRequest
-                )
-            }
-
             val mnemonic = walletDataHandler.retrieveWalletMnemonic()
             val okKey = accountOwner.value?.nodePubKey?.value
-//            val senderLsp = retrieveLSP().firstOrNull()?.pubKey
+
+            val ownerInfo = OwnerInfo(
+                accountOwner.value?.alias?.value ?: "",
+                accountOwner.value?.alias?.value ?: "",
+                userState
+            )
 
             if (mnemonic != null && okKey != null) {
                 connectManager.initializeMqttAndSubscribe(
                     "tcp://34.229.52.200:1883",
                     mnemonic,
-                    okKey,
-                    userState
+                    ownerInfo
                 )
             }
         }
