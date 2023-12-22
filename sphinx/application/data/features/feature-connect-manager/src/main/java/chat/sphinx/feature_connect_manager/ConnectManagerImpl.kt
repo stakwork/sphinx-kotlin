@@ -18,6 +18,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.eclipse.paho.client.mqttv3.IMqttActionListener
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken
@@ -59,13 +60,16 @@ class ConnectManagerImpl(
 
     private val _connectionStateStateFlow = MutableStateFlow<ConnectionState?>(null)
     override val connectionStateStateFlow: StateFlow<ConnectionState?>
-        get() = _connectionStateStateFlow
+        get() = _connectionStateStateFlow.asStateFlow()
 
     private val _ownerInfoStateFlow: MutableStateFlow<OwnerInfo?> by lazy {
-        MutableStateFlow(null)
+        MutableStateFlow(
+            OwnerInfo("", "", null)
+        )
     }
+
     override val ownerInfoStateFlow: StateFlow<OwnerInfo?>
-        get() = _ownerInfoStateFlow
+        get() = _ownerInfoStateFlow.asStateFlow()
 
     companion object {
         const val KEY_EXCHANGE = 10
@@ -303,8 +307,8 @@ class ConnectManagerImpl(
                             ownerSeed ?: "",
                             getTimestampInMilliseconds(),
                             ownerInfoStateFlow.value?.userState ?: ByteArray(0),
-                            "ale",
-                            ""
+                            ownerInfoStateFlow.value?.alias ?: "",
+                            ownerInfoStateFlow.value?.picture ?: ""
                         )
 
                         mqttClient?.let { client ->
@@ -360,7 +364,7 @@ class ConnectManagerImpl(
                 runReturnHandle(rr2, client)
             }
         } catch (e: Exception) {
-
+            val exce = e
         }
     }
 
