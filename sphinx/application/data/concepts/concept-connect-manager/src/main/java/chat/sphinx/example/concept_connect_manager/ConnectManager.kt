@@ -42,7 +42,7 @@ interface ConnectManagerListener {
 
     fun onTextMessageReceived(json: String)
 
-    fun onUpdateUserState(userState: ByteArray)
+    fun onUpdateUserState(userState: String)
 
 }
 

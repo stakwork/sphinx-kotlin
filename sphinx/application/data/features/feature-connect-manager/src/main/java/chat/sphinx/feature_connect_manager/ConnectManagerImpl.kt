@@ -1,5 +1,6 @@
 package chat.sphinx.feature_connect_manager
 
+import android.util.Base64
 import android.util.Log
 import chat.sphinx.example.concept_connect_manager.ConnectManager
 import chat.sphinx.example.concept_connect_manager.ConnectManagerListener
@@ -12,6 +13,8 @@ import chat.sphinx.wrapper_common.lightning.retrieveLightningRouteHint
 import chat.sphinx.wrapper_contact.ContactInfo
 import chat.sphinx.wrapper_lightning.WalletMnemonic
 import chat.sphinx.wrapper_lightning.toWalletMnemonic
+import com.ensarsarajcic.kotlinx.serialization.msgpack.MsgPack
+import com.ensarsarajcic.kotlinx.serialization.msgpack.MsgPackDynamicSerializer
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -28,6 +31,7 @@ import org.eclipse.paho.client.mqttv3.MqttCallback
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions
 import org.eclipse.paho.client.mqttv3.MqttException
 import org.eclipse.paho.client.mqttv3.MqttMessage
+import org.json.JSONException
 import org.json.JSONObject
 import uniffi.sphinxrs.RunReturn
 import uniffi.sphinxrs.addContact
@@ -173,16 +177,26 @@ class ConnectManagerImpl(
         coroutineScope.launch {
             val now = getTimestampInMilliseconds()
 
-            addContact(
-                ownerSeed!!,
-                now,
-                ownerInfoStateFlow.value?.userState!!,
-                contact.lightningNodePubKey?.value!!,
-                contact.contactRouteHint?.value!!,
-                ownerInfoStateFlow.value?.alias!!,
-                ownerInfoStateFlow.value?.picture!!,
-                0.toULong()
-            )
+            try {
+                val runReturn = addContact(
+                    ownerSeed!!,
+                    now,
+                    getCurrentUserState(),
+                    contact.lightningNodePubKey?.value!!,
+                    contact.lightningRouteHint?.value!!,
+                    ownerInfoStateFlow.value?.alias ?: "",
+                    ownerInfoStateFlow.value?.picture ?: "",
+                    3000.toULong()
+                )
+
+                handleRunReturn(
+                    runReturn,
+                    mqttClient!!
+                )
+            } catch (e: Exception) {
+                Log.e("MQTT_MESSAGES", "add contact excp $e")
+            }
+
 
 //            val childPubKey = ownerSeed?.let {
 //                generatePubKeyFromSeed(
@@ -306,13 +320,13 @@ class ConnectManagerImpl(
                             message.payload,
                             ownerSeed ?: "",
                             getTimestampInMilliseconds(),
-                            ownerInfoStateFlow.value?.userState ?: ByteArray(0),
+                            getCurrentUserState(),
                             ownerInfoStateFlow.value?.alias ?: "",
                             ownerInfoStateFlow.value?.picture ?: ""
                         )
 
                         mqttClient?.let { client ->
-                            runReturnHandle(runReturn, client)
+                            handleRunReturn(runReturn, client)
                         }
 
                         Log.d("MQTT_MESSAGES", " this is handle ${runReturn}")
@@ -338,33 +352,33 @@ class ConnectManagerImpl(
             mqttClient?.let { client ->
                 // Network setup and handling
                 val networkSetup = setNetwork(network)
-                runReturnHandle(networkSetup, client)
+                handleRunReturn(networkSetup, client)
 
                 // Block height setup and handling
                 val blockSetup = setBlockheight(0.toUInt())
-                runReturnHandle(blockSetup, client)
+                handleRunReturn(blockSetup, client)
 
                 // Subscribe to MQTT topic
                 val subtopic = getSubscriptionTopic(
                     ownerSeed!!,
                     getTimestampInMilliseconds(),
-                    ownerInfoStateFlow.value?.userState ?: ByteArray(0),
+                    getCurrentUserState(),
                 )
 
                 val qos = IntArray(1) { 1 }
                 client.subscribe(arrayOf(subtopic), qos)
 
                 // Initial setup and handling
-                val rr2 = initialSetup(
+                val setUp = initialSetup(
                     ownerSeed!!,
                     getTimestampInMilliseconds(),
-                    ownerInfoStateFlow.value?.userState!!
+                    getCurrentUserState()
                 )
 
-                runReturnHandle(rr2, client)
+                handleRunReturn(setUp, client)
             }
         } catch (e: Exception) {
-            val exce = e
+            Log.e("MQTT_MESSAGES", "${e.message}")
         }
     }
 
@@ -498,19 +512,11 @@ class ConnectManagerImpl(
         }
     }
 
-    private fun runReturnHandle(rr: RunReturn, client: MqttAsyncClient) {
+    private fun handleRunReturn(rr: RunReturn, client: MqttAsyncClient) {
         // Set updated state into db
         rr.stateMp?.let {
-
-            _ownerInfoStateFlow.value = ownerInfoStateFlow.value?.copy(
-                userState = it
-            )
-
-            notifyListeners {
-                onUpdateUserState(it)
-            }
+            storeUserState(it)
             Log.d("MQTT_MESSAGES", "=> stateMp $it")
-
         }
 
         // Publish to topic 0
@@ -737,4 +743,82 @@ class ConnectManagerImpl(
         }
     }
 
+    private fun storeUserState(state: ByteArray) {
+        try {
+            val decoded = MsgPack.decodeFromByteArray(MsgPackDynamicSerializer, state)
+            (decoded as? MutableMap<String, ByteArray>)?.let {
+                storeUserStateOnSharedPreferences(it)
+                Log.e("MSGPACK", "Dashboard storeUserState $it")
+            }
+
+        } catch (e: Exception) { }
+    }
+
+    private fun storeUserStateOnSharedPreferences(newUserState: MutableMap<String, ByteArray>) {
+        val existingUserState = retrieveUserStateMap(ownerInfoStateFlow.value?.userState)
+        existingUserState.putAll(newUserState)
+        Log.e("MSGPACK", "Dashboard $existingUserState")
+
+        val encodedString = encodeMapToBase64(existingUserState)
+
+        // Update class var
+        _ownerInfoStateFlow.value = ownerInfoStateFlow.value?.copy(
+            userState = encodedString
+        )
+
+        // Update SharedPreferences
+        notifyListeners {
+            onUpdateUserState(encodedString)
+        }
+    }
+
+    private fun retrieveUserStateMap(encodedString: String?): MutableMap<String, ByteArray> {
+        val result = encodedString?.let {
+            decodeBase64ToMap(it)
+        } ?: mutableMapOf()
+
+        return result
+    }
+
+    private fun getCurrentUserState(): ByteArray {
+        val userStateMap = retrieveUserStateMap(ownerInfoStateFlow.value?.userState)
+        return MsgPack.encodeToByteArray(MsgPackDynamicSerializer, userStateMap)
+    }
+
+    private fun encodeMapToBase64(map: MutableMap<String, ByteArray>): String {
+        val encodedMap = mutableMapOf<String, String>()
+
+        for ((key, value) in map) {
+            encodedMap[key] = Base64.encodeToString(value, Base64.NO_WRAP)
+        }
+
+        val result = (encodedMap as Map<*, *>?)?.let { JSONObject(it).toString() } ?: ""
+
+        Log.e("MSGPACK", "dasboard encodeMapToBase64 $result")
+
+
+        return result
+    }
+
+    private fun decodeBase64ToMap(encodedString: String): MutableMap<String, ByteArray> {
+        if (encodedString.isEmpty()) {
+            return mutableMapOf()
+        }
+
+        val decodedMap = mutableMapOf<String, ByteArray>()
+
+        try {
+            val jsonObject = JSONObject(encodedString)
+            val keys = jsonObject.keys()
+
+            while (keys.hasNext()) {
+                val key = keys.next()
+                val encodedValue = jsonObject.getString(key)
+                val decodedValue = Base64.decode(encodedValue, Base64.NO_WRAP)
+                decodedMap[key] = decodedValue
+            }
+        } catch (e: JSONException) { }
+
+        return decodedMap
+    }
 }

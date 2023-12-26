@@ -35,6 +35,7 @@ import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
@@ -134,7 +135,7 @@ internal class FeedAllViewModel @Inject constructor(
     }
 
     override val feedsHolderViewStateFlow: StateFlow<List<Feed>>
-        get() = _feedsHolderViewStateFlow
+        get() = _feedsHolderViewStateFlow.asStateFlow()
 
     override fun feedSelected(feed: Feed) {
         @Exhaustive

@@ -45,6 +45,6 @@ dependencies {
     api project(path: ':sphinx:application:data:concepts:repositories:concept-repository-lightning')
     api project(path: ':sphinx:application:data:concepts:repositories:concept-repository-connect-manager')
 
-
+    implementation deps.msgpack.sdk
     implementation deps.square.moshi
 }

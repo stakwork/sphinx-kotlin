@@ -11,7 +11,7 @@ interface ConnectManagerRepository {
 
     fun createOwnerAccount()
     fun createContact(contact: NewContact)
-    fun connectAndSubscribeToMqtt(userState: ByteArray?) {}
+    fun connectAndSubscribeToMqtt(userState: String?) {}
     fun setLspIp(lspIp: String)
     suspend fun updateLspAndOwner(data: String) {}
     suspend fun sendKeyExchange(
@@ -21,8 +21,4 @@ interface ConnectManagerRepository {
     ) {}
     suspend fun handleKeyExchangeMessage(json: String) {}
     suspend fun updateContactDetails(json: String) {}
-
-
-
-
 }

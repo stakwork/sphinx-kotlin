@@ -72,7 +72,6 @@ import chat.sphinx.example.concept_connect_manager.ConnectManagerListener
 import chat.sphinx.example.concept_connect_manager.model.OwnerInfo
 import chat.sphinx.example.wrapper_mqtt.HopsDto
 import chat.sphinx.example.wrapper_mqtt.SphinxChatMessage
-import chat.sphinx.example.wrapper_mqtt.MessagesFetchRequest
 import chat.sphinx.example.wrapper_mqtt.PubkeyDto
 import chat.sphinx.example.wrapper_mqtt.Sender
 import chat.sphinx.example.wrapper_mqtt.toJson
@@ -295,7 +294,7 @@ abstract class SphinxRepository(
         }
     }
 
-    override fun connectAndSubscribeToMqtt(userState: ByteArray?) {
+    override fun connectAndSubscribeToMqtt(userState: String?) {
         applicationScope.launch(mainImmediate) {
             val mnemonic = walletDataHandler.retrieveWalletMnemonic()
             val okKey = accountOwner.value?.nodePubKey?.value
@@ -368,9 +367,12 @@ abstract class SphinxRepository(
         }
     }
 
-    override fun onUpdateUserState(userState: ByteArray) {
+    override fun onUpdateUserState(userState: String) {
+        // llamar la funcion que hace el upsert en SharedPreferences with the corresponding String
+
         connectionManagerState.value = ConnectionManagerState.UserState(userState)
     }
+
 
     override suspend fun updateLspAndOwner(data: String) {
         val lspChannelInfo = data.toLspChannelInfo(moshi)
