@@ -11,6 +11,7 @@ import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import kotlinx.coroutines.launch
 import chat.sphinx.onboard_common.OnBoardStepHandler
 import chat.sphinx.wrapper_contact.toContactAlias
+import kotlinx.coroutines.delay
 import javax.inject.Inject
 
 @HiltViewModel
@@ -31,6 +32,7 @@ internal class OnBoardNameViewModel @Inject constructor(
         viewModelScope.launch(mainImmediate){
             alias.toContactAlias()?.let {
                 contactRepository.updateOwnerAlias(it)
+                delay(200)
                 navigator.toOnBoardPictureScreen(null)
             }
         }

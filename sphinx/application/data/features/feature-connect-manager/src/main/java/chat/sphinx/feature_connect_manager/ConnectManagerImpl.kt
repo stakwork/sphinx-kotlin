@@ -44,6 +44,7 @@ import uniffi.sphinxrs.mnemonicToSeed
 import uniffi.sphinxrs.peelOnionMsg
 import uniffi.sphinxrs.pubkeyFromSeed
 import uniffi.sphinxrs.rootSignMs
+import uniffi.sphinxrs.send
 import uniffi.sphinxrs.setBlockheight
 import uniffi.sphinxrs.setNetwork
 import uniffi.sphinxrs.xpubFromSeed
@@ -67,9 +68,7 @@ class ConnectManagerImpl(
         get() = _connectionStateStateFlow.asStateFlow()
 
     private val _ownerInfoStateFlow: MutableStateFlow<OwnerInfo?> by lazy {
-        MutableStateFlow(
-            OwnerInfo("", "", null)
-        )
+        MutableStateFlow(null)
     }
 
     override val ownerInfoStateFlow: StateFlow<OwnerInfo?>
@@ -426,42 +425,58 @@ class ConnectManagerImpl(
 
     override fun sendMessage(
         sphinxMessage: String,
-        hops: String,
-        okKey: String
+        contactPubKey: String
     ) {
         coroutineScope.launch {
 
             val now = getTimestampInMilliseconds()
 
-            val seed = ownerSeed
-
-            if (seed != null) {
-
-                val onion = try {
-                    createOnionMsg(
-                        seed,
-                        0.toULong(),
-                        now,
-                        network,
-                        hops,
-                        sphinxMessage
-                    )
-                } catch (e: Exception) {
-                    null
-                }
-
-                if (onion != null && mqttClient?.isConnected == true) {
-                    Log.d("ONION_PROCESS", "The Onion is contain\n $sphinxMessage")
-
-                    val publishTopic = "${okKey}/${0}/req/send"
-
-                    try {
-                        mqttClient?.publish(publishTopic, MqttMessage(onion))
-                    } catch (e: MqttException) {
-                        e.printStackTrace()
-                    }
-                }
+            try {
+                send(
+                    ownerSeed!!,
+                    now,
+                    contactPubKey,
+                    0.toUByte(),
+                    sphinxMessage,
+                    getCurrentUserState(),
+                    ownerInfoStateFlow.value?.alias ?: "",
+                    ownerInfoStateFlow.value?.picture ?: "",
+                    0.toULong()
+                )
+            } catch (e: Exception) {
+                Log.e("MQTT_MESSAGES", "send ${e.message}")
             }
+
+//
+//            val seed = ownerSeed
+//
+//            if (seed != null) {
+//
+//                val onion = try {
+//                    createOnionMsg(
+//                        seed,
+//                        0.toULong(),
+//                        now,
+//                        network,
+//                        hops,
+//                        sphinxMessage
+//                    )
+//                } catch (e: Exception) {
+//                    null
+//                }
+//
+//                if (onion != null && mqttClient?.isConnected == true) {
+//                    Log.d("ONION_PROCESS", "The Onion is contain\n $sphinxMessage")
+//
+//                    val publishTopic = "${contactPubKey}/${0}/req/send"
+//
+//                    try {
+//                        mqttClient?.publish(publishTopic, MqttMessage(onion))
+//                    } catch (e: MqttException) {
+//                        e.printStackTrace()
+//                    }
+//                }
+//            }
         }
     }
 
@@ -553,6 +568,25 @@ class ConnectManagerImpl(
 
         // Incoming sender info json
         rr.msgSender?.let { msgSender ->
+            try {
+                val jsonObject = JSONObject(msgSender)
+
+                val pubkey = jsonObject.getString("pubkey")
+                val alias = jsonObject.getString("alias")
+                val photoUrl = jsonObject.optString("photo_url")
+                val person = jsonObject.optString("person")
+                val confirmed = jsonObject.getBoolean("confirmed")
+
+                notifyListeners {
+                    onNewContactRegistered(
+                        pubkey,
+                        alias,
+                        photoUrl,
+                        confirmed
+                    )
+                }
+            } catch (e: Exception){}
+
             Log.d("MQTT_MESSAGES", "=> received msg_sender $msgSender")
         }
 
@@ -603,14 +637,13 @@ class ConnectManagerImpl(
 
         connectionState.childPubKey?.let { childKey ->
 
-            notifyListeners {
-                onNewContactRegistered(
-                    connectionState.index,
-                    childKey,
-                    scid,
-                    generatedContactRouteHint.value
-                )
-            }
+//            notifyListeners {
+//                onNewContactRegistered(
+//                    connectionState.index,
+//                    childKey,
+//                    scid
+//                )
+//            }
         }
     }
 

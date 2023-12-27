@@ -87,7 +87,7 @@ interface ContactRepository {
 
     suspend fun updateOwnerAlias(alias: ContactAlias)
 
-    suspend fun getNewContactIndex(): Flow<ContactIndex?>
+    suspend fun getNewContactIndex(): Flow<ContactId?>
 
     suspend fun getContactsChildPubKeysToIndexes(): Flow<HashMap<LightningNodePubKey, ContactIndex>?>
 
