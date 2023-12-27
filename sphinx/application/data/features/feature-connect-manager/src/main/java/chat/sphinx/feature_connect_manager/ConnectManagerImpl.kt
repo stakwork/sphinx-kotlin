@@ -36,6 +36,7 @@ import org.json.JSONObject
 import uniffi.sphinxrs.RunReturn
 import uniffi.sphinxrs.addContact
 import uniffi.sphinxrs.createOnionMsg
+import uniffi.sphinxrs.fetchMsgs
 import uniffi.sphinxrs.getSubscriptionTopic
 import uniffi.sphinxrs.handle
 import uniffi.sphinxrs.initialSetup
@@ -373,8 +374,17 @@ class ConnectManagerImpl(
                     getTimestampInMilliseconds(),
                     getCurrentUserState()
                 )
-
                 handleRunReturn(setUp, client)
+
+               val fetchMessages =  fetchMsgs(
+                    ownerSeed!!,
+                    getTimestampInMilliseconds(),
+                    getCurrentUserState(),
+                    0.toULong(),
+                    100.toUInt()
+                )
+
+                handleRunReturn(fetchMessages, client);
             }
         } catch (e: Exception) {
             Log.e("MQTT_MESSAGES", "${e.message}")
@@ -432,7 +442,7 @@ class ConnectManagerImpl(
             val now = getTimestampInMilliseconds()
 
             try {
-                send(
+                val message = send(
                     ownerSeed!!,
                     now,
                     contactPubKey,
@@ -443,40 +453,11 @@ class ConnectManagerImpl(
                     ownerInfoStateFlow.value?.picture ?: "",
                     0.toULong()
                 )
+                handleRunReturn(message, mqttClient!!)
+
             } catch (e: Exception) {
                 Log.e("MQTT_MESSAGES", "send ${e.message}")
             }
-
-//
-//            val seed = ownerSeed
-//
-//            if (seed != null) {
-//
-//                val onion = try {
-//                    createOnionMsg(
-//                        seed,
-//                        0.toULong(),
-//                        now,
-//                        network,
-//                        hops,
-//                        sphinxMessage
-//                    )
-//                } catch (e: Exception) {
-//                    null
-//                }
-//
-//                if (onion != null && mqttClient?.isConnected == true) {
-//                    Log.d("ONION_PROCESS", "The Onion is contain\n $sphinxMessage")
-//
-//                    val publishTopic = "${contactPubKey}/${0}/req/send"
-//
-//                    try {
-//                        mqttClient?.publish(publishTopic, MqttMessage(onion))
-//                    } catch (e: MqttException) {
-//                        e.printStackTrace()
-//                    }
-//                }
-//            }
         }
     }
 
