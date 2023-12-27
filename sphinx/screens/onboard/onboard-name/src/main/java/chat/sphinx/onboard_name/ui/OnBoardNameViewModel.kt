@@ -32,7 +32,6 @@ internal class OnBoardNameViewModel @Inject constructor(
         viewModelScope.launch(mainImmediate){
             alias.toContactAlias()?.let {
                 contactRepository.updateOwnerAlias(it)
-                delay(200)
                 navigator.toOnBoardPictureScreen(null)
             }
         }

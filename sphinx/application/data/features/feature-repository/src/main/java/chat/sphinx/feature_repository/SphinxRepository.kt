@@ -265,22 +265,7 @@ abstract class SphinxRepository(
         applicationScope.launch(mainImmediate) {
             val scid = routeHint.toLightningRouteHint()?.getScid()
 
-//            val lspChannelInfo = okKey.toLspChannelInfo(moshi)
-//            val serverIp = connectManager.retrieveLspIp()
-//            val serverPubKey = lspChannelInfo?.serverPubKey
-//            val scid = lspChannelInfo?.scid
-//            val routeHint = retrieveLightningRouteHint(serverPubKey?.value, scid?.value)
-//
-//            if (serverIp?.isNotEmpty() == true && serverPubKey != null) {
-//                updateLSP(
-//                    LightningServiceProvider(
-//                        ServerIp(serverIp),
-//                        serverPubKey
-//                    )
-//                )
-//            }
-
-            if (scid != null) {
+            if (scid != null && accountOwner.value?.nodePubKey == null) {
                 createOwner(okKey, routeHint, scid)
                 connectionManagerState.value = ConnectionManagerState.OwnerRegistered
             }
@@ -1973,16 +1958,23 @@ abstract class SphinxRepository(
         val now = DateTime.nowUTC()
         val contactId = getNewContactIndex().firstOrNull()?.value
 
+        val exitingContact = contact.lightningNodePubKey
+            ?.let { getContactByPubKey(it).firstOrNull() }
+
+        if (exitingContact?.nodePubKey != null) {
+            return
+        }
+
         val newContact = Contact(
-            id = ContactId(contactId ?: -1L),
+            id = ContactId(exitingContact?.id?.value ?: contactId ?: -1L),
             routeHint = contact.lightningRouteHint,
             nodePubKey = contact.lightningNodePubKey,
             nodeAlias = null,
-            alias = contact.contactAlias,
+            alias = exitingContact?.alias ?: contact.contactAlias,
             photoUrl = contact.photoUrl,
             privatePhoto = PrivatePhoto.False,
             isOwner = Owner.False,
-            status = if (contact.confirmed) ContactStatus.Confirmed else ContactStatus.Pending,
+            status = if (contact.confirmed || contact.lightningNodePubKey != null) ContactStatus.Confirmed else ContactStatus.Pending,
             rsaPublicKey = null,
             deviceId = null,
             createdAt = now.toDateTime(),
@@ -2001,12 +1993,12 @@ abstract class SphinxRepository(
         )
 
         val newChat = Chat(
-            id = ChatId(contactId ?: -1L),
+            id = ChatId(exitingContact?.id?.value ?: contactId ?: -1L),
             uuid = ChatUUID("${UUID.randomUUID()}"),
-            name = ChatName(contact.contactAlias?.value ?: "unknown"),
+            name = ChatName( exitingContact?.alias?.value ?: contact.contactAlias?.value ?: "unknown"),
             photoUrl = contact.photoUrl,
             type = ChatType.Conversation,
-            status = if (contact.confirmed) ChatStatus.Approved else ChatStatus.Pending,
+            status = if (contact.confirmed || contact.lightningNodePubKey != null) ChatStatus.Approved else ChatStatus.Pending,
             contactIds = listOf(ContactId(0), ContactId(contactId ?: -1)),
             isMuted = ChatMuted.False,
             createdAt = now.toDateTime(),
