@@ -22,10 +22,8 @@ abstract class ConnectManager {
         sphinxMessage: String,
         contactPubKey: String
     )
-
     abstract fun setLspIp(ip: String)
     abstract fun retrieveLspIp(): String?
-
     abstract fun addListener(listener: ConnectManagerListener): Boolean
     abstract fun removeListener(listener: ConnectManagerListener): Boolean
 
@@ -35,14 +33,19 @@ interface ConnectManagerListener {
 
     fun onMnemonicWords(words: String)
     fun onOwnerRegistered(okKey: String, routeHint: String)
-    fun onNewContactRegistered(pubKey: String, alias: String, photoUrl: String, confirmed: Boolean)
+    fun onNewContactRegistered(msgSender: String)
     fun onKeyExchange(json: String)
     fun onKeyExchangeConfirmation(json: String)
 
-    fun onTextMessageReceived(json: String)
+    fun onTextMessageReceived(
+        msg: String,
+        msgSender: String?,
+        msgType: Int?,
+        msgUuid: String?,
+        msgIndex: String?,
+    )
 
     fun onUpdateUserState(userState: String)
-
 }
 
 

@@ -35,14 +35,12 @@ import org.json.JSONException
 import org.json.JSONObject
 import uniffi.sphinxrs.RunReturn
 import uniffi.sphinxrs.addContact
-import uniffi.sphinxrs.createOnionMsg
 import uniffi.sphinxrs.fetchMsgs
 import uniffi.sphinxrs.getSubscriptionTopic
 import uniffi.sphinxrs.handle
 import uniffi.sphinxrs.initialSetup
 import uniffi.sphinxrs.mnemonicFromEntropy
 import uniffi.sphinxrs.mnemonicToSeed
-import uniffi.sphinxrs.peelOnionMsg
 import uniffi.sphinxrs.pubkeyFromSeed
 import uniffi.sphinxrs.rootSignMs
 import uniffi.sphinxrs.send
@@ -544,27 +542,24 @@ class ConnectManagerImpl(
 
         // Incoming message json
         rr.msg?.let { msg ->
+
+            notifyListeners {
+                onTextMessageReceived(
+                    msg,
+                    rr.msgSender,
+                    rr.msgType?.toInt(),
+                    rr.msgUuid,
+                    rr.msgIndex
+                )
+            }
             Log.d("MQTT_MESSAGES", "=> received msg $msg, ${rr.msgUuid}, ${rr.msgIndex}")
         }
 
         // Incoming sender info json
         rr.msgSender?.let { msgSender ->
             try {
-                val jsonObject = JSONObject(msgSender)
-
-                val pubkey = jsonObject.getString("pubkey")
-                val alias = jsonObject.getString("alias")
-                val photoUrl = jsonObject.optString("photo_url")
-                val person = jsonObject.optString("person")
-                val confirmed = jsonObject.getBoolean("confirmed")
-
                 notifyListeners {
-                    onNewContactRegistered(
-                        pubkey,
-                        alias,
-                        photoUrl,
-                        confirmed
-                    )
+                    onNewContactRegistered(msgSender)
                 }
             } catch (e: Exception){}
 
@@ -631,52 +626,52 @@ class ConnectManagerImpl(
     private fun handleOnionMessage(payload: ByteArray?) {
         payload ?: return
 
-        coroutineScope.launch {
-            val now = getTimestampInMilliseconds()
-
-            ownerSeed?.let { seed ->
-
-                val decryptedJson = try {
-                    peelOnionMsg(
-                        seed,
-                        0.toULong(),
-                        now,
-                        network,
-                        payload
-                    )
-                } catch (e: Exception) {
-                    Log.d("ONION_PROCESS", "This is the PeelOnionMsg EXCEPTION\n ${e.message}")
-                }
-
-                val jsonObject = try {
-                    JSONObject(decryptedJson.toString())
-                } catch (e: Exception) {
-                    null
-                }
-                val messageType = jsonObject?.getInt("type")
-
-                when (messageType) {
-                    KEY_EXCHANGE -> {
-                        notifyListeners {
-                            onKeyExchange(decryptedJson.toString())
-                        }
-                    }
-                    KEY_EXCHANGE_CONFIRMATION -> {
-                        notifyListeners {
-                            onKeyExchangeConfirmation(decryptedJson.toString())
-                        }
-                    }
-                    TEXT_MESSAGE -> {
-                        notifyListeners {
-                            onTextMessageReceived(decryptedJson.toString())
-                        }
-                    }
-                    else -> {}
-                }
-
-                Log.d("ONION_PROCESS", "This is the PeelOnionMsg\n $decryptedJson")
-            }
-        }
+//        coroutineScope.launch {
+//            val now = getTimestampInMilliseconds()
+//
+//            ownerSeed?.let { seed ->
+//
+//                val decryptedJson = try {
+//                    peelOnionMsg(
+//                        seed,
+//                        0.toULong(),
+//                        now,
+//                        network,
+//                        payload
+//                    )
+//                } catch (e: Exception) {
+//                    Log.d("ONION_PROCESS", "This is the PeelOnionMsg EXCEPTION\n ${e.message}")
+//                }
+//
+//                val jsonObject = try {
+//                    JSONObject(decryptedJson.toString())
+//                } catch (e: Exception) {
+//                    null
+//                }
+//                val messageType = jsonObject?.getInt("type")
+//
+//                when (messageType) {
+//                    KEY_EXCHANGE -> {
+//                        notifyListeners {
+//                            onKeyExchange(decryptedJson.toString())
+//                        }
+//                    }
+//                    KEY_EXCHANGE_CONFIRMATION -> {
+//                        notifyListeners {
+//                            onKeyExchangeConfirmation(decryptedJson.toString())
+//                        }
+//                    }
+//                    TEXT_MESSAGE -> {
+//                        notifyListeners {
+//                            onTextMessageReceived(decryptedJson.toString())
+//                        }
+//                    }
+//                    else -> {}
+//                }
+//
+//                Log.d("ONION_PROCESS", "This is the PeelOnionMsg\n $decryptedJson")
+//            }
+//        }
     }
 
     override fun setLspIp(ip: String) {

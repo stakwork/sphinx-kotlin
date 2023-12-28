@@ -132,6 +132,8 @@ import chat.sphinx.wrapper_lightning.toWalletMnemonic
 import chat.sphinx.wrapper_meme_server.AuthenticationChallenge
 import chat.sphinx.wrapper_meme_server.PublicAttachmentInfo
 import chat.sphinx.wrapper_message.*
+import chat.sphinx.wrapper_message.Msg.Companion.toMsg
+import chat.sphinx.wrapper_message.MsgSender.Companion.toMsgSender
 import chat.sphinx.wrapper_message_media.*
 import chat.sphinx.wrapper_message_media.token.MediaHost
 import chat.sphinx.wrapper_podcast.FeedRecommendation
@@ -309,19 +311,18 @@ abstract class SphinxRepository(
     }
 
     override fun onNewContactRegistered(
-        pubKey: String,
-        alias: String,
-        photoUrl: String,
-        confirmed: Boolean
+        msgSender: String
     ) {
         applicationScope.launch(io) {
+            val contactInfo = msgSender.toMsgSender(moshi)
+
             createNewContact(
                 NewContact(
-                    contactAlias = alias.toContactAlias(),
-                    lightningNodePubKey = pubKey.toLightningNodePubKey(),
+                    contactAlias = contactInfo.alias?.toContactAlias(),
+                    lightningNodePubKey = contactInfo.pubkey.toLightningNodePubKey(),
                     lightningRouteHint = null,
-                    photoUrl = photoUrl.toPhotoUrl(),
-                    confirmed = confirmed
+                    photoUrl = contactInfo.photo_url?.toPhotoUrl(),
+                    confirmed = contactInfo.confirmed
                 )
             )
         }
@@ -339,15 +340,26 @@ abstract class SphinxRepository(
         }
     }
 
-    override fun onTextMessageReceived(json: String) {
+    override fun onTextMessageReceived(
+        msg: String,
+        msgSender: String?,
+        msgType: Int?,
+        msgUuid: String?,
+        msgIndex: String?,
+    ) {
         applicationScope.launch(io) {
-            mqttTextMessageReceived(json)
+            val message = msg.toMsg(moshi)
+            val contactInfo = msgSender?.toMsgSender(moshi) ?: return@launch
+
+            val messageType = if (msgType == 0) MessageType.Message else return@launch
+            val messageUUID = msgUuid?.toMessageUUID() ?: return@launch
+            val messageId = msgIndex?.toLong()?.let { MessageId(it) } ?: return@launch
+
+            upsertMqttTextMessage(message, contactInfo, messageType, messageUUID, messageId)
         }
     }
 
     override fun onUpdateUserState(userState: String) {
-        // llamar la funcion que hace el upsert en SharedPreferences with the corresponding String
-
         connectionManagerState.value = ConnectionManagerState.UserState(userState)
     }
 
@@ -416,65 +428,65 @@ abstract class SphinxRepository(
 
     override suspend fun handleKeyExchangeMessage(json: String) {}
 
-    override suspend fun mqttTextMessageReceived(json: String) {
+    override suspend fun upsertMqttTextMessage(
+        msg: Msg,
+        msgSender: MsgSender,
+        msgType: MessageType,
+        msgUuid: MessageUUID,
+        msgIndex: MessageId
+    ) {
         val queries = coreDB.getSphinxDatabaseQueries()
-//        val textMessage = json.toSphinxChatMessageNull(moshi)
 
-//            textMessage?.let { message ->
-//                val messageContent = message.message.content
-//                val sender = message.sender
-//
-//                // Implement getContactByContactPubkey:
-//                val contact = getContactByPubKey(LightningNodePubKey(sender.pubkey)).firstOrNull()
-//                val messageId = queries.messageGetMaxId().executeAsOneOrNull()?.MAX?.plus(1) ?: 0
-//
-//                if (contact != null) {
-//
-//                    val newMessage = NewMessage(
-//                        id = MessageId(messageId),
-//                        uuid = MessageUUID(message.uuid),
-//                        chatId = ChatId(contact.contactIndex?.value ?: 0L),
-//                        type = MessageType.Message,
-//                        sender = contact.id,
-//                        receiver = ContactId(0),
-//                        amount = Sat(0),
-//                        date = DateTime.nowUTC().toDateTime(),
-//                        expirationDate = null,
-//                        messageContent = null,
-//                        status = MessageStatus.Confirmed,
-//                        seen = Seen.False,
-//                        senderAlias = null,
-//                        senderPic = null,
-//                        originalMUID = null,
-//                        replyUUID = null,
-//                        flagged = Flagged.False,
-//                        recipientAlias = null,
-//                        recipientPic = null,
-//                        person = null,
-//                        threadUUID = null,
-//                        errorMessage = null,
-//                        isPinned = false,
-//                        messageContentDecrypted = MessageContentDecrypted(messageContent.toString()),
-//                        messageDecryptionError = false,
-//                        messageDecryptionException = null,
-//                        messageMedia = null,
-//                        feedBoost = null,
-//                        callLinkMessage = null,
-//                        podcastClip = null,
-//                        giphyData = null,
-//                        reactions = null,
-//                        purchaseItems = null,
-//                        replyMessage = null,
-//                        thread = null
-//                    )
-//
-//                    messageLock.withLock {
-//                        queries.transaction {
-//                            upsertNewMessage(newMessage, queries, null)
-//                        }
-//                    }
-//                }
-//            }
+        val contact = getContactByPubKey(LightningNodePubKey(msgSender.pubkey)).firstOrNull()
+        val messageId = queries.messageGetMaxId().executeAsOneOrNull()?.MAX?.plus(1) ?: 0
+
+        if (contact != null) {
+
+            val newMessage = NewMessage(
+                id = MessageId(messageId),
+                uuid = msgUuid,
+                chatId = ChatId(contact.id.value),
+                type = msgType,
+                sender = contact.id,
+                receiver = ContactId(0),
+                amount = Sat(0),
+                date = DateTime.nowUTC().toDateTime(),
+                expirationDate = null,
+                messageContent = null,
+                status = MessageStatus.Confirmed,
+                seen = Seen.False,
+                senderAlias = null,
+                senderPic = null,
+                originalMUID = null,
+                replyUUID = null,
+                flagged = Flagged.False,
+                recipientAlias = null,
+                recipientPic = null,
+                person = null,
+                threadUUID = null,
+                errorMessage = null,
+                isPinned = false,
+                messageContentDecrypted = MessageContentDecrypted(msg.content),
+                messageDecryptionError = false,
+                messageDecryptionException = null,
+                messageMedia = null,
+                feedBoost = null,
+                callLinkMessage = null,
+                podcastClip = null,
+                giphyData = null,
+                reactions = null,
+                purchaseItems = null,
+                replyMessage = null,
+                thread = null
+            )
+
+            messageLock.withLock {
+                queries.transaction {
+                    upsertNewMessage(newMessage, queries, null)
+                }
+            }
+        }
+
     }
 
     override suspend fun updateContactDetails(json: String) {
