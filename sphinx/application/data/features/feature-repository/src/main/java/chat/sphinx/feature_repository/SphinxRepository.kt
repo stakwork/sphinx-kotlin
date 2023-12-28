@@ -328,18 +328,6 @@ abstract class SphinxRepository(
         }
     }
 
-    override fun onKeyExchange(json: String) {
-        applicationScope.launch(io) {
-            handleKeyExchangeMessage(json)
-        }
-    }
-
-    override fun onKeyExchangeConfirmation(json: String) {
-        applicationScope.launch(io) {
-            updateContactDetails(json)
-        }
-    }
-
     override fun onTextMessageReceived(
         msg: String,
         msgSender: String?,
@@ -363,7 +351,6 @@ abstract class SphinxRepository(
         connectionManagerState.value = ConnectionManagerState.UserState(userState)
     }
 
-
     override suspend fun updateLspAndOwner(data: String) {
         val lspChannelInfo = data.toLspChannelInfo(moshi)
         val serverIp = connectManager.retrieveLspIp()
@@ -383,50 +370,8 @@ abstract class SphinxRepository(
         if (routeHint != null && scid != null) {
             updateOwnerRouteHintAndScid(routeHint, scid)
         }
-        super.updateLspAndOwner(data)
     }
 
-    override suspend fun sendKeyExchange(
-        index: Int,
-        contactRouteHint: LightningRouteHint?,
-        returnConfirmation: Boolean
-    ) {
-//        val contact = getContactById(ContactId(index.toLong())).firstOrNull()
-//
-//        val owner = accountOwner.value
-//        val mnemonic = walletDataHandler.retrieveWalletMnemonic()
-//        val type = if (!returnConfirmation) 10 else 11
-//
-//        if (owner != null && mnemonic != null && contact != null) {
-//            val keyExchangeMessage = SphinxChatMessage(
-//                "",
-//                type,
-//                Sender(
-//                    owner.nodePubKey?.value ?: "",
-//                    owner.routeHint?.value ?: "",
-//                    contact.childPubKey?.value ?: "",
-//                    contactRouteHint?.value ?: "",
-//                    owner.alias?.value ?: "",
-//                    owner.photoUrl?.value ?: ""
-//                ),
-//                chat.sphinx.example.wrapper_mqtt.Message("")
-//            ).toJson(moshi)
-//
-//            val hops = HopsDto(
-//                listOf(
-//                    PubkeyDto(contact.routeHint?.getLspPubKey() ?: ""),
-//                    PubkeyDto(contact.nodePubKey?.value ?: "")
-//                )
-//            ).toJson(moshi)
-//
-//            connectManager.sendMessage(
-//                keyExchangeMessage,
-//                owner.nodePubKey?.value ?: ""
-//            )
-//        }
-    }
-
-    override suspend fun handleKeyExchangeMessage(json: String) {}
 
     override suspend fun upsertMqttTextMessage(
         msg: Msg,
@@ -436,14 +381,12 @@ abstract class SphinxRepository(
         msgIndex: MessageId
     ) {
         val queries = coreDB.getSphinxDatabaseQueries()
-
         val contact = getContactByPubKey(LightningNodePubKey(msgSender.pubkey)).firstOrNull()
-        val messageId = queries.messageGetMaxId().executeAsOneOrNull()?.MAX?.plus(1) ?: 0
 
         if (contact != null) {
 
             val newMessage = NewMessage(
-                id = MessageId(messageId),
+                id = msgIndex,
                 uuid = msgUuid,
                 chatId = ChatId(contact.id.value),
                 type = msgType,
@@ -487,27 +430,6 @@ abstract class SphinxRepository(
             }
         }
 
-    }
-
-    override suspend fun updateContactDetails(json: String) {
-//        val keyExchangeConfirmation = json.toSphinxChatMessageNull(moshi)
-//        keyExchangeConfirmation?.let { keyExchangeMessage ->
-//
-//            val senderInfo = keyExchangeConfirmation.sender
-//            val contactPubKey = senderInfo.pubkey.toLightningNodePubKey()
-//            val contactKey = senderInfo.contactPubkey?.toLightningNodePubKey()
-//            val contactRouteHint = senderInfo.contactRouteHint?.toLightningRouteHint()
-//
-//            if (contactPubKey != null && contactKey != null && contactRouteHint != null) {
-//
-//                updateContactKeyAndRouteHintByOkKey(
-//                    contactPubKey,
-//                    contactKey,
-//                    contactRouteHint,
-//                    senderInfo.photoUrl.toPhotoUrl()
-//                )
-//            }
-//        }
     }
 
     fun sendNewMessage(

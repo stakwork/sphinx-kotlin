@@ -4,13 +4,8 @@ import android.util.Base64
 import android.util.Log
 import chat.sphinx.example.concept_connect_manager.ConnectManager
 import chat.sphinx.example.concept_connect_manager.ConnectManagerListener
-import chat.sphinx.example.concept_connect_manager.model.TopicHandler
-import chat.sphinx.example.concept_connect_manager.model.ConnectionState
 import chat.sphinx.example.concept_connect_manager.model.OwnerInfo
-import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
 import chat.sphinx.wrapper_contact.NewContact
-import chat.sphinx.wrapper_common.lightning.retrieveLightningRouteHint
-import chat.sphinx.wrapper_contact.ContactInfo
 import chat.sphinx.wrapper_lightning.WalletMnemonic
 import chat.sphinx.wrapper_lightning.toWalletMnemonic
 import com.ensarsarajcic.kotlinx.serialization.msgpack.MsgPack
@@ -41,7 +36,6 @@ import uniffi.sphinxrs.handle
 import uniffi.sphinxrs.initialSetup
 import uniffi.sphinxrs.mnemonicFromEntropy
 import uniffi.sphinxrs.mnemonicToSeed
-import uniffi.sphinxrs.pubkeyFromSeed
 import uniffi.sphinxrs.rootSignMs
 import uniffi.sphinxrs.send
 import uniffi.sphinxrs.setBlockheight
@@ -60,11 +54,7 @@ class ConnectManagerImpl(
     private val network = "regtest"
     private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private var ownerSeed: String? = null
-    private var ownerLspPubKey: LightningNodePubKey? = null
 
-    private val _connectionStateStateFlow = MutableStateFlow<ConnectionState?>(null)
-    override val connectionStateStateFlow: StateFlow<ConnectionState?>
-        get() = _connectionStateStateFlow.asStateFlow()
 
     private val _ownerInfoStateFlow: MutableStateFlow<OwnerInfo?> by lazy {
         MutableStateFlow(null)
@@ -156,19 +146,6 @@ class ConnectManagerImpl(
         }
     }
 
-    private fun generatePubKeyFromSeed(
-        seed: String,
-        index: ULong,
-        time: String,
-        network: String
-    ): String? {
-        return try {
-            pubkeyFromSeed(seed, index, time, network)
-        } catch (e: Exception) {
-            null
-        }
-    }
-
     override fun createContact(
         contact: NewContact
     ) {
@@ -194,26 +171,6 @@ class ConnectManagerImpl(
             } catch (e: Exception) {
                 Log.e("MQTT_MESSAGES", "add contact excp $e")
             }
-
-
-//            val childPubKey = ownerSeed?.let {
-//                generatePubKeyFromSeed(
-//                    it,
-//                    contact.index.value.toULong(),
-//                    now,
-//                    network
-//                )
-//            }
-//
-//            val index = contact.index
-//
-//            if (childPubKey != null) {
-//
-//                subscribeAndPublishContactMQTT(
-//                    childPubKey,
-//                    index.value.toInt()
-//                )
-//            }
         }
     }
 
@@ -271,7 +228,6 @@ class ConnectManagerImpl(
         key: String,
         password: String,
     ) {
-
         mqttClient = try {
             MqttAsyncClient(serverURI, clientId, null)
         } catch (e: MqttException) {
@@ -329,8 +285,6 @@ class ConnectManagerImpl(
 
                         Log.d("MQTT_MESSAGES", " this is handle ${runReturn}")
                     }
-
-//                    handleMqttMessage(topic, message)
                 }
 
                 override fun deliveryComplete(token: IMqttDeliveryToken?) {
@@ -389,48 +343,6 @@ class ConnectManagerImpl(
         }
     }
 
-    private fun subscribeContacts(contacts: List<ContactInfo>) {
-        val subscribeTopic = contacts.map { contactInfo ->
-            "${contactInfo.childPubKey.value}/${contactInfo.contactIndex.value}/res/#"
-        }.toTypedArray()
-
-        val publishTopic = contacts.map { contactInfo ->
-            "${contactInfo.childPubKey.value}/${contactInfo.contactIndex.value}/req/register"
-        }.toTypedArray()
-
-        val messages = contacts.map { contactInfo ->
-            contactInfo.messagesFetchRequest
-        }.toTypedArray()
-
-        val qos = IntArray(subscribeTopic.size) { 1 }
-
-        mqttClient?.subscribe(subscribeTopic, qos)
-
-        publishTopicsSequentially(publishTopic, messages, 0)
-    }
-
-    private fun subscribeAndPublishContactMQTT(
-        childPubKey: String,
-        index: Int,
-    ) {
-        if (mqttClient?.isConnected == true) {
-            coroutineScope.launch {
-
-                val subscribeTopic = "${childPubKey}/${index}/res/#"
-                val publishTopic = "${childPubKey}/${index}/req/register"
-
-                try {
-                    mqttClient?.subscribe(subscribeTopic, 1)
-                    mqttClient?.publish(publishTopic, MqttMessage())
-                } catch (e: MqttException) {
-                    e.printStackTrace()
-                }
-            }
-        } else {
-            Log.d("MQTT_MESSAGES", "MQTT Client is not connected.")
-        }
-    }
-
     override fun sendMessage(
         sphinxMessage: String,
         contactPubKey: String
@@ -480,29 +392,6 @@ class ConnectManagerImpl(
                     Log.d("MQTT_MESSAGES", "Failed to publish to $topic: ${exception?.message}")
                 }
             })
-        }
-    }
-
-    private fun handleMqttMessage(topic: String?, message: MqttMessage?) {
-        topic?.let { nnTopic ->
-            val connectionState = TopicHandler.retrieveConnectionState(nnTopic, message.toString(), message?.payload)
-
-            when (connectionState) {
-                is ConnectionState.OwnerRegistered -> {
-                    notifyListeners {
-//                        onOwnerRegistered(connectionState.message,)
-                    }
-                }
-                is ConnectionState.ContactRegistered -> {
-                    handleContactRegistered(nnTopic, connectionState)
-                }
-                is ConnectionState.OnionMessage -> {
-                    handleOnionMessage(connectionState.payload)
-                }
-                else -> {
-                    _connectionStateStateFlow.value = connectionState
-                }
-            }
         }
     }
 
@@ -597,83 +486,6 @@ class ConnectManagerImpl(
         }
     }
 
-    private fun handleContactRegistered(
-        topic: String,
-        connectionState: ConnectionState.ContactRegistered
-    ) {
-
-        val jsonObject = try {
-            JSONObject(connectionState.message)
-        } catch (e: Exception) {
-            null
-        }
-
-        val scid = jsonObject?.getString("scid") ?: return
-        val generatedContactRouteHint = retrieveLightningRouteHint(ownerLspPubKey?.value, scid) ?: return
-
-        connectionState.childPubKey?.let { childKey ->
-
-//            notifyListeners {
-//                onNewContactRegistered(
-//                    connectionState.index,
-//                    childKey,
-//                    scid
-//                )
-//            }
-        }
-    }
-
-    private fun handleOnionMessage(payload: ByteArray?) {
-        payload ?: return
-
-//        coroutineScope.launch {
-//            val now = getTimestampInMilliseconds()
-//
-//            ownerSeed?.let { seed ->
-//
-//                val decryptedJson = try {
-//                    peelOnionMsg(
-//                        seed,
-//                        0.toULong(),
-//                        now,
-//                        network,
-//                        payload
-//                    )
-//                } catch (e: Exception) {
-//                    Log.d("ONION_PROCESS", "This is the PeelOnionMsg EXCEPTION\n ${e.message}")
-//                }
-//
-//                val jsonObject = try {
-//                    JSONObject(decryptedJson.toString())
-//                } catch (e: Exception) {
-//                    null
-//                }
-//                val messageType = jsonObject?.getInt("type")
-//
-//                when (messageType) {
-//                    KEY_EXCHANGE -> {
-//                        notifyListeners {
-//                            onKeyExchange(decryptedJson.toString())
-//                        }
-//                    }
-//                    KEY_EXCHANGE_CONFIRMATION -> {
-//                        notifyListeners {
-//                            onKeyExchangeConfirmation(decryptedJson.toString())
-//                        }
-//                    }
-//                    TEXT_MESSAGE -> {
-//                        notifyListeners {
-//                            onTextMessageReceived(decryptedJson.toString())
-//                        }
-//                    }
-//                    else -> {}
-//                }
-//
-//                Log.d("ONION_PROCESS", "This is the PeelOnionMsg\n $decryptedJson")
-//            }
-//        }
-    }
-
     override fun setLspIp(ip: String) {
         mixer = ip
     }
@@ -681,7 +493,6 @@ class ConnectManagerImpl(
     override fun retrieveLspIp(): String? {
         return mixer
     }
-
 
     // Utility Methods
 

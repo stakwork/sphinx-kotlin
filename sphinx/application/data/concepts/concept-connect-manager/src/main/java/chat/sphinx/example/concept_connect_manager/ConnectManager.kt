@@ -1,6 +1,5 @@
 package chat.sphinx.example.concept_connect_manager
 
-import chat.sphinx.example.concept_connect_manager.model.ConnectionState
 import chat.sphinx.example.concept_connect_manager.model.OwnerInfo
 import chat.sphinx.wrapper_contact.NewContact
 import chat.sphinx.wrapper_lightning.WalletMnemonic
@@ -8,7 +7,6 @@ import kotlinx.coroutines.flow.StateFlow
 
 abstract class ConnectManager {
 
-    abstract val connectionStateStateFlow: StateFlow<ConnectionState?>
     abstract val ownerInfoStateFlow: StateFlow<OwnerInfo?>
 
     abstract fun createAccount()
@@ -34,9 +32,6 @@ interface ConnectManagerListener {
     fun onMnemonicWords(words: String)
     fun onOwnerRegistered(okKey: String, routeHint: String)
     fun onNewContactRegistered(msgSender: String)
-    fun onKeyExchange(json: String)
-    fun onKeyExchangeConfirmation(json: String)
-
     fun onTextMessageReceived(
         msg: String,
         msgSender: String?,
@@ -44,7 +39,6 @@ interface ConnectManagerListener {
         msgUuid: String?,
         msgIndex: String?,
     )
-
     fun onUpdateUserState(userState: String)
 }
 

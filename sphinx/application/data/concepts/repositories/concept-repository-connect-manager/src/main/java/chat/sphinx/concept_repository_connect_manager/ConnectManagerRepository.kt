@@ -14,11 +14,4 @@ interface ConnectManagerRepository {
     fun connectAndSubscribeToMqtt(userState: String?) {}
     fun setLspIp(lspIp: String)
     suspend fun updateLspAndOwner(data: String) {}
-    suspend fun sendKeyExchange(
-        index: Int,
-        contactRouteHint: LightningRouteHint?,
-        returnConfirmation: Boolean
-    ) {}
-    suspend fun handleKeyExchangeMessage(json: String) {}
-    suspend fun updateContactDetails(json: String) {}
 }
