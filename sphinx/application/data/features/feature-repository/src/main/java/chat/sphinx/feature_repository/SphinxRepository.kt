@@ -351,6 +351,10 @@ abstract class SphinxRepository(
         connectionManagerState.value = ConnectionManagerState.UserState(userState)
     }
 
+    override fun onReconnectMqtt() {
+        connectionManagerState.value = ConnectionManagerState.ReconnectMqtt
+    }
+
     override suspend fun updateLspAndOwner(data: String) {
         val lspChannelInfo = data.toLspChannelInfo(moshi)
         val serverIp = connectManager.retrieveLspIp()

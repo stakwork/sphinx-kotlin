@@ -40,6 +40,8 @@ interface ConnectManagerListener {
         msgIndex: String?,
     )
     fun onUpdateUserState(userState: String)
+
+    fun onReconnectMqtt()
 }
 
 

@@ -1,5 +1,7 @@
 package chat.sphinx.feature_connect_manager
 
+import android.os.Handler
+import android.os.Looper
 import android.util.Base64
 import android.util.Log
 import chat.sphinx.example.concept_connect_manager.ConnectManager
@@ -14,6 +16,8 @@ import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -42,6 +46,8 @@ import uniffi.sphinxrs.setBlockheight
 import uniffi.sphinxrs.setNetwork
 import uniffi.sphinxrs.xpubFromSeed
 import java.security.SecureRandom
+import kotlin.math.min
+import kotlin.math.pow
 
 class ConnectManagerImpl(
     dispatchers: CoroutineDispatchers
@@ -52,8 +58,8 @@ class ConnectManagerImpl(
     private var walletMnemonic: WalletMnemonic? = null
     private var mqttClient: MqttAsyncClient? = null
     private val network = "regtest"
-    private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private var ownerSeed: String? = null
+    private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
 
     private val _ownerInfoStateFlow: MutableStateFlow<OwnerInfo?> by lazy {
@@ -209,6 +215,8 @@ class ConnectManagerImpl(
 
             if (xPub != null && sig != null) {
 
+                mixer = serverUri
+                walletMnemonic = mnemonicWords
                 ownerSeed = seed
                 _ownerInfoStateFlow.value = ownerInfo
 
@@ -250,7 +258,7 @@ class ConnectManagerImpl(
 
                 override fun onFailure(asyncActionToken: IMqttToken?, exception: Throwable?) {
                     Log.d("MQTT_MESSAGES", "Failed to connect to MQTT: ${exception?.message}")
-                    // Handle connection failure here
+                    reconnectWithBackoff()
                 }
             })
 
@@ -258,7 +266,8 @@ class ConnectManagerImpl(
 
                 override fun connectionLost(cause: Throwable?) {
                     Log.d("MQTT_MESSAGES", "MQTT DISCONNECTED! $cause ${cause?.message}")
-                    // Implement reconnection logic here
+
+                    reconnectWithBackoff()
                 }
 
                 override fun messageArrived(topic: String?, message: MqttMessage?) {
@@ -641,4 +650,46 @@ class ConnectManagerImpl(
 
         return decodedMap
     }
+    private var reconnectAttempts = 0
+    private val initialReconnectDelay = 1000L
+    private val maxReconnectDelay = 10000L
+    private val backoffMultiplier = 2.0
+
+    private fun reconnectWithBackoff() {
+        resetMQTT()
+        coroutineScope.launch {
+            val delayTime = calculateBackoffDelay()
+            delay(delayTime)
+
+            if (!isConnected()) {
+                initializeMqttAndSubscribe(
+                    mixer!!,
+                    walletMnemonic!!,
+                    ownerInfoStateFlow.value!!
+                )
+                Log.d("MQTT_MESSAGES",  "onReconnectMqtt" )
+            }
+
+            delay(1000)
+
+            if (!isConnected()) {
+                reconnectWithBackoff()
+                Log.d("MQTT_MESSAGES",  "reconnectWithBackoff" )
+            } else {
+                reconnectAttempts = 0
+            }
+        }
+    }
+
+    private fun calculateBackoffDelay(): Long {
+        val delay = initialReconnectDelay * backoffMultiplier.pow(reconnectAttempts.toDouble()).toLong()
+        reconnectAttempts++
+        return min(delay, maxReconnectDelay) // Ensure the delay does not exceed the maximum
+    }
+
+    // Method to check if the MQTT client is connected (you need to implement this based on your MQTT client)
+    private fun isConnected(): Boolean {
+        return mqttClient?.isConnected ?: false // Replace with actual connection check
+    }
+
 }
