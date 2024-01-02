@@ -1,6 +1,10 @@
 package chat.sphinx.onboard_connecting.ui
 
+import android.app.Application
 import android.content.Context
+import android.content.SharedPreferences
+import android.util.Base64
+import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.concept_crypto_rsa.RSA
@@ -33,6 +37,8 @@ import chat.sphinx.wrapper_invite.toValidInviteStringOrNull
 import chat.sphinx.wrapper_relay.*
 import chat.sphinx.wrapper_rsa.RsaPrivateKey
 import chat.sphinx.wrapper_rsa.RsaPublicKey
+import com.ensarsarajcic.kotlinx.serialization.msgpack.MsgPack
+import com.ensarsarajcic.kotlinx.serialization.msgpack.MsgPackDynamicSerializer
 import com.squareup.moshi.Moshi
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
@@ -46,6 +52,8 @@ import io.matthewnelson.crypto_common.clazzes.*
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import org.json.JSONException
+import org.json.JSONObject
 import javax.annotation.meta.Exhaustive
 import javax.inject.Inject
 
@@ -121,7 +129,8 @@ internal class OnBoardConnectingViewModel @Inject constructor(
     private val connectManagerRepository: ConnectManagerRepository,
     val moshi: Moshi,
     private val rsa: RSA,
-): MotionLayoutViewModel<
+    private val app: Application
+    ): MotionLayoutViewModel<
         Any,
         Context,
         OnBoardConnectingSideEffect,
@@ -133,13 +142,21 @@ internal class OnBoardConnectingViewModel @Inject constructor(
     private val args: OnBoardConnectingFragmentArgs by handle.navArgs()
     private lateinit var signerManager: SignerManager
 
+    private val userStateSharedPreferences: SharedPreferences =
+        app.getSharedPreferences(USER_STATE_SHARED_PREFERENCES, Context.MODE_PRIVATE)
+
+    companion object {
+        const val USER_STATE_SHARED_PREFERENCES = "user_state_settings"
+        const val ONION_STATE_KEY = "onion_state"
+    }
+
     init {
         viewModelScope.launch(mainImmediate) {
             delay(500L)
-
             processCode()
         }
         collectConnectionStateStateFlow()
+
     }
 
     fun setSignerManager(signerManager: SignerManager) {
@@ -184,7 +201,7 @@ internal class OnBoardConnectingViewModel @Inject constructor(
                 if (signerManager.isPhoneSignerSettingUp()) {
                     continuePhoneSignerSetup()
                 } else {
-                    connectManagerRepository.setLspIp("tcp://54.164.163.153:1883")
+                    connectManagerRepository.setLspIp("tcp://34.229.52.200:1883")
                     connectManagerRepository.createOwnerAccount()
 
 //                    submitSideEffect(OnBoardConnectingSideEffect.InvalidCode)
@@ -193,6 +210,14 @@ internal class OnBoardConnectingViewModel @Inject constructor(
             }
         }
     }
+
+    private fun storeUserState(state: String) {
+        val editor = userStateSharedPreferences.edit()
+
+        editor.putString(ONION_STATE_KEY, state)
+        editor.apply()
+    }
+
 
     private var decryptionJob: Job? = null
     @OptIn(RawPasswordAccess::class)
@@ -665,6 +690,9 @@ internal class OnBoardConnectingViewModel @Inject constructor(
                     }
                     is ConnectionManagerState.OwnerRegistered -> {
                         navigator.toOnBoardNameScreen()
+                    }
+                    is ConnectionManagerState.UserState -> {
+                        storeUserState(connectionState.userState)
                     }
                     else -> {}
                 }

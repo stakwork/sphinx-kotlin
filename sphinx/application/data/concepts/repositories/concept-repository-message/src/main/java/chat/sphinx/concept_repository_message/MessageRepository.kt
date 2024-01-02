@@ -18,8 +18,9 @@ import chat.sphinx.wrapper_message.FeedBoost
 import chat.sphinx.wrapper_message.Message
 import chat.sphinx.wrapper_message.MessageContentDecrypted
 import chat.sphinx.wrapper_message.MessageType
+import chat.sphinx.wrapper_message.Msg
+import chat.sphinx.wrapper_message.MsgSender
 import chat.sphinx.wrapper_message.ThreadUUID
-import chat.sphinx.wrapper_podcast.Podcast
 import kotlinx.coroutines.flow.Flow
 
 interface MessageRepository {
@@ -101,5 +102,11 @@ interface MessageRepository {
         type: MessageType,
     ): LoadResponse<Any, ResponseError>
 
-    suspend fun mqttTextMessageReceived(json: String)
+    suspend fun upsertMqttTextMessage(
+        msg: Msg,
+        msgSender: MsgSender,
+        msgType: MessageType,
+        msgUuid: MessageUUID,
+        msgIndex: MessageId
+    )
 }

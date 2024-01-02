@@ -14,7 +14,6 @@ import chat.sphinx.concept_wallet.WalletDataHandler
 import chat.sphinx.contact.ui.ContactSideEffect
 import chat.sphinx.contact.ui.ContactViewModel
 import chat.sphinx.contact.ui.ContactViewState
-import chat.sphinx.example.concept_connect_manager.ConnectManager
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.new_contact.navigation.NewContactNavigator
@@ -101,24 +100,17 @@ internal class NewContactViewModel @Inject constructor(
         }
 
         saveContactJob = viewModelScope.launch(mainImmediate) {
-            val newContactIndex = contactRepository.getNewContactIndex().firstOrNull()
-            val exitingOkKey = contactRepository.getContactByPubKey(lightningNodePubKey).firstOrNull()
+            val exitingContact = contactRepository.getContactByPubKey(lightningNodePubKey).firstOrNull()
 
-            if (newContactIndex != null && lightningRouteHint != null && exitingOkKey == null) {
+            if (lightningRouteHint != null && exitingContact == null) {
 
                 val newContact = NewContact(
                     contactAlias,
                     lightningNodePubKey,
                     lightningRouteHint,
                     null,
-                    newContactIndex,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null
+                    false
                 )
-
                 connectManagerRepository.createContact(newContact)
                 viewStateContainer.updateViewState(ContactViewState.Saved)
             }

@@ -393,9 +393,9 @@ ORDER BY id
 LIMIT 1;
 
 contactGetLastContactIndex:
-SELECT contact_index
+SELECT id
 FROM contactDbo
-ORDER BY contact_index DESC
+ORDER BY id DESC
 LIMIT 1;
 
 contactGetChildPubKeysToIndexes:

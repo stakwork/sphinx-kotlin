@@ -60,6 +60,7 @@ dependencies {
     kapt kaptDeps.google.hilt
 
     testImplementation testDeps.junit
+    implementation deps.msgpack.sdk
 
     androidTestImplementation testDeps.androidx.core
     androidTestImplementation testDeps.androidx.espresso

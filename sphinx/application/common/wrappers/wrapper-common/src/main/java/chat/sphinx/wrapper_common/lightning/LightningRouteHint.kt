@@ -15,6 +15,9 @@ inline fun retrieveLightningRouteHint(lspPubKey: String?, scid: String?): Lightn
 @Suppress("NOTHING_TO_INLINE")
 inline fun LightningRouteHint.getLspPubKey(): String = this.value.substringBefore('_')
 
+@Suppress("NOTHING_TO_INLINE")
+inline fun LightningRouteHint.getScid(): String = this.value.substringAfter('_')
+
 inline val String.isValidLightningRouteHint: Boolean
     get() = isNotEmpty() && matches("^${LightningRouteHint.REGEX}\$".toRegex())
 

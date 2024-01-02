@@ -3,7 +3,9 @@ package chat.sphinx.dashboard.ui
 import android.app.Application
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.net.Uri
+import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import app.cash.exhaustive.Exhaustive
@@ -23,6 +25,7 @@ import chat.sphinx.concept_relay.RelayDataHandler
 import chat.sphinx.concept_repository_actions.ActionsRepository
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_connect_manager.ConnectManagerRepository
+import chat.sphinx.concept_repository_connect_manager.model.ConnectionManagerState
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_dashboard_android.RepositoryDashboardAndroid
 import chat.sphinx.concept_repository_feed.FeedRepository
@@ -138,7 +141,15 @@ internal class DashboardViewModel @Inject constructor(
         MutableStateFlow(null)
     }
 
+    companion object {
+        const val USER_STATE_SHARED_PREFERENCES = "user_state_settings"
+        const val ONION_STATE_KEY = "onion_state"
+    }
+
     private lateinit var signerManager: SignerManager
+
+    private val userStateSharedPreferences: SharedPreferences =
+        app.getSharedPreferences(USER_STATE_SHARED_PREFERENCES, Context.MODE_PRIVATE)
 
     init {
         if (args.updateBackgroundLoginTime) {
@@ -146,7 +157,8 @@ internal class DashboardViewModel @Inject constructor(
                 backgroundLoginHandler.updateLoginTime()
             }
         }
-        connectManagerRepository.connectAndSubscribeToMqtt()
+        connectManagerRepository.connectAndSubscribeToMqtt(getUserState())
+        collectConnectionStateStateFlow()
 
         syncFeedRecommendationsState()
 
@@ -158,6 +170,35 @@ internal class DashboardViewModel @Inject constructor(
         feedRepository.restoreContentFeedStatuses()
 
         networkRefresh(true)
+    }
+
+
+    private fun collectConnectionStateStateFlow() {
+        viewModelScope.launch(mainImmediate) {
+            connectManagerRepository.connectionManagerState.collect { connectionState ->
+                when (connectionState) {
+                    is ConnectionManagerState.UserState -> {
+                        storeUserState(connectionState.userState)
+                    }
+                    is ConnectionManagerState.ReconnectMqtt -> {
+                        Log.d("MQTT_MESSAGES", "connectAndSubscribeToMqtt is called!!")
+                        connectManagerRepository.connectAndSubscribeToMqtt(getUserState())
+                    }
+                    else -> {}
+                }
+            }
+        }
+    }
+
+    private fun storeUserState(state: String) {
+        val editor = userStateSharedPreferences.edit()
+
+        editor.putString(ONION_STATE_KEY, state)
+        editor.apply()
+    }
+
+    private fun getUserState(): String? {
+        return userStateSharedPreferences.getString(ONION_STATE_KEY, null)
     }
 
     private fun getRelayKeys() {

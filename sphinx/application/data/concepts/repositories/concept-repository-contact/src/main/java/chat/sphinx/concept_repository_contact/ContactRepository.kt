@@ -63,7 +63,7 @@ interface ContactRepository {
 
     suspend fun setGithubPat(pat: String): Response<Boolean, ResponseError>
 
-    suspend fun createOwner(okKey: String)
+    suspend fun createOwner(okKey: String, routeHint: String, shortChannelId: String)
 
     suspend fun createNewContact(contact: NewContact)
 
@@ -87,7 +87,7 @@ interface ContactRepository {
 
     suspend fun updateOwnerAlias(alias: ContactAlias)
 
-    suspend fun getNewContactIndex(): Flow<ContactIndex?>
+    suspend fun getNewContactIndex(): Flow<ContactId?>
 
     suspend fun getContactsChildPubKeysToIndexes(): Flow<HashMap<LightningNodePubKey, ContactIndex>?>
 

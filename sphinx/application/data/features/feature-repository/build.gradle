@@ -56,6 +56,8 @@ dependencies {
     api deps.kotlin.reflect
     api deps.square.moshi
     api deps.square.sqlDelightCoroutines
+    implementation deps.msgpack.sdk
+
     implementation project(path: ':sphinx:application:data:concepts:concept-sphinx-notification-manager')
 
     testImplementation deps.square.sqlDelightJvm

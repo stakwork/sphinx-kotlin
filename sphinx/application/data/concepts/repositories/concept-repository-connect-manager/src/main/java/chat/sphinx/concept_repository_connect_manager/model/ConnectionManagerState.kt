@@ -4,7 +4,9 @@ import chat.sphinx.wrapper_contact.NewContact
 
 sealed class ConnectionManagerState {
 
-    data class MnemonicWords(val words: String): ConnectionManagerState()
     object OwnerRegistered: ConnectionManagerState()
+    object ReconnectMqtt: ConnectionManagerState()
+    data class MnemonicWords(val words: String): ConnectionManagerState()
+    data class UserState(val userState: String): ConnectionManagerState()
     data class ErrorMessage(val message: String): ConnectionManagerState()
 }

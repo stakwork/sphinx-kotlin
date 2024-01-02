@@ -69,13 +69,7 @@ import chat.sphinx.concept_wallet.WalletDataHandler
 import chat.sphinx.conceptcoredb.*
 import chat.sphinx.example.concept_connect_manager.ConnectManager
 import chat.sphinx.example.concept_connect_manager.ConnectManagerListener
-import chat.sphinx.example.wrapper_mqtt.HopsDto
-import chat.sphinx.example.wrapper_mqtt.SphinxChatMessage
-import chat.sphinx.example.wrapper_mqtt.MessagesFetchRequest
-import chat.sphinx.example.wrapper_mqtt.PubkeyDto
-import chat.sphinx.example.wrapper_mqtt.Sender
-import chat.sphinx.example.wrapper_mqtt.toJson
-import chat.sphinx.example.wrapper_mqtt.toSphinxChatMessageNull
+import chat.sphinx.example.concept_connect_manager.model.OwnerInfo
 import chat.sphinx.example.wrapper_mqtt.toLspChannelInfo
 import chat.sphinx.feature_repository.mappers.action_track.*
 import chat.sphinx.feature_repository.mappers.chat.ChatDboPresenterMapper
@@ -117,11 +111,12 @@ import chat.sphinx.wrapper_common.lightning.LightningRouteHint
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.lightning.ServerIp
 import chat.sphinx.wrapper_common.lightning.ShortChannelId
-import chat.sphinx.wrapper_common.lightning.getLspPubKey
+import chat.sphinx.wrapper_common.lightning.getScid
 import chat.sphinx.wrapper_common.lightning.retrieveLightningRouteHint
 import chat.sphinx.wrapper_common.lightning.toLightningNodePubKey
 import chat.sphinx.wrapper_common.lightning.toLightningRouteHint
 import chat.sphinx.wrapper_common.lightning.toSat
+import chat.sphinx.wrapper_common.lightning.toShortChannelId
 import chat.sphinx.wrapper_common.message.*
 import chat.sphinx.wrapper_common.payment.PaymentTemplate
 import chat.sphinx.wrapper_common.subscription.EndNumber
@@ -137,6 +132,8 @@ import chat.sphinx.wrapper_lightning.toWalletMnemonic
 import chat.sphinx.wrapper_meme_server.AuthenticationChallenge
 import chat.sphinx.wrapper_meme_server.PublicAttachmentInfo
 import chat.sphinx.wrapper_message.*
+import chat.sphinx.wrapper_message.Msg.Companion.toMsg
+import chat.sphinx.wrapper_message.MsgSender.Companion.toMsgSender
 import chat.sphinx.wrapper_message_media.*
 import chat.sphinx.wrapper_message_media.token.MediaHost
 import chat.sphinx.wrapper_podcast.FeedRecommendation
@@ -266,66 +263,33 @@ abstract class SphinxRepository(
         connectionManagerState.value = ConnectionManagerState.MnemonicWords(words)
     }
 
-    override fun onOkKey(okKey: String) {
-        applicationScope.launch(io) {
-            createOwner(okKey)
-        }
-    }
-
-    override fun onOwnerRegistered(message: String) {
+    override fun onOwnerRegistered(okKey: String, routeHint: String) {
         applicationScope.launch(mainImmediate) {
+            val scid = routeHint.toLightningRouteHint()?.getScid()
 
-            val lspChannelInfo = message.toLspChannelInfo(moshi)
-            val serverIp = connectManager.retrieveLspIp()
-            val serverPubKey = lspChannelInfo?.serverPubKey
-            val scid = lspChannelInfo?.scid
-            val routeHint = retrieveLightningRouteHint(serverPubKey?.value, scid?.value)
-
-            if (serverIp?.isNotEmpty() == true && serverPubKey != null) {
-                updateLSP(
-                    LightningServiceProvider(
-                        ServerIp(serverIp),
-                        serverPubKey
-                    )
-                )
-            }
-
-            if (routeHint != null && scid != null) {
-                updateOwnerRouteHintAndScid(routeHint, scid)
+            if (scid != null && accountOwner.value?.nodePubKey == null) {
+                createOwner(okKey, routeHint, scid)
                 connectionManagerState.value = ConnectionManagerState.OwnerRegistered
             }
         }
     }
 
-    override fun connectAndSubscribeToMqtt() {
+    override fun connectAndSubscribeToMqtt(userState: String?) {
         applicationScope.launch(mainImmediate) {
-            val contactsMap = getContactsChildPubKeysToIndexes().firstOrNull()
-                ?.mapKeys { it.key.value }
-                ?.mapValues { it.value.value.toInt() }
-
-            val contactsInfoList = contactsMap?.map { (childPubKeyString, contactIndexInt) ->
-                // TODO() get id of the last message for that contact
-
-                val messagesFetchRequest = MessagesFetchRequest(0, 1000).toJson(moshi)
-
-                ContactInfo(
-                    childPubKey = LightningNodePubKey(childPubKeyString),
-                    contactIndex = ContactIndex(contactIndexInt.toLong()),
-                    messagesFetchRequest = messagesFetchRequest
-                )
-            }
-
             val mnemonic = walletDataHandler.retrieveWalletMnemonic()
             val okKey = accountOwner.value?.nodePubKey?.value
-            val senderLsp = retrieveLSP().firstOrNull()?.pubKey
+
+            val ownerInfo = OwnerInfo(
+                accountOwner.value?.alias?.value ?: "",
+                accountOwner.value?.photoUrl?.value ?: "",
+                userState
+            )
 
             if (mnemonic != null && okKey != null) {
                 connectManager.initializeMqttAndSubscribe(
-                    "tcp://54.164.163.153:1883",
+                    "tcp://34.229.52.200:1883",
                     mnemonic,
-                    okKey,
-                    contactsInfoList,
-                    senderLsp
+                    ownerInfo
                 )
             }
         }
@@ -346,46 +310,49 @@ abstract class SphinxRepository(
         connectManager.setLspIp(lspIp)
     }
 
-    override suspend fun createOwnerWithOkKey(okKey: String) {
-        createOwner(okKey)
-        super.createOwnerWithOkKey(okKey)
-    }
-
     override fun onNewContactRegistered(
-        index: Int,
-        childPubKey: String,
-        scid: String,
-        contactRouteHint: String
+        msgSender: String
     ) {
         applicationScope.launch(io) {
-            val returnConfirmation = getContactById(ContactId(index.toLong())).firstOrNull()?.contactKey != null
+            val contactInfo = msgSender.toMsgSender(moshi)
 
-            updateChildPubKeyAndScidByIndex(
-                ContactIndex(index.toLong()),
-                LightningNodePubKey(childPubKey),
-                ShortChannelId(scid)
+            createNewContact(
+                NewContact(
+                    contactAlias = contactInfo.alias?.toContactAlias(),
+                    lightningNodePubKey = contactInfo.pubkey.toLightningNodePubKey(),
+                    lightningRouteHint = null,
+                    photoUrl = contactInfo.photo_url?.toPhotoUrl(),
+                    confirmed = contactInfo.confirmed
+                )
             )
-
-            sendKeyExchange(index, contactRouteHint.toLightningRouteHint(), returnConfirmation)
         }
     }
 
-    override fun onKeyExchange(json: String) {
+    override fun onTextMessageReceived(
+        msg: String,
+        msgSender: String?,
+        msgType: Int?,
+        msgUuid: String?,
+        msgIndex: String?,
+    ) {
         applicationScope.launch(io) {
-            handleKeyExchangeMessage(json)
+            val message = msg.toMsg(moshi)
+            val contactInfo = msgSender?.toMsgSender(moshi) ?: return@launch
+
+            val messageType = if (msgType == 0) MessageType.Message else return@launch
+            val messageUUID = msgUuid?.toMessageUUID() ?: return@launch
+            val messageId = msgIndex?.toLong()?.let { MessageId(it) } ?: return@launch
+
+            upsertMqttTextMessage(message, contactInfo, messageType, messageUUID, messageId)
         }
     }
 
-    override fun onKeyExchangeConfirmation(json: String) {
-        applicationScope.launch(io) {
-            updateContactDetails(json)
-        }
+    override fun onUpdateUserState(userState: String) {
+        connectionManagerState.value = ConnectionManagerState.UserState(userState)
     }
 
-    override fun onTextMessageReceived(json: String) {
-        applicationScope.launch(io) {
-            mqttTextMessageReceived(json)
-        }
+    override fun onReconnectMqtt() {
+        connectionManagerState.value = ConnectionManagerState.ReconnectMqtt
     }
 
     override suspend fun updateLspAndOwner(data: String) {
@@ -407,196 +374,77 @@ abstract class SphinxRepository(
         if (routeHint != null && scid != null) {
             updateOwnerRouteHintAndScid(routeHint, scid)
         }
-        super.updateLspAndOwner(data)
     }
 
-    override suspend fun sendKeyExchange(
-        index: Int,
-        contactRouteHint: LightningRouteHint?,
-        returnConfirmation: Boolean
+
+    override suspend fun upsertMqttTextMessage(
+        msg: Msg,
+        msgSender: MsgSender,
+        msgType: MessageType,
+        msgUuid: MessageUUID,
+        msgIndex: MessageId
     ) {
-        val contact = getContactById(ContactId(index.toLong())).firstOrNull()
-
-        val owner = accountOwner.value
-        val mnemonic = walletDataHandler.retrieveWalletMnemonic()
-        val type = if (!returnConfirmation) 10 else 11
-
-        if (owner != null && mnemonic != null && contact != null) {
-            val keyExchangeMessage = SphinxChatMessage(
-                "",
-                type,
-                Sender(
-                    owner.nodePubKey?.value ?: "",
-                    owner.routeHint?.value ?: "",
-                    contact.childPubKey?.value ?: "",
-                    contactRouteHint?.value ?: "",
-                    owner.alias?.value ?: "",
-                    owner.photoUrl?.value ?: ""
-                ),
-                chat.sphinx.example.wrapper_mqtt.Message("")
-            ).toJson(moshi)
-
-            val hops = HopsDto(
-                listOf(
-                    PubkeyDto(contact.routeHint?.getLspPubKey() ?: ""),
-                    PubkeyDto(contact.nodePubKey?.value ?: "")
-                )
-            ).toJson(moshi)
-
-            connectManager.sendMessage(
-                keyExchangeMessage,
-                hops,
-                owner.nodePubKey?.value ?: ""
-            )
-        }
-    }
-
-    override suspend fun handleKeyExchangeMessage(json: String) {
-        val keyExchange = json.toSphinxChatMessageNull(moshi)
-        val senderLsp = retrieveLSP().firstOrNull()?.pubKey
-        val newContactIndex = getNewContactIndex().firstOrNull()
-
-
-        keyExchange?.let { keyExchangeMessage ->
-            val senderInfo = keyExchangeMessage.sender
-            val exitingOkKey = senderInfo.pubkey.toLightningNodePubKey()
-                ?.let { getContactByPubKey(it).firstOrNull() }
-
-            if (newContactIndex != null && senderLsp != null && exitingOkKey == null) {
-
-                val newContact = NewContact(
-                    senderInfo.alias.toContactAlias(),
-                    senderInfo.pubkey.toLightningNodePubKey(),
-                    senderInfo.routeHint?.toLightningRouteHint(),
-                    null,
-                    newContactIndex,
-                    null,
-                    senderLsp,
-                    senderInfo.contactPubkey?.toLightningNodePubKey(),
-                    senderInfo.contactRouteHint?.toLightningRouteHint(),
-                    senderInfo.photoUrl.toPhotoUrl()
-                )
-
-                createNewContact(newContact)
-                connectManager.createContact(newContact)
-            }
-        }
-    }
-
-    override suspend fun mqttTextMessageReceived(json: String) {
         val queries = coreDB.getSphinxDatabaseQueries()
-        val textMessage = json.toSphinxChatMessageNull(moshi)
+        val contact = getContactByPubKey(LightningNodePubKey(msgSender.pubkey)).firstOrNull()
 
-            textMessage?.let { message ->
-                val messageContent = message.message.content
-                val sender = message.sender
+        if (contact != null) {
 
-                // Implement getContactByContactPubkey:
-                val contact = getContactByPubKey(LightningNodePubKey(sender.pubkey)).firstOrNull()
-                val messageId = queries.messageGetMaxId().executeAsOneOrNull()?.MAX?.plus(1) ?: 0
+            val newMessage = NewMessage(
+                id = msgIndex,
+                uuid = msgUuid,
+                chatId = ChatId(contact.id.value),
+                type = msgType,
+                sender = contact.id,
+                receiver = ContactId(0),
+                amount = Sat(0),
+                date = DateTime.nowUTC().toDateTime(),
+                expirationDate = null,
+                messageContent = null,
+                status = MessageStatus.Confirmed,
+                seen = Seen.False,
+                senderAlias = null,
+                senderPic = null,
+                originalMUID = null,
+                replyUUID = null,
+                flagged = Flagged.False,
+                recipientAlias = null,
+                recipientPic = null,
+                person = null,
+                threadUUID = null,
+                errorMessage = null,
+                isPinned = false,
+                messageContentDecrypted = MessageContentDecrypted(msg.content),
+                messageDecryptionError = false,
+                messageDecryptionException = null,
+                messageMedia = null,
+                feedBoost = null,
+                callLinkMessage = null,
+                podcastClip = null,
+                giphyData = null,
+                reactions = null,
+                purchaseItems = null,
+                replyMessage = null,
+                thread = null
+            )
 
-                if (contact != null) {
-
-                    val newMessage = NewMessage(
-                        id = MessageId(messageId),
-                        uuid = MessageUUID(message.uuid),
-                        chatId = ChatId(contact.contactIndex?.value ?: 0L),
-                        type = MessageType.Message,
-                        sender = contact.id,
-                        receiver = ContactId(0),
-                        amount = Sat(0),
-                        date = DateTime.nowUTC().toDateTime(),
-                        expirationDate = null,
-                        messageContent = null,
-                        status = MessageStatus.Confirmed,
-                        seen = Seen.False,
-                        senderAlias = null,
-                        senderPic = null,
-                        originalMUID = null,
-                        replyUUID = null,
-                        flagged = Flagged.False,
-                        recipientAlias = null,
-                        recipientPic = null,
-                        person = null,
-                        threadUUID = null,
-                        errorMessage = null,
-                        isPinned = false,
-                        messageContentDecrypted = MessageContentDecrypted(messageContent.toString()),
-                        messageDecryptionError = false,
-                        messageDecryptionException = null,
-                        messageMedia = null,
-                        feedBoost = null,
-                        callLinkMessage = null,
-                        podcastClip = null,
-                        giphyData = null,
-                        reactions = null,
-                        purchaseItems = null,
-                        replyMessage = null,
-                        thread = null
-                    )
-
-                    messageLock.withLock {
-                        queries.transaction {
-                            upsertNewMessage(newMessage, queries, null)
-                        }
-                    }
+            messageLock.withLock {
+                queries.transaction {
+                    upsertNewMessage(newMessage, queries, null)
                 }
             }
-    }
-
-    override suspend fun updateContactDetails(json: String) {
-        val keyExchangeConfirmation = json.toSphinxChatMessageNull(moshi)
-        keyExchangeConfirmation?.let { keyExchangeMessage ->
-
-            val senderInfo = keyExchangeConfirmation.sender
-            val contactPubKey = senderInfo.pubkey.toLightningNodePubKey()
-            val contactKey = senderInfo.contactPubkey?.toLightningNodePubKey()
-            val contactRouteHint = senderInfo.contactRouteHint?.toLightningRouteHint()
-
-            if (contactPubKey != null && contactKey != null && contactRouteHint != null) {
-
-                updateContactKeyAndRouteHintByOkKey(
-                    contactPubKey,
-                    contactKey,
-                    contactRouteHint,
-                    senderInfo.photoUrl.toPhotoUrl()
-                )
-            }
         }
+
     }
 
     fun sendNewMessage(
-        owner: Contact,
         contact: Contact,
         messageContent: String,
-        contactRouteHint: LightningRouteHint
     ) {
-
-        val newMessage = SphinxChatMessage(
-            "",
-            0,
-            Sender(
-                owner.nodePubKey?.value ?: "",
-                owner.routeHint?.value ?: "",
-                contact.childPubKey?.value ?: "",
-                contactRouteHint.value ?: "",
-                owner.alias?.value ?: "",
-                owner.photoUrl?.value ?: ""
-            ),
-            chat.sphinx.example.wrapper_mqtt.Message(messageContent)
-        ).toJson(moshi)
-
-        val hops = HopsDto(
-            listOf(
-                PubkeyDto(contact.routeHint?.getLspPubKey() ?: ""),
-                PubkeyDto(contact.nodePubKey?.value ?: "")
-            )
-        ).toJson(moshi)
+        val newMessage = chat.sphinx.example.wrapper_mqtt.Message(messageContent).toJson(moshi)
 
         connectManager.sendMessage(
             newMessage,
-            hops,
-            owner.nodePubKey?.value ?: ""
+            contact.nodePubKey?.value ?: ""
         )
     }
 
@@ -2006,13 +1854,13 @@ abstract class SphinxRepository(
         return response
     }
 
-    override suspend fun createOwner(okKey: String) {
+    override suspend fun createOwner(okKey: String, routeHint: String, shortChannelId: String) {
         val queries = coreDB.getSphinxDatabaseQueries()
         val now = DateTime.nowUTC()
 
         val owner = Contact(
             id = ContactId(0L),
-            routeHint = null,
+            routeHint = routeHint.toLightningRouteHint(),
             nodePubKey = okKey.toLightningNodePubKey(),
             nodeAlias = null,
             alias = null,
@@ -2030,7 +1878,7 @@ abstract class SphinxRepository(
             inviteId = null,
             inviteStatus = null,
             blocked = Blocked.False,
-            scid = null,
+            scid = shortChannelId.toShortChannelId(),
             contactIndex = ContactIndex(0L),
             contactRouteHint = null,
             childPubKey = null,
@@ -2046,18 +1894,25 @@ abstract class SphinxRepository(
     override suspend fun createNewContact(contact: NewContact) {
         val queries = coreDB.getSphinxDatabaseQueries()
         val now = DateTime.nowUTC()
-        val contactKey = contact.contactKey
+        val contactId = getNewContactIndex().firstOrNull()?.value
+
+        val exitingContact = contact.lightningNodePubKey
+            ?.let { getContactByPubKey(it).firstOrNull() }
+
+        if (exitingContact?.nodePubKey != null) {
+            return
+        }
 
         val newContact = Contact(
-            id = ContactId(contact.index.value),
+            id = ContactId(exitingContact?.id?.value ?: contactId ?: -1L),
             routeHint = contact.lightningRouteHint,
             nodePubKey = contact.lightningNodePubKey,
             nodeAlias = null,
-            alias = contact.contactAlias,
+            alias = exitingContact?.alias ?: contact.contactAlias,
             photoUrl = contact.photoUrl,
             privatePhoto = PrivatePhoto.False,
             isOwner = Owner.False,
-            status = if (contactKey != null) ContactStatus.Confirmed else ContactStatus.Pending,
+            status = if (contact.confirmed || contact.lightningNodePubKey != null) ContactStatus.Confirmed else ContactStatus.Pending,
             rsaPublicKey = null,
             deviceId = null,
             createdAt = now.toDateTime(),
@@ -2068,21 +1923,21 @@ abstract class SphinxRepository(
             inviteId = null,
             inviteStatus = null,
             blocked = Blocked.False,
-            scid = contact.scid,
-            contactIndex = contact.index,
-            contactRouteHint = contact.contactRouteHint,
-            childPubKey = contact.childPubKey,
-            contactKey = contactKey
+            scid = null,
+            contactIndex = null,
+            contactRouteHint = null,
+            childPubKey = null,
+            contactKey = null
         )
 
         val newChat = Chat(
-            id = ChatId(contact.index.value),
+            id = ChatId(exitingContact?.id?.value ?: contactId ?: -1L),
             uuid = ChatUUID("${UUID.randomUUID()}"),
-            name = ChatName(contact.contactAlias?.value ?: "unknown"),
+            name = ChatName( exitingContact?.alias?.value ?: contact.contactAlias?.value ?: "unknown"),
             photoUrl = contact.photoUrl,
             type = ChatType.Conversation,
-            status = if (contactKey != null) ChatStatus.Approved else ChatStatus.Pending,
-            contactIds = listOf(ContactId(0), ContactId(contact.index.value)),
+            status = if (contact.confirmed || contact.lightningNodePubKey != null) ChatStatus.Approved else ChatStatus.Pending,
+            contactIds = listOf(ContactId(0), ContactId(contactId ?: -1)),
             isMuted = ChatMuted.False,
             createdAt = now.toDateTime(),
             groupKey = null,
@@ -2211,14 +2066,14 @@ abstract class SphinxRepository(
         }
     }
 
-    override suspend fun getNewContactIndex(): Flow<ContactIndex?> = flow {
+    override suspend fun getNewContactIndex(): Flow<ContactId?> = flow {
         emitAll(
             coreDB.getSphinxDatabaseQueries().contactGetLastContactIndex()
                 .asFlow()
                 .mapToOneOrNull(io)
-                .map { dbContactIndex ->
-                    dbContactIndex?.contact_index?.value?.let {
-                        ContactIndex(it + 1)
+                .map { dbContactId ->
+                    dbContactId?.value?.let {
+                        ContactId(it + 1)
                     }
                 }
         )
@@ -3154,17 +3009,11 @@ abstract class SphinxRepository(
                     owner
                 }
 
-            val contactRouteHint = retrieveLightningRouteHint(
-                retrieveLSP().firstOrNull()?.pubKey?.value,
-                contact?.scid?.value
-            )
 
-            if (owner != null && contact != null && contactRouteHint != null) {
+            if (contact != null) {
                 sendNewMessage(
-                    owner,
                     contact,
                     sendMessage.text ?: "",
-                    contactRouteHint
                 )
             }
 
