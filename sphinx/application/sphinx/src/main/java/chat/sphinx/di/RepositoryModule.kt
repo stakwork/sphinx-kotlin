@@ -197,6 +197,12 @@ object RepositoryModule {
         )
 
     @Provides
+    fun provideConnectManagerRepository(
+        sphinxRepositoryAndroid: SphinxRepositoryAndroid
+    ): ConnectManagerRepository =
+        sphinxRepositoryAndroid
+
+    @Provides
     fun provideChatRepository(
         sphinxRepositoryAndroid: SphinxRepositoryAndroid
     ): ChatRepository =
@@ -251,10 +257,5 @@ object RepositoryModule {
     ): ActionsRepository =
         sphinxRepositoryAndroid
 
-    @Provides
-    fun provideConnectManagerRepository(
-        sphinxRepositoryAndroid: SphinxRepositoryAndroid
-    ): ConnectManagerRepository =
-        sphinxRepositoryAndroid
 }
 

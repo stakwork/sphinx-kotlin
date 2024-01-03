@@ -14,4 +14,6 @@ dependencies {
     api project(path: ':sphinx:application:common:wrappers:wrapper-contact')
     api project(path: ':sphinx:application:data:concepts:concept-meme-server')
     api project(path: ':sphinx:application:network:concepts:queries:concept-network-query-meme-server')
+    api project(path: ':sphinx:application:data:concepts:repositories:concept-repository-connect-manager')
+
 }

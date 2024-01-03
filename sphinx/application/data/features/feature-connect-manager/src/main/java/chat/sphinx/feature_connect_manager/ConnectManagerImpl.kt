@@ -1,7 +1,5 @@
 package chat.sphinx.feature_connect_manager
 
-import android.os.Handler
-import android.os.Looper
 import android.util.Base64
 import android.util.Log
 import chat.sphinx.example.concept_connect_manager.ConnectManager
@@ -16,12 +14,12 @@ import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import okio.base64.encodeBase64
 import org.eclipse.paho.client.mqttv3.IMqttActionListener
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken
 import org.eclipse.paho.client.mqttv3.IMqttToken
@@ -44,6 +42,7 @@ import uniffi.sphinxrs.rootSignMs
 import uniffi.sphinxrs.send
 import uniffi.sphinxrs.setBlockheight
 import uniffi.sphinxrs.setNetwork
+import uniffi.sphinxrs.signBytes
 import uniffi.sphinxrs.xpubFromSeed
 import java.security.SecureRandom
 import kotlin.math.min
@@ -501,6 +500,37 @@ class ConnectManagerImpl(
 
     override fun retrieveLspIp(): String? {
         return mixer
+    }
+
+    override fun processChallengeSignature(challenge: String) {
+
+        val signedChallenge = try {
+            signBytes(
+                ownerSeed!!,
+                0.toULong(),
+                getTimestampInMilliseconds(),
+                network,
+                challenge.toByteArray()
+            )
+        } catch (e: Exception) {
+            null
+        }
+
+        if (signedChallenge != null) {
+
+           val sign = ByteArray(signedChallenge.length / 2) { index ->
+               val start = index * 2
+               val end = start + 2
+               val byteValue = signedChallenge.substring(start, end).toInt(16)
+               byteValue.toByte()
+           }.encodeBase64()
+               .replace("/", "_")
+               .replace("+", "-")
+
+            notifyListeners {
+                onSignedChallenge(sign)
+            }
+        }
     }
 
     // Utility Methods

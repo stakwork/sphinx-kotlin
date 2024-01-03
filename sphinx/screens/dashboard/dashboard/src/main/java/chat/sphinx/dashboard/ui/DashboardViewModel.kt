@@ -180,10 +180,6 @@ internal class DashboardViewModel @Inject constructor(
                     is ConnectionManagerState.UserState -> {
                         storeUserState(connectionState.userState)
                     }
-                    is ConnectionManagerState.ReconnectMqtt -> {
-                        Log.d("MQTT_MESSAGES", "connectAndSubscribeToMqtt is called!!")
-                        connectManagerRepository.connectAndSubscribeToMqtt(getUserState())
-                    }
                     else -> {}
                 }
             }

@@ -24,6 +24,7 @@ abstract class ConnectManager {
     abstract fun retrieveLspIp(): String?
     abstract fun addListener(listener: ConnectManagerListener): Boolean
     abstract fun removeListener(listener: ConnectManagerListener): Boolean
+    abstract fun processChallengeSignature(challenge: String)
 
 }
 
@@ -41,7 +42,8 @@ interface ConnectManagerListener {
     )
     fun onUpdateUserState(userState: String)
 
-    fun onReconnectMqtt()
+    fun onSignedChallenge(sign: String)
+
 }
 
 

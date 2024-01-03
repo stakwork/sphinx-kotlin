@@ -252,6 +252,7 @@ abstract class SphinxRepository(
 
     init {
         connectManager.addListener(this)
+        memeServerTokenHandler.addListener(this)
     }
 
     override fun onMnemonicWords(words: String) {
@@ -310,6 +311,10 @@ abstract class SphinxRepository(
         connectManager.setLspIp(lspIp)
     }
 
+    override fun singChallenge(challenge: String) {
+        connectManager.processChallengeSignature(challenge)
+    }
+
     override fun onNewContactRegistered(
         msgSender: String
     ) {
@@ -351,8 +356,8 @@ abstract class SphinxRepository(
         connectionManagerState.value = ConnectionManagerState.UserState(userState)
     }
 
-    override fun onReconnectMqtt() {
-        connectionManagerState.value = ConnectionManagerState.ReconnectMqtt
+    override fun onSignedChallenge(sign: String) {
+        connectionManagerState.value = ConnectionManagerState.SignedChallenge(sign)
     }
 
     override suspend fun updateLspAndOwner(data: String) {
@@ -375,7 +380,6 @@ abstract class SphinxRepository(
             updateOwnerRouteHintAndScid(routeHint, scid)
         }
     }
-
 
     override suspend fun upsertMqttTextMessage(
         msg: Msg,
@@ -1722,30 +1726,14 @@ abstract class SphinxRepository(
 
                         owner?.let { nnOwner ->
 
-                            networkQueryContact.updateContact(
-                                nnOwner.id,
-                                PutContactDto(photo_url = newUrl.value)
-                            ).collect { loadResponse ->
+                            val queries = coreDB.getSphinxDatabaseQueries()
 
-                                @Exhaustive
-                                when (loadResponse) {
-                                    is LoadResponse.Loading -> {
-                                    }
-                                    is Response.Error -> {
-                                        response = loadResponse
-                                    }
-                                    is Response.Success -> {
-                                        val queries = coreDB.getSphinxDatabaseQueries()
-
-                                        contactLock.withLock {
-                                            withContext(io) {
-                                                queries.contactUpdatePhotoUrl(
-                                                    newUrl,
-                                                    nnOwner.id,
-                                                )
-                                            }
-                                        }
-                                    }
+                            contactLock.withLock {
+                                withContext(io) {
+                                    queries.contactUpdatePhotoUrl(
+                                        newUrl,
+                                        nnOwner.id,
+                                    )
                                 }
                             }
                         } ?: throw IllegalStateException("Failed to retrieve account owner")
