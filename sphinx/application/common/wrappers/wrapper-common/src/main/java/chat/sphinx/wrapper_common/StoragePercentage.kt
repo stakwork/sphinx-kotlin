@@ -7,12 +7,18 @@ fun calculateStoragePercentage(storageData: StorageData): StoragePercentage {
             storageData.video.totalSize.value + storageData.audio.totalSize.value +
             storageData.files.totalSize.value
 
+    // Helper function to format the storage value
+    fun formatStorageValue(value: Long): Float {
+        val formattedString = value.toString().replace(",", "")
+        return String.format("%.3f", formattedString.toFloat() / totalStorage).toFloat()
+    }
+
     return StoragePercentage(
-        freeStorage = String.format("%.3f", freeStorage.toFloat() / totalStorage).toFloat(),
-        image = String.format("%.3f", storageData.images.totalSize.value.toFloat() / totalStorage).toFloat(),
-        video = String.format("%.3f", storageData.video.totalSize.value.toFloat() / totalStorage).toFloat(),
-        audio = String.format("%.3f", storageData.audio.totalSize.value.toFloat() / totalStorage).toFloat(),
-        files = String.format("%.3f", storageData.files.totalSize.value.toFloat() / totalStorage).toFloat()
+        freeStorage = formatStorageValue(freeStorage),
+        image = formatStorageValue(storageData.images.totalSize.value),
+        video = formatStorageValue(storageData.video.totalSize.value),
+        audio = formatStorageValue(storageData.audio.totalSize.value),
+        files = formatStorageValue(storageData.files.totalSize.value)
     )
 }
 
