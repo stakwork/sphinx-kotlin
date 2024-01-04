@@ -3,6 +3,8 @@ package chat.sphinx.feature_meme_server
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.concept_meme_server.MemeServerTokenHandler
 import chat.sphinx.concept_network_query_meme_server.NetworkQueryMemeServer
+import chat.sphinx.concept_repository_connect_manager.ConnectManagerRepository
+import chat.sphinx.concept_repository_connect_manager.model.ConnectionManagerState
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.exception
@@ -18,7 +20,7 @@ import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -52,8 +54,9 @@ class MemeServerTokenHandlerImpl(
     private val networkQueryMemeServer: NetworkQueryMemeServer,
     private val LOG: SphinxLogger,
 ) : MemeServerTokenHandler(),
-    CoroutineDispatchers by dispatchers
-{
+    CoroutineDispatchers by dispatchers {
+    private var connectManagerRepository: ConnectManagerRepository? = null
+
     companion object {
         const val TAG = "MemeServerTokenHandlerImpl"
 
@@ -78,7 +81,7 @@ class MemeServerTokenHandlerImpl(
     /**
      * Generates & returns a [Mutex] for the given [MediaHost] in a synchronous manner
      * */
-    private inner class SynchronizedLockMap: SynchronizedMap<MediaHost, Mutex>() {
+    private inner class SynchronizedLockMap : SynchronizedMap<MediaHost, Mutex>() {
         suspend fun getOrCreateLock(mediaHost: MediaHost): Mutex =
             super.withLock {
                 it[mediaHost] ?: Mutex().also { mutex ->
@@ -95,12 +98,17 @@ class MemeServerTokenHandlerImpl(
     private val tokenLock = SynchronizedLockMap()
 
     override suspend fun retrieveAuthenticationToken(mediaHost: MediaHost): AuthenticationToken? {
-        return tokenCache.withLock { it[mediaHost] } ?: tokenLock.getOrCreateLock(mediaHost).withLock {
-            tokenCache.withLock { it[mediaHost] } ?: retrieveAuthenticationTokenImpl(mediaHost)
-                .also { token ->
-                    tokenCache.withLock { it[mediaHost] = token }
-                }
-        }
+        return tokenCache.withLock { it[mediaHost] } ?: tokenLock.getOrCreateLock(mediaHost)
+            .withLock {
+                tokenCache.withLock { it[mediaHost] } ?: retrieveAuthenticationTokenImpl(mediaHost)
+                    .also { token ->
+                        tokenCache.withLock { it[mediaHost] = token }
+                    }
+            }
+    }
+
+    override fun addListener(listener: ConnectManagerRepository) {
+        connectManagerRepository = listener
     }
 
     private suspend fun retrieveAuthenticationTokenImpl(mediaHost: MediaHost): AuthenticationToken? {
@@ -115,13 +123,14 @@ class MemeServerTokenHandlerImpl(
                     nnToken
                 }
             } else {
-                val data: Pair<AuthenticationToken, Long>? = tokenString.split(DELIMITER).let { splits ->
-                    splits.elementAtOrNull(0)?.toAuthenticationToken()?.let { token ->
-                        splits.elementAtOrNull(1)?.toLongOrNull()?.let { expiration ->
-                            Pair(token, expiration)
+                val data: Pair<AuthenticationToken, Long>? =
+                    tokenString.split(DELIMITER).let { splits ->
+                        splits.elementAtOrNull(0)?.toAuthenticationToken()?.let { token ->
+                            splits.elementAtOrNull(1)?.toLongOrNull()?.let { expiration ->
+                                Pair(token, expiration)
+                            }
                         }
                     }
-                }
 
                 data?.let { nnData ->
                     val now = System.currentTimeMillis()
@@ -180,7 +189,8 @@ class MemeServerTokenHandlerImpl(
                         throw Exception()
                     }
                 }
-            } catch (e: Exception) {}
+            } catch (e: Exception) {
+            }
 
             delay(25L)
         }
@@ -198,8 +208,10 @@ class MemeServerTokenHandlerImpl(
                     is Response.Error -> {
                         LOG.e(TAG, loadResponse.message, loadResponse.exception)
                     }
+
                     is Response.Success -> {
                         id = loadResponse.value.id.toAuthenticationId()
+                        connectManagerRepository?.singChallenge(loadResponse.value.challenge)
                         challenge = loadResponse.value.challenge.toAuthenticationChallenge()
                     }
                 }
@@ -208,20 +220,23 @@ class MemeServerTokenHandlerImpl(
             id?.let { nnId ->
                 challenge?.let { nnChallenge ->
 
-                    var sig: AuthenticationSig? = null
+//                    networkQueryMemeServer.signChallenge(nnChallenge).collect { loadResponse ->
+//                        @Exhaustive
+//                        when (loadResponse) {
+//                            is LoadResponse.Loading -> {}
+//                            is Response.Error -> {
+//                                LOG.e(TAG, loadResponse.message, loadResponse.exception)
+//                            }
+//                            is Response.Success -> {
+//                                sig = loadResponse.value.sig.toAuthenticationSig()
+//                            }
+//                        }
+//                    }
 
-                    networkQueryMemeServer.signChallenge(nnChallenge).collect { loadResponse ->
-                        @Exhaustive
-                        when (loadResponse) {
-                            is LoadResponse.Loading -> {}
-                            is Response.Error -> {
-                                LOG.e(TAG, loadResponse.message, loadResponse.exception)
-                            }
-                            is Response.Success -> {
-                                sig = loadResponse.value.sig.toAuthenticationSig()
-                            }
-                        }
-                    }
+                    val sig: AuthenticationSig? = connectManagerRepository?.connectionManagerState
+                        ?.firstOrNull { it is ConnectionManagerState.SignedChallenge }
+                        ?.let { (it as ConnectionManagerState.SignedChallenge).authToken.toAuthenticationSig() }
+
 
                     sig?.let { nnSig ->
 
@@ -237,18 +252,20 @@ class MemeServerTokenHandlerImpl(
                                 is Response.Error -> {
                                     LOG.e(TAG, loadResponse.message, loadResponse.exception)
                                 }
+
                                 is Response.Success -> {
-                                    loadResponse.value.token.toAuthenticationToken()?.let { nnToken ->
-                                        token = nnToken
-                                        LOG.d(
-                                            TAG,
-                                            """
+                                    loadResponse.value.token.toAuthenticationToken()
+                                        ?.let { nnToken ->
+                                            token = nnToken
+                                            LOG.d(
+                                                TAG,
+                                                """
                                                 MemeServerAuthenticationToken acquired from server!
                                                 host: $mediaHost
                                                 token: $nnToken
                                             """.trimIndent()
-                                        )
-                                    }
+                                            )
+                                        }
                                 }
                             }
                         }
@@ -257,9 +274,9 @@ class MemeServerTokenHandlerImpl(
                 }
             }
         }
-
-        return token
+            return token
     }
+
 
     init {
         // Primes the default meme server token. If it's not persisted or

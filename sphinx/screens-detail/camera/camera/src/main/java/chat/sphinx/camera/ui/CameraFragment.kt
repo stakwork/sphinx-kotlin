@@ -70,13 +70,17 @@ internal class CameraFragment: SideEffectDetailFragment<
     @Volatile
     private var rotationProvider: RotationProvider? = null
     private var lastRotation: Int? = null
-    @SuppressLint("RestrictedApi")
-    private val rotationListener = { rotation: Int  ->
-        lastRotation = rotation
-        imageCapture.targetRotation = rotation
-        videoCapture.targetRotation = rotation
-    }
 
+    @SuppressLint("RestrictedApi")
+    private val rotationListener = { rotation: Int ->
+        lastRotation = rotation
+        if (::imageCapture.isInitialized) {
+            imageCapture.targetRotation = rotation
+        }
+        if (::videoCapture.isInitialized) {
+            videoCapture.targetRotation = rotation
+        }
+    }
     private lateinit var imageCapture: ImageCapture
     private lateinit var videoCapture: VideoCapture<Recorder>
 
