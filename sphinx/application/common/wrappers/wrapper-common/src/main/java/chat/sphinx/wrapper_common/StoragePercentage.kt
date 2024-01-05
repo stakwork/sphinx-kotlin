@@ -1,5 +1,7 @@
 package chat.sphinx.wrapper_common
 
+import java.util.Locale
+
 
 fun calculateStoragePercentage(storageData: StorageData): StoragePercentage {
     val freeStorage = storageData.freeStorage?.value ?: 0L
@@ -7,18 +9,12 @@ fun calculateStoragePercentage(storageData: StorageData): StoragePercentage {
             storageData.video.totalSize.value + storageData.audio.totalSize.value +
             storageData.files.totalSize.value
 
-    // Helper function to format the storage value
-    fun formatStorageValue(value: Long): Float {
-        val formattedString = value.toString().replace(",", "")
-        return String.format("%.3f", formattedString.toFloat() / totalStorage).toFloat()
-    }
-
     return StoragePercentage(
-        freeStorage = formatStorageValue(freeStorage),
-        image = formatStorageValue(storageData.images.totalSize.value),
-        video = formatStorageValue(storageData.video.totalSize.value),
-        audio = formatStorageValue(storageData.audio.totalSize.value),
-        files = formatStorageValue(storageData.files.totalSize.value)
+        freeStorage = String.format(Locale.ENGLISH, "%.3f", freeStorage.toFloat() / totalStorage).toFloat(),
+        image = String.format(Locale.ENGLISH, "%.3f", storageData.images.totalSize.value.toFloat() / totalStorage).toFloat(),
+        video = String.format(Locale.ENGLISH, "%.3f", storageData.video.totalSize.value.toFloat() / totalStorage).toFloat(),
+        audio = String.format(Locale.ENGLISH, "%.3f", storageData.audio.totalSize.value.toFloat() / totalStorage).toFloat(),
+        files = String.format(Locale.ENGLISH, "%.3f", storageData.files.totalSize.value.toFloat() / totalStorage).toFloat()
     )
 }
 
