@@ -59,7 +59,7 @@ internal class SphinxFirebaseMessagingService: FirebaseMessagingService() {
 
         // Extract data from the message
         // Extract data from the message
-        val title: String = p0.data["message"] ?: ""
+        val title: String = p0.data["title"] ?: ""
         val messageBody: String = p0.data["body"] ?: ""
         val chatId: Long? = (p0.data["chat_id"] ?: "").toLongOrNull()
 
