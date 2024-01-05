@@ -78,6 +78,7 @@ import chat.sphinx.menu_bottom.ui.MenuBottomViewState
 import chat.sphinx.resources.*
 import chat.sphinx.wrapper_common.FileSize
 import chat.sphinx.wrapper_common.asFormattedString
+import chat.sphinx.wrapper_common.chat.PushNotificationLink
 import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_common.lightning.toSat
 import chat.sphinx.wrapper_common.message.MessageId
@@ -210,6 +211,22 @@ abstract class ChatFragment<
         setupRecyclerView()
 
         viewModel.screenInit()
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        handlePushNotification()
+    }
+
+    private fun handlePushNotification() {
+        val chatId = activity?.intent?.extras?.getString("chat_id")?.toLongOrNull() ?: activity?.intent?.extras?.getLong("chat_id")
+
+        chatId?.let { _ ->
+            lifecycleScope.launch(viewModel.mainImmediate) {
+                viewModel.chatNavigator.popBackStack()
+            }
+        }
     }
 
     override fun onKeyboardToggle() {

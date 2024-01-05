@@ -31,6 +31,9 @@
     <string name="failed_to_process_image">No se ha podido procesar la imagen</string>
     <string name="image_uploaded_successfully">Imagen cargada con éxito</string>
     <string name="invalid_meeting_server_url">Url de Meeting Server inválida</string>
+    <string name="profile_delete_account">Eliminar Cuenta</string>
+    <string name="profile_delete_account_description">¿Estas seguro de que quieres eliminar tu cuenta y toda tu información? Esta acción no puede revertirse</string>
+    <string name="profile_delete_account_error">Ocurrió un error al intentar eliminar la cuenta, por favor inténtalo luego</string>
 
     <string name="empty_or_null_relay_url">La nueva URL de Relay no puede ser vacía o nula</string>
     <string name="invalid_relay_url">La nueva URL de Relay es inválida</string>

@@ -124,8 +124,7 @@
 
     <include
         android:id="@+id/include_chat_contact_selected_message"
-        layout="@layout/layout_selected_message"
-        tools:visibility="gone" />
+        layout="@layout/layout_selected_message"/>
 
     <include
         android:id="@+id/include_chat_contact_attachment_send_preview"

@@ -16,6 +16,8 @@
     <string name="null_name_error">ERROR: NOMBRE VACÍO</string>
     <string name="public_key">Clave Pública</string>
     <string name="loading_dots">Cargando ...</string>
+    <string name="confirm">Confirmar</string>
+    <string name="cancel">Cancelar</string>
 
     <!--  Media Type Labels -->
     <string name="media_type_label_audio">Audio</string>

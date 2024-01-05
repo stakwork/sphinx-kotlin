@@ -277,6 +277,9 @@ CREATE INDEX idx_chat_type ON chatDbo(type);
 CREATE INDEX idx_chat_latest_message_id ON chatDbo(latest_message_id);
 CREATE INDEX idx_chat_name ON chatDbo(name);
 
+chatDeleteAll:
+DELETE FROM chatDbo;
+
 CREATE TABLE contactDbo(
     id                          INTEGER         AS ContactId NOT NULL PRIMARY KEY,
     route_hint                  TEXT            AS LightningRouteHint,
@@ -420,6 +423,9 @@ contactDeleteById:
 DELETE FROM contactDbo
 WHERE id = ?;
 
+contactDeleteAll:
+DELETE FROM contactDbo;
+
 CREATE TABLE inviteDbo(
     id                          INTEGER         AS InviteId NOT NULL PRIMARY KEY,
     invite_string               TEXT            AS InviteString NOT NULL,
@@ -485,6 +491,9 @@ WHERE id = ?;
 inviteDeleteByContactId:
 DELETE FROM inviteDbo
 WHERE contact_id = ?;
+
+inviteDeleteAll:
+DELETE FROM inviteDbo;
 
 CREATE TABLE dashboardDbo(
     id                          TEXT            AS DashboardItemId NOT NULL PRIMARY KEY,
@@ -575,6 +584,9 @@ dashboardUpsert {
 dashboardDeleteById:
 DELETE FROM dashboardDbo
 WHERE id = ?;
+
+dashboardDeleteAll:
+DELETE FROM dashboardDbo;
 
 -- Cannot use inline classes if there are 23 or more columns
 -- https://youtrack.jetbrains.com/issue/KT-45084
@@ -882,6 +894,9 @@ messageDeleteByChatId:
 DELETE FROM messageDbo
 WHERE chat_id = ?;
 
+messageDeleteAll:
+DELETE FROM messageDbo;
+
 CREATE TABLE messageMediaDbo(
     id                          INTEGER         AS MessageId NOT NULL PRIMARY KEY,
     chat_id                     INTEGER         AS ChatId NOT NULL,
@@ -978,6 +993,9 @@ CREATE INDEX idx_message_chat_date ON messageDbo(chat_id, date DESC);
 CREATE INDEX idx_message_sender_chat_type ON messageDbo(sender, chat_id, type);
 CREATE INDEX idx_message_id ON messageDbo(id);
 CREATE INDEX idx_message_muid_original_muid ON messageDbo(muid, original_muid);
+
+messageMediaDeleteAll:
+DELETE FROM messageMediaDbo;
 
 CREATE TABLE subscriptionDbo(
     id                          INTEGER         AS SubscriptionId NOT NULL PRIMARY KEY,
@@ -1077,6 +1095,9 @@ WHERE id = ?;
 subscriptionDeleteByContactId:
 DELETE FROM subscriptionDbo
 WHERE contact_id = ?;
+
+subscriptionDeleteAll:
+DELETE FROM subscriptionDbo;
 
 CREATE TABLE feedDbo(
     id                          TEXT               AS FeedId NOT NULL PRIMARY KEY,
@@ -1257,6 +1278,9 @@ DELETE
 FROM feedDbo
 WHERE id = ?;
 
+feedDeleteAll:
+DELETE FROM feedDbo;
+
 CREATE TABLE feedItemDbo(
     id                          TEXT               AS FeedId NOT NULL PRIMARY KEY,
     title                       TEXT               AS FeedTitle NOT NULL,
@@ -1389,6 +1413,8 @@ UPDATE feedItemDbo
 SET local_file = NULL
 WHERE feed_id = ?;
 
+feedItemDeleteAll:
+DELETE FROM feedItemDbo;
 
 CREATE TABLE feedModelDbo(
     id                          TEXT               AS FeedId NOT NULL PRIMARY KEY,
@@ -1423,6 +1449,9 @@ feedModelDeleteById:
 DELETE
 FROM feedModelDbo
 WHERE id = ?;
+
+feedModelDeleteAll:
+DELETE FROM feedModelDbo;
 
 CREATE TABLE feedDestinationDbo(
     address                     TEXT            AS FeedDestinationAddress NOT NULL,
@@ -1463,6 +1492,9 @@ SELECT *
 FROM feedDestinationDbo
 WHERE feed_id = ?;
 
+feedDestinationDeleteAll:
+DELETE FROM feedDestinationDbo;
+
 CREATE TABLE actionTrackDbo(
     id                          INTEGER         AS ActionTrackId NOT NULL PRIMARY KEY AUTOINCREMENT,
     type                        INTEGER         AS ActionTrackType NOT NULL,
@@ -1499,9 +1531,6 @@ actionTrackGetAll:
 SELECT *
 FROM actionTrackDbo;
 
-actionTrackDeleteAll:
-DELETE FROM chatDbo;
-
 actionTrackGetByType:
 SELECT *
 FROM actionTrackDbo
@@ -1516,6 +1545,9 @@ actionTrackUpdateUploadedItems:
 UPDATE actionTrackDbo
 SET uploaded = 1
 WHERE id IN :ids;
+
+actionTrackDeleteAll:
+DELETE FROM actionTrackDbo;
 
 CREATE TABLE contentFeedStatusDbo(
     feed_id                         TEXT            AS FeedId NOT NULL PRIMARY KEY,
@@ -1589,13 +1621,13 @@ SELECT *
 FROM contentFeedStatusDbo
 WHERE feed_id = ?;
 
-contentFeedStatusDeleteAll:
-DELETE FROM contentFeedStatusDbo;
-
 contentFeedStatusDeleteByFeedId:
 DELETE
 FROM contentFeedStatusDbo
 WHERE feed_id = ?;
+
+contentFeedStatusDeleteAll:
+DELETE FROM contentFeedStatusDbo;
 
 
 CREATE TABLE contentEpisodeStatusDbo(

@@ -148,4 +148,10 @@ class SphinxKeyRestore(
             } ?: emit(KeyRestoreResponse.Error.InvalidUserPin)
         }
     }
+
+    override suspend fun clearAll() {
+        authenticationStorage.clearAuthenticationStorage()
+        authenticationManager.logOut()
+        encryptionKeyHandler.clearKeysToRestore()
+    }
 }

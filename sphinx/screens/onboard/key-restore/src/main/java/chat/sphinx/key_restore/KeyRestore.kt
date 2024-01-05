@@ -20,4 +20,6 @@ abstract class KeyRestore {
         authorizationToken: AuthorizationToken,
         transportKey: RsaPublicKey? = null
     ): Flow<KeyRestoreResponse>
+
+    abstract suspend fun clearAll()
 }

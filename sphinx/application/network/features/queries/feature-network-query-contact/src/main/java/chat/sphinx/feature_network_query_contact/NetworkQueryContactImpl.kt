@@ -33,6 +33,7 @@ class NetworkQueryContactImpl(
         private const val ENDPOINT_KEYS_EXCHANGE = "/contacts/%d/keys"
         private const val ENDPOINT_GENERATE_GITHUB_PAT = "/bot/git"
         private const val ENDPOINT_HAS_ADMIN = "/has_admin"
+        private const val ENDPOINT_DELETE_ACCOUNT = "/test_clear"
 
 
         private const val ENDPOINT_CREATE_INVITE = "/invites"
@@ -261,6 +262,15 @@ class NetworkQueryContactImpl(
         networkRelayCall.get(
             url = "${url.value}$ENDPOINT_HAS_ADMIN",
             responseJsonClass = HasAdminRelayResponse::class.java,
+        )
+
+    override fun deleteAccount(
+        relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>?
+    ): Flow<LoadResponse<Any, ResponseError>> =
+        networkRelayCall.relayGet(
+            responseJsonClass = DeleteAccountRelayResponse::class.java,
+            relayEndpoint = ENDPOINT_DELETE_ACCOUNT,
+            relayData = relayData
         )
 
 }

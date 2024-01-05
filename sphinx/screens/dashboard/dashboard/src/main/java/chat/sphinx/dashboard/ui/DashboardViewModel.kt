@@ -48,10 +48,14 @@ import chat.sphinx.scanner_view_model_coordinator.request.ScannerFilter
 import chat.sphinx.scanner_view_model_coordinator.request.ScannerRequest
 import chat.sphinx.scanner_view_model_coordinator.response.ScannerResponse
 import chat.sphinx.wrapper_chat.Chat
+import chat.sphinx.wrapper_chat.isConversation
 import chat.sphinx.wrapper_common.*
 import chat.sphinx.wrapper_common.chat.ChatUUID
+import chat.sphinx.wrapper_common.chat.PushNotificationLink
+import chat.sphinx.wrapper_common.chat.toPushNotificationLink
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.RestoreProgressViewState
+import chat.sphinx.wrapper_common.dashboard.toChatId
 import chat.sphinx.wrapper_common.feed.*
 import chat.sphinx.wrapper_common.lightning.*
 import chat.sphinx.wrapper_common.tribe.TribeJoinLink
@@ -136,6 +140,13 @@ internal class DashboardViewModel @Inject constructor(
         MutableStateFlow(null)
     }
 
+    private val _networkStateFlow: MutableStateFlow<Pair<LoadResponse<Boolean, ResponseError>, Boolean>> by lazy {
+        MutableStateFlow(Pair(LoadResponse.Loading, true))
+    }
+    val networkStateFlow: StateFlow<Pair<LoadResponse<Boolean, ResponseError>, Boolean>>
+        get() = _networkStateFlow.asStateFlow()
+
+
     private lateinit var signerManager: SignerManager
 
     init {
@@ -182,6 +193,24 @@ internal class DashboardViewModel @Inject constructor(
                 handleRedeemSatsLink(redeemSatsLink)
             } ?: deepLink?.toFeedItemLink()?.let { feedItemLink ->
                 handleFeedItemLink(feedItemLink)
+            } ?: deepLink?.toPushNotificationLink()?.let { pushNotificationLink ->
+                handlePushNotification(pushNotificationLink)
+            }
+        }
+    }
+
+    private fun handlePushNotification(pushNotificationLink: PushNotificationLink) {
+        viewModelScope.launch(mainImmediate) {
+            pushNotificationLink.chatId?.toChatId()?.let { nnChatId ->
+                chatRepository.getChatById(nnChatId).firstOrNull()?.let { chat ->
+                    if (chat.isConversation()) {
+                        chat.contactIds.elementAtOrNull(1)?.let { contactId ->
+                            dashboardNavigator.toChatContact(nnChatId, contactId)
+                        }
+                    } else {
+                        dashboardNavigator.toChatTribe(nnChatId)
+                    }
+                }
             }
         }
     }
@@ -920,7 +949,7 @@ internal class DashboardViewModel @Inject constructor(
             chatListFooterButtonsViewStateContainer.updateViewState(
                 ChatListFooterButtonsViewState.ButtonsVisibility(
                     addFriendVisible = true,
-                    createTribeVisible = !owner.isOnVirtualNode(),
+                    createTribeVisible = true,
                     discoverTribesVisible = false
                 )
             )
@@ -1031,10 +1060,6 @@ internal class DashboardViewModel @Inject constructor(
         }
     }
 
-    private val _networkStateFlow: MutableStateFlow<Pair<LoadResponse<Boolean, ResponseError>, Boolean>> by lazy {
-        MutableStateFlow(Pair(LoadResponse.Loading, true))
-    }
-
     private val _restoreProgressStateFlow: MutableStateFlow<RestoreProgressViewState?> by lazy {
         MutableStateFlow(null)
     }
@@ -1048,9 +1073,6 @@ internal class DashboardViewModel @Inject constructor(
             }
         }
     }
-
-    val networkStateFlow: StateFlow<Pair<LoadResponse<Boolean, ResponseError>, Boolean>>
-        get() = _networkStateFlow.asStateFlow()
 
     val restoreProgressStateFlow: StateFlow<RestoreProgressViewState?>
         get() = _restoreProgressStateFlow.asStateFlow()
