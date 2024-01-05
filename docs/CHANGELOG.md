@@ -1,5 +1,9 @@
 # ChangeLog
 
+# Version 1.0.0-beta14 (2024-01-05)
+- Improves push notification content
+- Fixes crash on Profile
+
 # Version 1.0.0-beta13 (2023-12-13)
 - Adds ability to delete Sphinx account
 
