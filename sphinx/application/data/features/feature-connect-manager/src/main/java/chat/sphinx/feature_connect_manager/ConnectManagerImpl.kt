@@ -437,18 +437,30 @@ class ConnectManagerImpl(
             // BALANCE = newBalance.toLong()
         }
 
-        // Incoming message json
-        rr.msg?.let { msg ->
+        rr.sentTo?.let { sentTo ->
+            val msg = rr.msg ?: return
+            val type = rr.msgType?.toInt() ?: return
+            val uuid = rr.msgUuid ?: return
+            val index = rr.msgIndex ?: return
 
             notifyListeners {
-                onTextMessageReceived(
-                    msg,
-                    rr.msgSender,
-                    rr.msgType?.toInt(),
-                    rr.msgUuid,
-                    rr.msgIndex
-                )
+                onTextMessageSent(msg, sentTo, type, uuid, index)
             }
+
+            Log.d("MQTT_MESSAGES", "=> received sentTo $sentTo")
+        }
+
+        // Incoming message json
+        rr.msg?.let { msg ->
+            val sender = rr.msgSender ?: return
+            val type = rr.msgType?.toInt() ?: return
+            val uuid = rr.msgUuid ?: return
+            val index = rr.msgIndex ?: return
+
+            notifyListeners {
+                onTextMessageReceived(msg, sender, type, uuid, index)
+            }
+
             Log.d("MQTT_MESSAGES", "=> received msg $msg, ${rr.msgUuid}, ${rr.msgIndex}")
         }
 
@@ -462,6 +474,9 @@ class ConnectManagerImpl(
 
             Log.d("MQTT_MESSAGES", "=> received msg_sender $msgSender")
         }
+
+        // Sent message info
+
 
         // Print my contact info
         rr.myContactInfo?.let { myContactInfo ->

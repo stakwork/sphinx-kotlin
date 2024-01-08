@@ -438,6 +438,8 @@ internal interface _UniFFILib : Library {
     ): RustBuffer.ByValue
     fun uniffi_sphinxrs_fn_func_send(`seed`: RustBuffer.ByValue,`uniqueTime`: RustBuffer.ByValue,`to`: RustBuffer.ByValue,`msgType`: Byte,`msgJson`: RustBuffer.ByValue,`state`: RustBuffer.ByValue,`myAlias`: RustBuffer.ByValue,`myImg`: RustBuffer.ByValue,`amtMsat`: Long,_uniffi_out_err: RustCallStatus, 
     ): RustBuffer.ByValue
+    fun uniffi_sphinxrs_fn_func_make_media_token(`seed`: RustBuffer.ByValue,`uniqueTime`: RustBuffer.ByValue,`state`: RustBuffer.ByValue,`host`: RustBuffer.ByValue,`muid`: RustBuffer.ByValue,`to`: RustBuffer.ByValue,`expiry`: Int,_uniffi_out_err: RustCallStatus, 
+    ): RustBuffer.ByValue
     fun ffi_sphinxrs_rustbuffer_alloc(`size`: Int,_uniffi_out_err: RustCallStatus, 
     ): RustBuffer.ByValue
     fun ffi_sphinxrs_rustbuffer_from_bytes(`bytes`: ForeignBytes.ByValue,_uniffi_out_err: RustCallStatus, 
@@ -519,6 +521,8 @@ internal interface _UniFFILib : Library {
     fun uniffi_sphinxrs_checksum_func_handle(
     ): Short
     fun uniffi_sphinxrs_checksum_func_send(
+    ): Short
+    fun uniffi_sphinxrs_checksum_func_make_media_token(
     ): Short
     fun ffi_sphinxrs_uniffi_contract_version(
     ): Int
@@ -646,6 +650,9 @@ private fun uniffiCheckApiChecksums(lib: _UniFFILib) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_sphinxrs_checksum_func_send() != 22190.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_sphinxrs_checksum_func_make_media_token() != 53931.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
 }
@@ -843,6 +850,7 @@ data class RunReturn (
     var `newBalance`: ULong?, 
     var `myContactInfo`: String?, 
     var `sentStatus`: String?, 
+    var `sentTo`: String?, 
     var `settledStatus`: String?, 
     var `error`: String?
 ) {
@@ -869,6 +877,7 @@ public object FfiConverterTypeRunReturn: FfiConverterRustBuffer<RunReturn> {
             FfiConverterOptionalString.read(buf),
             FfiConverterOptionalString.read(buf),
             FfiConverterOptionalString.read(buf),
+            FfiConverterOptionalString.read(buf),
         )
     }
 
@@ -888,6 +897,7 @@ public object FfiConverterTypeRunReturn: FfiConverterRustBuffer<RunReturn> {
             FfiConverterOptionalULong.allocationSize(value.`newBalance`) +
             FfiConverterOptionalString.allocationSize(value.`myContactInfo`) +
             FfiConverterOptionalString.allocationSize(value.`sentStatus`) +
+            FfiConverterOptionalString.allocationSize(value.`sentTo`) +
             FfiConverterOptionalString.allocationSize(value.`settledStatus`) +
             FfiConverterOptionalString.allocationSize(value.`error`)
     )
@@ -908,6 +918,7 @@ public object FfiConverterTypeRunReturn: FfiConverterRustBuffer<RunReturn> {
             FfiConverterOptionalULong.write(value.`newBalance`, buf)
             FfiConverterOptionalString.write(value.`myContactInfo`, buf)
             FfiConverterOptionalString.write(value.`sentStatus`, buf)
+            FfiConverterOptionalString.write(value.`sentTo`, buf)
             FfiConverterOptionalString.write(value.`settledStatus`, buf)
             FfiConverterOptionalString.write(value.`error`, buf)
     }
@@ -2032,6 +2043,15 @@ fun `send`(`seed`: String, `uniqueTime`: String, `to`: String, `msgType`: UByte,
     return FfiConverterTypeRunReturn.lift(
     rustCallWithError(SphinxException) { _status ->
     _UniFFILib.INSTANCE.uniffi_sphinxrs_fn_func_send(FfiConverterString.lower(`seed`),FfiConverterString.lower(`uniqueTime`),FfiConverterString.lower(`to`),FfiConverterUByte.lower(`msgType`),FfiConverterString.lower(`msgJson`),FfiConverterByteArray.lower(`state`),FfiConverterString.lower(`myAlias`),FfiConverterString.lower(`myImg`),FfiConverterULong.lower(`amtMsat`),_status)
+})
+}
+
+@Throws(SphinxException::class)
+
+fun `makeMediaToken`(`seed`: String, `uniqueTime`: String, `state`: ByteArray, `host`: String, `muid`: String, `to`: String, `expiry`: UInt): String {
+    return FfiConverterString.lift(
+    rustCallWithError(SphinxException) { _status ->
+    _UniFFILib.INSTANCE.uniffi_sphinxrs_fn_func_make_media_token(FfiConverterString.lower(`seed`),FfiConverterString.lower(`uniqueTime`),FfiConverterByteArray.lower(`state`),FfiConverterString.lower(`host`),FfiConverterString.lower(`muid`),FfiConverterString.lower(`to`),FfiConverterUInt.lower(`expiry`),_status)
 })
 }
 

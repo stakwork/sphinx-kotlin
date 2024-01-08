@@ -335,20 +335,39 @@ abstract class SphinxRepository(
 
     override fun onTextMessageReceived(
         msg: String,
-        msgSender: String?,
-        msgType: Int?,
-        msgUuid: String?,
-        msgIndex: String?,
+        msgSender: String,
+        msgType: Int,
+        msgUuid: String,
+        msgIndex: String,
     ) {
         applicationScope.launch(io) {
             val message = msg.toMsg(moshi)
-            val contactInfo = msgSender?.toMsgSender(moshi) ?: return@launch
+            val contactInfo = msgSender.toMsgSender(moshi)
 
             val messageType = if (msgType == 0) MessageType.Message else return@launch
-            val messageUUID = msgUuid?.toMessageUUID() ?: return@launch
-            val messageId = msgIndex?.toLong()?.let { MessageId(it) } ?: return@launch
+            val messageUUID = msgUuid.toMessageUUID() ?: return@launch
+            val messageId = MessageId(msgIndex.toLong())
 
-            upsertMqttTextMessage(message, contactInfo, messageType, messageUUID, messageId)
+            upsertMqttTextMessage(message, contactInfo, messageType, messageUUID, messageId, false)
+        }
+    }
+
+    override fun onTextMessageSent(
+        msg: String,
+        contactPubKey: String,
+        msgType: Int,
+        msgUuid: String,
+        msgIndex: String
+    ) {
+        applicationScope.launch(io) {
+            val message = msg.toMsg(moshi)
+            val msgSender = MsgSender(contactPubKey, null,null,null,true)
+
+            val messageType = if (msgType == 0) MessageType.Message else return@launch
+            val messageUUID = msgUuid.toMessageUUID() ?: return@launch
+            val messageId = MessageId(msgIndex.toLong())
+
+            upsertMqttTextMessage(message, msgSender, messageType, messageUUID, messageId, true)
         }
     }
 
@@ -386,7 +405,8 @@ abstract class SphinxRepository(
         msgSender: MsgSender,
         msgType: MessageType,
         msgUuid: MessageUUID,
-        msgIndex: MessageId
+        msgIndex: MessageId,
+        isSent: Boolean
     ) {
         val queries = coreDB.getSphinxDatabaseQueries()
         val contact = getContactByPubKey(LightningNodePubKey(msgSender.pubkey)).firstOrNull()
@@ -398,7 +418,7 @@ abstract class SphinxRepository(
                 uuid = msgUuid,
                 chatId = ChatId(contact.id.value),
                 type = msgType,
-                sender = contact.id,
+                sender = if (isSent) ContactId(0) else contact.id,
                 receiver = ContactId(0),
                 amount = Sat(0),
                 date = DateTime.nowUTC().toDateTime(),
@@ -3147,7 +3167,7 @@ abstract class SphinxRepository(
                             // type, message_content, message_decrypted, status
 
                             queries.messageUpsert(
-                                MessageStatus.Confirmed,
+                                MessageStatus.Pending,
                                 Seen.True,
                                 chatDbo.myAlias?.value?.toSenderAlias(),
                                 chatDbo.myPhotoUrl,

@@ -35,11 +35,20 @@ interface ConnectManagerListener {
     fun onNewContactRegistered(msgSender: String)
     fun onTextMessageReceived(
         msg: String,
-        msgSender: String?,
-        msgType: Int?,
-        msgUuid: String?,
-        msgIndex: String?,
+        msgSender: String,
+        msgType: Int,
+        msgUuid: String,
+        msgIndex: String,
     )
+
+    fun onTextMessageSent(
+        msg: String,
+        contactPubKey: String,
+        msgType: Int,
+        msgUuid: String,
+        msgIndex: String,
+    )
+
     fun onUpdateUserState(userState: String)
 
     fun onSignedChallenge(sign: String)

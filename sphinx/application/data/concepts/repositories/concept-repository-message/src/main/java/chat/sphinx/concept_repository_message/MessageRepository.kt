@@ -107,6 +107,7 @@ interface MessageRepository {
         msgSender: MsgSender,
         msgType: MessageType,
         msgUuid: MessageUUID,
-        msgIndex: MessageId
+        msgIndex: MessageId,
+        isSent: Boolean
     )
 }
