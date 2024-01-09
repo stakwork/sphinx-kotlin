@@ -898,6 +898,11 @@ UPDATE messageDbo
 SET flagged = :flagged
 WHERE id = ?;
 
+messageUpdateUUID:
+UPDATE messageDbo
+SET uuid = :uuid
+WHERE id = ?;
+
 messageUpsert {
     UPDATE messageDbo
     SET status = :status,
@@ -978,6 +983,11 @@ messageUpsert {
 messageDeleteById:
 DELETE FROM messageDbo
 WHERE id = ?;
+
+messageDeleteByUUID:
+DELETE FROM messageDbo
+WHERE uuid = ?;
+
 
 messageDeleteByChatId:
 DELETE FROM messageDbo

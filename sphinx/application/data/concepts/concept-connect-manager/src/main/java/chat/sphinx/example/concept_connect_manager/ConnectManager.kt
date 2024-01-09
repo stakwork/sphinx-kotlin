@@ -18,7 +18,8 @@ abstract class ConnectManager {
     )
     abstract fun sendMessage(
         sphinxMessage: String,
-        contactPubKey: String
+        contactPubKey: String,
+        provisionalId: Long
     )
     abstract fun generateMediaToken(
         contactPubKey: String,
@@ -50,9 +51,11 @@ interface ConnectManagerListener {
         msg: String,
         contactPubKey: String,
         msgType: Int,
-        msgUuid: String,
+        msgUUID: String,
         msgIndex: String,
     )
+
+    fun onMessageUUID(msgUUID: String, provisionalId: Long)
 
     fun onUpdateUserState(userState: String)
 

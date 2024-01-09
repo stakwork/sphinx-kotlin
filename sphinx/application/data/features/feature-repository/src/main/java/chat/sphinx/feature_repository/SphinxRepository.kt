@@ -357,7 +357,7 @@ abstract class SphinxRepository(
         msg: String,
         contactPubKey: String,
         msgType: Int,
-        msgUuid: String,
+        msgUUID: String,
         msgIndex: String
     ) {
         applicationScope.launch(io) {
@@ -365,11 +365,21 @@ abstract class SphinxRepository(
             val msgSender = MsgSender(contactPubKey, null,null,null,true)
 
             val messageType = if (msgType == 0) MessageType.Message else return@launch
-            val messageUUID = msgUuid.toMessageUUID() ?: return@launch
+            val messageUUID = msgUUID.toMessageUUID() ?: return@launch
             val messageId = MessageId(msgIndex.toLong())
 
             upsertMqttTextMessage(message, msgSender, messageType, messageUUID, messageId, true)
         }
+    }
+
+    override fun onMessageUUID(msgUUID: String, provisionalId: Long) {
+        applicationScope.launch {
+            val queries = coreDB.getSphinxDatabaseQueries()
+            messageLock.withLock {
+                queries.messageUpdateUUID(MessageUUID(msgUUID), MessageId(provisionalId))
+            }
+        }
+
     }
     override fun onUpdateUserState(userState: String) {
         connectionManagerState.value = ConnectionManagerState.UserState(userState)
@@ -410,6 +420,10 @@ abstract class SphinxRepository(
     ) {
         val queries = coreDB.getSphinxDatabaseQueries()
         val contact = getContactByPubKey(LightningNodePubKey(msgSender.pubkey)).firstOrNull()
+
+        messageLock.withLock{
+            queries.messageDeleteByUUID(msgUuid)
+        }
 
         if (contact != null) {
 
@@ -466,7 +480,8 @@ abstract class SphinxRepository(
         attachmentInfo: AttachmentInfo?,
         mediaToken: MediaToken?,
         mediaKey: MediaKey?,
-        messageType: MessageType?
+        messageType: MessageType?,
+        provisionalId: MessageId?
     ) {
         val type = if (messageType is MessageType.Attachment) { "Attachment"} else null
 
@@ -477,10 +492,13 @@ abstract class SphinxRepository(
             type
         ).toJson(moshi)
 
-        connectManager.sendMessage(
-            newMessage,
-            contact.nodePubKey?.value ?: ""
-        )
+        provisionalId?.value?.let {
+            connectManager.sendMessage(
+                newMessage,
+                contact.nodePubKey?.value ?: "",
+                it
+            )
+        }
     }
 
     ////////////////
@@ -3305,7 +3323,8 @@ abstract class SphinxRepository(
                     media,
                     mediaTokenValue?.toMediaToken(),
                     mediaKey,
-                    messageType
+                    messageType,
+                    provisionalMessageId
                 )
             }
 //

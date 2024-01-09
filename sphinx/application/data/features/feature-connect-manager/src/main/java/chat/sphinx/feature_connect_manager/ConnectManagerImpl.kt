@@ -354,7 +354,8 @@ class ConnectManagerImpl(
 
     override fun sendMessage(
         sphinxMessage: String,
-        contactPubKey: String
+        contactPubKey: String,
+        provisionalId: Long
     ) {
         coroutineScope.launch {
 
@@ -374,6 +375,11 @@ class ConnectManagerImpl(
                 )
                 handleRunReturn(message, mqttClient!!)
 
+                    message.msgUuid?.let { msgUUID ->
+                        notifyListeners {
+                            onMessageUUID(msgUUID, provisionalId)
+                        }
+                    }
             } catch (e: Exception) {
                 Log.e("MQTT_MESSAGES", "send ${e.message}")
             }
