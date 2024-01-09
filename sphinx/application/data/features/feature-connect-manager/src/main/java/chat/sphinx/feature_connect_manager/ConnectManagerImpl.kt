@@ -36,6 +36,7 @@ import uniffi.sphinxrs.fetchMsgs
 import uniffi.sphinxrs.getSubscriptionTopic
 import uniffi.sphinxrs.handle
 import uniffi.sphinxrs.initialSetup
+import uniffi.sphinxrs.makeMediaToken
 import uniffi.sphinxrs.mnemonicFromEntropy
 import uniffi.sphinxrs.mnemonicToSeed
 import uniffi.sphinxrs.rootSignMs
@@ -379,6 +380,26 @@ class ConnectManagerImpl(
         }
     }
 
+    override fun generateMediaToken(contactPubKey: String, muid: String, host: String): String? {
+        val now = getTimestampInMilliseconds()
+
+        return try {
+            val mediaToken = makeMediaToken(
+                ownerSeed!!,
+                now,
+                getCurrentUserState(),
+                host,
+                muid,
+                contactPubKey,
+                now.toUInt()
+            )
+            mediaToken
+        } catch (e: Exception){
+            Log.d("MQTT_MESSAGES", "Error to generate media token")
+            null
+        }
+    }
+
     private fun publishTopicsSequentially(topics: Array<String>, messages: Array<String>?, index: Int) {
         if (index < topics.size) {
             val topic = topics[index]
@@ -437,6 +458,7 @@ class ConnectManagerImpl(
             // BALANCE = newBalance.toLong()
         }
 
+        // Sent message info
         rr.sentTo?.let { sentTo ->
             val msg = rr.msg ?: return
             val type = rr.msgType?.toInt() ?: return
@@ -474,9 +496,6 @@ class ConnectManagerImpl(
 
             Log.d("MQTT_MESSAGES", "=> received msg_sender $msgSender")
         }
-
-        // Sent message info
-
 
         // Print my contact info
         rr.myContactInfo?.let { myContactInfo ->

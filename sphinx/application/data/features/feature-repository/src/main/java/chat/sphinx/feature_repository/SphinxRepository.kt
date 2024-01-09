@@ -28,6 +28,7 @@ import chat.sphinx.concept_network_query_invite.NetworkQueryInvite
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_network_query_lightning.model.balance.BalanceDto
 import chat.sphinx.concept_network_query_meme_server.NetworkQueryMemeServer
+import chat.sphinx.concept_network_query_meme_server.model.PostMemeServerUploadDto
 import chat.sphinx.concept_network_query_message.NetworkQueryMessage
 import chat.sphinx.concept_network_query_message.model.*
 import chat.sphinx.concept_network_query_people.NetworkQueryPeople
@@ -370,7 +371,6 @@ abstract class SphinxRepository(
             upsertMqttTextMessage(message, msgSender, messageType, messageUUID, messageId, true)
         }
     }
-
     override fun onUpdateUserState(userState: String) {
         connectionManagerState.value = ConnectionManagerState.UserState(userState)
     }
@@ -437,7 +437,7 @@ abstract class SphinxRepository(
                 threadUUID = null,
                 errorMessage = null,
                 isPinned = false,
-                messageContentDecrypted = MessageContentDecrypted(msg.content),
+                messageContentDecrypted = if (msg.content.isNotEmpty()) MessageContentDecrypted(msg.content) else null,
                 messageDecryptionError = false,
                 messageDecryptionException = null,
                 messageMedia = null,
@@ -463,8 +463,19 @@ abstract class SphinxRepository(
     fun sendNewMessage(
         contact: Contact,
         messageContent: String,
+        attachmentInfo: AttachmentInfo?,
+        mediaToken: MediaToken?,
+        mediaKey: MediaKey?,
+        messageType: MessageType?
     ) {
-        val newMessage = chat.sphinx.example.wrapper_mqtt.Message(messageContent).toJson(moshi)
+        val type = if (messageType is MessageType.Attachment) { "Attachment"} else null
+
+        val newMessage = chat.sphinx.example.wrapper_mqtt.Message(
+            messageContent,
+            mediaToken?.value,
+            mediaKey?.value,
+            type
+        ).toJson(moshi)
 
         connectManager.sendMessage(
             newMessage,
@@ -3017,27 +3028,19 @@ abstract class SphinxRepository(
                     owner
                 }
 
+            val ownerPubKey = owner?.nodePubKey
 
-            if (contact != null) {
-                sendNewMessage(
-                    contact,
-                    sendMessage.text ?: "",
-                )
+            if (owner == null) {
+                LOG.w(TAG, "Owner returned null")
+                return@launch
             }
 
-//            val ownerPubKey = owner?.rsaPublicKey
-//
-//            if (owner == null) {
-//                LOG.w(TAG, "Owner returned null")
-//                return@launch
-//            }
-//
-//            if (ownerPubKey == null) {
-//                LOG.w(TAG, "Owner's RSA public key was null")
-//                return@launch
-//            }
+            if (ownerPubKey == null) {
+                LOG.w(TAG, "Owner's public key was null")
+                return@launch
+            }
 
-//            // encrypt text
+            // encrypt text
 //            val message: Pair<MessageContentDecrypted, MessageContent>? =
 //                messageText(sendMessage, moshi)?.let { msgText ->
 //
@@ -3063,7 +3066,9 @@ abstract class SphinxRepository(
 //                    }
 //                }
 
-//            // media attachment
+            val media: AttachmentInfo? = sendMessage.attachmentInfo
+
+            // media attachment
 //            val media: Triple<Password, MediaKey, AttachmentInfo>? =
 //                if (sendMessage.giphyData == null) {
 //                    sendMessage.attachmentInfo?.let { info ->
@@ -3090,7 +3095,7 @@ abstract class SphinxRepository(
 //                } else {
 //                    null
 //                }
-//
+
 //            if (message == null && media == null && !sendMessage.isTribePayment) {
 //                return@launch
 //            }
@@ -3099,24 +3104,24 @@ abstract class SphinxRepository(
             val escrowAmount = chat?.escrowAmount?.value ?: 0
             val priceToMeet = sendMessage.priceToMeet?.value ?: 0
             val messagePrice = (pricePerMessage + escrowAmount + priceToMeet).toSat() ?: Sat(0)
-//
-//            val messageType = when {
-//                (media != null) -> {
-//                    MessageType.Attachment
-//                }
-//                (sendMessage.isBoost) -> {
-//                    MessageType.Boost
-//                }
-//                (sendMessage.isCall) -> {
-//                    MessageType.CallLink
-//                }
-//                (sendMessage.isTribePayment) -> {
-//                    MessageType.DirectPayment
-//                }
-//                else -> {
-//                    MessageType.Message
-//                }
-//            }
+
+            val messageType = when {
+                (media != null) -> {
+                    MessageType.Attachment
+                }
+                (sendMessage.isBoost) -> {
+                    MessageType.Boost
+                }
+                (sendMessage.isCall) -> {
+                    MessageType.CallLink
+                }
+                (sendMessage.isTribePayment) -> {
+                    MessageType.DirectPayment
+                }
+                else -> {
+                    MessageType.Message
+                }
+            }
 
 //            //If is tribe payment, reply UUID is sent to identify recipient. But it's not a response
             val replyUUID = when {
@@ -3239,46 +3244,70 @@ abstract class SphinxRepository(
 //            } else {
 //                null
 //            }
-//
-//            val postMemeServerDto: PostMemeServerUploadDto? = if (media != null) {
-//                val token = memeServerTokenHandler.retrieveAuthenticationToken(MediaHost.DEFAULT)
-//                    ?: provisionalMessageId?.let { provId ->
-//                        withContext(io) {
-//                            queries.messageUpdateStatus(MessageStatus.Failed, provId)
-//                        }
-//
-//                        return@launch
-//                    } ?: return@launch
-//
-//                val response = networkQueryMemeServer.uploadAttachmentEncrypted(
-//                    token,
-//                    media.third.mediaType,
-//                    media.third.file,
-//                    media.third.fileName,
-//                    media.first,
-//                    MediaHost.DEFAULT,
-//                )
-//
-//                @Exhaustive
-//                when (response) {
-//                    is Response.Error -> {
-//                        LOG.e(TAG, response.message, response.exception)
-//
-//                        provisionalMessageId?.let { provId ->
-//                            withContext(io) {
-//                                queries.messageUpdateStatus(MessageStatus.Failed, provId)
-//                            }
-//                        }
-//
-//                        return@launch
-//                    }
-//                    is Response.Success -> {
-//                        response.value
-//                    }
-//                }
-//            } else {
-//                null
-//            }
+
+
+            var mediaTokenValue: String? = null
+            val password = PasswordGenerator(MEDIA_KEY_SIZE).password
+
+            val postMemeServerDto: PostMemeServerUploadDto? = if (media != null) {
+                val token = memeServerTokenHandler.retrieveAuthenticationToken(MediaHost.DEFAULT)
+                    ?: provisionalMessageId?.let { provId ->
+                        withContext(io) {
+                            queries.messageUpdateStatus(MessageStatus.Failed, provId)
+                        }
+                        return@launch
+                    } ?: return@launch
+
+
+                val response = networkQueryMemeServer.uploadAttachmentEncrypted(
+                    token,
+                    media.mediaType,
+                    media.file,
+                    media.fileName,
+                    password,
+                    MediaHost.DEFAULT,
+                )
+
+                @Exhaustive
+                when (response) {
+                    is Response.Error -> {
+                        LOG.e(TAG, response.message, response.exception)
+
+                        provisionalMessageId?.let { provId ->
+                            withContext(io) {
+                                queries.messageUpdateStatus(MessageStatus.Failed, provId)
+                            }
+                        }
+                        return@launch
+                    }
+                    is Response.Success -> {
+                        contact?.nodePubKey?.value?.let { contactPubKey ->
+
+                            mediaTokenValue = connectManager.generateMediaToken(
+                                contactPubKey ,
+                                response.value.muid,
+                                MediaHost.DEFAULT.value
+                            )
+                        }
+                        response.value
+                    }
+                }
+            } else {
+                null
+            }
+
+            if (contact != null) {
+                val mediaKey = if (media != null) MediaKey(password.value.copyOf().toString()) else null
+
+                sendNewMessage(
+                    contact,
+                    sendMessage.text ?: "",
+                    media,
+                    mediaTokenValue?.toMediaToken(),
+                    mediaKey,
+                    messageType
+                )
+            }
 //
 //            val amount = messagePrice.value + (sendMessage.tribePaymentAmount ?: Sat(0)).value
 //

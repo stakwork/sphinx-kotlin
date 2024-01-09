@@ -6,7 +6,10 @@ import com.squareup.moshi.Moshi
 
 @JsonClass(generateAdapter = true)
 data class Message(
-    val content: String?
+    val content: String?,
+    val mediaToken: String?,
+    val mediaKey: String?,
+    val mediaType: String?
 ) {
     @Throws(AssertionError::class)
     fun toJson(moshi: Moshi): String {

@@ -20,12 +20,17 @@ abstract class ConnectManager {
         sphinxMessage: String,
         contactPubKey: String
     )
+    abstract fun generateMediaToken(
+        contactPubKey: String,
+        muid: String,
+        host: String
+    ): String?
+
     abstract fun setLspIp(ip: String)
     abstract fun retrieveLspIp(): String?
     abstract fun addListener(listener: ConnectManagerListener): Boolean
     abstract fun removeListener(listener: ConnectManagerListener): Boolean
     abstract fun processChallengeSignature(challenge: String)
-
 }
 
 interface ConnectManagerListener {
