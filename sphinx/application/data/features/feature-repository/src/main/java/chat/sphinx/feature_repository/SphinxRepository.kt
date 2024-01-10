@@ -28,7 +28,6 @@ import chat.sphinx.concept_network_query_invite.NetworkQueryInvite
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_network_query_lightning.model.balance.BalanceDto
 import chat.sphinx.concept_network_query_meme_server.NetworkQueryMemeServer
-import chat.sphinx.concept_network_query_meme_server.model.PostMemeServerUploadDto
 import chat.sphinx.concept_network_query_message.NetworkQueryMessage
 import chat.sphinx.concept_network_query_message.model.*
 import chat.sphinx.concept_network_query_people.NetworkQueryPeople
@@ -345,11 +344,11 @@ abstract class SphinxRepository(
             val message = msg.toMsg(moshi)
             val contactInfo = msgSender.toMsgSender(moshi)
 
-            val messageType = if (msgType == 0) MessageType.Message else return@launch
+            val messageType = msgType.toMessageType()
             val messageUUID = msgUuid.toMessageUUID() ?: return@launch
             val messageId = MessageId(msgIndex.toLong())
 
-            upsertMqttTextMessage(message, contactInfo, messageType, messageUUID, messageId, false)
+            upsertMqttMessage(message, contactInfo, messageType, messageUUID, messageId, false)
         }
     }
 
@@ -364,11 +363,11 @@ abstract class SphinxRepository(
             val message = msg.toMsg(moshi)
             val msgSender = MsgSender(contactPubKey, null,null,null,true)
 
-            val messageType = if (msgType == 0) MessageType.Message else return@launch
+            val messageType = msgType.toMessageType()
             val messageUUID = msgUUID.toMessageUUID() ?: return@launch
             val messageId = MessageId(msgIndex.toLong())
 
-            upsertMqttTextMessage(message, msgSender, messageType, messageUUID, messageId, true)
+            upsertMqttMessage(message, msgSender, messageType, messageUUID, messageId, true)
         }
     }
 
@@ -410,7 +409,7 @@ abstract class SphinxRepository(
         }
     }
 
-    override suspend fun upsertMqttTextMessage(
+    override suspend fun upsertMqttMessage(
         msg: Msg,
         msgSender: MsgSender,
         msgType: MessageType,
@@ -421,11 +420,39 @@ abstract class SphinxRepository(
         val queries = coreDB.getSphinxDatabaseQueries()
         val contact = getContactByPubKey(LightningNodePubKey(msgSender.pubkey)).firstOrNull()
 
-        messageLock.withLock{
-            queries.messageDeleteByUUID(msgUuid)
-        }
-
         if (contact != null) {
+
+            val messageId = queries.messageGetIdByUUID(msgUuid).executeAsOneOrNull()
+            val existingMessageMedia = messageId?.let { queries.messageMediaGetById(it).executeAsOneOrNull() }?.copy(
+                id = msgIndex
+            )
+
+            val messageMedia: MessageMediaDbo? = if (existingMessageMedia != null) {
+                messageLock.withLock {
+                    queries.messageMediaDeleteById(messageId)
+                }
+                existingMessageMedia
+            } else {
+                msg.mediaToken?.toMediaToken()?.let { mediaToken ->
+
+                    decryptMessageDtoMediaKeyIfAvailable()
+
+                    MessageMediaDbo(
+                        msgIndex,
+                        ChatId(contact.id.value),
+                        msg.mediaKey?.toMediaKey(),
+                        null,
+                        msg.mediaType?.toMediaType() ?: MediaType.Unknown(""),
+                        mediaToken,
+                        null,
+                        null
+                    )
+                }
+            }
+
+            messageLock.withLock {
+                queries.messageDeleteByUUID(msgUuid)
+            }
 
             val newMessage = NewMessage(
                 id = msgIndex,
@@ -454,7 +481,7 @@ abstract class SphinxRepository(
                 messageContentDecrypted = if (msg.content.isNotEmpty()) MessageContentDecrypted(msg.content) else null,
                 messageDecryptionError = false,
                 messageDecryptionException = null,
-                messageMedia = null,
+                messageMedia = messageMedia?.let { MessageMediaDboWrapper(it) },
                 feedBoost = null,
                 callLinkMessage = null,
                 podcastClip = null,
@@ -483,20 +510,19 @@ abstract class SphinxRepository(
         messageType: MessageType?,
         provisionalId: MessageId?
     ) {
-        val type = if (messageType is MessageType.Attachment) { "Attachment"} else null
-
         val newMessage = chat.sphinx.example.wrapper_mqtt.Message(
             messageContent,
             mediaToken?.value,
             mediaKey?.value,
-            type
+            attachmentInfo?.mediaType?.value
         ).toJson(moshi)
 
         provisionalId?.value?.let {
             connectManager.sendMessage(
                 newMessage,
                 contact.nodePubKey?.value ?: "",
-                it
+                it,
+                messageType?.value ?: 0
             )
         }
     }
@@ -3163,28 +3189,14 @@ abstract class SphinxRepository(
             val provisionalMessageId: MessageId? = chat?.let { chatDbo ->
                 // Build provisional message and insert
                 provisionalMessageLock.withLock {
+
                     val currentProvisionalId: MessageId? = withContext(io) {
                         queries.messageGetLowestProvisionalMessageId().executeAsOneOrNull()
                     }
-
                     val provisionalId = MessageId((currentProvisionalId?.value ?: 0L) - 1)
 
                     withContext(io) {
-
                         queries.transaction {
-
-//                            if (media != null) {
-//                                queries.messageMediaUpsert(
-//                                    media.second,
-//                                    media.third.mediaType,
-//                                    MediaToken.PROVISIONAL_TOKEN,
-//                                    provisionalId,
-//                                    chatDbo.id,
-//                                    MediaKeyDecrypted(media.first.value.joinToString("")),
-//                                    media.third.file,
-//                                    sendMessage.attachmentInfo?.fileName
-//                                )
-//                            }
 
                             // The following parms are set to null to make the upsert to work
                             // type, message_content, message_decrypted, status
@@ -3196,7 +3208,7 @@ abstract class SphinxRepository(
                                 chatDbo.myPhotoUrl,
                                 null,
                                 replyUUID,
-                                MessageType.Message,
+                                messageType,
                                 null,
                                 null,
                                 Push.False,
@@ -3232,7 +3244,6 @@ abstract class SphinxRepository(
 //                                )
 //                            }
                         }
-
                         provisionalId
                     }
                 }
@@ -3262,70 +3273,87 @@ abstract class SphinxRepository(
 //            } else {
 //                null
 //            }
+            if (contact != null) {
+                if (media != null) {
+                    val password = PasswordGenerator(MEDIA_KEY_SIZE).password
+                    val token = memeServerTokenHandler.retrieveAuthenticationToken(MediaHost.DEFAULT)
+                            ?: provisionalMessageId?.let { provId ->
+                                withContext(io) {
+                                    queries.messageUpdateStatus(MessageStatus.Failed, provId)
+                                }
+                                return@launch
+                            } ?: return@launch
 
+                    val response = networkQueryMemeServer.uploadAttachmentEncrypted(
+                        token,
+                        media.mediaType,
+                        media.file,
+                        media.fileName,
+                        password,
+                        MediaHost.DEFAULT,
+                    )
 
-            var mediaTokenValue: String? = null
-            val password = PasswordGenerator(MEDIA_KEY_SIZE).password
+                    @Exhaustive
+                    when (response) {
+                        is Response.Error -> {
+                            LOG.e(TAG, response.message, response.exception)
 
-            val postMemeServerDto: PostMemeServerUploadDto? = if (media != null) {
-                val token = memeServerTokenHandler.retrieveAuthenticationToken(MediaHost.DEFAULT)
-                    ?: provisionalMessageId?.let { provId ->
-                        withContext(io) {
-                            queries.messageUpdateStatus(MessageStatus.Failed, provId)
+                            provisionalMessageId?.let { provId ->
+                                withContext(io) {
+                                    queries.messageUpdateStatus(MessageStatus.Failed, provId)
+                                }
+                            }
+                            return@launch
                         }
-                        return@launch
-                    } ?: return@launch
 
+                        is Response.Success -> {
+                            contact.nodePubKey?.value?.let { contactPubKey ->
 
-                val response = networkQueryMemeServer.uploadAttachmentEncrypted(
-                    token,
-                    media.mediaType,
-                    media.file,
-                    media.fileName,
-                    password,
-                    MediaHost.DEFAULT,
-                )
+                                val mediaTokenValue = connectManager.generateMediaToken(
+                                    contactPubKey,
+                                    response.value.muid,
+                                    MediaHost.DEFAULT.value
+                                )
 
-                @Exhaustive
-                when (response) {
-                    is Response.Error -> {
-                        LOG.e(TAG, response.message, response.exception)
+                                val mediaKey = MediaKey(password.value.copyOf().joinToString(""))
 
-                        provisionalMessageId?.let { provId ->
-                            withContext(io) {
-                                queries.messageUpdateStatus(MessageStatus.Failed, provId)
+                                queries.messageMediaUpsert(
+                                    mediaKey,
+                                    media.mediaType,
+                                    mediaTokenValue?.toMediaToken() ?: MediaToken.PROVISIONAL_TOKEN,
+                                    provisionalMessageId ?: MessageId(Long.MIN_VALUE),
+                                    ChatId(contact.id.value),
+                                    MediaKeyDecrypted(password.value.copyOf().joinToString("")),
+                                    media.file,
+                                    sendMessage.attachmentInfo?.fileName
+                                )
+
+                                sendNewMessage(
+                                    contact,
+                                    sendMessage.text ?: "",
+                                    media,
+                                    mediaTokenValue?.toMediaToken(),
+                                    mediaKey,
+                                    messageType,
+                                    provisionalMessageId
+                                )
+
+                                LOG.d("MQTT_MESSAGES", "Media Message was sent. mediatoken=$mediaTokenValue mediakey$mediaKey" )
+
                             }
                         }
-                        return@launch
                     }
-                    is Response.Success -> {
-                        contact?.nodePubKey?.value?.let { contactPubKey ->
-
-                            mediaTokenValue = connectManager.generateMediaToken(
-                                contactPubKey ,
-                                response.value.muid,
-                                MediaHost.DEFAULT.value
-                            )
-                        }
-                        response.value
-                    }
+                } else {
+                    sendNewMessage(
+                        contact,
+                        sendMessage.text ?: "",
+                        null,
+                        null,
+                        null,
+                        messageType,
+                        provisionalMessageId
+                    )
                 }
-            } else {
-                null
-            }
-
-            if (contact != null) {
-                val mediaKey = if (media != null) MediaKey(password.value.copyOf().toString()) else null
-
-                sendNewMessage(
-                    contact,
-                    sendMessage.text ?: "",
-                    media,
-                    mediaTokenValue?.toMediaToken(),
-                    mediaKey,
-                    messageType,
-                    provisionalMessageId
-                )
             }
 //
 //            val amount = messagePrice.value + (sendMessage.tribePaymentAmount ?: Sat(0)).value

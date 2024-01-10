@@ -19,7 +19,8 @@ abstract class ConnectManager {
     abstract fun sendMessage(
         sphinxMessage: String,
         contactPubKey: String,
-        provisionalId: Long
+        provisionalId: Long,
+        messageType: Int
     )
     abstract fun generateMediaToken(
         contactPubKey: String,

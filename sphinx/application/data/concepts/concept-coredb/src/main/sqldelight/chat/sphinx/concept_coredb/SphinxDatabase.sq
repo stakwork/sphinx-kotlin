@@ -781,6 +781,10 @@ LIMIT 1;
 messageGetMaxId:
 SELECT MAX(id) FROM messageDbo;
 
+messageGetIdByUUID:
+SELECT id
+FROM messageDbo
+WHERE uuid = ?;
 
 messageGetAllToShowByChatIdWithLimit:
 SELECT *

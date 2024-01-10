@@ -102,7 +102,7 @@ interface MessageRepository {
         type: MessageType,
     ): LoadResponse<Any, ResponseError>
 
-    suspend fun upsertMqttTextMessage(
+    suspend fun upsertMqttMessage(
         msg: Msg,
         msgSender: MsgSender,
         msgType: MessageType,

@@ -46,6 +46,7 @@ import uniffi.sphinxrs.setNetwork
 import uniffi.sphinxrs.signBytes
 import uniffi.sphinxrs.xpubFromSeed
 import java.security.SecureRandom
+import java.util.Calendar
 import kotlin.math.min
 import kotlin.math.pow
 
@@ -355,7 +356,8 @@ class ConnectManagerImpl(
     override fun sendMessage(
         sphinxMessage: String,
         contactPubKey: String,
-        provisionalId: Long
+        provisionalId: Long,
+        messageType: Int
     ) {
         coroutineScope.launch {
 
@@ -366,7 +368,7 @@ class ConnectManagerImpl(
                     ownerSeed!!,
                     now,
                     contactPubKey,
-                    0.toUByte(),
+                    messageType.toUByte(),
                     sphinxMessage,
                     getCurrentUserState(),
                     ownerInfoStateFlow.value?.alias ?: "",
@@ -389,6 +391,11 @@ class ConnectManagerImpl(
     override fun generateMediaToken(contactPubKey: String, muid: String, host: String): String? {
         val now = getTimestampInMilliseconds()
 
+        val calendar = Calendar.getInstance()
+        calendar.timeInMillis = System.currentTimeMillis()
+        calendar.add(Calendar.YEAR, 1)
+        val yearFromNow = calendar.timeInMillis
+
         return try {
             val mediaToken = makeMediaToken(
                 ownerSeed!!,
@@ -397,11 +404,11 @@ class ConnectManagerImpl(
                 host,
                 muid,
                 contactPubKey,
-                now.toUInt()
+                yearFromNow.toUInt()
             )
             mediaToken
         } catch (e: Exception){
-            Log.d("MQTT_MESSAGES", "Error to generate media token")
+            Log.d("MQTT_MESSAGES", "Error to generate media token $e")
             null
         }
     }
