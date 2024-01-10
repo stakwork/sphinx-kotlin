@@ -435,8 +435,6 @@ abstract class SphinxRepository(
             } else {
                 msg.mediaToken?.toMediaToken()?.let { mediaToken ->
 
-                    decryptMessageDtoMediaKeyIfAvailable()
-
                     MessageMediaDbo(
                         msgIndex,
                         ChatId(contact.id.value),
