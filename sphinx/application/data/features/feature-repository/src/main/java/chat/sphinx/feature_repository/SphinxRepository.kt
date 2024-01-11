@@ -428,18 +428,18 @@ abstract class SphinxRepository(
             )
 
             val messageMedia: MessageMediaDbo? = if (existingMessageMedia != null) {
+                // Existing provisional media message
                 messageLock.withLock {
                     queries.messageMediaDeleteById(messageId)
                 }
                 existingMessageMedia
             } else {
                 msg.mediaToken?.toMediaToken()?.let { mediaToken ->
-
                     MessageMediaDbo(
                         msgIndex,
                         ChatId(contact.id.value),
                         msg.mediaKey?.toMediaKey(),
-                        null,
+                        msg.mediaKey?.toMediaKeyDecrypted(),
                         msg.mediaType?.toMediaType() ?: MediaType.Unknown(""),
                         mediaToken,
                         null,
@@ -516,7 +516,8 @@ abstract class SphinxRepository(
         ).toJson(moshi)
 
         provisionalId?.value?.let {
-            connectManager.sendMessage(
+            connectManager.
+            sendMessage(
                 newMessage,
                 contact.nodePubKey?.value ?: "",
                 it,
@@ -5835,6 +5836,55 @@ abstract class SphinxRepository(
         }
 
     @OptIn(UnencryptedDataAccess::class)
+    private suspend fun decryptMessageMediaKeyIfAvailable(
+        messageId: Long,
+        mediaKey: String?,
+        scope: CoroutineScope,
+        dispatcher: CoroutineDispatcher = mainImmediate,
+    ): String? = mediaKey?.let { mk ->
+
+        if (mk.isNotEmpty()) {
+
+            var decryptedString: String? = null
+
+            scope.launch(dispatcher) {
+
+                val decrypted = decryptMediaKey(
+                    MediaKey(mk)
+                )
+
+                @Exhaustive
+                when (decrypted) {
+                    is Response.Error -> {
+                        // Only log it if there is an exception
+                        decrypted.exception?.let { nnE ->
+                            LOG.e(
+                                TAG,
+                                """
+                            ${decrypted.message}
+                            MessageId: $messageId
+                            MediaKey: $mediaKey
+                            """.trimIndent(),
+                                nnE
+                            )
+                        }
+                    }
+                    is Response.Success -> {
+                        decryptedString = decrypted.value.toUnencryptedString(trim = false).value
+                    }
+                }
+
+            }
+
+            return decryptedString
+
+        } else {
+            null
+        }
+    }
+
+
+    @OptIn(UnencryptedDataAccess::class)
     private suspend fun decryptMessageDtoMediaKeyIfAvailable(
         message: MessageDto,
         scope: CoroutineScope,
@@ -6902,11 +6952,11 @@ abstract class SphinxRepository(
                 val queries = coreDB.getSphinxDatabaseQueries()
 
                 //Getting media data from purchase accepted item if is paid content
-                val media = message?.retrieveUrlAndMessageMedia()?.second
+                val media = message.retrieveUrlAndMessageMedia()?.second
                 val host = media?.host
                 val url = media?.url
 
-                val localFile = message?.messageMedia?.localFile
+                val localFile = message.messageMedia?.localFile
 
                 if (
                     message != null &&

@@ -307,7 +307,6 @@ class ConnectManagerImpl(
         }
     }
 
-
     private fun subscribeOwnerMQTT() {
 
         try {
@@ -394,7 +393,12 @@ class ConnectManagerImpl(
         val calendar = Calendar.getInstance()
         calendar.timeInMillis = System.currentTimeMillis()
         calendar.add(Calendar.YEAR, 1)
-        val yearFromNow = calendar.timeInMillis
+
+        val yearFromNow = try {
+            (calendar.timeInMillis / 1000).toUInt()
+        } catch (e: Exception) {
+            null
+        }
 
         return try {
             val mediaToken = makeMediaToken(
@@ -404,7 +408,7 @@ class ConnectManagerImpl(
                 host,
                 muid,
                 contactPubKey,
-                yearFromNow.toUInt()
+                yearFromNow!!
             )
             mediaToken
         } catch (e: Exception){
