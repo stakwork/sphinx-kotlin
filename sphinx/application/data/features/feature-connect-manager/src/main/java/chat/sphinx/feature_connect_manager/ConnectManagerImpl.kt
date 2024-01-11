@@ -36,6 +36,7 @@ import uniffi.sphinxrs.fetchMsgs
 import uniffi.sphinxrs.getSubscriptionTopic
 import uniffi.sphinxrs.handle
 import uniffi.sphinxrs.initialSetup
+import uniffi.sphinxrs.makeMediaToken
 import uniffi.sphinxrs.mnemonicFromEntropy
 import uniffi.sphinxrs.mnemonicToSeed
 import uniffi.sphinxrs.rootSignMs
@@ -45,6 +46,7 @@ import uniffi.sphinxrs.setNetwork
 import uniffi.sphinxrs.signBytes
 import uniffi.sphinxrs.xpubFromSeed
 import java.security.SecureRandom
+import java.util.Calendar
 import kotlin.math.min
 import kotlin.math.pow
 
@@ -305,7 +307,6 @@ class ConnectManagerImpl(
         }
     }
 
-
     private fun subscribeOwnerMQTT() {
 
         try {
@@ -353,7 +354,9 @@ class ConnectManagerImpl(
 
     override fun sendMessage(
         sphinxMessage: String,
-        contactPubKey: String
+        contactPubKey: String,
+        provisionalId: Long,
+        messageType: Int
     ) {
         coroutineScope.launch {
 
@@ -364,7 +367,7 @@ class ConnectManagerImpl(
                     ownerSeed!!,
                     now,
                     contactPubKey,
-                    0.toUByte(),
+                    messageType.toUByte(),
                     sphinxMessage,
                     getCurrentUserState(),
                     ownerInfoStateFlow.value?.alias ?: "",
@@ -373,9 +376,44 @@ class ConnectManagerImpl(
                 )
                 handleRunReturn(message, mqttClient!!)
 
+                    message.msgUuid?.let { msgUUID ->
+                        notifyListeners {
+                            onMessageUUID(msgUUID, provisionalId)
+                        }
+                    }
             } catch (e: Exception) {
                 Log.e("MQTT_MESSAGES", "send ${e.message}")
             }
+        }
+    }
+
+    override fun generateMediaToken(contactPubKey: String, muid: String, host: String): String? {
+        val now = getTimestampInMilliseconds()
+
+        val calendar = Calendar.getInstance()
+        calendar.timeInMillis = System.currentTimeMillis()
+        calendar.add(Calendar.YEAR, 1)
+
+        val yearFromNow = try {
+            (calendar.timeInMillis / 1000).toUInt()
+        } catch (e: Exception) {
+            null
+        }
+
+        return try {
+            val mediaToken = makeMediaToken(
+                ownerSeed!!,
+                now,
+                getCurrentUserState(),
+                host,
+                muid,
+                contactPubKey,
+                yearFromNow!!
+            )
+            mediaToken
+        } catch (e: Exception){
+            Log.d("MQTT_MESSAGES", "Error to generate media token $e")
+            null
         }
     }
 
@@ -437,18 +475,31 @@ class ConnectManagerImpl(
             // BALANCE = newBalance.toLong()
         }
 
-        // Incoming message json
-        rr.msg?.let { msg ->
+        // Sent message info
+        rr.sentTo?.let { sentTo ->
+            val msg = rr.msg ?: return
+            val type = rr.msgType?.toInt() ?: return
+            val uuid = rr.msgUuid ?: return
+            val index = rr.msgIndex ?: return
 
             notifyListeners {
-                onTextMessageReceived(
-                    msg,
-                    rr.msgSender,
-                    rr.msgType?.toInt(),
-                    rr.msgUuid,
-                    rr.msgIndex
-                )
+                onTextMessageSent(msg, sentTo, type, uuid, index)
             }
+
+            Log.d("MQTT_MESSAGES", "=> received sentTo $sentTo")
+        }
+
+        // Incoming message json
+        rr.msg?.let { msg ->
+            val sender = rr.msgSender ?: return
+            val type = rr.msgType?.toInt() ?: return
+            val uuid = rr.msgUuid ?: return
+            val index = rr.msgIndex ?: return
+
+            notifyListeners {
+                onTextMessageReceived(msg, sender, type, uuid, index)
+            }
+
             Log.d("MQTT_MESSAGES", "=> received msg $msg, ${rr.msgUuid}, ${rr.msgIndex}")
         }
 

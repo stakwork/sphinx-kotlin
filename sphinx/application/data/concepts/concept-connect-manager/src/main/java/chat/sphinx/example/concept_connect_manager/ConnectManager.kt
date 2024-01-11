@@ -18,14 +18,21 @@ abstract class ConnectManager {
     )
     abstract fun sendMessage(
         sphinxMessage: String,
-        contactPubKey: String
+        contactPubKey: String,
+        provisionalId: Long,
+        messageType: Int
     )
+    abstract fun generateMediaToken(
+        contactPubKey: String,
+        muid: String,
+        host: String
+    ): String?
+
     abstract fun setLspIp(ip: String)
     abstract fun retrieveLspIp(): String?
     abstract fun addListener(listener: ConnectManagerListener): Boolean
     abstract fun removeListener(listener: ConnectManagerListener): Boolean
     abstract fun processChallengeSignature(challenge: String)
-
 }
 
 interface ConnectManagerListener {
@@ -35,11 +42,22 @@ interface ConnectManagerListener {
     fun onNewContactRegistered(msgSender: String)
     fun onTextMessageReceived(
         msg: String,
-        msgSender: String?,
-        msgType: Int?,
-        msgUuid: String?,
-        msgIndex: String?,
+        msgSender: String,
+        msgType: Int,
+        msgUuid: String,
+        msgIndex: String,
     )
+
+    fun onTextMessageSent(
+        msg: String,
+        contactPubKey: String,
+        msgType: Int,
+        msgUUID: String,
+        msgIndex: String,
+    )
+
+    fun onMessageUUID(msgUUID: String, provisionalId: Long)
+
     fun onUpdateUserState(userState: String)
 
     fun onSignedChallenge(sign: String)
