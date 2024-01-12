@@ -10,7 +10,8 @@ data class Message(
     val mediaToken: String?,
     val mediaKey: String?,
     val mediaType: String?,
-    val replyUuid: String?
+    val replyUuid: String?,
+    val threadUuid: String?
 ) {
     @Throws(AssertionError::class)
     fun toJson(moshi: Moshi): String {

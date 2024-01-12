@@ -12,7 +12,8 @@ data class Msg(
     val mediaToken: String?,
     val mediaKey: String?,
     val mediaType: String?,
-    val replyUuid: String?
+    val replyUuid: String?,
+    val threadUuid: String?
 ) {
     companion object {
         fun String.toMsgNull(moshi: Moshi): Msg? {

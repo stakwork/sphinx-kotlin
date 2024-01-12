@@ -511,14 +511,16 @@ abstract class SphinxRepository(
         mediaKey: MediaKey?,
         messageType: MessageType?,
         provisionalId: MessageId?,
-        replyUUID: ReplyUUID?
+        replyUUID: ReplyUUID?,
+        threadUUID: ThreadUUID?
     ) {
         val newMessage = chat.sphinx.example.wrapper_mqtt.Message(
             messageContent,
             mediaToken?.value,
             mediaKey?.value,
             attachmentInfo?.mediaType?.value,
-            replyUUID?.value
+            replyUUID?.value,
+            threadUUID?.value
         ).toJson(moshi)
 
         provisionalId?.value?.let {
@@ -3350,7 +3352,8 @@ abstract class SphinxRepository(
                                     mediaKey,
                                     messageType,
                                     provisionalMessageId,
-                                    replyUUID
+                                    replyUUID,
+                                    threadUUID
                                 )
 
                                 LOG.d("MQTT_MESSAGES", "Media Message was sent. mediatoken=$mediaTokenValue mediakey$mediaKey" )
@@ -3367,7 +3370,8 @@ abstract class SphinxRepository(
                         null,
                         messageType,
                         provisionalMessageId,
-                        replyUUID
+                        replyUUID,
+                        threadUUID
                     )
                 }
             }
