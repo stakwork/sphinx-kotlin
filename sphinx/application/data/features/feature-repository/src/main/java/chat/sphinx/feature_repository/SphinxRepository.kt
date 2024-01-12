@@ -421,21 +421,24 @@ abstract class SphinxRepository(
         val contact = getContactByPubKey(LightningNodePubKey(msgSender.pubkey)).firstOrNull()
 
         if (contact != null) {
+            var messageMedia: MessageMediaDbo? = null
 
-            val messageId = queries.messageGetIdByUUID(msgUuid).executeAsOneOrNull()
-            val existingMessageMedia = messageId?.let { queries.messageMediaGetById(it).executeAsOneOrNull() }?.copy(
-                id = msgIndex
-            )
+            if (isSent) {
+                val messageId = queries.messageGetIdByUUID(msgUuid).executeAsOneOrNull()
+                val existingMessageMedia = messageId?.let {
+                    queries.messageMediaGetById(it).executeAsOneOrNull()
+                }?.copy(id = msgIndex)
 
-            val messageMedia: MessageMediaDbo? = if (existingMessageMedia != null) {
-                // Existing provisional media message
-                messageLock.withLock {
-                    queries.messageMediaDeleteById(messageId)
+                existingMessageMedia?.let {
+                    messageLock.withLock {
+                        queries.messageMediaDeleteById(messageId)
+                    }
+                    messageMedia = existingMessageMedia
                 }
-                existingMessageMedia
             } else {
                 msg.mediaToken?.toMediaToken()?.let { mediaToken ->
-                    MessageMediaDbo(
+
+                    messageMedia = MessageMediaDbo(
                         msgIndex,
                         ChatId(contact.id.value),
                         msg.mediaKey?.toMediaKey(),
@@ -1962,80 +1965,89 @@ abstract class SphinxRepository(
             ?.let { getContactByPubKey(it).firstOrNull() }
 
         if (exitingContact?.nodePubKey != null) {
-            return
-        }
-
-        val newContact = Contact(
-            id = ContactId(exitingContact?.id?.value ?: contactId ?: -1L),
-            routeHint = contact.lightningRouteHint,
-            nodePubKey = contact.lightningNodePubKey,
-            nodeAlias = null,
-            alias = exitingContact?.alias ?: contact.contactAlias,
-            photoUrl = contact.photoUrl,
-            privatePhoto = PrivatePhoto.False,
-            isOwner = Owner.False,
-            status = if (contact.confirmed || contact.lightningNodePubKey != null) ContactStatus.Confirmed else ContactStatus.Pending,
-            rsaPublicKey = null,
-            deviceId = null,
-            createdAt = now.toDateTime(),
-            updatedAt = now.toDateTime(),
-            fromGroup = ContactFromGroup.False,
-            notificationSound = null,
-            tipAmount = null,
-            inviteId = null,
-            inviteStatus = null,
-            blocked = Blocked.False,
-            scid = null,
-            contactIndex = null,
-            contactRouteHint = null,
-            childPubKey = null,
-            contactKey = null
-        )
-
-        val newChat = Chat(
-            id = ChatId(exitingContact?.id?.value ?: contactId ?: -1L),
-            uuid = ChatUUID("${UUID.randomUUID()}"),
-            name = ChatName( exitingContact?.alias?.value ?: contact.contactAlias?.value ?: "unknown"),
-            photoUrl = contact.photoUrl,
-            type = ChatType.Conversation,
-            status = if (contact.confirmed || contact.lightningNodePubKey != null) ChatStatus.Approved else ChatStatus.Pending,
-            contactIds = listOf(ContactId(0), ContactId(contactId ?: -1)),
-            isMuted = ChatMuted.False,
-            createdAt = now.toDateTime(),
-            groupKey = null,
-            host = null,
-            pricePerMessage = null,
-            escrowAmount = null,
-            unlisted = ChatUnlisted.False,
-            privateTribe = ChatPrivate.False,
-            ownerPubKey = null,
-            seen = Seen.False,
-            metaData = null,
-            myPhotoUrl = null,
-            myAlias = null,
-            pendingContactIds = emptyList(),
-            latestMessageId = null,
-            contentSeenAt = null,
-            pinedMessage = null,
-            notify = NotificationLevel.SeeAll
-        )
-
-        applicationScope.launch(mainImmediate) {
             contactLock.withLock {
-                queries.transaction {
-                    upsertNewContact(newContact, queries)
-                }
+                queries.contactUpdatePhotoUrl(contact.photoUrl, exitingContact.id)
             }
             chatLock.withLock {
-                queries.transaction {
-                    upsertNewChat(
-                        newChat,
-                        moshi,
-                        SynchronizedMap<ChatId, Seen>(),
-                        queries,
-                        newContact,
-                        accountOwner.value?.nodePubKey
-                    )
+                queries.chatUpdatePhotoUrlById(contact.photoUrl, ChatId(exitingContact.id.value))
+            }
+
+        } else {
+
+            val newContact = Contact(
+                id = ContactId(exitingContact?.id?.value ?: contactId ?: -1L),
+                routeHint = contact.lightningRouteHint,
+                nodePubKey = contact.lightningNodePubKey,
+                nodeAlias = null,
+                alias = exitingContact?.alias ?: contact.contactAlias,
+                photoUrl = contact.photoUrl,
+                privatePhoto = PrivatePhoto.False,
+                isOwner = Owner.False,
+                status = if (contact.confirmed || contact.lightningNodePubKey != null) ContactStatus.Confirmed else ContactStatus.Pending,
+                rsaPublicKey = null,
+                deviceId = null,
+                createdAt = now.toDateTime(),
+                updatedAt = now.toDateTime(),
+                fromGroup = ContactFromGroup.False,
+                notificationSound = null,
+                tipAmount = null,
+                inviteId = null,
+                inviteStatus = null,
+                blocked = Blocked.False,
+                scid = null,
+                contactIndex = null,
+                contactRouteHint = null,
+                childPubKey = null,
+                contactKey = null
+            )
+
+            val newChat = Chat(
+                id = ChatId(exitingContact?.id?.value ?: contactId ?: -1L),
+                uuid = ChatUUID("${UUID.randomUUID()}"),
+                name = ChatName(
+                    exitingContact?.alias?.value ?: contact.contactAlias?.value ?: "unknown"
+                ),
+                photoUrl = contact.photoUrl,
+                type = ChatType.Conversation,
+                status = if (contact.confirmed || contact.lightningNodePubKey != null) ChatStatus.Approved else ChatStatus.Pending,
+                contactIds = listOf(ContactId(0), ContactId(contactId ?: -1)),
+                isMuted = ChatMuted.False,
+                createdAt = now.toDateTime(),
+                groupKey = null,
+                host = null,
+                pricePerMessage = null,
+                escrowAmount = null,
+                unlisted = ChatUnlisted.False,
+                privateTribe = ChatPrivate.False,
+                ownerPubKey = null,
+                seen = Seen.False,
+                metaData = null,
+                myPhotoUrl = null,
+                myAlias = null,
+                pendingContactIds = emptyList(),
+                latestMessageId = null,
+                contentSeenAt = null,
+                pinedMessage = null,
+                notify = NotificationLevel.SeeAll
+            )
+
+            applicationScope.launch(mainImmediate) {
+                contactLock.withLock {
+                    queries.transaction {
+                        upsertNewContact(newContact, queries)
+                    }
+                }
+                chatLock.withLock {
+                    queries.transaction {
+                        upsertNewChat(
+                            newChat,
+                            moshi,
+                            SynchronizedMap<ChatId, Seen>(),
+                            queries,
+                            newContact,
+                            accountOwner.value?.nodePubKey
+                        )
+                    }
                 }
             }
         }
