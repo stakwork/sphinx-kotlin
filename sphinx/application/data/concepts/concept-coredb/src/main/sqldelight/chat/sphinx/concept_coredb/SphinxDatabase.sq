@@ -310,6 +310,11 @@ UPDATE chatDbo
 SET pin_message = :pin_message
 WHERE id = ?;
 
+chatUpdatePhotoUrlById:
+UPDATE chatDbo
+SET photo_url = :photo_url
+WHERE id = ?;
+
 chatUpdateTribeData:
 UPDATE chatDbo
 SET price_per_message = :price_per_message,
