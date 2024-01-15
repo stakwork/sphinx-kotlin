@@ -356,7 +356,8 @@ class ConnectManagerImpl(
         sphinxMessage: String,
         contactPubKey: String,
         provisionalId: Long,
-        messageType: Int
+        messageType: Int,
+        amount: Long?
     ) {
         coroutineScope.launch {
 
@@ -372,7 +373,7 @@ class ConnectManagerImpl(
                     getCurrentUserState(),
                     ownerInfoStateFlow.value?.alias ?: "",
                     ownerInfoStateFlow.value?.picture ?: "",
-                    0.toULong()
+                    amount?.toULong() ?: 0.toULong()
                 )
                 handleRunReturn(message, mqttClient!!)
 

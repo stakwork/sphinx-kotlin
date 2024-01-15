@@ -26,7 +26,6 @@ import chat.sphinx.concept_network_query_feed_status.model.PostFeedStatusDto
 import chat.sphinx.concept_network_query_feed_status.model.PutFeedStatusDto
 import chat.sphinx.concept_network_query_invite.NetworkQueryInvite
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
-import chat.sphinx.concept_network_query_lightning.model.balance.BalanceDto
 import chat.sphinx.concept_network_query_meme_server.NetworkQueryMemeServer
 import chat.sphinx.concept_network_query_message.NetworkQueryMessage
 import chat.sphinx.concept_network_query_message.model.*
@@ -470,7 +469,7 @@ abstract class SphinxRepository(
                 type = msgType,
                 sender = if (isSent) ContactId(0) else contact.id,
                 receiver = ContactId(0),
-                amount = Sat(0),
+                amount = Sat(msg.amount?.toLong() ?: 0L),
                 date = DateTime.nowUTC().toDateTime(),
                 expirationDate = null,
                 messageContent = null,
@@ -517,22 +516,24 @@ abstract class SphinxRepository(
         mediaToken: MediaToken?,
         mediaKey: MediaKey?,
         messageType: MessageType?,
-        provisionalId: MessageId?
+        provisionalId: MessageId?,
+        amount: Sat?
     ) {
         val newMessage = chat.sphinx.example.wrapper_mqtt.Message(
             messageContent,
+            null,
             mediaToken?.value,
             mediaKey?.value,
             attachmentInfo?.mediaType?.value
         ).toJson(moshi)
 
         provisionalId?.value?.let {
-            connectManager.
-            sendMessage(
+            connectManager.sendMessage(
                 newMessage,
                 contact.nodePubKey?.value ?: "",
                 it,
-                messageType?.value ?: 0
+                messageType?.value ?: 0,
+                amount?.value
             )
         }
     }
@@ -3254,8 +3255,9 @@ abstract class SphinxRepository(
                                     mediaTokenValue?.toMediaToken(),
                                     mediaKey,
                                     messageType,
-                                    provisionalMessageId
-                                )
+                                    provisionalMessageId,
+                                    sendMessage.tribePaymentAmount ?: messagePrice,
+                                    )
 
                                 LOG.d("MQTT_MESSAGES", "Media Message was sent. mediatoken=$mediaTokenValue mediakey$mediaKey" )
 
@@ -3270,8 +3272,9 @@ abstract class SphinxRepository(
                         null,
                         null,
                         messageType,
-                        provisionalMessageId
-                    )
+                        provisionalMessageId,
+                        sendMessage.tribePaymentAmount ?: messagePrice,
+                        )
                 }
             }
 //

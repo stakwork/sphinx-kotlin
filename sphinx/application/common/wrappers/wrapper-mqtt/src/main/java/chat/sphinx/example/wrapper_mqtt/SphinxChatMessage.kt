@@ -7,6 +7,7 @@ import com.squareup.moshi.Moshi
 @JsonClass(generateAdapter = true)
 data class Message(
     val content: String?,
+    val amount: Int?,
     val mediaToken: String?,
     val mediaKey: String?,
     val mediaType: String?
