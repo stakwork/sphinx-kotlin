@@ -429,9 +429,10 @@ abstract class SphinxRepository(
 
         if (contact != null) {
             var messageMedia: MessageMediaDbo? = null
+            val existingMessage = queries.messageGetByUUID(msgUuid).executeAsOneOrNull()
 
             if (isSent) {
-                val messageId = queries.messageGetIdByUUID(msgUuid).executeAsOneOrNull()
+                val messageId = existingMessage?.id
                 val existingMessageMedia = messageId?.let {
                     queries.messageMediaGetById(it).executeAsOneOrNull()
                 }?.copy(id = msgIndex)
@@ -478,7 +479,7 @@ abstract class SphinxRepository(
                 senderAlias = null,
                 senderPic = null,
                 originalMUID = null,
-                replyUUID = null,
+                replyUUID = existingMessage?.reply_uuid ?: msg.replyUuid?.toReplyUUID(),
                 flagged = Flagged.False,
                 recipientAlias = null,
                 recipientPic = null,
@@ -517,14 +518,18 @@ abstract class SphinxRepository(
         mediaKey: MediaKey?,
         messageType: MessageType?,
         provisionalId: MessageId?,
-        amount: Sat?
+        amount: Sat?,
+        replyUUID: ReplyUUID?,
+        threadUUID: ThreadUUID?
     ) {
         val newMessage = chat.sphinx.example.wrapper_mqtt.Message(
             messageContent,
             null,
             mediaToken?.value,
             mediaKey?.value,
-            attachmentInfo?.mediaType?.value
+            attachmentInfo?.mediaType?.value,
+            replyUUID?.value,
+            threadUUID?.value
         ).toJson(moshi)
 
         provisionalId?.value?.let {
@@ -3257,7 +3262,9 @@ abstract class SphinxRepository(
                                     messageType,
                                     provisionalMessageId,
                                     sendMessage.tribePaymentAmount ?: messagePrice,
-                                    )
+                                    replyUUID,
+                                    threadUUID
+                                )
 
                                 LOG.d("MQTT_MESSAGES", "Media Message was sent. mediatoken=$mediaTokenValue mediakey$mediaKey" )
 
@@ -3274,7 +3281,9 @@ abstract class SphinxRepository(
                         messageType,
                         provisionalMessageId,
                         sendMessage.tribePaymentAmount ?: messagePrice,
-                        )
+                        replyUUID,
+                        threadUUID
+                    )
                 }
             }
 //

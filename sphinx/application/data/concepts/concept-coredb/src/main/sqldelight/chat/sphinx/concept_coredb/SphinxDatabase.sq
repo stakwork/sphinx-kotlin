@@ -723,7 +723,8 @@ LIMIT 1;
 messageGetByUUID:
 SELECT *
 FROM messageDbo
-WHERE uuid = ?;
+WHERE uuid = ?
+LIMIT 1;
 
 messageGetToShowByUUID:
 SELECT *

@@ -11,7 +11,9 @@ data class Msg(
     val amount: Int?,
     val mediaToken: String?,
     val mediaKey: String?,
-    val mediaType: String?
+    val mediaType: String?,
+    val replyUuid: String?,
+    val threadUuid: String?
 ) {
     companion object {
         fun String.toMsgNull(moshi: Moshi): Msg? {
