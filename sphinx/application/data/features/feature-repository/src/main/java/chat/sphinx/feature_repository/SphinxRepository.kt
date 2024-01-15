@@ -404,9 +404,7 @@ abstract class SphinxRepository(
             )
         }
 
-        if (routeHint != null && scid != null) {
-            updateOwnerRouteHintAndScid(routeHint, scid)
-        }
+
     }
 
     override suspend fun upsertMqttMessage(
@@ -1942,12 +1940,7 @@ abstract class SphinxRepository(
             tipAmount = null,
             inviteId = null,
             inviteStatus = null,
-            blocked = Blocked.False,
-            scid = shortChannelId.toShortChannelId(),
-            contactIndex = ContactIndex(0L),
-            contactRouteHint = null,
-            childPubKey = null,
-            contactKey = null
+            blocked = Blocked.False
         )
         contactLock.withLock {
             queries.transaction {
@@ -1993,12 +1986,7 @@ abstract class SphinxRepository(
                 tipAmount = null,
                 inviteId = null,
                 inviteStatus = null,
-                blocked = Blocked.False,
-                scid = null,
-                contactIndex = null,
-                contactRouteHint = null,
-                childPubKey = null,
-                contactKey = null
+                blocked = Blocked.False
             )
 
             val newChat = Chat(
@@ -2053,72 +2041,6 @@ abstract class SphinxRepository(
         }
     }
 
-    override suspend fun updateContactKeyAndRouteHintByOkKey(
-        contactPubKey: LightningNodePubKey,
-        contactKey: LightningNodePubKey,
-        contactRouteHint: LightningRouteHint,
-        photoUrl: PhotoUrl?
-    ) {
-        val queries = coreDB.getSphinxDatabaseQueries()
-        val contactIndex = queries.contactGetIndexByOkKey(contactPubKey)
-            .executeAsList().getOrNull(0)?.contact_index
-
-        contactLock.withLock {
-            queries.contactUpdateContactKeyAndRouteHint(
-                contactKey,
-                contactRouteHint,
-                ContactStatus.Confirmed,
-                photoUrl,
-                contactPubKey
-            )
-        }
-
-        contactIndex?.value?.let { chatIndex ->
-            chatLock.withLock {
-                queries.chatUpdateSatusById(ChatStatus.Approved, ChatId(chatIndex))
-            }
-        }
-    }
-
-    override suspend fun updateChildPubKeyAndScidByIndex(
-        contactIndex: ContactIndex,
-        childPubKey: LightningNodePubKey,
-        scid: ShortChannelId
-    ) {
-        val queries = coreDB.getSphinxDatabaseQueries()
-
-        contactLock.withLock {
-            queries.contactUpdateChildPubKeyAndScidByIndex(
-                childPubKey,
-                scid,
-                contactIndex
-            )
-        }
-    }
-
-    override suspend fun updateOwnerRouteHintAndScid(
-        routeHint: LightningRouteHint,
-        scid: ShortChannelId
-    ) {
-        val queries = coreDB.getSphinxDatabaseQueries()
-        val now = DateTime.nowUTC().toDateTime()
-
-        val updatedOwner = accountOwner.value?.copy(
-            routeHint = routeHint,
-            scid = scid,
-            updatedAt = now
-        )
-
-        if (updatedOwner != null) {
-            applicationScope.launch(mainImmediate) {
-                contactLock.withLock {
-                    queries.transaction {
-                        upsertNewContact(updatedOwner, queries)
-                    }
-                }
-            }
-        }
-    }
 
     override suspend fun updateOwnerAlias(alias: ContactAlias) {
         val queries = coreDB.getSphinxDatabaseQueries()
@@ -2152,22 +2074,6 @@ abstract class SphinxRepository(
                 }
         )
     }
-
-    override suspend fun getContactsChildPubKeysToIndexes(): Flow<HashMap<LightningNodePubKey, ContactIndex>?> = flow {
-        emitAll(
-            coreDB.getSphinxDatabaseQueries().contactGetChildPubKeysToIndexes()
-                .asFlow()
-                .map { query ->
-                    query.executeAsList().fold(HashMap<LightningNodePubKey, ContactIndex>()) { map, result ->
-                        if (result.contact_index != null) {
-                            map[result.child_pub_key] = result.contact_index!!
-                        }
-                        map
-                    }.takeIf { it.isNotEmpty() }
-                }
-        )
-    }
-
 
     override suspend fun updateChatProfileInfo(
         chatId: ChatId,

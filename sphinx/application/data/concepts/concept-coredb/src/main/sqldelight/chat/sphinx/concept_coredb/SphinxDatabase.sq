@@ -347,12 +347,7 @@ CREATE TABLE contactDbo(
     tip_amount                  INTEGER         AS Sat,
     invite_id                   INTEGER         AS InviteId,
     invite_status               INTEGER         AS InviteStatus,
-    blocked                     INTEGER         AS Blocked NOT NULL DEFAULT 0,
-    scid                        TEXT            AS ShortChannelId,
-    contact_index               INTEGER         AS ContactIndex,
-    contact_route_hint          TEXT            AS LightningRouteHint,
-    child_pub_key               TEXT            AS LightningNodePubKey,
-    contact_key                 TEXT            AS LightningNodePubKey
+    blocked                     INTEGER         AS Blocked NOT NULL DEFAULT 0
 );
 
 contactGetAllIds:
@@ -403,16 +398,6 @@ FROM contactDbo
 ORDER BY id DESC
 LIMIT 1;
 
-contactGetChildPubKeysToIndexes:
-SELECT child_pub_key, contact_index
-FROM contactDbo
-WHERE child_pub_key IS NOT NULL;
-
-contactGetIndexByOkKey:
-SELECT contact_index
-FROM contactDbo
-WHERE node_pub_key = ?;
-
 contactUpsert {
     UPDATE contactDbo
     SET route_hint = :route_hint,
@@ -427,12 +412,7 @@ contactUpsert {
         updated_at = :updated_at,
         notification_sound = :notification_sound,
         tip_amount = :tip_amount,
-        blocked = :blocked,
-        scid = :scid,
-        contact_index = :contact_index,
-        contact_route_hint = :contact_route_hint,
-        child_pub_key = :child_pub_key,
-        contact_key = : contact_key
+        blocked = :blocked
     WHERE id = :id;
 
     INSERT OR IGNORE INTO contactDbo(
@@ -451,12 +431,7 @@ contactUpsert {
         updated_at,
         notification_sound,
         tip_amount,
-        blocked,
-        scid,
-        contact_index,
-        contact_route_hint,
-        child_pub_key,
-        contact_key
+        blocked
     )
     VALUES (
         :id,
@@ -474,12 +449,7 @@ contactUpsert {
         :updated_at,
         :notification_sound,
         :tip_amount,
-        :blocked,
-        :scid,
-        :contact_index,
-        :contact_route_hint,
-        :child_pub_key,
-        :contact_key
+        :blocked
     );
 }
 
@@ -503,20 +473,6 @@ contactUpdateBlocked:
 UPDATE contactDbo
 SET blocked = :blocked
 WHERE id = ?;
-
-contactUpdateContactKeyAndRouteHint:
-UPDATE contactDbo
-SET contact_key = :contact_key,
-    contact_route_hint = :contact_route_hint,
-    status = :status,
-    photo_url = :photo_url
-WHERE node_pub_key = ?;
-
-contactUpdateChildPubKeyAndScidByIndex:
-UPDATE contactDbo
-SET child_pub_key = :child_pub_key,
-    scid = :scid
-WHERE contact_index = :contact_index;
 
 contactDeleteById:
 DELETE FROM contactDbo

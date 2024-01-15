@@ -363,11 +363,6 @@ inline fun TransactionCallbacks.upsertNewContact(contact: Contact, queries: Sphi
     val notificationSound = contact.notificationSound
     val tipAmount = contact.tipAmount
     val blocked = contact.blocked
-    val scid = contact.scid
-    val contactIndex = contact.contactIndex
-    val contactRouteHint = contact.contactRouteHint
-    val childPubKey = contact.childPubKey
-    val contactKey = contact.contactKey
 
     // Perform the upsert operation
     queries.contactUpsert(
@@ -384,11 +379,6 @@ inline fun TransactionCallbacks.upsertNewContact(contact: Contact, queries: Sphi
         notificationSound,
         tipAmount,
         blocked,
-        scid,
-        contactIndex,
-        contactRouteHint,
-        childPubKey,
-        contactKey,
         contact.id,
         contact.isOwner,
         contact.createdAt
@@ -439,11 +429,6 @@ inline fun TransactionCallbacks.upsertContact(dto: ContactDto, queries: SphinxDa
         dto.notification_sound?.toNotificationSound(),
         dto.tip_amount?.toSat(),
         dto.blockedActual.toBlocked(),
-        dto.scid?.toShortChannelId(),
-        dto.contactIndex?.toContactIndex(),
-        dto.contactRouteHint?.toLightningRouteHint(),
-        dto.childPubKey?.toLightningNodePubKey(),
-        dto.contactKey?.toLightningNodePubKey(),
         contactId,
         isOwner,
         createdAt

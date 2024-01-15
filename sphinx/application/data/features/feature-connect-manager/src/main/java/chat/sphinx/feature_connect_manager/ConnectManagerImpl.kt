@@ -529,6 +529,10 @@ class ConnectManagerImpl(
             }
         }
 
+        rr.msgMsat?.let { mSat ->
+            Log.d("MQTT_MESSAGES", "=> msg_msat $mSat")
+        }
+
         // Sent
         rr.sentStatus?.let { sentStatus ->
             Log.d("MQTT_MESSAGES", "=> sent_status $sentStatus")

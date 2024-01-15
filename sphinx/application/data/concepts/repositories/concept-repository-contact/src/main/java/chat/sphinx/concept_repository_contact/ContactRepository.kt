@@ -67,29 +67,10 @@ interface ContactRepository {
 
     suspend fun createNewContact(contact: NewContact)
 
-    suspend fun updateContactKeyAndRouteHintByOkKey(
-        contactPubKey: LightningNodePubKey,
-        contactKey: LightningNodePubKey,
-        contactRouteHint: LightningRouteHint,
-        photoUrl: PhotoUrl?
-    )
-
-    suspend fun updateChildPubKeyAndScidByIndex(
-        contactIndex: ContactIndex,
-        childPubKey: LightningNodePubKey,
-        scid: ShortChannelId
-    )
-
-    suspend fun updateOwnerRouteHintAndScid(
-        routeHint: LightningRouteHint,
-        scid: ShortChannelId
-    )
-
     suspend fun updateOwnerAlias(alias: ContactAlias)
 
     suspend fun getNewContactIndex(): Flow<ContactId?>
 
-    suspend fun getContactsChildPubKeysToIndexes(): Flow<HashMap<LightningNodePubKey, ContactIndex>?>
 
     /** Sphinx V1 (likely to be removed) **/
 
