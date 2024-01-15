@@ -8,17 +8,14 @@ import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.dashboard.InviteId
 import chat.sphinx.wrapper_common.dashboard.RestoreProgress
-import chat.sphinx.wrapper_common.feed.FeedId
 import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.feed.FeedType
 import chat.sphinx.wrapper_contact.Contact
-import chat.sphinx.wrapper_feed.ContentFeedStatus
 import chat.sphinx.wrapper_feed.Feed
 import chat.sphinx.wrapper_invite.Invite
 import chat.sphinx.wrapper_lightning.NodeBalance
 import chat.sphinx.wrapper_message.Message
 import chat.sphinx.wrapper_podcast.FeedRecommendation
-import chat.sphinx.wrapper_podcast.Podcast
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -85,7 +82,7 @@ interface RepositoryDashboard {
         body: String
     ): Response<Boolean, ResponseError>
 
-    val networkRefreshBalance: Flow<LoadResponse<Boolean, ResponseError>>
+    val networkRefreshBalance: MutableStateFlow<Long?>
     val networkRefreshContacts: Flow<LoadResponse<Boolean, ResponseError>>
     val networkRefreshLatestContacts: Flow<LoadResponse<RestoreProgress, ResponseError>>
     val networkRefreshFeedContent: Flow<LoadResponse<RestoreProgress, ResponseError>>

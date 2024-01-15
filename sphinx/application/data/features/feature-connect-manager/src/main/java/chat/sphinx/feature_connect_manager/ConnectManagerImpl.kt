@@ -472,7 +472,10 @@ class ConnectManagerImpl(
         // Set your balance
         rr.newBalance?.let { newBalance ->
             Log.d("MQTT_MESSAGES", "===> BALANCE ${newBalance.toLong()}")
-            // BALANCE = newBalance.toLong()
+
+            notifyListeners {
+                onNewBalance(newBalance.toLong())
+            }
         }
 
         // Sent message info

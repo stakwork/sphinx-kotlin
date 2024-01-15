@@ -62,6 +62,8 @@ interface ConnectManagerListener {
 
     fun onSignedChallenge(sign: String)
 
+    fun onNewBalance(balance: Long)
+
 }
 
 

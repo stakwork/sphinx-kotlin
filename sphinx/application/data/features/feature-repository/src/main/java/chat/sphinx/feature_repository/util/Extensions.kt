@@ -13,7 +13,6 @@ import chat.sphinx.wrapper_chat.*
 import chat.sphinx.wrapper_common.*
 import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.contact.toBlocked
-import chat.sphinx.wrapper_common.contact.toContactIndex
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.dashboard.InviteId
@@ -51,11 +50,26 @@ inline fun BalanceDto.toNodeBalanceOrNull(): NodeBalance? =
 @Suppress("NOTHING_TO_INLINE")
 inline fun BalanceDto.toNodeBalance(): NodeBalance =
     NodeBalance(
-        Sat(reserve),
-        Sat(full_balance),
         Sat(balance),
-        Sat(pending_open_balance),
     )
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun String.toNodeBalance(): NodeBalance? {
+    return try {
+        NodeBalance(Sat(this.toLong()))
+    } catch (e: NumberFormatException) {
+        null
+    }
+}
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun Long.toNodeBalance(): NodeBalance? {
+    return try {
+        NodeBalance(Sat(this.toLong()))
+    } catch (e: NumberFormatException) {
+        null
+    }
+}
 
 inline val MessageDto.updateChatDboLatestMessage: Boolean
     get() = type.toMessageType().show           &&

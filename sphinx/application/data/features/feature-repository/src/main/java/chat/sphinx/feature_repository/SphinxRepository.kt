@@ -43,7 +43,6 @@ import chat.sphinx.concept_network_query_subscription.model.PutSubscriptionDto
 import chat.sphinx.concept_network_query_subscription.model.SubscriptionDto
 import chat.sphinx.concept_network_query_verify_external.NetworkQueryAuthorizeExternal
 import chat.sphinx.concept_network_query_verify_external.model.RedeemSatsDto
-import chat.sphinx.concept_relay.CustomException
 import chat.sphinx.concept_relay.RelayDataHandler
 import chat.sphinx.concept_repository_actions.ActionsRepository
 import chat.sphinx.concept_repository_chat.ChatRepository
@@ -101,7 +100,6 @@ import chat.sphinx.wrapper_chat.*
 import chat.sphinx.wrapper_common.*
 import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.contact.Blocked
-import chat.sphinx.wrapper_common.contact.ContactIndex
 import chat.sphinx.wrapper_common.contact.isTrue
 import chat.sphinx.wrapper_common.dashboard.*
 import chat.sphinx.wrapper_common.feed.*
@@ -110,13 +108,11 @@ import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
 import chat.sphinx.wrapper_common.lightning.LightningRouteHint
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.lightning.ServerIp
-import chat.sphinx.wrapper_common.lightning.ShortChannelId
 import chat.sphinx.wrapper_common.lightning.getScid
 import chat.sphinx.wrapper_common.lightning.retrieveLightningRouteHint
 import chat.sphinx.wrapper_common.lightning.toLightningNodePubKey
 import chat.sphinx.wrapper_common.lightning.toLightningRouteHint
 import chat.sphinx.wrapper_common.lightning.toSat
-import chat.sphinx.wrapper_common.lightning.toShortChannelId
 import chat.sphinx.wrapper_common.message.*
 import chat.sphinx.wrapper_common.payment.PaymentTemplate
 import chat.sphinx.wrapper_common.subscription.EndNumber
@@ -164,7 +160,6 @@ import java.io.InputStream
 import java.text.ParseException
 import java.util.*
 import kotlin.collections.ArrayList
-import kotlin.collections.HashMap
 import kotlin.collections.LinkedHashMap
 import kotlin.math.absoluteValue
 import kotlin.math.round
@@ -386,6 +381,21 @@ abstract class SphinxRepository(
 
     override fun onSignedChallenge(sign: String) {
         connectionManagerState.value = ConnectionManagerState.SignedChallenge(sign)
+    }
+
+    override fun onNewBalance(balance: Long) {
+        applicationScope.launch {
+
+            balanceLock.withLock {
+                accountBalanceStateFlow.value = balance.toNodeBalance()
+                networkRefreshBalance.value = balance
+
+                authenticationStorage.putString(
+                    REPOSITORY_LIGHTNING_BALANCE,
+                    balance.toString()
+                )
+            }
+        }
     }
 
     override suspend fun updateLspAndOwner(data: String) {
@@ -2248,112 +2258,104 @@ abstract class SphinxRepository(
             if (accountBalanceStateFlow.value == null) {
                 authenticationStorage
                     .getString(REPOSITORY_LIGHTNING_BALANCE, null)
-                    ?.let { balanceJsonString ->
+                    ?.let { balanceString ->
 
-                        val balanceDto: BalanceDto? = try {
-                            withContext(default) {
-                                moshi.adapter(BalanceDto::class.java)
-                                    .fromJson(balanceJsonString)
-                            }
-                        } catch (e: Exception) {
-                            null
-                        }
-
-                        balanceDto?.toNodeBalanceOrNull()?.let { nodeBalance ->
+                        balanceString.toNodeBalance()?.let { nodeBalance ->
                             accountBalanceStateFlow.value = nodeBalance
                         }
                     }
             }
-
         }
 
         return accountBalanceStateFlow.asStateFlow()
     }
 
-    override val networkRefreshBalance: Flow<LoadResponse<Boolean, ResponseError>> by lazy {
-        flow {
-            networkQueryLightning.getBalance().collect { loadResponse ->
-                @Exhaustive
-                when (loadResponse) {
-                    is LoadResponse.Loading -> {
-                        emit(loadResponse)
-                    }
-                    is Response.Error -> {
-                        emit(loadResponse)
+    override val networkRefreshBalance: MutableStateFlow<Long?> by lazy {
+        MutableStateFlow(null)
 
-                        (loadResponse.exception as? CustomException)?.let { exception ->
-                            if (exception.code == AUTHENTICATION_ERROR) {
-                                saveTransportKey()
-                            }
-                        }
-                    }
-                    is Response.Success -> {
-
-                        try {
-                            val jsonString: String = withContext(default) {
-                                moshi.adapter(BalanceDto::class.java)
-                                    .toJson(loadResponse.value)
-                            } ?: throw NullPointerException("Converting BalanceDto to Json failed")
-
-                            balanceLock.withLock {
-                                accountBalanceStateFlow.value = loadResponse.value.toNodeBalance()
-
-                                authenticationStorage.putString(
-                                    REPOSITORY_LIGHTNING_BALANCE,
-                                    jsonString
-                                )
-                            }
-
-                            emit(Response.Success(true))
-                        } catch (e: Exception) {
-
-                            // this should _never_ happen, as if the network call was
-                            // successful, it went from json -> dto, and we're just going
-                            // back from dto -> json to persist it...
-                            emit(
-                                Response.Error(
-                                    ResponseError(
-                                        """
-                                        Network Fetching of balance was successful, but
-                                        conversion to a string for persisting failed.
-                                        ${loadResponse.value}
-                                    """.trimIndent(),
-                                        e
-                                    )
-                                )
-                            )
-                        }
-
-                    }
-                }
-            }
-        }
+//        flow {
+//            networkQueryLightning.getBalance().collect { loadResponse ->
+//                @Exhaustive
+//                when (loadResponse) {
+//                    is LoadResponse.Loading -> {
+//                        emit(loadResponse)
+//                    }
+//                    is Response.Error -> {
+//                        emit(loadResponse)
+//
+//                        (loadResponse.exception as? CustomException)?.let { exception ->
+//                            if (exception.code == AUTHENTICATION_ERROR) {
+//                                saveTransportKey()
+//                            }
+//                        }
+//                    }
+//                    is Response.Success -> {
+//
+//                        try {
+//                            val jsonString: String = withContext(default) {
+//                                moshi.adapter(BalanceDto::class.java)
+//                                    .toJson(loadResponse.value)
+//                            } ?: throw NullPointerException("Converting BalanceDto to Json failed")
+//
+//                            balanceLock.withLock {
+//                                accountBalanceStateFlow.value = loadResponse.value.toNodeBalance()
+//
+//                                authenticationStorage.putString(
+//                                    REPOSITORY_LIGHTNING_BALANCE,
+//                                    jsonString
+//                                )
+//                            }
+//
+//                            emit(Response.Success(true))
+//                        } catch (e: Exception) {
+//
+//                            // this should _never_ happen, as if the network call was
+//                            // successful, it went from json -> dto, and we're just going
+//                            // back from dto -> json to persist it...
+//                            emit(
+//                                Response.Error(
+//                                    ResponseError(
+//                                        """
+//                                        Network Fetching of balance was successful, but
+//                                        conversion to a string for persisting failed.
+//                                        ${loadResponse.value}
+//                                    """.trimIndent(),
+//                                        e
+//                                    )
+//                                )
+//                            )
+//                        }
+//
+//                    }
+//                }
+//            }
+//        }
     }
 
     override suspend fun getAccountBalanceAll(
         relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>?
     ): Flow<LoadResponse<NodeBalanceAll, ResponseError>> = flow {
 
-        networkQueryLightning.getBalanceAll(
-            relayData
-        ).collect { loadResponse ->
-            @Exhaustive
-            when (loadResponse) {
-                is LoadResponse.Loading -> {
-                    emit(loadResponse)
-                }
-                is Response.Error -> {
-                    emit(loadResponse)
-                }
-                is Response.Success -> {
-                    val nodeBalanceAll = NodeBalanceAll(
-                        Sat(loadResponse.value.local_balance),
-                        Sat(loadResponse.value.remote_balance)
-                    )
-                    emit(Response.Success(nodeBalanceAll))
-                }
-            }
-        }
+//        networkQueryLightning.getBalanceAll(
+//            relayData
+//        ).collect { loadResponse ->
+//            @Exhaustive
+//            when (loadResponse) {
+//                is LoadResponse.Loading -> {
+//                    emit(loadResponse)
+//                }
+//                is Response.Error -> {
+//                    emit(loadResponse)
+//                }
+//                is Response.Success -> {
+//                    val nodeBalanceAll = NodeBalanceAll(
+//                        Sat(loadResponse.value.local_balance),
+//                        Sat(loadResponse.value.remote_balance)
+//                    )
+//                    emit(Response.Success(nodeBalanceAll))
+//                }
+//            }
+//        }
     }
 
     private val lspLock = Mutex()

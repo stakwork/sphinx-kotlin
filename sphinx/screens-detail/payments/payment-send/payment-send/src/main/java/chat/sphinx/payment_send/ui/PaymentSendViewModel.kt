@@ -17,7 +17,6 @@ import chat.sphinx.payment_common.ui.viewstate.AmountViewState
 import chat.sphinx.payment_common.ui.viewstate.send.PaymentSendViewState
 import chat.sphinx.payment_send.R
 import chat.sphinx.payment_send.navigation.PaymentSendNavigator
-import chat.sphinx.scanner_view_model_coordinator.request.ScannerFilter
 import chat.sphinx.scanner_view_model_coordinator.request.ScannerRequest
 import chat.sphinx.scanner_view_model_coordinator.response.ScannerResponse
 import chat.sphinx.wrapper_common.dashboard.ChatId
@@ -30,11 +29,9 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
-import io.matthewnelson.concept_views.viewstate.value
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
-import javax.annotation.meta.Exhaustive
 import javax.inject.Inject
 
 internal inline val PaymentSendFragmentArgs.chatId: ChatId?
