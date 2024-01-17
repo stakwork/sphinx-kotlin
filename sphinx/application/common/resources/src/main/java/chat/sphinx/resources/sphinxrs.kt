@@ -440,6 +440,10 @@ internal interface _UniFFILib : Library {
     ): RustBuffer.ByValue
     fun uniffi_sphinxrs_fn_func_make_media_token(`seed`: RustBuffer.ByValue,`uniqueTime`: RustBuffer.ByValue,`state`: RustBuffer.ByValue,`host`: RustBuffer.ByValue,`muid`: RustBuffer.ByValue,`to`: RustBuffer.ByValue,`expiry`: Int,_uniffi_out_err: RustCallStatus, 
     ): RustBuffer.ByValue
+    fun uniffi_sphinxrs_fn_func_make_media_token_with_meta(`seed`: RustBuffer.ByValue,`uniqueTime`: RustBuffer.ByValue,`state`: RustBuffer.ByValue,`host`: RustBuffer.ByValue,`muid`: RustBuffer.ByValue,`to`: RustBuffer.ByValue,`expiry`: Int,`meta`: RustBuffer.ByValue,_uniffi_out_err: RustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_sphinxrs_fn_func_make_invoice(`seed`: RustBuffer.ByValue,`uniqueTime`: RustBuffer.ByValue,`state`: RustBuffer.ByValue,`amtMsat`: Long,`preimage`: RustBuffer.ByValue,`description`: RustBuffer.ByValue,_uniffi_out_err: RustCallStatus, 
+    ): RustBuffer.ByValue
     fun ffi_sphinxrs_rustbuffer_alloc(`size`: Int,_uniffi_out_err: RustCallStatus, 
     ): RustBuffer.ByValue
     fun ffi_sphinxrs_rustbuffer_from_bytes(`bytes`: ForeignBytes.ByValue,_uniffi_out_err: RustCallStatus, 
@@ -523,6 +527,10 @@ internal interface _UniFFILib : Library {
     fun uniffi_sphinxrs_checksum_func_send(
     ): Short
     fun uniffi_sphinxrs_checksum_func_make_media_token(
+    ): Short
+    fun uniffi_sphinxrs_checksum_func_make_media_token_with_meta(
+    ): Short
+    fun uniffi_sphinxrs_checksum_func_make_invoice(
     ): Short
     fun ffi_sphinxrs_uniffi_contract_version(
     ): Int
@@ -653,6 +661,12 @@ private fun uniffiCheckApiChecksums(lib: _UniFFILib) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_sphinxrs_checksum_func_make_media_token() != 53931.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_sphinxrs_checksum_func_make_media_token_with_meta() != 21693.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_sphinxrs_checksum_func_make_invoice() != 41170.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
 }
@@ -2056,6 +2070,24 @@ fun `makeMediaToken`(`seed`: String, `uniqueTime`: String, `state`: ByteArray, `
     return FfiConverterString.lift(
     rustCallWithError(SphinxException) { _status ->
     _UniFFILib.INSTANCE.uniffi_sphinxrs_fn_func_make_media_token(FfiConverterString.lower(`seed`),FfiConverterString.lower(`uniqueTime`),FfiConverterByteArray.lower(`state`),FfiConverterString.lower(`host`),FfiConverterString.lower(`muid`),FfiConverterString.lower(`to`),FfiConverterUInt.lower(`expiry`),_status)
+})
+}
+
+@Throws(SphinxException::class)
+
+fun `makeMediaTokenWithMeta`(`seed`: String, `uniqueTime`: String, `state`: ByteArray, `host`: String, `muid`: String, `to`: String, `expiry`: UInt, `meta`: String): String {
+    return FfiConverterString.lift(
+    rustCallWithError(SphinxException) { _status ->
+    _UniFFILib.INSTANCE.uniffi_sphinxrs_fn_func_make_media_token_with_meta(FfiConverterString.lower(`seed`),FfiConverterString.lower(`uniqueTime`),FfiConverterByteArray.lower(`state`),FfiConverterString.lower(`host`),FfiConverterString.lower(`muid`),FfiConverterString.lower(`to`),FfiConverterUInt.lower(`expiry`),FfiConverterString.lower(`meta`),_status)
+})
+}
+
+@Throws(SphinxException::class)
+
+fun `makeInvoice`(`seed`: String, `uniqueTime`: String, `state`: ByteArray, `amtMsat`: ULong, `preimage`: String, `description`: String): String {
+    return FfiConverterString.lift(
+    rustCallWithError(SphinxException) { _status ->
+    _UniFFILib.INSTANCE.uniffi_sphinxrs_fn_func_make_invoice(FfiConverterString.lower(`seed`),FfiConverterString.lower(`uniqueTime`),FfiConverterByteArray.lower(`state`),FfiConverterULong.lower(`amtMsat`),FfiConverterString.lower(`preimage`),FfiConverterString.lower(`description`),_status)
 })
 }
 
