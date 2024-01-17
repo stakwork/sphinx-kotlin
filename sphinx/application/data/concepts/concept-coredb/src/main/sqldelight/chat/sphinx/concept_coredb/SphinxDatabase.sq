@@ -854,6 +854,11 @@ UPDATE messageDbo
 SET status = :status
 WHERE id = ?;
 
+messageUpdateStatusByUUID:
+UPDATE messageDbo
+SET status = :status
+WHERE uuid = ?;
+
 messageUpdateInvoiceAsPaidByPaymentHash:
 UPDATE messageDbo
 SET status = 1

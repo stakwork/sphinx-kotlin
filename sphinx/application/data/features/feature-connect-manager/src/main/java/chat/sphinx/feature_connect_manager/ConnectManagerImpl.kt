@@ -8,6 +8,7 @@ import chat.sphinx.example.concept_connect_manager.model.OwnerInfo
 import chat.sphinx.wrapper_contact.NewContact
 import chat.sphinx.wrapper_lightning.WalletMnemonic
 import chat.sphinx.wrapper_lightning.toWalletMnemonic
+import chat.sphinx.wrapper_message.MessageType
 import com.ensarsarajcic.kotlinx.serialization.msgpack.MsgPack
 import com.ensarsarajcic.kotlinx.serialization.msgpack.MsgPackDynamicSerializer
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
@@ -388,6 +389,34 @@ class ConnectManagerImpl(
         }
     }
 
+    override fun deleteMessage(
+        sphinxMessage: String,
+        contactPubKey: String
+    ) {
+        coroutineScope.launch {
+
+            val now = getTimestampInMilliseconds()
+
+            try {
+                val message = send(
+                    ownerSeed!!,
+                    now,
+                    contactPubKey,
+                    MessageType.DELETE.toUByte(),
+                    sphinxMessage,
+                    getCurrentUserState(),
+                    ownerInfoStateFlow.value?.alias ?: "",
+                    ownerInfoStateFlow.value?.picture ?: "",
+                    0.toULong()
+                )
+                handleRunReturn(message, mqttClient!!)
+
+            } catch (e: Exception) {
+                Log.e("MQTT_MESSAGES", "send ${e.message}")
+            }
+        }
+    }
+
     override fun generateMediaToken(contactPubKey: String, muid: String, host: String): String? {
         val now = getTimestampInMilliseconds()
 
@@ -487,7 +516,7 @@ class ConnectManagerImpl(
             val index = rr.msgIndex ?: return
 
             notifyListeners {
-                onTextMessageSent(msg, sentTo, type, uuid, index)
+                onMessageSent(msg, sentTo, type, uuid, index)
             }
 
             Log.d("MQTT_MESSAGES", "=> received sentTo $sentTo")
@@ -502,7 +531,7 @@ class ConnectManagerImpl(
             val amount = rr.msgMsat?.toLong()
 
             notifyListeners {
-                onTextMessageReceived(msg, sender, type, uuid, index, amount)
+                onMessageReceived(msg, sender, type, uuid, index, amount)
             }
 
             Log.d("MQTT_MESSAGES", "=> received msg $msg, ${rr.msgUuid}, ${rr.msgIndex}")

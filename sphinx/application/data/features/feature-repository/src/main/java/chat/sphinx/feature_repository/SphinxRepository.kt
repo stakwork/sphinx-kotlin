@@ -329,7 +329,7 @@ abstract class SphinxRepository(
         }
     }
 
-    override fun onTextMessageReceived(
+    override fun onMessageReceived(
         msg: String,
         msgSender: String,
         msgType: Int,
@@ -345,19 +345,26 @@ abstract class SphinxRepository(
             val messageUUID = msgUuid.toMessageUUID() ?: return@launch
             val messageId = MessageId(msgIndex.toLong())
 
-            upsertMqttMessage(
-                message,
-                contactInfo,
-                messageType,
-                messageUUID,
-                messageId,
-                false,
-                amount?.toSat()
-            )
+            when (messageType) {
+                is MessageType.Delete -> {
+
+                }
+                else -> {
+                    upsertMqttMessage(
+                        message,
+                        contactInfo,
+                        messageType,
+                        messageUUID,
+                        messageId,
+                        false,
+                        amount?.toSat()
+                    )
+                }
+            }
         }
     }
 
-    override fun onTextMessageSent(
+    override fun onMessageSent(
         msg: String,
         contactPubKey: String,
         msgType: Int,
@@ -525,7 +532,14 @@ abstract class SphinxRepository(
                 }
             }
         }
+    }
 
+    override suspend fun deleteMqttMessage(messageUuid: MessageUUID) {
+        val queries = coreDB.getSphinxDatabaseQueries()
+
+        messageLock.withLock {
+            queries.messageUpdateStatusByUUID(MessageStatus.Deleted, messageUuid)
+        }
     }
 
     fun sendNewMessage(
@@ -3642,11 +3656,10 @@ abstract class SphinxRepository(
         }
     }
 
-    override suspend fun deleteMessage(message: Message): Response<Any, ResponseError> {
-        var response: Response<Any, ResponseError> = Response.Success(true)
-
-        applicationScope.launch(mainImmediate) {
+    override suspend fun deleteMessage(message: Message) {
+//        var response: Response<Any, ResponseError> = Response.Success(true)
             val queries = coreDB.getSphinxDatabaseQueries()
+            val contact = getContactById(ContactId(message.chatId.value)).firstOrNull()
 
             if (message.id.isProvisionalMessage) {
                 messageLock.withLock {
@@ -3657,31 +3670,53 @@ abstract class SphinxRepository(
                     }
                 }
             } else {
-                networkQueryMessage.deleteMessage(message.id).collect { loadResponse ->
-                    @Exhaustive
-                    when (loadResponse) {
-                        is LoadResponse.Loading -> {
-                        }
-                        is Response.Error -> {
-                            response = Response.Error(
-                                ResponseError(loadResponse.message, loadResponse.exception)
-                            )
-                        }
-                        is Response.Success -> {
-                            messageLock.withLock {
-                                withContext(io) {
-                                    queries.transaction {
-                                        upsertMessage(loadResponse.value, queries)
-                                    }
-                                }
-                            }
-                        }
+
+                messageLock.withLock {
+                    withContext(io) {
+                        queries.messageUpdateStatus(MessageStatus.Deleted, message.id)
                     }
                 }
-            }
-        }.join()
 
-        return response
+                val newMessage = chat.sphinx.example.wrapper_mqtt.Message(
+                    "",
+                    null,
+                    null,
+                    null,
+                    null,
+                    message.uuid?.value,
+                    null
+                ).toJson(moshi)
+
+                contact?.nodePubKey?.value?.let { contactPubkey ->
+                    connectManager.deleteMessage(
+                        newMessage,
+                        contactPubkey
+                    )
+                }
+
+//                networkQueryMessage.deleteMessage(message.id).collect { loadResponse ->
+//                    @Exhaustive
+//                    when (loadResponse) {
+//                        is LoadResponse.Loading -> {
+//                        }
+//                        is Response.Error -> {
+//                            response = Response.Error(
+//                                ResponseError(loadResponse.message, loadResponse.exception)
+//                            )
+//                        }
+//                        is Response.Success -> {
+//                            messageLock.withLock {
+//                                withContext(io) {
+//                                    queries.transaction {
+//                                        upsertMessage(loadResponse.value, queries)
+//                                    }
+//                                }
+//                            }
+//                        }
+//                    }
+//                }
+            }
+//        return response
     }
 
     override suspend fun sendPayment(

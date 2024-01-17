@@ -23,6 +23,12 @@ abstract class ConnectManager {
         messageType: Int,
         amount: Long?
     )
+
+    abstract fun deleteMessage(
+        sphinxMessage: String,
+        contactPubKey: String,
+    )
+
     abstract fun generateMediaToken(
         contactPubKey: String,
         muid: String,
@@ -41,7 +47,7 @@ interface ConnectManagerListener {
     fun onMnemonicWords(words: String)
     fun onOwnerRegistered(okKey: String, routeHint: String)
     fun onNewContactRegistered(msgSender: String)
-    fun onTextMessageReceived(
+    fun onMessageReceived(
         msg: String,
         msgSender: String,
         msgType: Int,
@@ -50,7 +56,7 @@ interface ConnectManagerListener {
         amount: Long?
     )
 
-    fun onTextMessageSent(
+    fun onMessageSent(
         msg: String,
         contactPubKey: String,
         msgType: Int,
