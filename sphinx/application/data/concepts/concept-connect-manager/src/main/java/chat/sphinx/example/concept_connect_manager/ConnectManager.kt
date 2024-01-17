@@ -47,6 +47,7 @@ interface ConnectManagerListener {
         msgType: Int,
         msgUuid: String,
         msgIndex: String,
+        amount: Long?
     )
 
     fun onTextMessageSent(

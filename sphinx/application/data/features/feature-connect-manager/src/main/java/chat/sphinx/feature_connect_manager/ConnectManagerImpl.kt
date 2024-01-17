@@ -499,9 +499,10 @@ class ConnectManagerImpl(
             val type = rr.msgType?.toInt() ?: return
             val uuid = rr.msgUuid ?: return
             val index = rr.msgIndex ?: return
+            val amount = rr.msgMsat?.toLong()
 
             notifyListeners {
-                onTextMessageReceived(msg, sender, type, uuid, index)
+                onTextMessageReceived(msg, sender, type, uuid, index, amount)
             }
 
             Log.d("MQTT_MESSAGES", "=> received msg $msg, ${rr.msgUuid}, ${rr.msgIndex}")

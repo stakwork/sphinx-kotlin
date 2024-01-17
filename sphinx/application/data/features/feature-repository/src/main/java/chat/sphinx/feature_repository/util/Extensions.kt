@@ -77,6 +77,12 @@ inline val MessageDto.updateChatDboLatestMessage: Boolean
             status != MessageStatus.DELETED
 
 
+inline val Message.updateChatNewLatestMessage: Boolean
+    get() = type.show                          &&
+            type != MessageType.BotRes         &&
+            status != MessageStatus.Deleted
+
+
 @Suppress("NOTHING_TO_INLINE")
 inline fun TransactionCallbacks.updateServerDbo(
     lsp: LightningServiceProvider,
@@ -113,6 +119,32 @@ inline fun TransactionCallbacks.updateChatDboLatestMessage(
 }
 
 @Suppress("NOTHING_TO_INLINE")
+inline fun TransactionCallbacks.updateChatNewLatestMessage(
+    message: Message,
+    chatId: ChatId,
+    latestMessageUpdatedTimeMap: MutableMap<ChatId, DateTime>,
+    queries: SphinxDatabaseQueries,
+) {
+    val dateTime = message.date
+
+    if (
+        message.updateChatNewLatestMessage &&
+        (latestMessageUpdatedTimeMap[chatId]?.time ?: 0L) <= dateTime.time
+    ){
+        queries.chatUpdateLatestMessage(
+            message.id,
+            chatId,
+        )
+        queries.dashboardUpdateLatestMessage(
+            dateTime,
+            message.id,
+            chatId,
+        )
+        latestMessageUpdatedTimeMap[chatId] = dateTime
+    }
+}
+
+@Suppress("NOTHING_TO_INLINE")
 inline fun TransactionCallbacks.updateChatDboLatestMessage(
     messageDto: MessageDto,
     chatId: ChatId,
@@ -121,6 +153,18 @@ inline fun TransactionCallbacks.updateChatDboLatestMessage(
 ) {
     latestMessageUpdatedTimeMap.withLock { map ->
         updateChatDboLatestMessage(messageDto, chatId, map, queries)
+    }
+}
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun TransactionCallbacks.updateChatNewLatestMessage(
+    message: Message,
+    chatId: ChatId,
+    latestMessageUpdatedTimeMap: SynchronizedMap<ChatId, DateTime>,
+    queries: SphinxDatabaseQueries,
+) {
+    latestMessageUpdatedTimeMap.withLock { map ->
+        updateChatNewLatestMessage(message, chatId, map, queries)
     }
 }
 

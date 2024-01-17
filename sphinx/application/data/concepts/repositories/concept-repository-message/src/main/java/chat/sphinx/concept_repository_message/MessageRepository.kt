@@ -108,6 +108,7 @@ interface MessageRepository {
         msgType: MessageType,
         msgUuid: MessageUUID,
         msgIndex: MessageId,
-        isSent: Boolean
+        isSent: Boolean,
+        amount: Sat?
     )
 }
