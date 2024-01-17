@@ -337,11 +337,11 @@ class ConnectManagerImpl(
                 )
                 handleRunReturn(setUp, client)
 
-               val fetchMessages =  fetchMsgs(
+               val fetchMessages = fetchMsgs(
                     ownerSeed!!,
                     getTimestampInMilliseconds(),
                     getCurrentUserState(),
-                    0.toULong(),
+                    ownerInfoStateFlow.value?.messageLastIndex?.toULong() ?: 0.toULong(),
                     100.toUInt()
                 )
 
@@ -755,7 +755,7 @@ class ConnectManagerImpl(
                 initializeMqttAndSubscribe(
                     mixer!!,
                     walletMnemonic!!,
-                    ownerInfoStateFlow.value!!
+                    ownerInfoStateFlow.value!!,
                 )
                 Log.d("MQTT_MESSAGES",  "onReconnectMqtt" )
             }

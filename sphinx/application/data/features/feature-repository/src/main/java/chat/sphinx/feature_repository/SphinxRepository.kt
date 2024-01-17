@@ -270,13 +270,16 @@ abstract class SphinxRepository(
 
     override fun connectAndSubscribeToMqtt(userState: String?) {
         applicationScope.launch(mainImmediate) {
+            val queries = coreDB.getSphinxDatabaseQueries()
             val mnemonic = walletDataHandler.retrieveWalletMnemonic()
             val okKey = accountOwner.value?.nodePubKey?.value
+            val lastMessageIndex = queries.messageGetMaxId().executeAsOneOrNull()?.MAX
 
             val ownerInfo = OwnerInfo(
                 accountOwner.value?.alias?.value ?: "",
                 accountOwner.value?.photoUrl?.value ?: "",
-                userState
+                userState,
+                lastMessageIndex
             )
 
             if (mnemonic != null && okKey != null) {
