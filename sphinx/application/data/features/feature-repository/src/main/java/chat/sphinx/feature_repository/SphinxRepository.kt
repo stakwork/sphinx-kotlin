@@ -3939,9 +3939,9 @@ abstract class SphinxRepository(
             }
             val provisionalId = MessageId((currentProvisionalId?.value ?: 0L) - 1)
 
-            val amount = pricePerMessage.value + escrowAmount.value + (owner.tipAmount ?: Sat(
-                20L
-            )).value
+//            val amount = pricePerMessage.value + escrowAmount.value + (owner.tipAmount ?: Sat(
+//                20L
+//            )).value
 
             val newBoost = NewMessage(
                 id = provisionalId,
@@ -3950,7 +3950,7 @@ abstract class SphinxRepository(
                 type = MessageType.Boost,
                 sender = owner.id,
                 receiver = null,
-                amount = Sat(amount),
+                amount = owner.tipAmount ?: Sat(20L),
                 date = DateTime.nowUTC().toDateTime(),
                 expirationDate = null,
                 messageContent = null,
@@ -4017,7 +4017,7 @@ abstract class SphinxRepository(
                     nnContact.nodePubKey?.value ?: "",
                     provisionalId.value,
                     MessageType.BOOST,
-                    amount
+                    owner.tipAmount?.value ?: 20L
                 )
             }
 
