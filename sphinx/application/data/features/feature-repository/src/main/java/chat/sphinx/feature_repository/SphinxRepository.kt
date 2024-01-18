@@ -3050,6 +3050,9 @@ abstract class SphinxRepository(
                 return@launch
             }
 
+            val message = messageText(sendMessage, moshi)
+
+
             // encrypt text
 //            val message: Pair<MessageContentDecrypted, MessageContent>? =
 //                messageText(sendMessage, moshi)?.let { msgText ->
@@ -3192,7 +3195,7 @@ abstract class SphinxRepository(
                                 DateTime.nowUTC().toDateTime(),
                                 null,
                                 null,
-                                sendMessage.text?.toMessageContentDecrypted(),
+                                message?.toMessageContentDecrypted() ?: sendMessage.text?.toMessageContentDecrypted(),
                                 null,
                                 false.toFlagged()
                             )
@@ -3296,7 +3299,7 @@ abstract class SphinxRepository(
 
                                 sendNewMessage(
                                     contact,
-                                    sendMessage.text ?: "",
+                                    message ?: sendMessage.text ?: "",
                                     media,
                                     mediaTokenValue?.toMediaToken(),
                                     mediaKey,
@@ -3308,14 +3311,13 @@ abstract class SphinxRepository(
                                 )
 
                                 LOG.d("MQTT_MESSAGES", "Media Message was sent. mediatoken=$mediaTokenValue mediakey$mediaKey" )
-
                             }
                         }
                     }
                 } else {
                     sendNewMessage(
                         contact,
-                        sendMessage.text ?: "",
+                        message ?: sendMessage.text ?: "",
                         null,
                         null,
                         null,
