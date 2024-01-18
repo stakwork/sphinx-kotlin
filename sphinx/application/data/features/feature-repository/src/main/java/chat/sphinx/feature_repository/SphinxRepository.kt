@@ -347,7 +347,7 @@ abstract class SphinxRepository(
 
             when (messageType) {
                 is MessageType.Delete -> {
-
+                    message.replyUuid?.toMessageUUID()?.let { deleteMqttMessage(it) }
                 }
                 else -> {
                     upsertMqttMessage(
