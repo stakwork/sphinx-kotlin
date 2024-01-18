@@ -529,8 +529,17 @@ abstract class SphinxRepository(
             messageLock.withLock {
                 queries.transaction {
                     upsertNewMessage(newMessage, queries, null)
+
+                    updateChatNewLatestMessage(
+                        newMessage,
+                        ChatId(contact.id.value),
+                        latestMessageUpdatedTimeMap,
+                        queries
+                    )
+
                 }
             }
+
         }
     }
 
