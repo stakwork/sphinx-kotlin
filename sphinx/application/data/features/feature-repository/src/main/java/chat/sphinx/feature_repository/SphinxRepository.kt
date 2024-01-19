@@ -3776,64 +3776,15 @@ abstract class SphinxRepository(
                 return@launch
             }
 
-            var encryptedText: MessageContent? = null
-            var encryptedRemoteText: MessageContent? = null
-
-            sendPayment.text?.let { msgText ->
-                encryptedText = owner
-                    .rsaPublicKey
-                    ?.let { pubKey ->
-                        val encResponse = rsa.encrypt(
-                            pubKey,
-                            UnencryptedString(msgText),
-                            formatOutput = false,
-                            dispatcher = default,
-                        )
-
-                        @Exhaustive
-                        when (encResponse) {
-                            is Response.Error -> {
-                                LOG.e(TAG, encResponse.message, encResponse.exception)
-                                null
-                            }
-                            is Response.Success -> {
-                                MessageContent(encResponse.value.value)
-                            }
-                        }
-                    }
-
-                contact?.let { contact ->
-                    encryptedRemoteText = contact
-                        .public_key
-                        ?.let { pubKey ->
-                            val encResponse = rsa.encrypt(
-                                pubKey,
-                                UnencryptedString(msgText),
-                                formatOutput = false,
-                                dispatcher = default,
-                            )
-
-                            @Exhaustive
-                            when (encResponse) {
-                                is Response.Error -> {
-                                    LOG.e(TAG, encResponse.message, encResponse.exception)
-                                    null
-                                }
-                                is Response.Success -> {
-                                    MessageContent(encResponse.value.value)
-                                }
-                            }
-                        }
-                }
-            }
+            val text = sendPayment.text
 
             val postPaymentDto: PostPaymentDto = try {
                 PostPaymentDto(
                     chat_id = sendPayment.chatId?.value,
                     contact_id = sendPayment.contactId?.value,
                     amount = sendPayment.amount,
-                    text = encryptedText?.value,
-                    remote_text = encryptedRemoteText?.value,
+                    text = text,
+                    remote_text = null,
                     destination_key = sendPayment.destinationKey?.value,
                     route_hint = sendPayment.routeHint?.value,
                     muid = sendPayment.paymentTemplate?.muid,
@@ -3847,69 +3798,155 @@ abstract class SphinxRepository(
                 return@launch
             }
 
-            if (postPaymentDto.isKeySendPayment) {
-                networkQueryMessage.sendKeySendPayment(
-                    postPaymentDto,
-                ).collect { loadResponse ->
-                    @Exhaustive
-                    when (loadResponse) {
-                        is LoadResponse.Loading -> {
-                        }
-                        is Response.Error -> {
-                            LOG.e(TAG, loadResponse.message, loadResponse.exception)
-                            response = loadResponse
-                        }
-                        is Response.Success -> {
-                            response = loadResponse
+            val currentProvisionalId: MessageId? = withContext(io) {
+                queries.messageGetLowestProvisionalMessageId().executeAsOneOrNull()
+            }
+            val provisionalId = MessageId((currentProvisionalId?.value ?: 0L) - 1)
+
+            val newPayment = NewMessage(
+                id = provisionalId,
+                uuid = null,
+                chatId = sendPayment.chatId ?: ChatId(ChatId.NULL_CHAT_ID.toLong()),
+                type = MessageType.Boost,
+                sender = owner.id,
+                receiver = null,
+                amount = Sat(sendPayment.amount),
+                date = DateTime.nowUTC().toDateTime(),
+                expirationDate = null,
+                messageContent = null,
+                status = MessageStatus.Confirmed,
+                seen = Seen.True,
+                senderAlias = null,
+                senderPic = null,
+                originalMUID = sendPayment.paymentTemplate?.muid?.toMessageMUID(),
+                replyUUID = sendPayment.paymentTemplate?.muid?.let { ReplyUUID(it) },
+                flagged = false.toFlagged(),
+                recipientAlias = null,
+                recipientPic = null,
+                person = null,
+                threadUUID = null,
+                errorMessage = null,
+                isPinned = false,
+                messageContentDecrypted = text?.toMessageContentDecrypted(),
+                messageDecryptionError = false,
+                messageDecryptionException = null,
+                messageMedia = null,
+                feedBoost = null,
+                callLinkMessage = null,
+                podcastClip = null,
+                giphyData = null,
+                reactions = null,
+                purchaseItems = null,
+                replyMessage = null,
+                thread = null
+            )
+
+            val newPaymentMessage = chat.sphinx.example.wrapper_mqtt.Message(
+                text,
+                null,
+                sendPayment.paymentTemplate?.token,
+                null,
+                null,
+                null,
+                null
+            ).toJson(moshi)
+
+            chatLock.withLock {
+                messageLock.withLock {
+                    withContext(io) {
+
+                        queries.transaction {
+                            upsertNewMessage(newPayment, queries, null)
                         }
                     }
-                }
-            } else {
-                networkQueryMessage.sendPayment(
-                    postPaymentDto,
-                ).collect { loadResponse ->
-                    @Exhaustive
-                    when (loadResponse) {
-                        is LoadResponse.Loading -> {
-                        }
-                        is Response.Error -> {
-                            LOG.e(TAG, loadResponse.message, loadResponse.exception)
-                            response = loadResponse
-                        }
-                        is Response.Success -> {
-                            val message = loadResponse.value
 
-                            decryptMessageDtoContentIfAvailable(
-                                message,
-                                coroutineScope { this },
+                    queries.transaction {
+                        sendPayment.chatId?.let { chatId ->
+                            updateChatNewLatestMessage(
+                                newPayment,
+                                chatId,
+                                latestMessageUpdatedTimeMap,
+                                queries
                             )
-
-                            chatLock.withLock {
-                                messageLock.withLock {
-                                    withContext(io) {
-
-                                        queries.transaction {
-                                            upsertMessage(message, queries)
-
-                                            if (message.updateChatDboLatestMessage) {
-                                                message.chat_id?.toChatId()?.let { chatId ->
-                                                    updateChatDboLatestMessage(
-                                                        message,
-                                                        chatId,
-                                                        latestMessageUpdatedTimeMap,
-                                                        queries
-                                                    )
-                                                }
-                                            }
-                                        }
-
-                                    }
-                                }
-                            }
                         }
                     }
                 }
             }
+
+            contact?.let { nnContact ->
+                connectManager.sendMessage(
+                    newPaymentMessage,
+                    contact.node_pub_key?.value ?: "",
+                    provisionalId.value,
+                    MessageType.DIRECT_PAYMENT,
+                    sendPayment.amount
+                )
+            }
+
+
+//            if (postPaymentDto.isKeySendPayment) {
+//                networkQueryMessage.sendKeySendPayment(
+//                    postPaymentDto,
+//                ).collect { loadResponse ->
+//                    @Exhaustive
+//                    when (loadResponse) {
+//                        is LoadResponse.Loading -> {
+//                        }
+//                        is Response.Error -> {
+//                            LOG.e(TAG, loadResponse.message, loadResponse.exception)
+//                            response = loadResponse
+//                        }
+//                        is Response.Success -> {
+//                            response = loadResponse
+//                        }
+//                    }
+//                }
+//            } else {
+//                networkQueryMessage.sendPayment(
+//                    postPaymentDto,
+//                ).collect { loadResponse ->
+//                    @Exhaustive
+//                    when (loadResponse) {
+//                        is LoadResponse.Loading -> {
+//                        }
+//                        is Response.Error -> {
+//                            LOG.e(TAG, loadResponse.message, loadResponse.exception)
+//                            response = loadResponse
+//                        }
+//                        is Response.Success -> {
+//                            val message = loadResponse.value
+//
+//                            decryptMessageDtoContentIfAvailable(
+//                                message,
+//                                coroutineScope { this },
+//                            )
+//
+//                            chatLock.withLock {
+//                                messageLock.withLock {
+//                                    withContext(io) {
+//
+//                                        queries.transaction {
+//                                            upsertMessage(message, queries)
+//
+//                                            if (message.updateChatDboLatestMessage) {
+//                                                message.chat_id?.toChatId()?.let { chatId ->
+//                                                    updateChatDboLatestMessage(
+//                                                        message,
+//                                                        chatId,
+//                                                        latestMessageUpdatedTimeMap,
+//                                                        queries
+//                                                    )
+//                                                }
+//                                            }
+//                                        }
+//
+//                                    }
+//                                }
+//                            }
+//                        }
+//                    }
+//                }
+//            }
 
         }.join()
 
@@ -3985,10 +4022,6 @@ abstract class SphinxRepository(
             }
             val provisionalId = MessageId((currentProvisionalId?.value ?: 0L) - 1)
 
-//            val amount = pricePerMessage.value + escrowAmount.value + (owner.tipAmount ?: Sat(
-//                20L
-//            )).value
-
             val newBoost = NewMessage(
                 id = provisionalId,
                 uuid = null,
@@ -4000,7 +4033,7 @@ abstract class SphinxRepository(
                 date = DateTime.nowUTC().toDateTime(),
                 expirationDate = null,
                 messageContent = null,
-                status = MessageStatus.Received,
+                status = MessageStatus.Confirmed,
                 seen = Seen.True,
                 senderAlias = null,
                 senderPic = null,
