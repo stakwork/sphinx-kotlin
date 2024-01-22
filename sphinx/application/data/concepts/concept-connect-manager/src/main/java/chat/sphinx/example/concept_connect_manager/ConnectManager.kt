@@ -20,12 +20,20 @@ abstract class ConnectManager {
         sphinxMessage: String,
         contactPubKey: String,
         provisionalId: Long,
-        messageType: Int
+        messageType: Int,
+        amount: Long?
     )
+
+    abstract fun deleteMessage(
+        sphinxMessage: String,
+        contactPubKey: String,
+    )
+
     abstract fun generateMediaToken(
         contactPubKey: String,
         muid: String,
-        host: String
+        host: String,
+        metaData: String?
     ): String?
 
     abstract fun setLspIp(ip: String)
@@ -40,15 +48,16 @@ interface ConnectManagerListener {
     fun onMnemonicWords(words: String)
     fun onOwnerRegistered(okKey: String, routeHint: String)
     fun onNewContactRegistered(msgSender: String)
-    fun onTextMessageReceived(
+    fun onMessageReceived(
         msg: String,
         msgSender: String,
         msgType: Int,
         msgUuid: String,
         msgIndex: String,
+        amount: Long?
     )
 
-    fun onTextMessageSent(
+    fun onMessageSent(
         msg: String,
         contactPubKey: String,
         msgType: Int,
@@ -61,6 +70,8 @@ interface ConnectManagerListener {
     fun onUpdateUserState(userState: String)
 
     fun onSignedChallenge(sign: String)
+
+    fun onNewBalance(balance: Long)
 
 }
 

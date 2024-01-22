@@ -94,7 +94,7 @@ internal class PaymentTemplateAdapter(
                     imageViewTemplate.visible
 
                     paymentTemplates.getOrNull(position - 2)?.let { paymentTemplate ->
-                        paymentTemplate.getTemplateUrl(MediaHost.DEFAULT.value)?.let { url ->
+                        paymentTemplate.getTemplateUrl(MediaHost.DEFAULT.value).let { url ->
 
                             val token = AuthenticationToken(paymentTemplate.token)
 

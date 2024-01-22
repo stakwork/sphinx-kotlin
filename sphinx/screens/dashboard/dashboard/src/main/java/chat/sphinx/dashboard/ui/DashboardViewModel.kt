@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.net.Uri
-import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import app.cash.exhaustive.Exhaustive
@@ -1107,14 +1106,14 @@ internal class DashboardViewModel @Inject constructor(
 
         jobNetworkRefresh = viewModelScope.launch(mainImmediate) {
             repositoryDashboard.networkRefreshBalance.collect { response ->
-                @Exhaustive
-                when (response) {
-                    is LoadResponse.Loading,
-                    is Response.Error -> {
-                        _networkStateFlow.value = Pair(response, screenStart)
-                    }
-                    is Response.Success -> {}
-                }
+//                @Exhaustive
+//                when (response) {
+//                    is LoadResponse.Loading,
+//                    is Response.Error -> {
+//                        _networkStateFlow.value = Pair(response, screenStart)
+//                    }
+//                    is Response.Success -> {}
+//                }
             }
 
             if (_networkStateFlow.value.first is Response.Error) {

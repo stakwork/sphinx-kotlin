@@ -1159,20 +1159,24 @@ abstract class ChatViewModel<ARGS : NavArgs>(
      * Remotely and locally Deletes a [Message] through the [MessageRepository]
      */
     open fun deleteMessage(message: Message) {
-        val sideEffect = ChatSideEffect.AlertConfirmDeleteMessage {
-            viewModelScope.launch(mainImmediate) {
-                when (messageRepository.deleteMessage(message)) {
-                    is Response.Error -> {
-                        submitSideEffect(ChatSideEffect.Notify("Failed to delete Message"))
-                    }
-                    is Response.Success -> {}
-                }
-            }
+        viewModelScope.launch(mainImmediate) {
+            messageRepository.deleteMessage(message)
         }
 
-        viewModelScope.launch(mainImmediate) {
-            submitSideEffect(sideEffect)
-        }
+//        val sideEffect = ChatSideEffect.AlertConfirmDeleteMessage {
+//            viewModelScope.launch(mainImmediate) {
+//                when (messageRepository.deleteMessage(message)) {
+//                    is Response.Error -> {
+//                        submitSideEffect(ChatSideEffect.Notify("Failed to delete Message"))
+//                    }
+//                    is Response.Success -> {}
+//                }
+//            }
+//        }
+
+//        viewModelScope.launch(mainImmediate) {
+//            submitSideEffect(sideEffect)
+//        }
     }
 
     private var toggleChatMutedJob: Job? = null

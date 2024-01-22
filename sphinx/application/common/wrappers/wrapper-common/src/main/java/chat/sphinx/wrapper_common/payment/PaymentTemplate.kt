@@ -12,7 +12,7 @@ class PaymentTemplate(
     }
 
     fun getDimensions(): String {
-        return "${width}x${height}"
+        return "{\"dim\":\"${width}x${height}\"}"
     }
 
     fun getMediaType(): String {

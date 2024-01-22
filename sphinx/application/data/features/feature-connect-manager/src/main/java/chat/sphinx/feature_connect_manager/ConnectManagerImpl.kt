@@ -8,6 +8,7 @@ import chat.sphinx.example.concept_connect_manager.model.OwnerInfo
 import chat.sphinx.wrapper_contact.NewContact
 import chat.sphinx.wrapper_lightning.WalletMnemonic
 import chat.sphinx.wrapper_lightning.toWalletMnemonic
+import chat.sphinx.wrapper_message.MessageType
 import com.ensarsarajcic.kotlinx.serialization.msgpack.MsgPack
 import com.ensarsarajcic.kotlinx.serialization.msgpack.MsgPackDynamicSerializer
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
@@ -37,6 +38,7 @@ import uniffi.sphinxrs.getSubscriptionTopic
 import uniffi.sphinxrs.handle
 import uniffi.sphinxrs.initialSetup
 import uniffi.sphinxrs.makeMediaToken
+import uniffi.sphinxrs.makeMediaTokenWithMeta
 import uniffi.sphinxrs.mnemonicFromEntropy
 import uniffi.sphinxrs.mnemonicToSeed
 import uniffi.sphinxrs.rootSignMs
@@ -337,11 +339,11 @@ class ConnectManagerImpl(
                 )
                 handleRunReturn(setUp, client)
 
-               val fetchMessages =  fetchMsgs(
+               val fetchMessages = fetchMsgs(
                     ownerSeed!!,
                     getTimestampInMilliseconds(),
                     getCurrentUserState(),
-                    0.toULong(),
+                    ownerInfoStateFlow.value?.messageLastIndex?.toULong() ?: 0.toULong(),
                     100.toUInt()
                 )
 
@@ -356,7 +358,8 @@ class ConnectManagerImpl(
         sphinxMessage: String,
         contactPubKey: String,
         provisionalId: Long,
-        messageType: Int
+        messageType: Int,
+        amount: Long?
     ) {
         coroutineScope.launch {
 
@@ -372,7 +375,7 @@ class ConnectManagerImpl(
                     getCurrentUserState(),
                     ownerInfoStateFlow.value?.alias ?: "",
                     ownerInfoStateFlow.value?.picture ?: "",
-                    0.toULong()
+                    amount?.toULong() ?: 0.toULong()
                 )
                 handleRunReturn(message, mqttClient!!)
 
@@ -387,7 +390,40 @@ class ConnectManagerImpl(
         }
     }
 
-    override fun generateMediaToken(contactPubKey: String, muid: String, host: String): String? {
+    override fun deleteMessage(
+        sphinxMessage: String,
+        contactPubKey: String
+    ) {
+        coroutineScope.launch {
+
+            val now = getTimestampInMilliseconds()
+
+            try {
+                val message = send(
+                    ownerSeed!!,
+                    now,
+                    contactPubKey,
+                    MessageType.DELETE.toUByte(),
+                    sphinxMessage,
+                    getCurrentUserState(),
+                    ownerInfoStateFlow.value?.alias ?: "",
+                    ownerInfoStateFlow.value?.picture ?: "",
+                    0.toULong()
+                )
+                handleRunReturn(message, mqttClient!!)
+
+            } catch (e: Exception) {
+                Log.e("MQTT_MESSAGES", "send ${e.message}")
+            }
+        }
+    }
+
+    override fun generateMediaToken(
+        contactPubKey: String,
+        muid: String,
+        host: String,
+        metaData: String?
+    ): String? {
         val now = getTimestampInMilliseconds()
 
         val calendar = Calendar.getInstance()
@@ -401,17 +437,29 @@ class ConnectManagerImpl(
         }
 
         return try {
-            val mediaToken = makeMediaToken(
-                ownerSeed!!,
-                now,
-                getCurrentUserState(),
-                host,
-                muid,
-                contactPubKey,
-                yearFromNow!!
-            )
-            mediaToken
-        } catch (e: Exception){
+            if (metaData != null) {
+                makeMediaTokenWithMeta(
+                    ownerSeed!!,
+                    now,
+                    getCurrentUserState(),
+                    host,
+                    muid,
+                    contactPubKey,
+                    yearFromNow!!,
+                    metaData
+                )
+            } else {
+                makeMediaToken(
+                    ownerSeed!!,
+                    now,
+                    getCurrentUserState(),
+                    host,
+                    muid,
+                    contactPubKey,
+                    yearFromNow!!
+                )
+            }
+        } catch (e: Exception) {
             Log.d("MQTT_MESSAGES", "Error to generate media token $e")
             null
         }
@@ -472,7 +520,10 @@ class ConnectManagerImpl(
         // Set your balance
         rr.newBalance?.let { newBalance ->
             Log.d("MQTT_MESSAGES", "===> BALANCE ${newBalance.toLong()}")
-            // BALANCE = newBalance.toLong()
+
+            notifyListeners {
+                onNewBalance(newBalance.toLong())
+            }
         }
 
         // Sent message info
@@ -483,7 +534,7 @@ class ConnectManagerImpl(
             val index = rr.msgIndex ?: return
 
             notifyListeners {
-                onTextMessageSent(msg, sentTo, type, uuid, index)
+                onMessageSent(msg, sentTo, type, uuid, index)
             }
 
             Log.d("MQTT_MESSAGES", "=> received sentTo $sentTo")
@@ -495,9 +546,10 @@ class ConnectManagerImpl(
             val type = rr.msgType?.toInt() ?: return
             val uuid = rr.msgUuid ?: return
             val index = rr.msgIndex ?: return
+            val amount = rr.msgMsat?.toLong()
 
             notifyListeners {
-                onTextMessageReceived(msg, sender, type, uuid, index)
+                onMessageReceived(msg, sender, type, uuid, index, amount)
             }
 
             Log.d("MQTT_MESSAGES", "=> received msg $msg, ${rr.msgUuid}, ${rr.msgIndex}")
@@ -527,6 +579,10 @@ class ConnectManagerImpl(
                     onOwnerRegistered(okKey, routeHint)
                 }
             }
+        }
+
+        rr.msgMsat?.let { mSat ->
+            Log.d("MQTT_MESSAGES", "=> msg_msat $mSat")
         }
 
         // Sent
@@ -746,7 +802,7 @@ class ConnectManagerImpl(
                 initializeMqttAndSubscribe(
                     mixer!!,
                     walletMnemonic!!,
-                    ownerInfoStateFlow.value!!
+                    ownerInfoStateFlow.value!!,
                 )
                 Log.d("MQTT_MESSAGES",  "onReconnectMqtt" )
             }

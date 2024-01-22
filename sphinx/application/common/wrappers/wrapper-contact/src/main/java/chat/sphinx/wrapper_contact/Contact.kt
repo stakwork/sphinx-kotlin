@@ -80,10 +80,5 @@ data class Contact(
     val tipAmount: Sat?,
     val inviteId: InviteId?,
     val inviteStatus: InviteStatus?,
-    val blocked: Blocked,
-    val scid: ShortChannelId?,
-    val contactIndex: ContactIndex?,
-    val contactRouteHint: LightningRouteHint?,
-    val childPubKey: LightningNodePubKey?,
-    val contactKey: LightningNodePubKey?
+    val blocked: Blocked
 )

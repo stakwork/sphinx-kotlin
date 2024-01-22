@@ -68,7 +68,7 @@ interface MessageRepository {
         boost: FeedBoost
     )
 
-    suspend fun deleteMessage(message: Message) : Response<Any, ResponseError>
+    suspend fun deleteMessage(message: Message)
 
     suspend fun getPaymentTemplates() : Response<List<PaymentTemplate>, ResponseError>
 
@@ -108,6 +108,9 @@ interface MessageRepository {
         msgType: MessageType,
         msgUuid: MessageUUID,
         msgIndex: MessageId,
-        isSent: Boolean
+        isSent: Boolean,
+        amount: Sat?
     )
+
+    suspend fun deleteMqttMessage(messageUuid: MessageUUID)
 }

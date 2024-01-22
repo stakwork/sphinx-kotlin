@@ -13,7 +13,6 @@ import chat.sphinx.wrapper_chat.*
 import chat.sphinx.wrapper_common.*
 import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.contact.toBlocked
-import chat.sphinx.wrapper_common.contact.toContactIndex
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.dashboard.InviteId
@@ -51,16 +50,37 @@ inline fun BalanceDto.toNodeBalanceOrNull(): NodeBalance? =
 @Suppress("NOTHING_TO_INLINE")
 inline fun BalanceDto.toNodeBalance(): NodeBalance =
     NodeBalance(
-        Sat(reserve),
-        Sat(full_balance),
         Sat(balance),
-        Sat(pending_open_balance),
     )
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun String.toNodeBalance(): NodeBalance? {
+    return try {
+        NodeBalance(Sat(this.toLong()))
+    } catch (e: NumberFormatException) {
+        null
+    }
+}
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun Long.toNodeBalance(): NodeBalance? {
+    return try {
+        NodeBalance(Sat(this.toLong()))
+    } catch (e: NumberFormatException) {
+        null
+    }
+}
 
 inline val MessageDto.updateChatDboLatestMessage: Boolean
     get() = type.toMessageType().show           &&
             type != MessageType.BOT_RES         &&
             status != MessageStatus.DELETED
+
+
+inline val Message.updateChatNewLatestMessage: Boolean
+    get() = type.show                          &&
+            type != MessageType.BotRes         &&
+            status != MessageStatus.Deleted
 
 
 @Suppress("NOTHING_TO_INLINE")
@@ -99,6 +119,32 @@ inline fun TransactionCallbacks.updateChatDboLatestMessage(
 }
 
 @Suppress("NOTHING_TO_INLINE")
+inline fun TransactionCallbacks.updateChatNewLatestMessage(
+    message: Message,
+    chatId: ChatId,
+    latestMessageUpdatedTimeMap: MutableMap<ChatId, DateTime>,
+    queries: SphinxDatabaseQueries,
+) {
+    val dateTime = message.date
+
+    if (
+        message.updateChatNewLatestMessage &&
+        (latestMessageUpdatedTimeMap[chatId]?.time ?: 0L) <= dateTime.time
+    ){
+        queries.chatUpdateLatestMessage(
+            message.id,
+            chatId,
+        )
+        queries.dashboardUpdateLatestMessage(
+            dateTime,
+            message.id,
+            chatId,
+        )
+        latestMessageUpdatedTimeMap[chatId] = dateTime
+    }
+}
+
+@Suppress("NOTHING_TO_INLINE")
 inline fun TransactionCallbacks.updateChatDboLatestMessage(
     messageDto: MessageDto,
     chatId: ChatId,
@@ -107,6 +153,18 @@ inline fun TransactionCallbacks.updateChatDboLatestMessage(
 ) {
     latestMessageUpdatedTimeMap.withLock { map ->
         updateChatDboLatestMessage(messageDto, chatId, map, queries)
+    }
+}
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun TransactionCallbacks.updateChatNewLatestMessage(
+    message: Message,
+    chatId: ChatId,
+    latestMessageUpdatedTimeMap: SynchronizedMap<ChatId, DateTime>,
+    queries: SphinxDatabaseQueries,
+) {
+    latestMessageUpdatedTimeMap.withLock { map ->
+        updateChatNewLatestMessage(message, chatId, map, queries)
     }
 }
 
@@ -363,11 +421,6 @@ inline fun TransactionCallbacks.upsertNewContact(contact: Contact, queries: Sphi
     val notificationSound = contact.notificationSound
     val tipAmount = contact.tipAmount
     val blocked = contact.blocked
-    val scid = contact.scid
-    val contactIndex = contact.contactIndex
-    val contactRouteHint = contact.contactRouteHint
-    val childPubKey = contact.childPubKey
-    val contactKey = contact.contactKey
 
     // Perform the upsert operation
     queries.contactUpsert(
@@ -384,11 +437,6 @@ inline fun TransactionCallbacks.upsertNewContact(contact: Contact, queries: Sphi
         notificationSound,
         tipAmount,
         blocked,
-        scid,
-        contactIndex,
-        contactRouteHint,
-        childPubKey,
-        contactKey,
         contact.id,
         contact.isOwner,
         contact.createdAt
@@ -439,11 +487,6 @@ inline fun TransactionCallbacks.upsertContact(dto: ContactDto, queries: SphinxDa
         dto.notification_sound?.toNotificationSound(),
         dto.tip_amount?.toSat(),
         dto.blockedActual.toBlocked(),
-        dto.scid?.toShortChannelId(),
-        dto.contactIndex?.toContactIndex(),
-        dto.contactRouteHint?.toLightningRouteHint(),
-        dto.childPubKey?.toLightningNodePubKey(),
-        dto.contactKey?.toLightningNodePubKey(),
         contactId,
         isOwner,
         createdAt
