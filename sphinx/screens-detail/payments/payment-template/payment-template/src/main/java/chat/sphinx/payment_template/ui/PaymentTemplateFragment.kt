@@ -204,7 +204,7 @@ internal class PaymentTemplateFragment: SideEffectFragment<
                     is SelectedTemplateViewState.SelectedTemplate -> {
                         val template = viewState.template
 
-                        template.getTemplateUrl(MediaHost.DEFAULT.value)?.let { url ->
+                        template.getTemplateUrl(MediaHost.DEFAULT.value).let { url ->
                             val token = AuthenticationToken(template.token)
 
                             lifecycleScope.launch(viewModel.mainImmediate) {

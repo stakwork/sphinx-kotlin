@@ -3778,25 +3778,25 @@ abstract class SphinxRepository(
 
             val text = sendPayment.text
 
-            val postPaymentDto: PostPaymentDto = try {
-                PostPaymentDto(
-                    chat_id = sendPayment.chatId?.value,
-                    contact_id = sendPayment.contactId?.value,
-                    amount = sendPayment.amount,
-                    text = text,
-                    remote_text = null,
-                    destination_key = sendPayment.destinationKey?.value,
-                    route_hint = sendPayment.routeHint?.value,
-                    muid = sendPayment.paymentTemplate?.muid,
-                    dimensions = sendPayment.paymentTemplate?.getDimensions(),
-                    media_type = sendPayment.paymentTemplate?.getMediaType()
-                )
-            } catch (e: IllegalArgumentException) {
-                response = Response.Error(
-                    ResponseError("Failed to create PostPaymentDto")
-                )
-                return@launch
-            }
+//            val postPaymentDto: PostPaymentDto = try {
+//                PostPaymentDto(
+//                    chat_id = sendPayment.chatId?.value,
+//                    contact_id = sendPayment.contactId?.value,
+//                    amount = sendPayment.amount,
+//                    text = text,
+//                    remote_text = null,
+//                    destination_key = sendPayment.destinationKey?.value,
+//                    route_hint = sendPayment.routeHint?.value,
+//                    muid = sendPayment.paymentTemplate?.muid,
+//                    dimensions = sendPayment.paymentTemplate?.getDimensions(),
+//                    media_type = sendPayment.paymentTemplate?.getMediaType()
+//                )
+//            } catch (e: IllegalArgumentException) {
+//                response = Response.Error(
+//                    ResponseError("Failed to create PostPaymentDto")
+//                )
+//                return@launch
+//            }
 
             val currentProvisionalId: MessageId? = withContext(io) {
                 queries.messageGetLowestProvisionalMessageId().executeAsOneOrNull()
@@ -3807,7 +3807,7 @@ abstract class SphinxRepository(
                 id = provisionalId,
                 uuid = null,
                 chatId = sendPayment.chatId ?: ChatId(ChatId.NULL_CHAT_ID.toLong()),
-                type = MessageType.Boost,
+                type = MessageType.DirectPayment,
                 sender = owner.id,
                 receiver = null,
                 amount = Sat(sendPayment.amount),
@@ -3819,7 +3819,7 @@ abstract class SphinxRepository(
                 senderAlias = null,
                 senderPic = null,
                 originalMUID = sendPayment.paymentTemplate?.muid?.toMessageMUID(),
-                replyUUID = sendPayment.paymentTemplate?.muid?.let { ReplyUUID(it) },
+                replyUUID = null,
                 flagged = false.toFlagged(),
                 recipientAlias = null,
                 recipientPic = null,
@@ -3841,15 +3841,39 @@ abstract class SphinxRepository(
                 thread = null
             )
 
+            var mediaTokenValue: String? = null
+
+            sendPayment.paymentTemplate?.let { template ->
+
+                mediaTokenValue = connectManager.generateMediaToken(
+                    contact?.node_pub_key?.value ?: "",
+                    sendPayment.paymentTemplate?.muid ?: "",
+                    MediaHost.DEFAULT.value
+                )
+
+                queries.messageMediaUpsert(
+                    null,
+                    MediaType.IMAGE.toMediaType(),
+                   mediaTokenValue?.toMediaToken() ?: MediaToken.PROVISIONAL_TOKEN,
+                    provisionalId,
+                    ChatId(contact?.id?.value ?: ChatId.NULL_CHAT_ID.toLong()),
+                    null,
+                    null,
+                    null
+                )
+
+            }
+
             val newPaymentMessage = chat.sphinx.example.wrapper_mqtt.Message(
                 text,
                 null,
-                sendPayment.paymentTemplate?.token,
+                mediaTokenValue,
                 null,
-                null,
+                MediaType.IMAGE,
                 null,
                 null
             ).toJson(moshi)
+
 
             chatLock.withLock {
                 messageLock.withLock {
@@ -3862,6 +3886,7 @@ abstract class SphinxRepository(
 
                     queries.transaction {
                         sendPayment.chatId?.let { chatId ->
+
                             updateChatNewLatestMessage(
                                 newPayment,
                                 chatId,
