@@ -3281,7 +3281,8 @@ abstract class SphinxRepository(
                                 val mediaTokenValue = connectManager.generateMediaToken(
                                     contactPubKey,
                                     response.value.muid,
-                                    MediaHost.DEFAULT.value
+                                    MediaHost.DEFAULT.value,
+                                    null
                                 )
 
                                 val mediaKey = MediaKey(password.value.copyOf().joinToString(""))
@@ -3848,7 +3849,8 @@ abstract class SphinxRepository(
                 mediaTokenValue = connectManager.generateMediaToken(
                     contact?.node_pub_key?.value ?: "",
                     sendPayment.paymentTemplate?.muid ?: "",
-                    MediaHost.DEFAULT.value
+                    MediaHost.DEFAULT.value,
+                    sendPayment.paymentTemplate?.getDimensions()
                 )
 
                 queries.messageMediaUpsert(

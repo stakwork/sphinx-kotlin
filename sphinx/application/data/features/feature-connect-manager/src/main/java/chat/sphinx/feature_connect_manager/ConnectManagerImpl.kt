@@ -38,6 +38,7 @@ import uniffi.sphinxrs.getSubscriptionTopic
 import uniffi.sphinxrs.handle
 import uniffi.sphinxrs.initialSetup
 import uniffi.sphinxrs.makeMediaToken
+import uniffi.sphinxrs.makeMediaTokenWithMeta
 import uniffi.sphinxrs.mnemonicFromEntropy
 import uniffi.sphinxrs.mnemonicToSeed
 import uniffi.sphinxrs.rootSignMs
@@ -417,7 +418,12 @@ class ConnectManagerImpl(
         }
     }
 
-    override fun generateMediaToken(contactPubKey: String, muid: String, host: String): String? {
+    override fun generateMediaToken(
+        contactPubKey: String,
+        muid: String,
+        host: String,
+        metaData: String?
+    ): String? {
         val now = getTimestampInMilliseconds()
 
         val calendar = Calendar.getInstance()
@@ -431,17 +437,29 @@ class ConnectManagerImpl(
         }
 
         return try {
-            val mediaToken = makeMediaToken(
-                ownerSeed!!,
-                now,
-                getCurrentUserState(),
-                host,
-                muid,
-                contactPubKey,
-                yearFromNow!!
-            )
-            mediaToken
-        } catch (e: Exception){
+            if (metaData != null) {
+                makeMediaTokenWithMeta(
+                    ownerSeed!!,
+                    now,
+                    getCurrentUserState(),
+                    host,
+                    muid,
+                    contactPubKey,
+                    yearFromNow!!,
+                    metaData
+                )
+            } else {
+                makeMediaToken(
+                    ownerSeed!!,
+                    now,
+                    getCurrentUserState(),
+                    host,
+                    muid,
+                    contactPubKey,
+                    yearFromNow!!
+                )
+            }
+        } catch (e: Exception) {
             Log.d("MQTT_MESSAGES", "Error to generate media token $e")
             null
         }

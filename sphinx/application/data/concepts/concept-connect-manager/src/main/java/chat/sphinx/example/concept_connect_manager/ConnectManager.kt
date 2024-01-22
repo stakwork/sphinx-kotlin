@@ -32,7 +32,8 @@ abstract class ConnectManager {
     abstract fun generateMediaToken(
         contactPubKey: String,
         muid: String,
-        host: String
+        host: String,
+        metaData: String?
     ): String?
 
     abstract fun setLspIp(ip: String)
