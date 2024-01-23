@@ -711,6 +711,11 @@ SELECT *
 FROM messageDbo
 WHERE id = ?;
 
+messageGetByMuid:
+SELECT *
+FROM messageDbo
+WHERE muid = ?;
+
 messageLastMemberRequestGetByContactId:
 SELECT *
 FROM messageDbo
@@ -852,6 +857,11 @@ WHERE id = ?;
 messageUpdateStatus:
 UPDATE messageDbo
 SET status = :status
+WHERE id = ?;
+
+messageUpdateType:
+UPDATE messageDbo
+SET type = :type
 WHERE id = ?;
 
 messageUpdateStatusByUUID:
