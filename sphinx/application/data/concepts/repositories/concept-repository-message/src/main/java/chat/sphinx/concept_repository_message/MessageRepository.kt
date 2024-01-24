@@ -51,11 +51,12 @@ interface MessageRepository {
 
     fun sendMessage(sendMessage: SendMessage?)
 
-    suspend fun payAttachment(message: Message) : Response<Any, ResponseError>
+    suspend fun payAttachment(message: Message)
 
     fun sendMediaKeyOnPaidPurchase(
         msg: Msg,
         contactInfo: MsgSender,
+        paidAmount: Sat
     )
 
     fun updatePaidMessageMediaKey(
