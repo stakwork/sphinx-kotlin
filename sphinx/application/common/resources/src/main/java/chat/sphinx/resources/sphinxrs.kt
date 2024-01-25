@@ -444,6 +444,10 @@ internal interface _UniFFILib : Library {
     ): RustBuffer.ByValue
     fun uniffi_sphinxrs_fn_func_make_invoice(`seed`: RustBuffer.ByValue,`uniqueTime`: RustBuffer.ByValue,`state`: RustBuffer.ByValue,`amtMsat`: Long,`preimage`: RustBuffer.ByValue,`description`: RustBuffer.ByValue,_uniffi_out_err: RustCallStatus, 
     ): RustBuffer.ByValue
+    fun uniffi_sphinxrs_fn_func_create_tribe(`seed`: RustBuffer.ByValue,`uniqueTime`: RustBuffer.ByValue,`state`: RustBuffer.ByValue,`tribeServerPubkey`: RustBuffer.ByValue,`tribeJson`: RustBuffer.ByValue,_uniffi_out_err: RustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_sphinxrs_fn_func_join_tribe(`seed`: RustBuffer.ByValue,`uniqueTime`: RustBuffer.ByValue,`state`: RustBuffer.ByValue,`tribePubkey`: RustBuffer.ByValue,`tribeRouteHint`: RustBuffer.ByValue,`alias`: RustBuffer.ByValue,`amtMsat`: Long,_uniffi_out_err: RustCallStatus, 
+    ): RustBuffer.ByValue
     fun ffi_sphinxrs_rustbuffer_alloc(`size`: Int,_uniffi_out_err: RustCallStatus, 
     ): RustBuffer.ByValue
     fun ffi_sphinxrs_rustbuffer_from_bytes(`bytes`: ForeignBytes.ByValue,_uniffi_out_err: RustCallStatus, 
@@ -531,6 +535,10 @@ internal interface _UniFFILib : Library {
     fun uniffi_sphinxrs_checksum_func_make_media_token_with_meta(
     ): Short
     fun uniffi_sphinxrs_checksum_func_make_invoice(
+    ): Short
+    fun uniffi_sphinxrs_checksum_func_create_tribe(
+    ): Short
+    fun uniffi_sphinxrs_checksum_func_join_tribe(
     ): Short
     fun ffi_sphinxrs_uniffi_contract_version(
     ): Int
@@ -667,6 +675,12 @@ private fun uniffiCheckApiChecksums(lib: _UniFFILib) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_sphinxrs_checksum_func_make_invoice() != 41170.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_sphinxrs_checksum_func_create_tribe() != 28873.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_sphinxrs_checksum_func_join_tribe() != 63841.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
 }
@@ -849,6 +863,7 @@ public object FfiConverterTypeKeys: FfiConverterRustBuffer<Keys> {
 
 
 data class RunReturn (
+    var `newSubscription`: String?, 
     var `topic0`: String?, 
     var `payload0`: ByteArray?, 
     var `topic1`: String?, 
@@ -867,7 +882,8 @@ data class RunReturn (
     var `sentStatus`: String?, 
     var `sentTo`: String?, 
     var `settledStatus`: String?, 
-    var `error`: String?
+    var `error`: String?, 
+    var `newTribe`: String?
 ) {
     
 }
@@ -875,6 +891,7 @@ data class RunReturn (
 public object FfiConverterTypeRunReturn: FfiConverterRustBuffer<RunReturn> {
     override fun read(buf: ByteBuffer): RunReturn {
         return RunReturn(
+            FfiConverterOptionalString.read(buf),
             FfiConverterOptionalString.read(buf),
             FfiConverterOptionalByteArray.read(buf),
             FfiConverterOptionalString.read(buf),
@@ -894,10 +911,12 @@ public object FfiConverterTypeRunReturn: FfiConverterRustBuffer<RunReturn> {
             FfiConverterOptionalString.read(buf),
             FfiConverterOptionalString.read(buf),
             FfiConverterOptionalString.read(buf),
+            FfiConverterOptionalString.read(buf),
         )
     }
 
     override fun allocationSize(value: RunReturn) = (
+            FfiConverterOptionalString.allocationSize(value.`newSubscription`) +
             FfiConverterOptionalString.allocationSize(value.`topic0`) +
             FfiConverterOptionalByteArray.allocationSize(value.`payload0`) +
             FfiConverterOptionalString.allocationSize(value.`topic1`) +
@@ -916,10 +935,12 @@ public object FfiConverterTypeRunReturn: FfiConverterRustBuffer<RunReturn> {
             FfiConverterOptionalString.allocationSize(value.`sentStatus`) +
             FfiConverterOptionalString.allocationSize(value.`sentTo`) +
             FfiConverterOptionalString.allocationSize(value.`settledStatus`) +
-            FfiConverterOptionalString.allocationSize(value.`error`)
+            FfiConverterOptionalString.allocationSize(value.`error`) +
+            FfiConverterOptionalString.allocationSize(value.`newTribe`)
     )
 
     override fun write(value: RunReturn, buf: ByteBuffer) {
+            FfiConverterOptionalString.write(value.`newSubscription`, buf)
             FfiConverterOptionalString.write(value.`topic0`, buf)
             FfiConverterOptionalByteArray.write(value.`payload0`, buf)
             FfiConverterOptionalString.write(value.`topic1`, buf)
@@ -939,6 +960,7 @@ public object FfiConverterTypeRunReturn: FfiConverterRustBuffer<RunReturn> {
             FfiConverterOptionalString.write(value.`sentTo`, buf)
             FfiConverterOptionalString.write(value.`settledStatus`, buf)
             FfiConverterOptionalString.write(value.`error`, buf)
+            FfiConverterOptionalString.write(value.`newTribe`, buf)
     }
 }
 
@@ -2088,6 +2110,24 @@ fun `makeInvoice`(`seed`: String, `uniqueTime`: String, `state`: ByteArray, `amt
     return FfiConverterString.lift(
     rustCallWithError(SphinxException) { _status ->
     _UniFFILib.INSTANCE.uniffi_sphinxrs_fn_func_make_invoice(FfiConverterString.lower(`seed`),FfiConverterString.lower(`uniqueTime`),FfiConverterByteArray.lower(`state`),FfiConverterULong.lower(`amtMsat`),FfiConverterString.lower(`preimage`),FfiConverterString.lower(`description`),_status)
+})
+}
+
+@Throws(SphinxException::class)
+
+fun `createTribe`(`seed`: String, `uniqueTime`: String, `state`: ByteArray, `tribeServerPubkey`: String, `tribeJson`: String): RunReturn {
+    return FfiConverterTypeRunReturn.lift(
+    rustCallWithError(SphinxException) { _status ->
+    _UniFFILib.INSTANCE.uniffi_sphinxrs_fn_func_create_tribe(FfiConverterString.lower(`seed`),FfiConverterString.lower(`uniqueTime`),FfiConverterByteArray.lower(`state`),FfiConverterString.lower(`tribeServerPubkey`),FfiConverterString.lower(`tribeJson`),_status)
+})
+}
+
+@Throws(SphinxException::class)
+
+fun `joinTribe`(`seed`: String, `uniqueTime`: String, `state`: ByteArray, `tribePubkey`: String, `tribeRouteHint`: String, `alias`: String, `amtMsat`: ULong): RunReturn {
+    return FfiConverterTypeRunReturn.lift(
+    rustCallWithError(SphinxException) { _status ->
+    _UniFFILib.INSTANCE.uniffi_sphinxrs_fn_func_join_tribe(FfiConverterString.lower(`seed`),FfiConverterString.lower(`uniqueTime`),FfiConverterByteArray.lower(`state`),FfiConverterString.lower(`tribePubkey`),FfiConverterString.lower(`tribeRouteHint`),FfiConverterString.lower(`alias`),FfiConverterULong.lower(`amtMsat`),_status)
 })
 }
 
