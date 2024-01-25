@@ -223,3 +223,7 @@ class SendMessage private constructor(
         }
     }
 }
+
+fun Long.formatAmount(): String {
+    return """{"amt": $this}"""
+}

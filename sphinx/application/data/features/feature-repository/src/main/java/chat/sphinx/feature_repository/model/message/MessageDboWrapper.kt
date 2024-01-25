@@ -1,6 +1,7 @@
 package chat.sphinx.feature_repository.model.message
 
 import chat.sphinx.conceptcoredb.MessageDbo
+import chat.sphinx.conceptcoredb.MessageMediaDbo
 import chat.sphinx.wrapper_common.DateTime
 import chat.sphinx.wrapper_common.PhotoUrl
 import chat.sphinx.wrapper_common.Seen
@@ -145,3 +146,46 @@ class MessageDboWrapper(
     override val isPinned: Boolean
         get() = _isPinned
 }
+
+fun convertMessageDboToNewMessage(messageDbo: MessageDbo, messageMedia: MessageMediaDbo): NewMessage {
+    return NewMessage(
+        id = messageDbo.id,
+        uuid = messageDbo.uuid,
+        chatId = messageDbo.chat_id,
+        type = messageDbo.type,
+        sender = messageDbo.sender,
+        receiver = messageDbo.receiver_,
+        amount = messageDbo.amount,
+        paymentHash = messageDbo.payment_hash,
+        paymentRequest = messageDbo.payment_request,
+        date = messageDbo.date,
+        expirationDate = messageDbo.expiration_date,
+        messageContent = messageDbo.message_content,
+        status = messageDbo.status,
+        seen = messageDbo.seen,
+        senderAlias = messageDbo.sender_alias,
+        senderPic = messageDbo.sender_pic,
+        originalMUID = messageDbo.original_muid,
+        replyUUID = messageDbo.reply_uuid,
+        flagged = messageDbo.flagged,
+        recipientAlias = messageDbo.recipient_alias,
+        recipientPic = messageDbo.recipient_pic,
+        person = messageDbo.person,
+        threadUUID = messageDbo.thread_uuid,
+        errorMessage = messageDbo.error_message,
+        isPinned = false,
+        messageContentDecrypted = messageDbo.message_content_decrypted,
+        messageDecryptionError = false,
+        messageDecryptionException = null,
+        messageMedia = MessageMediaDboWrapper(messageMedia),
+        feedBoost = null,
+        callLinkMessage = null,
+        podcastClip = null,
+        giphyData = null,
+        reactions = null,
+        purchaseItems = null,
+        replyMessage = null,
+        thread = null
+    )
+}
+

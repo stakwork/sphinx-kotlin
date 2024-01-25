@@ -59,6 +59,7 @@ import chat.sphinx.concept_repository_message.model.AttachmentInfo
 import chat.sphinx.concept_repository_message.model.SendMessage
 import chat.sphinx.concept_repository_message.model.SendPayment
 import chat.sphinx.concept_repository_message.model.SendPaymentRequest
+import chat.sphinx.concept_repository_message.model.formatAmount
 import chat.sphinx.concept_repository_subscription.SubscriptionRepository
 import chat.sphinx.concept_socket_io.SocketIOManager
 import chat.sphinx.concept_socket_io.SphinxSocketIOMessage
@@ -83,6 +84,7 @@ import chat.sphinx.feature_repository.mappers.message.MessageDboPresenterMapper
 import chat.sphinx.feature_repository.mappers.subscription.SubscriptionDboPresenterMapper
 import chat.sphinx.feature_repository.model.message.MessageDboWrapper
 import chat.sphinx.feature_repository.model.message.MessageMediaDboWrapper
+import chat.sphinx.feature_repository.model.message.convertMessageDboToNewMessage
 import chat.sphinx.feature_repository.util.*
 import chat.sphinx.kotlin_response.*
 import chat.sphinx.logger.SphinxLogger
@@ -350,6 +352,16 @@ abstract class SphinxRepository(
                     message.replyUuid?.toMessageUUID()?.let { deleteMqttMessage(it) }
                 }
                 else -> {
+                    if (messageType is MessageType.Purchase.Processing) {
+                        amount?.toSat()?.let { paidAmount ->
+                            sendMediaKeyOnPaidPurchase(
+                                message,
+                                contactInfo,
+                                paidAmount
+                            )
+                        }
+                    }
+
                     upsertMqttMessage(
                         message,
                         contactInfo,
@@ -436,13 +448,11 @@ abstract class SphinxRepository(
                 )
             )
         }
-
-
     }
 
     override suspend fun upsertMqttMessage(
         msg: Msg,
-        msgSender: MsgSender,
+        contactInfo: MsgSender,
         msgType: MessageType,
         msgUuid: MessageUUID,
         msgIndex: MessageId,
@@ -450,7 +460,7 @@ abstract class SphinxRepository(
         amount: Sat?
     ) {
         val queries = coreDB.getSphinxDatabaseQueries()
-        val contact = getContactByPubKey(LightningNodePubKey(msgSender.pubkey)).firstOrNull()
+        val contact = getContactByPubKey(LightningNodePubKey(contactInfo.pubkey)).firstOrNull()
 
         if (contact != null) {
             var messageMedia: MessageMediaDbo? = null
@@ -539,7 +549,6 @@ abstract class SphinxRepository(
 
                 }
             }
-
         }
     }
 
@@ -712,6 +721,106 @@ abstract class SphinxRepository(
                         }
                     }
                 }
+            }
+        }
+    }
+
+    override fun sendMediaKeyOnPaidPurchase(
+        msg: Msg,
+        contactInfo: MsgSender,
+        paidAmount: Sat
+    ) {
+        applicationScope.launch {
+            val queries = coreDB.getSphinxDatabaseQueries()
+            val muid = msg.mediaToken?.toMediaToken()?.getMUIDFromMediaToken()
+
+            muid?.value?.let { nnMuid ->
+                val message = queries.messageGetByMuid(MessageMUID(nnMuid)).executeAsOneOrNull()
+                val mediaMessage = message?.id?.let { queries.messageMediaGetById(it) }?.executeAsOneOrNull()
+
+                val contact: Contact? = message?.chat_id?.let { chatId ->
+                    getContactById(ContactId(chatId.value)).firstOrNull()
+                }
+
+                val messageType = if (message?.amount?.value == paidAmount.value) {
+                    MessageType.Purchase.Accepted
+                } else {
+                    MessageType.Purchase.Denied
+                }
+
+                if (message != null && contact != null && mediaMessage != null) {
+
+                    val currentProvisionalId: MessageId? = withContext(io) {
+                        queries.messageGetLowestProvisionalMessageId().executeAsOneOrNull()
+                    }
+                    val provisionalId = MessageId((currentProvisionalId?.value ?: 0L) - 1)
+
+                    // Message Accepted
+                    val mediaMessageAccepted = mediaMessage.copy(media_key = null, media_key_decrypted = null, local_file = null)
+                    val messageAccepted = message.copy(
+                        type = messageType,
+                        id = provisionalId
+                    ).let { convertMessageDboToNewMessage(it, mediaMessageAccepted) }
+
+                    chatLock.withLock {
+                        messageLock.withLock {
+                            withContext(io) {
+
+                                queries.transaction {
+                                    upsertNewMessage(messageAccepted, queries, null)
+                                }
+
+                                queries.transaction {
+                                    updateChatNewLatestMessage(
+                                        messageAccepted,
+                                        message.chat_id,
+                                        latestMessageUpdatedTimeMap,
+                                        queries
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    val newPurchaseMessage = chat.sphinx.example.wrapper_mqtt.Message(
+                        null,
+                        null,
+                        mediaMessage.media_token.value,
+                        mediaMessage.media_key?.value,
+                        null,
+                        null,
+                        null
+                    ).toJson(moshi)
+
+                    contact.let { nnContact ->
+                        connectManager.sendMessage(
+                            newPurchaseMessage,
+                            contact.nodePubKey?.value ?: "",
+                            provisionalId.value,
+                            messageType.value,
+                            null
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+
+
+    override fun updatePaidMessageMediaKey(
+        msg: Msg,
+        contactInfo: MsgSender
+    ) {
+        applicationScope.launch {
+            val queries = coreDB.getSphinxDatabaseQueries()
+            val muid = msg.mediaToken?.toMediaToken()?.getMUIDFromMediaToken()
+
+            muid?.value?.let { nnMuid ->
+                val message = queries.messageGetByMuid(MessageMUID(nnMuid)).executeAsOneOrNull()
+                val mediaKey = msg.mediaKey?.toMediaKeyDecrypted()
+
+                message?.id?.let { queries.messageMediaUpdateMediaKeyDecrypted(mediaKey, it) }
             }
         }
     }
@@ -3052,6 +3161,8 @@ abstract class SphinxRepository(
 
             val message = messageText(sendMessage, moshi)
 
+            val isPaidMessage: Boolean = (sendMessage.paidMessagePrice?.value ?: 0) > 0
+
 
             // encrypt text
 //            val message: Pair<MessageContentDecrypted, MessageContent>? =
@@ -3187,9 +3298,9 @@ abstract class SphinxRepository(
                                 provisionalId,
                                 null,
                                 chatDbo.id,
-                                owner?.id ?: ContactId(0L),
+                                owner.id,
                                 sendMessage.contactId,
-                                sendMessage.tribePaymentAmount ?: messagePrice,
+                                sendMessage.tribePaymentAmount ?: sendMessage.paidMessagePrice ?: messagePrice ,
                                 null,
                                 null,
                                 DateTime.nowUTC().toDateTime(),
@@ -3278,11 +3389,13 @@ abstract class SphinxRepository(
                         is Response.Success -> {
                             contact.nodePubKey?.value?.let { contactPubKey ->
 
+                                val amount: String? = sendMessage.paidMessagePrice?.value?.formatAmount()
+
                                 val mediaTokenValue = connectManager.generateMediaToken(
                                     contactPubKey,
                                     response.value.muid,
                                     MediaHost.DEFAULT.value,
-                                    null
+                                    amount
                                 )
 
                                 val mediaKey = MediaKey(password.value.copyOf().joinToString(""))
@@ -3303,7 +3416,7 @@ abstract class SphinxRepository(
                                     message ?: sendMessage.text ?: "",
                                     media,
                                     mediaTokenValue?.toMediaToken(),
-                                    mediaKey,
+                                    if (isPaidMessage) null else mediaKey,
                                     messageType,
                                     provisionalMessageId,
                                     sendMessage.tribePaymentAmount ?: messagePrice,
@@ -3669,66 +3782,42 @@ abstract class SphinxRepository(
     }
 
     override suspend fun deleteMessage(message: Message) {
-//        var response: Response<Any, ResponseError> = Response.Success(true)
-            val queries = coreDB.getSphinxDatabaseQueries()
-            val contact = getContactById(ContactId(message.chatId.value)).firstOrNull()
+        val queries = coreDB.getSphinxDatabaseQueries()
+        val contact = getContactById(ContactId(message.chatId.value)).firstOrNull()
 
-            if (message.id.isProvisionalMessage) {
-                messageLock.withLock {
-                    withContext(io) {
-                        queries.transaction {
-                            deleteMessageById(message.id, queries)
-                        }
+        if (message.id.isProvisionalMessage) {
+            messageLock.withLock {
+                withContext(io) {
+                    queries.transaction {
+                        deleteMessageById(message.id, queries)
                     }
                 }
-            } else {
-
-                messageLock.withLock {
-                    withContext(io) {
-                        queries.messageUpdateStatus(MessageStatus.Deleted, message.id)
-                    }
-                }
-
-                val newMessage = chat.sphinx.example.wrapper_mqtt.Message(
-                    "",
-                    null,
-                    null,
-                    null,
-                    null,
-                    message.uuid?.value,
-                    null
-                ).toJson(moshi)
-
-                contact?.nodePubKey?.value?.let { contactPubkey ->
-                    connectManager.deleteMessage(
-                        newMessage,
-                        contactPubkey
-                    )
-                }
-
-//                networkQueryMessage.deleteMessage(message.id).collect { loadResponse ->
-//                    @Exhaustive
-//                    when (loadResponse) {
-//                        is LoadResponse.Loading -> {
-//                        }
-//                        is Response.Error -> {
-//                            response = Response.Error(
-//                                ResponseError(loadResponse.message, loadResponse.exception)
-//                            )
-//                        }
-//                        is Response.Success -> {
-//                            messageLock.withLock {
-//                                withContext(io) {
-//                                    queries.transaction {
-//                                        upsertMessage(loadResponse.value, queries)
-//                                    }
-//                                }
-//                            }
-//                        }
-//                    }
-//                }
             }
-//        return response
+        } else {
+
+            messageLock.withLock {
+                withContext(io) {
+                    queries.messageUpdateStatus(MessageStatus.Deleted, message.id)
+                }
+            }
+
+            val newMessage = chat.sphinx.example.wrapper_mqtt.Message(
+                "",
+                null,
+                null,
+                null,
+                null,
+                message.uuid?.value,
+                null
+            ).toJson(moshi)
+
+            contact?.nodePubKey?.value?.let { contactPubkey ->
+                connectManager.deleteMessage(
+                    newMessage,
+                    contactPubkey
+                )
+            }
+        }
     }
 
     override suspend fun sendPayment(
@@ -3778,26 +3867,6 @@ abstract class SphinxRepository(
             }
 
             val text = sendPayment.text
-
-//            val postPaymentDto: PostPaymentDto = try {
-//                PostPaymentDto(
-//                    chat_id = sendPayment.chatId?.value,
-//                    contact_id = sendPayment.contactId?.value,
-//                    amount = sendPayment.amount,
-//                    text = text,
-//                    remote_text = null,
-//                    destination_key = sendPayment.destinationKey?.value,
-//                    route_hint = sendPayment.routeHint?.value,
-//                    muid = sendPayment.paymentTemplate?.muid,
-//                    dimensions = sendPayment.paymentTemplate?.getDimensions(),
-//                    media_type = sendPayment.paymentTemplate?.getMediaType()
-//                )
-//            } catch (e: IllegalArgumentException) {
-//                response = Response.Error(
-//                    ResponseError("Failed to create PostPaymentDto")
-//                )
-//                return@launch
-//            }
 
             val currentProvisionalId: MessageId? = withContext(io) {
                 queries.messageGetLowestProvisionalMessageId().executeAsOneOrNull()
@@ -3909,71 +3978,6 @@ abstract class SphinxRepository(
                     sendPayment.amount
                 )
             }
-
-
-//            if (postPaymentDto.isKeySendPayment) {
-//                networkQueryMessage.sendKeySendPayment(
-//                    postPaymentDto,
-//                ).collect { loadResponse ->
-//                    @Exhaustive
-//                    when (loadResponse) {
-//                        is LoadResponse.Loading -> {
-//                        }
-//                        is Response.Error -> {
-//                            LOG.e(TAG, loadResponse.message, loadResponse.exception)
-//                            response = loadResponse
-//                        }
-//                        is Response.Success -> {
-//                            response = loadResponse
-//                        }
-//                    }
-//                }
-//            } else {
-//                networkQueryMessage.sendPayment(
-//                    postPaymentDto,
-//                ).collect { loadResponse ->
-//                    @Exhaustive
-//                    when (loadResponse) {
-//                        is LoadResponse.Loading -> {
-//                        }
-//                        is Response.Error -> {
-//                            LOG.e(TAG, loadResponse.message, loadResponse.exception)
-//                            response = loadResponse
-//                        }
-//                        is Response.Success -> {
-//                            val message = loadResponse.value
-//
-//                            decryptMessageDtoContentIfAvailable(
-//                                message,
-//                                coroutineScope { this },
-//                            )
-//
-//                            chatLock.withLock {
-//                                messageLock.withLock {
-//                                    withContext(io) {
-//
-//                                        queries.transaction {
-//                                            upsertMessage(message, queries)
-//
-//                                            if (message.updateChatDboLatestMessage) {
-//                                                message.chat_id?.toChatId()?.let { chatId ->
-//                                                    updateChatDboLatestMessage(
-//                                                        message,
-//                                                        chatId,
-//                                                        latestMessageUpdatedTimeMap,
-//                                                        queries
-//                                                    )
-//                                                }
-//                                            }
-//                                        }
-//
-//                                    }
-//                                }
-//                            }
-//                        }
-//                    }
-//                }
-//            }
 
         }.join()
 
@@ -4127,54 +4131,6 @@ abstract class SphinxRepository(
                 )
             }
 
-
-//            networkQueryMessage.boostMessage(
-//                boostMessageDto = PostBoostMessageDto(
-//                    chat_id = chatId.value,
-//                    amount = pricePerMessage.value + escrowAmount.value + (owner.tipAmount ?: Sat(
-//                        20L
-//                    )).value,
-//                    message_price = pricePerMessage.value + escrowAmount.value,
-//                    reply_uuid = messageUUID.value
-//                )
-//            ).collect { loadResponse ->
-//                @Exhaustive
-//                when (loadResponse) {
-//                    is LoadResponse.Loading -> {
-//                    }
-//                    is Response.Error -> {
-//                        LOG.e(TAG, loadResponse.message, loadResponse.exception)
-//                        response = loadResponse
-//                    }
-//                    is Response.Success -> {
-//                        decryptMessageDtoContentIfAvailable(
-//                            loadResponse.value,
-//                            coroutineScope { this },
-//                        )
-//                        val queries = coreDB.getSphinxDatabaseQueries()
-//                        chatLock.withLock {
-//                            messageLock.withLock {
-//                                withContext(io) {
-//
-//                                    queries.transaction {
-//                                        upsertMessage(loadResponse.value, queries)
-//
-//                                        if (loadResponse.value.updateChatDboLatestMessage) {
-//                                            updateChatDboLatestMessage(
-//                                                loadResponse.value,
-//                                                chatId,
-//                                                latestMessageUpdatedTimeMap,
-//                                                queries
-//                                            )
-//                                        }
-//                                    }
-//
-//                                }
-//                            }
-//                        }
-//                    }
-//                }
-//            }
         }.join()
 
         return response
@@ -4398,50 +4354,119 @@ abstract class SphinxRepository(
         return response ?: Response.Error(ResponseError("Failed to pay invoice"))
     }
 
-    override suspend fun payAttachment(message: Message): Response<Any, ResponseError> {
-        var response: Response<Any, ResponseError>? = null
-
+    override suspend fun payAttachment(message: Message) {
         applicationScope.launch(mainImmediate) {
             val queries = coreDB.getSphinxDatabaseQueries()
 
             message.messageMedia?.mediaToken?.let { mediaToken ->
                 mediaToken.getPriceFromMediaToken().let { price ->
 
-                    networkQueryMessage.payAttachment(
-                        message.chatId,
-                        message.sender,
-                        price,
-                        mediaToken
-                    ).collect { loadResponse ->
-                        @Exhaustive
-                        when (loadResponse) {
-                            is LoadResponse.Loading -> {
-                            }
-
-                            is Response.Error -> {
-                                response = Response.Error(
-                                    ResponseError(loadResponse.message, loadResponse.exception)
-                                )
-                            }
-                            is Response.Success -> {
-                                response = loadResponse
-
-                                messageLock.withLock {
-                                    withContext(io) {
-                                        queries.transaction {
-                                            upsertMessage(loadResponse.value, queries)
-                                        }
+                    val owner: Contact = accountOwner.value
+                        ?: let {
+                            // TODO: Handle this better...
+                            var owner: Contact? = null
+                            try {
+                                accountOwner.collect {
+                                    if (it != null) {
+                                        owner = it
+                                        throw Exception()
                                     }
                                 }
+                            } catch (e: Exception) {}
+                            delay(25L)
+                            owner
+                        } ?: return@launch
+
+                    val contact: Contact? = message.chatId.let { chatId ->
+                        getContactById(ContactId(chatId.value)).firstOrNull()
+                    }
+
+                    val currentProvisionalId: MessageId? = withContext(io) {
+                        queries.messageGetLowestProvisionalMessageId().executeAsOneOrNull()
+                    }
+                    val provisionalId = MessageId((currentProvisionalId?.value ?: 0L) - 1)
+
+                    val newPurchase = NewMessage(
+                        id = provisionalId,
+                        uuid = null,
+                        chatId = message.chatId,
+                        type = MessageType.Purchase.Processing,
+                        sender = owner.id,
+                        receiver = null,
+                        amount = price,
+                        date = DateTime.nowUTC().toDateTime(),
+                        expirationDate = null,
+                        messageContent = null,
+                        status = MessageStatus.Confirmed,
+                        seen = Seen.True,
+                        senderAlias = null,
+                        senderPic = null,
+                        originalMUID = message.originalMUID,
+                        replyUUID = null,
+                        flagged = false.toFlagged(),
+                        recipientAlias = null,
+                        recipientPic = null,
+                        person = null,
+                        threadUUID = null,
+                        errorMessage = null,
+                        isPinned = false,
+                        messageContentDecrypted = null,
+                        messageDecryptionError = false,
+                        messageDecryptionException = null,
+                        messageMedia = null,
+                        feedBoost = null,
+                        callLinkMessage = null,
+                        podcastClip = null,
+                        giphyData = null,
+                        reactions = null,
+                        purchaseItems = null,
+                        replyMessage = null,
+                        thread = null
+                    )
+
+
+                    val newPurchaseMessage = chat.sphinx.example.wrapper_mqtt.Message(
+                        null,
+                        null,
+                        mediaToken.value,
+                        null,
+                        null,
+                        null,
+                        null
+                    ).toJson(moshi)
+
+
+                    chatLock.withLock {
+                        messageLock.withLock {
+                            withContext(io) {
+                                queries.transaction {
+                                    upsertNewMessage(newPurchase, queries, null)
+                                }
+                            }
+
+                            queries.transaction {
+                                updateChatNewLatestMessage(
+                                    newPurchase,
+                                    message.chatId,
+                                    latestMessageUpdatedTimeMap,
+                                    queries
+                                )
                             }
                         }
                     }
 
+                    contact?.let { nnContact ->
+                        connectManager.sendMessage(
+                            newPurchaseMessage,
+                            contact.nodePubKey?.value ?: "",
+                            provisionalId.value,
+                            MessageType.PURCHASE_PROCESSING,
+                            price.value
+                        )
+                    }
                 }
             }
-        }.join()
-
-        return response ?: Response.Error(ResponseError("Failed to pay for attachment"))
+        }
     }
 
     override suspend fun setNotificationLevel(

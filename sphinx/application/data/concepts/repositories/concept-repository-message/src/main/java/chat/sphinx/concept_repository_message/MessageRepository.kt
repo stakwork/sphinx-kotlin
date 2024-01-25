@@ -51,7 +51,18 @@ interface MessageRepository {
 
     fun sendMessage(sendMessage: SendMessage?)
 
-    suspend fun payAttachment(message: Message) : Response<Any, ResponseError>
+    suspend fun payAttachment(message: Message)
+
+    fun sendMediaKeyOnPaidPurchase(
+        msg: Msg,
+        contactInfo: MsgSender,
+        paidAmount: Sat
+    )
+
+    fun updatePaidMessageMediaKey(
+        msg: Msg,
+        contactInfo: MsgSender,
+    )
 
     fun resendMessage(
         message: Message,
@@ -104,7 +115,7 @@ interface MessageRepository {
 
     suspend fun upsertMqttMessage(
         msg: Msg,
-        msgSender: MsgSender,
+        contactInfo: MsgSender,
         msgType: MessageType,
         msgUuid: MessageUUID,
         msgIndex: MessageId,
