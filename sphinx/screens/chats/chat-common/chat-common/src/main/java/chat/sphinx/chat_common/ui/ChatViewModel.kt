@@ -2282,18 +2282,6 @@ abstract class ChatViewModel<ARGS : NavArgs>(
         val sideEffect = ChatSideEffect.AlertConfirmPayAttachment {
             payAttachmentJob = viewModelScope.launch(mainImmediate) {
                 messageRepository.payAttachment(message)
-
-//                @Exhaustive
-//                when (val response = messageRepository.payAttachment(message)) {
-//                    is Response.Error -> {
-//                        submitSideEffect(ChatSideEffect.Notify(response.cause.message))
-//                    }
-//                    is Response.Success -> {
-//                        // give time for DB to push new data to render to screen
-//                        // to inhibit firing of another payAttachment
-//                        delay(100L)
-//                    }
-//                }
             }
         }
 
