@@ -313,6 +313,10 @@ abstract class SphinxRepository(
         connectManager.processChallengeSignature(challenge)
     }
 
+    override fun joinTribe(tribeHost: String, tribePubKey: String, tribeRouteHint: String) {
+        connectManager.connectToTribe(tribeHost, tribePubKey, tribeRouteHint)
+    }
+
     override fun onNewContactRegistered(
         msgSender: String
     ) {
@@ -4569,39 +4573,39 @@ abstract class SphinxRepository(
                 }
             }
 
-            networkQueryChat.joinTribe(tribeDto).collect { loadResponse ->
-                @Exhaustive
-                when (loadResponse) {
-                    LoadResponse.Loading -> {
-                    }
-                    is Response.Error -> {
-                        response = loadResponse
-                    }
-                    is Response.Success -> {
-                        chatLock.withLock {
-                            withContext(io) {
-                                queries.transaction {
-                                    upsertChat(
-                                        loadResponse.value,
-                                        moshi,
-                                        chatSeenMap,
-                                        queries,
-                                        null,
-                                        accountOwner.value?.nodePubKey
-                                    )
-                                    updateChatTribeData(
-                                        tribeDto,
-                                        ChatId(loadResponse.value.id),
-                                        queries
-                                    )
-                                }
-                            }
-                        }
-
-                        response = loadResponse
-                    }
-                }
-            }
+//            networkQueryChat.joinTribe(tribeDto).collect { loadResponse ->
+//                @Exhaustive
+//                when (loadResponse) {
+//                    LoadResponse.Loading -> {
+//                    }
+//                    is Response.Error -> {
+//                        response = loadResponse
+//                    }
+//                    is Response.Success -> {
+//                        chatLock.withLock {
+//                            withContext(io) {
+//                                queries.transaction {
+//                                    upsertChat(
+//                                        loadResponse.value,
+//                                        moshi,
+//                                        chatSeenMap,
+//                                        queries,
+//                                        null,
+//                                        accountOwner.value?.nodePubKey
+//                                    )
+//                                    updateNewChatTribeData(
+//                                        tribeDto,
+//                                        ChatId(loadResponse.value.id),
+//                                        queries
+//                                    )
+//                                }
+//                            }
+//                        }
+//
+//                        response = loadResponse
+//                    }
+//                }
+//            }
 
         }.join()
 
@@ -4654,7 +4658,7 @@ abstract class SphinxRepository(
 
                 val queries = coreDB.getSphinxDatabaseQueries()
 
-                networkQueryChat.getTribeInfo(chatHost, chatUUID).collect { loadResponse ->
+                networkQueryChat.getTribeInfo(chatHost, LightningNodePubKey(chatUUID.value)).collect { loadResponse ->
                     when (loadResponse) {
 
                         is LoadResponse.Loading -> {}
@@ -4665,43 +4669,43 @@ abstract class SphinxRepository(
 
                             if (owner?.nodePubKey != chat.ownerPubKey) {
 
-                                val didChangeNameOrPhotoUrl = (
-                                    tribeDto.name != chat.name?.value ?: "" ||
-                                    tribeDto.img != chat.photoUrl?.value ?: ""
-                                )
+//                                val didChangeNameOrPhotoUrl = (
+//                                    tribeDto.name != chat.name?.value ?: "" ||
+//                                    tribeDto.img != chat.photoUrl?.value ?: ""
+//                                )
 
-                                chatLock.withLock {
-                                    queries.transaction {
-                                        updateChatTribeData(tribeDto, chat.id, queries)
-                                    }
-                                }
-
-                                if (didChangeNameOrPhotoUrl) {
-                                    networkQueryChat.updateTribe(
-                                        chat.id,
-                                        PostGroupDto(
-                                            tribeDto.name,
-                                            tribeDto.description,
-                                            img = tribeDto.img ?: "",
-                                        )
-                                    ).collect {}
-                                }
+//                                chatLock.withLock {
+//                                    queries.transaction {
+//                                        updateChatTribeData(tribeDto, chat.id, queries)
+//                                    }
+//                                }
+//
+//                                if (didChangeNameOrPhotoUrl) {
+//                                    networkQueryChat.updateTribe(
+//                                        chat.id,
+//                                        PostGroupDto(
+//                                            tribeDto.name,
+//                                            tribeDto.description,
+//                                            img = tribeDto.img ?: "",
+//                                        )
+//                                    ).collect {}
+//                                }
 
                             }
 
-                            chat.host?.let { host ->
-                                val feedType = (tribeDto.feed_type ?: 0).toFeedType()
-
-                                tribeData = TribeData(
-                                    host,
-                                    chat.uuid,
-                                    tribeDto.feed_url?.toFeedUrl(),
-                                    feedType,
-                                    tribeDto.pin?.toMessageUUID(),
-                                    tribeDto.app_url?.toAppUrl(),
-                                    tribeDto.badges
-                                )
-                            }
+//                            chat.host?.let { host ->
+//                                val feedType = (tribeDto.feed_type ?: 0).toFeedType()
+//
+//                                tribeData = TribeData(
+//                                    host,
+//                                    chat.uuid,
+//                                    tribeDto.feed_url?.toFeedUrl(),
+//                                    feedType,
+//                                    tribeDto.pin?.toMessageUUID(),
+//                                    tribeDto.app_url?.toAppUrl(),
+//                                    tribeDto.badges
+//                                )
+//                            }
                         }
                     }
                 }

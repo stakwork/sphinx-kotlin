@@ -1,5 +1,6 @@
 package chat.sphinx.concept_repository_chat.model
 
+import chat.sphinx.concept_network_query_chat.model.NewTribeDto
 import chat.sphinx.concept_network_query_chat.model.PostGroupDto
 import chat.sphinx.concept_network_query_chat.model.TribeDto
 import chat.sphinx.wrapper_chat.AppUrl
@@ -189,6 +190,13 @@ class CreateTribe private constructor(
             feedUrl = tribeDto.feed_url?.toFeedUrl()
             feedType = tribeDto.feed_type?.toFeedType()
             unlisted = tribeDto.unlisted
+        }
+
+        // Needs to complete all the args
+        @Synchronized
+        fun newLoad(tribeDto: NewTribeDto) {
+            name = tribeDto.name
+            img = null
         }
 
         @Synchronized

@@ -1,6 +1,7 @@
 package chat.sphinx.feature_repository.util
 
 import chat.sphinx.concept_network_query_chat.model.ChatDto
+import chat.sphinx.concept_network_query_chat.model.NewTribeDto
 import chat.sphinx.concept_network_query_chat.model.TribeDto
 import chat.sphinx.concept_network_query_chat.model.feed.FeedDto
 import chat.sphinx.concept_network_query_contact.model.ContactDto
@@ -185,6 +186,36 @@ inline fun TransactionCallbacks.updateChatNotificationLevel(
     queries: SphinxDatabaseQueries
 ) {
     queries.chatUpdateNotificationLevel(notificationLevel, chatId)
+}
+
+@Suppress("NOTHING_TO_INLINE", "SpellCheckingInspection")
+inline fun TransactionCallbacks.updateNewChatTribeData(
+    tribe: NewTribeDto,
+    chatId: ChatId,
+    queries: SphinxDatabaseQueries,
+) {
+    // Needs to implement the rest of args
+
+    val pricePerMessage = 0L.toSat()
+    val escrowAmount = 0L.toSat()
+    val name = tribe.name.toChatName()
+    val photoUrl = null
+    val pinMessage = null
+
+    queries.chatUpdateTribeData(
+        pricePerMessage,
+        escrowAmount,
+        name,
+        photoUrl,
+        pinMessage,
+        chatId,
+    )
+
+    queries.dashboardUpdateTribe(
+        name?.value ?: "",
+        photoUrl,
+        chatId
+    )
 }
 
 @Suppress("NOTHING_TO_INLINE", "SpellCheckingInspection")

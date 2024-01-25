@@ -4,7 +4,6 @@ import app.cash.exhaustive.Exhaustive
 import chat.sphinx.concept_network_query_chat.NetworkQueryChat
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.wrapper_chat.ChatHost
-import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.tribe.TribeJoinLink
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import chat.sphinx.concept_link_preview.model.*
@@ -12,7 +11,7 @@ import chat.sphinx.feature_link_preview.util.getDescription
 import chat.sphinx.feature_link_preview.util.getFavIconUrl
 import chat.sphinx.feature_link_preview.util.getImageUrl
 import chat.sphinx.feature_link_preview.util.getTitle
-import kotlinx.coroutines.flow.collect
+import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
@@ -123,17 +122,20 @@ internal class TribePreviewDataRetriever(val tribeJoinLink: TribeJoinLink): Link
 
         networkQueryChat.getTribeInfo(
             ChatHost(tribeJoinLink.tribeHost),
-            ChatUUID(tribeJoinLink.tribeUUID)
+            LightningNodePubKey(tribeJoinLink.tribePubkey)
         ).collect { response ->
             @Exhaustive
             when (response) {
                 is LoadResponse.Loading -> {}
                 is chat.sphinx.kotlin_response.Response.Error -> {}
                 is chat.sphinx.kotlin_response.Response.Success -> {
+
+                    // Needs to get description and image
+
                     data = TribePreviewData(
                         TribePreviewName(response.value.name),
-                        response.value.description.toPreviewDescriptionOrNull(),
-                        response.value.img?.toPreviewImageUrlOrNull(),
+                        "".toPreviewDescriptionOrNull(),
+                        "".toPreviewImageUrlOrNull(),
                     )
                 }
             }

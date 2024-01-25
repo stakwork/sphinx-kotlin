@@ -397,7 +397,7 @@ internal class DashboardViewModel @Inject constructor(
     private suspend fun handleTribeJoinLink(tribeJoinLink: TribeJoinLink) {
         val chat: Chat? = try {
             chatRepository.getChatByUUID(
-                ChatUUID(tribeJoinLink.tribeUUID)
+                ChatUUID(tribeJoinLink.tribePubkey)
             ).firstOrNull()
         } catch (e: IllegalArgumentException) {
             null

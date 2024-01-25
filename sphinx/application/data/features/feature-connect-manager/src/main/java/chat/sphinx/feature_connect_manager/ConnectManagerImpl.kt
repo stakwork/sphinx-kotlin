@@ -37,6 +37,7 @@ import uniffi.sphinxrs.fetchMsgs
 import uniffi.sphinxrs.getSubscriptionTopic
 import uniffi.sphinxrs.handle
 import uniffi.sphinxrs.initialSetup
+import uniffi.sphinxrs.joinTribe
 import uniffi.sphinxrs.makeMediaToken
 import uniffi.sphinxrs.makeMediaTokenWithMeta
 import uniffi.sphinxrs.mnemonicFromEntropy
@@ -418,6 +419,33 @@ class ConnectManagerImpl(
         }
     }
 
+    override fun connectToTribe(
+        tribeHost: String,
+        tribePubKey: String,
+        tribeRouteHint: String
+    ) {
+        coroutineScope.launch {
+
+            val now = getTimestampInMilliseconds()
+
+            try {
+                val joinTribeMessage = joinTribe(
+                    ownerSeed!!,
+                    now,
+                    getCurrentUserState(),
+                    tribePubKey,
+                    tribeRouteHint,
+                    ownerInfoStateFlow.value?.alias ?: "",
+                    1.toULong()
+                )
+                handleRunReturn(joinTribeMessage, mqttClient!!)
+
+            } catch (e: Exception) {
+                Log.e("MQTT_MESSAGES", "joinTribe ${e.message}")
+            }
+        }
+    }
+
     override fun generateMediaToken(
         contactPubKey: String,
         muid: String,
@@ -524,6 +552,10 @@ class ConnectManagerImpl(
             notifyListeners {
                 onNewBalance(newBalance.toLong())
             }
+        }
+
+        rr.newTribe?.let { newTribe ->
+            Log.d("MQTT_MESSAGES", "===> newTribe $newTribe")
         }
 
         // Sent message info

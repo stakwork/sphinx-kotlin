@@ -15,6 +15,7 @@ import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.feed.FeedUrl
+import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
 import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RequestSignature
 import chat.sphinx.wrapper_relay.RelayUrl
@@ -43,7 +44,7 @@ class NetworkQueryChatImpl(
         private const val ENDPOINT_STREAM_SATS = "/stream"
         private const val ENDPOINT_ADD_TRIBE_MEMBER = "/tribe_member"
 
-        private const val GET_TRIBE_INFO_URL = "https://%s/tribes/%s"
+        private const val GET_TRIBE_INFO_URL = "http://%s/tribes/%s"
         private const val GET_FEED_CONTENT_URL = "https://%s/feed?url=%s&fulltext=true"
     }
 
@@ -73,11 +74,11 @@ class NetworkQueryChatImpl(
 
     override fun getTribeInfo(
         host: ChatHost,
-        uuid: ChatUUID
-    ): Flow<LoadResponse<TribeDto, ResponseError>> =
+        tribePubKey: LightningNodePubKey
+    ): Flow<LoadResponse<NewTribeDto, ResponseError>> =
         networkRelayCall.get(
-            url = String.format(GET_TRIBE_INFO_URL, host.value, uuid.value),
-            responseJsonClass = TribeDto::class.java,
+            url = String.format(GET_TRIBE_INFO_URL, host.value, tribePubKey.value),
+            responseJsonClass = NewTribeDto::class.java,
         )
 
     override fun getFeedContent(
