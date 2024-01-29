@@ -406,6 +406,7 @@ abstract class SphinxRepository(
             val messageUUID = msgUuid.toMessageUUID() ?: return@launch
             val originalUUID = message.originalUuid?.toMessageUUID()
             val date = message.date?.let { DateTime(Date(it)) }
+            val isSent = (accountOwner.value?.alias?.value == contactInfo.alias)
 
             when (messageType) {
                 is MessageType.Delete -> {
@@ -430,7 +431,7 @@ abstract class SphinxRepository(
                         messageId,
                         originalUUID,
                         date,
-                        false,
+                        isSent,
                         amount?.toSat()
                     )
                 }
@@ -548,7 +549,6 @@ abstract class SphinxRepository(
 
             val existingMessage = queries.messageGetByUUID(messageUuid).executeAsOneOrNull()
 
-
             if (isSent) {
                 val messageId = existingMessage?.id
                 val existingMessageMedia = messageId?.let {
@@ -594,8 +594,8 @@ abstract class SphinxRepository(
                 messageContent = null,
                 status = if (isSent) MessageStatus.Confirmed else MessageStatus.Received,
                 seen = Seen.False,
-                senderAlias = null,
-                senderPic = null,
+                senderAlias = msgSender.alias?.toSenderAlias(),
+                senderPic = msgSender.photo_url?.toPhotoUrl(),
                 originalMUID = null,
                 replyUUID = existingMessage?.reply_uuid ?: msg.replyUuid?.toReplyUUID(),
                 flagged = Flagged.False,
@@ -629,7 +629,6 @@ abstract class SphinxRepository(
                         latestMessageUpdatedTimeMap,
                         queries
                     )
-
                 }
             }
         }
