@@ -360,11 +360,14 @@ class ConnectManagerImpl(
         contactPubKey: String,
         provisionalId: Long,
         messageType: Int,
-        amount: Long?
+        amount: Long?,
+        isTribe: Boolean
     ) {
         coroutineScope.launch {
 
             val now = getTimestampInMilliseconds()
+            // Have to include al least 1 sat for tribe messages
+            val nnAmount = if (isTribe) 1000L else amount ?: 0L
 
             try {
                 val message = send(
@@ -376,7 +379,8 @@ class ConnectManagerImpl(
                     getCurrentUserState(),
                     ownerInfoStateFlow.value?.alias ?: "",
                     ownerInfoStateFlow.value?.picture ?: "",
-                    amount?.toULong() ?: 0.toULong()
+                    nnAmount.toULong(),
+                    isTribe
                 )
                 handleRunReturn(message, mqttClient!!)
 
@@ -385,6 +389,7 @@ class ConnectManagerImpl(
                             onMessageUUID(msgUUID, provisionalId)
                         }
                     }
+
             } catch (e: Exception) {
                 Log.e("MQTT_MESSAGES", "send ${e.message}")
             }

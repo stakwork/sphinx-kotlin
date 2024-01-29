@@ -4,14 +4,12 @@ import android.app.Application
 import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import app.cash.exhaustive.Exhaustive
 import chat.sphinx.camera_view_model_coordinator.request.CameraRequest
 import chat.sphinx.camera_view_model_coordinator.response.CameraResponse
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.concept_image_loader.Transformation
 import chat.sphinx.concept_network_query_chat.NetworkQueryChat
 import chat.sphinx.concept_network_query_chat.model.NewTribeDto
-import chat.sphinx.concept_network_query_chat.model.TribeDto
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_connect_manager.ConnectManagerRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
@@ -24,11 +22,7 @@ import chat.sphinx.kotlin_response.Response
 import chat.sphinx.menu_bottom_profile_pic.PictureMenuHandler
 import chat.sphinx.menu_bottom_profile_pic.PictureMenuViewModel
 import chat.sphinx.wrapper_chat.ChatHost
-import chat.sphinx.wrapper_chat.toChatHost
-import chat.sphinx.wrapper_common.chat.toChatUUID
 import chat.sphinx.wrapper_common.dashboard.ChatId
-import chat.sphinx.wrapper_common.feed.toFeedUrl
-import chat.sphinx.wrapper_common.feed.toSubscribed
 import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
 import chat.sphinx.wrapper_common.tribe.toTribeJoinLink
 import chat.sphinx.wrapper_contact.Contact
@@ -201,7 +195,8 @@ internal class JoinTribeViewModel @Inject constructor(
                 connectManagerRepository.joinTribe(
                     host,
                     tribeInfo.pubkey,
-                    tribeInfo.route_hint
+                    tribeInfo.route_hint,
+                    tribeInfo.name
                 )
                 updateViewState(JoinTribeViewState.TribeJoined)
             } else {

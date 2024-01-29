@@ -17,7 +17,8 @@ interface ConnectManagerRepository {
     fun joinTribe(
         tribeHost: String,
         tribePubKey: String,
-        tribeRouteHint: String
+        tribeRouteHint: String,
+        tribeName: String
     )
     suspend fun updateLspAndOwner(data: String) {}
 

@@ -218,6 +218,9 @@ FROM chatDbo
 WHERE type = 0 AND contact_ids = ?
 LIMIT 1;
 
+chatGetMaxTribeId:
+SELECT MAX(id) FROM chatDbo WHERE type = 2;
+
 chatUpsert {
     UPDATE chatDbo
     SET name = :name,

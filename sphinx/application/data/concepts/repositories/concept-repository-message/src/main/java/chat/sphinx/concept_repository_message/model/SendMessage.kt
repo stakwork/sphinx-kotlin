@@ -28,20 +28,20 @@ class SendMessage private constructor(
 ) {
 
     class Builder {
-        private var chatId: ChatId?                 = null
-        private var contactId: ContactId?           = null
-        private var tribePaymentAmount: Sat?        = null
-        private var attachmentInfo: AttachmentInfo? = null
-        private var replyUUID: ReplyUUID?           = null
-        private var text: String?                   = null
-        private var giphyData: GiphyData?           = null
-        private var podcastClip: PodcastClip?       = null
-        private var isBoost: Boolean                = false
-        private var isCall: Boolean                 = false
-        private var isTribePayment: Boolean         = false
-        private var paidMessagePrice: Sat?          = null
-        private var priceToMeet: Sat?               = null
-        private var threadUUID: ThreadUUID?         = null
+        private var chatId: ChatId?                    = null
+        private var contactId: ContactId?              = null
+        private var tribePaymentAmount: Sat?           = null
+        private var attachmentInfo: AttachmentInfo?    = null
+        private var replyUUID: ReplyUUID?              = null
+        private var text: String?                      = null
+        private var giphyData: GiphyData?              = null
+        private var podcastClip: PodcastClip?          = null
+        private var isBoost: Boolean                   = false
+        private var isCall: Boolean                    = false
+        private var isTribePayment: Boolean            = false
+        private var paidMessagePrice: Sat?             = null
+        private var priceToMeet: Sat?                  = null
+        private var threadUUID: ThreadUUID?            = null
 
         enum class ValidationError {
             EMPTY_PRICE, EMPTY_DESTINATION, EMPTY_CONTENT
@@ -216,7 +216,7 @@ class SendMessage private constructor(
                         isTribePayment,
                         paidMessagePrice,
                         priceToMeet,
-                        threadUUID
+                        threadUUID,
                     ), null
                 )
             }

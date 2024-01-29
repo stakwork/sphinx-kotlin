@@ -7,9 +7,10 @@ import java.io.File
 @JsonClass(generateAdapter = true)
 data class NewTribeDto(
     val name: String,
-    val type: String,
     val pubkey: String,
-    val route_hint: String
+    val route_hint: String,
+    val member_count: Int?,
+    val last_active: Int?
 ) {
 
     var amount: Long? = null

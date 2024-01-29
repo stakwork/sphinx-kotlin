@@ -21,7 +21,8 @@ abstract class ConnectManager {
         contactPubKey: String,
         provisionalId: Long,
         messageType: Int,
-        amount: Long?
+        amount: Long?,
+        isTribe: Boolean = false
     )
 
     abstract fun deleteMessage(

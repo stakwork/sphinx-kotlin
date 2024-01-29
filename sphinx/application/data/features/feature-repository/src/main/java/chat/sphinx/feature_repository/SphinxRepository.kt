@@ -313,8 +313,62 @@ abstract class SphinxRepository(
         connectManager.processChallengeSignature(challenge)
     }
 
-    override fun joinTribe(tribeHost: String, tribePubKey: String, tribeRouteHint: String) {
+    override fun joinTribe(
+        tribeHost: String,
+        tribePubKey: String,
+        tribeRouteHint: String,
+        tribeName: String
+    ) {
         connectManager.connectToTribe(tribeHost, tribePubKey, tribeRouteHint)
+
+        applicationScope.launch {
+            val queries = coreDB.getSphinxDatabaseQueries()
+
+            val tribeId = queries.chatGetMaxTribeId().executeAsOneOrNull()?.let { it.MAX?.minus(1)  }
+                ?: (Long.MAX_VALUE - 1)
+            val now: String = DateTime.nowUTC()
+
+            val newTribe = Chat(
+                id = ChatId(tribeId),
+                uuid = ChatUUID(tribePubKey),
+                name = ChatName( tribeName ?: "unknown"),
+                photoUrl = null,
+                type = ChatType.Tribe,
+                status = ChatStatus.Approved,
+                contactIds = listOf(ContactId(0), ContactId(tribeId)),
+                isMuted = ChatMuted.False,
+                createdAt = now.toDateTime(),
+                groupKey = null,
+                host = null,
+                pricePerMessage = null,
+                escrowAmount = null,
+                unlisted = ChatUnlisted.False,
+                privateTribe = ChatPrivate.False,
+                ownerPubKey = LightningNodePubKey(tribePubKey),
+                seen = Seen.False,
+                metaData = null,
+                myPhotoUrl = null,
+                myAlias = null,
+                pendingContactIds = emptyList(),
+                latestMessageId = null,
+                contentSeenAt = null,
+                pinedMessage = null,
+                notify = NotificationLevel.SeeAll
+            )
+
+            chatLock.withLock {
+                queries.transaction {
+                    upsertNewChat(
+                        newTribe,
+                        moshi,
+                        SynchronizedMap<ChatId, Seen>(),
+                        queries,
+                        null,
+                        accountOwner.value?.nodePubKey
+                    )
+                }
+            }
+        }
     }
 
     override fun onNewContactRegistered(
@@ -347,9 +401,11 @@ abstract class SphinxRepository(
             val message = msg.toMsg(moshi)
             val contactInfo = msgSender.toMsgSender(moshi)
 
+            val messageId = MessageId(msgIndex.toLong())
             val messageType = msgType.toMessageType()
             val messageUUID = msgUuid.toMessageUUID() ?: return@launch
-            val messageId = MessageId(msgIndex.toLong())
+            val originalUUID = message.originalUuid?.toMessageUUID()
+            val date = message.date?.let { DateTime(Date(it)) }
 
             when (messageType) {
                 is MessageType.Delete -> {
@@ -372,6 +428,8 @@ abstract class SphinxRepository(
                         messageType,
                         messageUUID,
                         messageId,
+                        originalUUID,
+                        date,
                         false,
                         amount?.toSat()
                     )
@@ -394,6 +452,8 @@ abstract class SphinxRepository(
             val messageType = msgType.toMessageType()
             val messageUUID = msgUUID.toMessageUUID() ?: return@launch
             val messageId = MessageId(msgIndex.toLong())
+            val originalUUID = message.originalUuid?.toMessageUUID()
+            val date = message.date?.let { DateTime(Date(it)) }
 
             upsertMqttMessage(
                 message,
@@ -401,6 +461,8 @@ abstract class SphinxRepository(
                 messageType,
                 messageUUID,
                 messageId,
+                originalUUID,
+                date,
                 true,
                 null
             )
@@ -456,19 +518,36 @@ abstract class SphinxRepository(
 
     override suspend fun upsertMqttMessage(
         msg: Msg,
-        contactInfo: MsgSender,
+        msgSender: MsgSender,
         msgType: MessageType,
         msgUuid: MessageUUID,
         msgIndex: MessageId,
+        originalUuid: MessageUUID?,
+        date: DateTime?,
         isSent: Boolean,
         amount: Sat?
     ) {
         val queries = coreDB.getSphinxDatabaseQueries()
-        val contact = getContactByPubKey(LightningNodePubKey(contactInfo.pubkey)).firstOrNull()
+        val contact = getContactByPubKey(LightningNodePubKey(msgSender.pubkey)).firstOrNull()
+        val chatTribe = getChatByUUID(ChatUUID(msgSender.pubkey)).firstOrNull()
+        var messageMedia: MessageMediaDbo? = null
 
-        if (contact != null) {
-            var messageMedia: MessageMediaDbo? = null
-            val existingMessage = queries.messageGetByUUID(msgUuid).executeAsOneOrNull()
+        if (contact != null || chatTribe != null) {
+
+            val messageUuid = when {
+                contact != null -> msgUuid // Conversation
+                isSent -> originalUuid     // Tribe send
+                else -> msgUuid            // Tribe receive
+            }
+
+            val chatId = when {
+                contact?.id?.value != null -> contact.id.value
+                chatTribe?.id?.value != null -> chatTribe.id.value
+                else -> 0L
+            }
+
+            val existingMessage = queries.messageGetByUUID(messageUuid).executeAsOneOrNull()
+
 
             if (isSent) {
                 val messageId = existingMessage?.id
@@ -487,7 +566,7 @@ abstract class SphinxRepository(
 
                     messageMedia = MessageMediaDbo(
                         msgIndex,
-                        ChatId(contact.id.value),
+                        ChatId(chatId),
                         msg.mediaKey?.toMediaKey(),
                         msg.mediaKey?.toMediaKeyDecrypted(),
                         msg.mediaType?.toMediaType() ?: MediaType.Unknown(""),
@@ -499,18 +578,18 @@ abstract class SphinxRepository(
             }
 
             messageLock.withLock {
-                queries.messageDeleteByUUID(msgUuid)
+                queries.messageDeleteByUUID(messageUuid)
             }
 
             val newMessage = NewMessage(
                 id = msgIndex,
-                uuid = msgUuid,
-                chatId = ChatId(contact.id.value),
+                uuid = messageUuid,
+                chatId = ChatId(chatId),
                 type = msgType,
-                sender = if (isSent) ContactId(0) else contact.id,
+                sender = if (isSent) ContactId(0) else contact?.id ?: ContactId(chatId) ,
                 receiver = ContactId(0),
                 amount = existingMessage?.amount ?: amount ?: Sat(0L),
-                date = DateTime.nowUTC().toDateTime(),
+                date = date ?: DateTime.nowUTC().toDateTime(),
                 expirationDate = null,
                 messageContent = null,
                 status = if (isSent) MessageStatus.Confirmed else MessageStatus.Received,
@@ -546,7 +625,7 @@ abstract class SphinxRepository(
 
                     updateChatNewLatestMessage(
                         newMessage,
-                        ChatId(contact.id.value),
+                        ChatId(chatId),
                         latestMessageUpdatedTimeMap,
                         queries
                     )
@@ -565,7 +644,7 @@ abstract class SphinxRepository(
     }
 
     fun sendNewMessage(
-        contact: Contact,
+        contact: String,
         messageContent: String,
         attachmentInfo: AttachmentInfo?,
         mediaToken: MediaToken?,
@@ -574,7 +653,8 @@ abstract class SphinxRepository(
         provisionalId: MessageId?,
         amount: Sat?,
         replyUUID: ReplyUUID?,
-        threadUUID: ThreadUUID?
+        threadUUID: ThreadUUID?,
+        isTribe: Boolean
     ) {
         val newMessage = chat.sphinx.example.wrapper_mqtt.Message(
             messageContent,
@@ -589,10 +669,11 @@ abstract class SphinxRepository(
         provisionalId?.value?.let {
             connectManager.sendMessage(
                 newMessage,
-                contact.nodePubKey?.value ?: "",
+                contact,
                 it,
                 messageType?.value ?: 0,
-                amount?.value
+                amount?.value,
+                isTribe
             )
         }
     }
@@ -802,7 +883,7 @@ abstract class SphinxRepository(
                             contact.nodePubKey?.value ?: "",
                             provisionalId.value,
                             messageType.value,
-                            null
+                            null,
                         )
                     }
                 }
@@ -2120,6 +2201,10 @@ abstract class SphinxRepository(
     }
 
     override suspend fun createNewContact(contact: NewContact) {
+        if (!contact.confirmed) {
+            return
+        }
+
         val queries = coreDB.getSphinxDatabaseQueries()
         val now = DateTime.nowUTC()
         val contactId = getNewContactIndex().firstOrNull()?.value
@@ -3164,65 +3249,8 @@ abstract class SphinxRepository(
             }
 
             val message = messageText(sendMessage, moshi)
-
             val isPaidMessage: Boolean = (sendMessage.paidMessagePrice?.value ?: 0) > 0
-
-
-            // encrypt text
-//            val message: Pair<MessageContentDecrypted, MessageContent>? =
-//                messageText(sendMessage, moshi)?.let { msgText ->
-//
-//                    val response = rsa.encrypt(
-//                        ownerPubKey,
-//                        UnencryptedString(msgText),
-//                        formatOutput = false,
-//                        dispatcher = default,
-//                    )
-//
-//                    @Exhaustive
-//                    when (response) {
-//                        is Response.Error -> {
-//                            LOG.e(TAG, response.message, response.exception)
-//                            null
-//                        }
-//                        is Response.Success -> {
-//                            Pair(
-//                                MessageContentDecrypted(msgText),
-//                                MessageContent(response.value.value)
-//                            )
-//                        }
-//                    }
-//                }
-
             val media: AttachmentInfo? = sendMessage.attachmentInfo
-
-            // media attachment
-//            val media: Triple<Password, MediaKey, AttachmentInfo>? =
-//                if (sendMessage.giphyData == null) {
-//                    sendMessage.attachmentInfo?.let { info ->
-//                        val password = PasswordGenerator(MEDIA_KEY_SIZE).password
-//
-//                        val response = rsa.encrypt(
-//                            ownerPubKey,
-//                            UnencryptedString(password.value.joinToString("")),
-//                            formatOutput = false,
-//                            dispatcher = default,
-//                        )
-//
-//                        @Exhaustive
-//                        when (response) {
-//                            is Response.Error -> {
-//                                LOG.e(TAG, response.message, response.exception)
-//                                null
-//                            }
-//                            is Response.Success -> {
-//                                Triple(password, MediaKey(response.value.value), info)
-//                            }
-//                        }
-//                    }
-//                } else {
-//                    null
-//                }
 
 //            if (message == null && media == null && !sendMessage.isTribePayment) {
 //                return@launch
@@ -3314,19 +3342,6 @@ abstract class SphinxRepository(
                                 null,
                                 false.toFlagged()
                             )
-
-//                            if (media != null) {
-//                                queries.messageMediaUpsert(
-//                                    media.second,
-//                                    media.third.mediaType,
-//                                    MediaToken.PROVISIONAL_TOKEN,
-//                                    provisionalId,
-//                                    chatDbo.id,
-//                                    MediaKeyDecrypted(media.first.value.joinToString("")),
-//                                    media.third.file,
-//                                    sendMessage.attachmentInfo?.fileName
-//                                )
-//                            }
                         }
                         provisionalId
                     }
@@ -3357,7 +3372,8 @@ abstract class SphinxRepository(
 //            } else {
 //                null
 //            }
-            if (contact != null) {
+
+            if (contact != null || chat != null) {
                 if (media != null) {
                     val password = PasswordGenerator(MEDIA_KEY_SIZE).password
                     val token = memeServerTokenHandler.retrieveAuthenticationToken(MediaHost.DEFAULT)
@@ -3391,12 +3407,14 @@ abstract class SphinxRepository(
                         }
 
                         is Response.Success -> {
-                            contact.nodePubKey?.value?.let { contactPubKey ->
+                            val pubKey = contact?.nodePubKey?.value ?: chat?.ownerPubKey?.value
+
+                            pubKey?.let { nnPubKey ->
 
                                 val amount: String? = sendMessage.paidMessagePrice?.value?.formatAmount()
 
                                 val mediaTokenValue = connectManager.generateMediaToken(
-                                    contactPubKey,
+                                    nnPubKey,
                                     response.value.muid,
                                     MediaHost.DEFAULT.value,
                                     amount
@@ -3409,14 +3427,14 @@ abstract class SphinxRepository(
                                     media.mediaType,
                                     mediaTokenValue?.toMediaToken() ?: MediaToken.PROVISIONAL_TOKEN,
                                     provisionalMessageId ?: MessageId(Long.MIN_VALUE),
-                                    ChatId(contact.id.value),
+                                    chat?.id ?: ChatId(ChatId.NULL_CHAT_ID.toLong()),
                                     MediaKeyDecrypted(password.value.copyOf().joinToString("")),
                                     media.file,
                                     sendMessage.attachmentInfo?.fileName
                                 )
 
                                 sendNewMessage(
-                                    contact,
+                                    contact?.nodePubKey?.value ?: chat?.ownerPubKey?.value ?: "",
                                     message ?: sendMessage.text ?: "",
                                     media,
                                     mediaTokenValue?.toMediaToken(),
@@ -3425,7 +3443,8 @@ abstract class SphinxRepository(
                                     provisionalMessageId,
                                     sendMessage.tribePaymentAmount ?: messagePrice,
                                     replyUUID,
-                                    threadUUID
+                                    threadUUID,
+                                    chat?.isTribe() ?: false
                                 )
 
                                 LOG.d("MQTT_MESSAGES", "Media Message was sent. mediatoken=$mediaTokenValue mediakey$mediaKey" )
@@ -3434,7 +3453,7 @@ abstract class SphinxRepository(
                     }
                 } else {
                     sendNewMessage(
-                        contact,
+                        contact?.nodePubKey?.value ?: chat?.ownerPubKey?.value ?: "",
                         message ?: sendMessage.text ?: "",
                         null,
                         null,
@@ -3443,49 +3462,11 @@ abstract class SphinxRepository(
                         provisionalMessageId,
                         sendMessage.tribePaymentAmount ?: messagePrice,
                         replyUUID,
-                        threadUUID
+                        threadUUID,
+                        chat?.isTribe() ?: false
                     )
                 }
             }
-//
-//            val amount = messagePrice.value + (sendMessage.tribePaymentAmount ?: Sat(0)).value
-//
-//            val postMessageDto: PostMessageDto = try {
-//                PostMessageDto(
-//                    sendMessage.chatId?.value,
-//                    sendMessage.contactId?.value,
-//                    amount,
-//                    messagePrice.value,
-//                    sendMessage.replyUUID?.value,
-//                    messageContent,
-//                    remoteTextMap,
-//                    mediaKeyMap,
-//                    postMemeServerDto?.mime,
-//                    postMemeServerDto?.muid,
-//                    sendMessage.paidMessagePrice?.value,
-//                    sendMessage.isBoost,
-//                    sendMessage.isCall,
-//                    sendMessage.isTribePayment,
-//                    sendMessage.threadUUID?.value
-//                )
-//            } catch (e: IllegalArgumentException) {
-//                LOG.e(TAG, "Failed to create PostMessageDto", e)
-//
-//                provisionalMessageId?.let { provId ->
-//                    withContext(io) {
-//                        queries.messageUpdateStatus(MessageStatus.Failed, provId)
-//                    }
-//                }
-//
-//                return@launch
-//            }
-
-//            sendMessage(
-//                provisionalMessageId,
-//                postMessageDto,
-//                message?.first,
-//                media
-//            )
         }
     }
 
@@ -3979,7 +3960,7 @@ abstract class SphinxRepository(
                     contact.node_pub_key?.value ?: "",
                     provisionalId.value,
                     MessageType.DIRECT_PAYMENT,
-                    sendPayment.amount
+                    sendPayment.amount,
                 )
             }
 
@@ -4131,7 +4112,7 @@ abstract class SphinxRepository(
                     nnContact.nodePubKey?.value ?: "",
                     provisionalId.value,
                     MessageType.BOOST,
-                    owner.tipAmount?.value ?: 20L
+                    owner.tipAmount?.value ?: 20L,
                 )
             }
 
@@ -4465,7 +4446,7 @@ abstract class SphinxRepository(
                             contact.nodePubKey?.value ?: "",
                             provisionalId.value,
                             MessageType.PURCHASE_PROCESSING,
-                            price.value
+                            price.value,
                         )
                     }
                 }

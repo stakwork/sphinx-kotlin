@@ -7,6 +7,7 @@ import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.wrapper_chat.Chat
+import chat.sphinx.wrapper_common.DateTime
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.feed.FeedId
@@ -115,10 +116,12 @@ interface MessageRepository {
 
     suspend fun upsertMqttMessage(
         msg: Msg,
-        contactInfo: MsgSender,
+        msgSender: MsgSender,
         msgType: MessageType,
         msgUuid: MessageUUID,
         msgIndex: MessageId,
+        originalUuid: MessageUUID?,
+        date: DateTime?,
         isSent: Boolean,
         amount: Sat?
     )
