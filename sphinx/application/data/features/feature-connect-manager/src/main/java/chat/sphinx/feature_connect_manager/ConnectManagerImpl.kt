@@ -569,9 +569,10 @@ class ConnectManagerImpl(
             val type = rr.msgType?.toInt() ?: return
             val uuid = rr.msgUuid ?: return
             val index = rr.msgIndex ?: return
+            val msgTimestamp = rr.msgTimestamp?.toLong()
 
             notifyListeners {
-                onMessageSent(msg, sentTo, type, uuid, index)
+                onMessageSent(msg, sentTo, type, uuid, index, msgTimestamp)
             }
 
             Log.d("MQTT_MESSAGES", "=> received sentTo $sentTo")
@@ -584,9 +585,10 @@ class ConnectManagerImpl(
             val uuid = rr.msgUuid ?: return
             val index = rr.msgIndex ?: return
             val amount = rr.msgMsat?.toLong()
+            val msgTimestamp = rr.msgTimestamp?.toLong()
 
             notifyListeners {
-                onMessageReceived(msg, sender, type, uuid, index, amount)
+                onMessageReceived(msg, sender, type, uuid, index, amount, msgTimestamp)
             }
 
             Log.d("MQTT_MESSAGES", "=> received msg $msg, ${rr.msgUuid}, ${rr.msgIndex}")
@@ -616,6 +618,10 @@ class ConnectManagerImpl(
                     onOwnerRegistered(okKey, routeHint)
                 }
             }
+        }
+
+        rr.msgTimestamp?.let { msgTimestamp ->
+            Log.d("MQTT_MESSAGES", "=> msgTimestamp $msgTimestamp")
         }
 
         rr.msgMsat?.let { mSat ->

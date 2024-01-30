@@ -897,6 +897,7 @@ data class RunReturn (
     var `msgIndex`: String?, 
     var `msgSender`: String?, 
     var `msgMsat`: ULong?, 
+    var `msgTimestamp`: ULong?, 
     var `newBalance`: ULong?, 
     var `myContactInfo`: String?, 
     var `sentStatus`: String?, 
@@ -926,6 +927,7 @@ public object FfiConverterTypeRunReturn: FfiConverterRustBuffer<RunReturn> {
             FfiConverterOptionalString.read(buf),
             FfiConverterOptionalULong.read(buf),
             FfiConverterOptionalULong.read(buf),
+            FfiConverterOptionalULong.read(buf),
             FfiConverterOptionalString.read(buf),
             FfiConverterOptionalString.read(buf),
             FfiConverterOptionalString.read(buf),
@@ -950,6 +952,7 @@ public object FfiConverterTypeRunReturn: FfiConverterRustBuffer<RunReturn> {
             FfiConverterOptionalString.allocationSize(value.`msgIndex`) +
             FfiConverterOptionalString.allocationSize(value.`msgSender`) +
             FfiConverterOptionalULong.allocationSize(value.`msgMsat`) +
+            FfiConverterOptionalULong.allocationSize(value.`msgTimestamp`) +
             FfiConverterOptionalULong.allocationSize(value.`newBalance`) +
             FfiConverterOptionalString.allocationSize(value.`myContactInfo`) +
             FfiConverterOptionalString.allocationSize(value.`sentStatus`) +
@@ -974,6 +977,7 @@ public object FfiConverterTypeRunReturn: FfiConverterRustBuffer<RunReturn> {
             FfiConverterOptionalString.write(value.`msgIndex`, buf)
             FfiConverterOptionalString.write(value.`msgSender`, buf)
             FfiConverterOptionalULong.write(value.`msgMsat`, buf)
+            FfiConverterOptionalULong.write(value.`msgTimestamp`, buf)
             FfiConverterOptionalULong.write(value.`newBalance`, buf)
             FfiConverterOptionalString.write(value.`myContactInfo`, buf)
             FfiConverterOptionalString.write(value.`sentStatus`, buf)

@@ -396,6 +396,7 @@ abstract class SphinxRepository(
         msgUuid: String,
         msgIndex: String,
         amount: Long?,
+        msgTimestamp: Long?,
     ) {
         applicationScope.launch(io) {
             val message = msg.toMsg(moshi)
@@ -405,7 +406,7 @@ abstract class SphinxRepository(
             val messageType = msgType.toMessageType()
             val messageUUID = msgUuid.toMessageUUID() ?: return@launch
             val originalUUID = message.originalUuid?.toMessageUUID()
-            val date = message.date?.let { DateTime(Date(it)) }
+            val date = msgTimestamp?.let { DateTime(Date(it)) }
             val isSent = (accountOwner.value?.alias?.value == contactInfo.alias)
 
             when (messageType) {
@@ -444,7 +445,8 @@ abstract class SphinxRepository(
         contactPubKey: String,
         msgType: Int,
         msgUUID: String,
-        msgIndex: String
+        msgIndex: String,
+        msgTimestamp: Long?
     ) {
         applicationScope.launch(io) {
             val message = msg.toMsg(moshi)
@@ -454,7 +456,7 @@ abstract class SphinxRepository(
             val messageUUID = msgUUID.toMessageUUID() ?: return@launch
             val messageId = MessageId(msgIndex.toLong())
             val originalUUID = message.originalUuid?.toMessageUUID()
-            val date = message.date?.let { DateTime(Date(it)) }
+            val date = msgTimestamp?.let { DateTime(Date(it)) }
 
             upsertMqttMessage(
                 message,
@@ -587,7 +589,7 @@ abstract class SphinxRepository(
                 sender = if (isSent) ContactId(0) else contact?.id ?: ContactId(chatId) ,
                 receiver = ContactId(0),
                 amount = existingMessage?.amount ?: amount ?: Sat(0L),
-                date = DateTime.nowUTC().toDateTime(),
+                date = date ?: DateTime.nowUTC().toDateTime(),
                 expirationDate = null,
                 messageContent = null,
                 status = if (isSent) MessageStatus.Confirmed else MessageStatus.Received,

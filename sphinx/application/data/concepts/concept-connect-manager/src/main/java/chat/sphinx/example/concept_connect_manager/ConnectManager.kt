@@ -61,7 +61,9 @@ interface ConnectManagerListener {
         msgType: Int,
         msgUuid: String,
         msgIndex: String,
-        amount: Long?
+        amount: Long?,
+        msgTimestamp: Long?
+
     )
 
     fun onMessageSent(
@@ -70,6 +72,7 @@ interface ConnectManagerListener {
         msgType: Int,
         msgUUID: String,
         msgIndex: String,
+        msgTimestamp: Long?,
     )
 
     fun onMessageUUID(msgUUID: String, provisionalId: Long)
