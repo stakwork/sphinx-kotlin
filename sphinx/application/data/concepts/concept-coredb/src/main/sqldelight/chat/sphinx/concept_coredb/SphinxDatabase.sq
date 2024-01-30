@@ -889,6 +889,11 @@ UPDATE messageDbo
 SET uuid = :uuid
 WHERE id = ?;
 
+messageUpdateUUIDByUUID:
+UPDATE messageDbo
+SET uuid = :newUuid
+WHERE uuid = ?;
+
 messageUpsert {
     UPDATE messageDbo
     SET status = :status,

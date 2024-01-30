@@ -10,7 +10,9 @@ data class NewTribeDto(
     val pubkey: String,
     val route_hint: String,
     val member_count: Int?,
-    val last_active: Int?
+    val last_active: Int?,
+    val created: Long?,
+    val updated: Long?
 ) {
 
     var amount: Long? = null

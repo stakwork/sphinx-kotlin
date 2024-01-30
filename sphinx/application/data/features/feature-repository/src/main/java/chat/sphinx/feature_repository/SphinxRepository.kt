@@ -535,10 +535,8 @@ abstract class SphinxRepository(
 
         if (contact != null || chatTribe != null) {
 
-            val messageUuid = when {
-                contact != null -> msgUuid // Conversation
-                isSent -> originalUuid     // Tribe send
-                else -> msgUuid            // Tribe receive
+            originalUuid?.let { uuid ->
+                queries.messageUpdateUUIDByUUID(msgUuid, uuid )
             }
 
             val chatId = when {
@@ -547,7 +545,7 @@ abstract class SphinxRepository(
                 else -> 0L
             }
 
-            val existingMessage = queries.messageGetByUUID(messageUuid).executeAsOneOrNull()
+            val existingMessage = queries.messageGetByUUID(msgUuid).executeAsOneOrNull()
 
             if (isSent) {
                 val messageId = existingMessage?.id
@@ -578,18 +576,18 @@ abstract class SphinxRepository(
             }
 
             messageLock.withLock {
-                queries.messageDeleteByUUID(messageUuid)
+                queries.messageDeleteByUUID(msgUuid)
             }
 
             val newMessage = NewMessage(
                 id = msgIndex,
-                uuid = messageUuid,
+                uuid = msgUuid,
                 chatId = ChatId(chatId),
                 type = msgType,
                 sender = if (isSent) ContactId(0) else contact?.id ?: ContactId(chatId) ,
                 receiver = ContactId(0),
                 amount = existingMessage?.amount ?: amount ?: Sat(0L),
-                date = date ?: DateTime.nowUTC().toDateTime(),
+                date = DateTime.nowUTC().toDateTime(),
                 expirationDate = null,
                 messageContent = null,
                 status = if (isSent) MessageStatus.Confirmed else MessageStatus.Received,
