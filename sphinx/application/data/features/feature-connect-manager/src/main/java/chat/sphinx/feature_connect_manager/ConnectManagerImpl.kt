@@ -367,7 +367,7 @@ class ConnectManagerImpl(
 
             val now = getTimestampInMilliseconds()
             // Have to include al least 1 sat for tribe messages
-            val nnAmount = if (isTribe) 1000L else amount ?: 0L
+            val nnAmount = amount ?: if (isTribe) 1L else 0L
 
             try {
                 val message = send(
@@ -405,7 +405,7 @@ class ConnectManagerImpl(
             val now = getTimestampInMilliseconds()
 
             // Have to include al least 1 sat for tribe messages
-            val nnAmount = if (isTribe) 1000L else 0L
+            val nnAmount = if (isTribe) 1L else 0L
 
             try {
                 val message = send(

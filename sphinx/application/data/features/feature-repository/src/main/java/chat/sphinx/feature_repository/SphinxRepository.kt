@@ -4006,6 +4006,7 @@ abstract class SphinxRepository(
         applicationScope.launch(mainImmediate) {
             val queries = coreDB.getSphinxDatabaseQueries()
             val contact = getContactById(ContactId(chatId.value)).firstOrNull()
+            val chatTribe = getChatById(chatId).firstOrNull()
 
             val owner: Contact = accountOwner.value.let {
                 if (it != null) {
@@ -4110,16 +4111,19 @@ abstract class SphinxRepository(
                 }
             }
 
-            contact?.let { nnContact ->
+            val contactPubKey = contact?.nodePubKey?.value ?: chatTribe?.ownerPubKey?.value
+            val isTribe = (chatTribe != null)
+
+            if (contactPubKey != null) {
                 connectManager.sendMessage(
                     newBoostMessage,
-                    nnContact.nodePubKey?.value ?: "",
+                    contactPubKey,
                     provisionalId.value,
                     MessageType.BOOST,
                     owner.tipAmount?.value ?: 20L,
+                    isTribe
                 )
             }
-
         }.join()
 
         return response
