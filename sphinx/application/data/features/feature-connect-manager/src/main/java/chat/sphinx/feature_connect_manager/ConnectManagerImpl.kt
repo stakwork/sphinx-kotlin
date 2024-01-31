@@ -366,9 +366,13 @@ class ConnectManagerImpl(
         coroutineScope.launch {
 
             val now = getTimestampInMilliseconds()
-            // Have to include al least 1 sat for tribe messages
-            val nnAmount = amount ?: if (isTribe) 1L else 0L
 
+            // Have to include al least 1 sat for tribe messages
+            val nnAmount = when {
+                isTribe && (amount == null || amount == 0L) -> 1L
+                isTribe -> amount ?: 1L
+                else -> amount ?: 0L
+            }
             try {
                 val message = send(
                     ownerSeed!!,
