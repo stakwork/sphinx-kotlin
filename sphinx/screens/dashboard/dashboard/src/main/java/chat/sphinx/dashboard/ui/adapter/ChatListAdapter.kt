@@ -228,9 +228,7 @@ internal class ChatListAdapter(
                         }
                         is DashboardChat.Active.GroupOrTribe -> {
                             lifecycleOwner.lifecycleScope.launch {
-                                if (dashboardChat.chat.type.isGroup()) {
-                                    viewModel.dashboardNavigator.toChatGroup(dashboardChat.chat.id)
-                                } else if (dashboardChat.chat.type.isTribe()) {
+                                if (dashboardChat.chat.type.isTribe()) {
                                     viewModel.dashboardNavigator.toChatTribe(dashboardChat.chat.id)
                                 }
 
@@ -339,10 +337,6 @@ internal class ChatListAdapter(
                 textViewDashboardChatHolderName.text = chatName
                 textViewChatHolderCenteredName.text = chatName
 
-                // Lock
-//                val encryptedChat = dashboardChat.isEncrypted()
-//                imageViewChatHolderLock.invisibleIfFalse(encryptedChat)
-//                imageViewChatHolderCenteredLock.invisibleIfFalse(encryptedChat)
 
 //                val chatHasMessages = (dashboardChat as? DashboardChat.Active)?.message != null
 //                val activeChatOrInvite = ((dashboardChat is DashboardChat.Active && chatHasMessages) || dashboardChat is DashboardChat.Inactive.Invite)
@@ -365,6 +359,11 @@ internal class ChatListAdapter(
                             R.color.sphinxOrange
                         )
                     )
+                }
+                if (dashboardChat is DashboardChat.Active.GroupOrTribe) {
+                    imageViewChatHolderLock.text = getString(R.string.material_icon_name_lock)
+                    progressBarChatStatus.gone
+                    textViewChatStatus.gone
                 }
 
                 // Time
