@@ -3768,6 +3768,7 @@ abstract class SphinxRepository(
     override suspend fun deleteMessage(message: Message) {
         val queries = coreDB.getSphinxDatabaseQueries()
         val contact = getContactById(ContactId(message.chatId.value)).firstOrNull()
+        val chatTribe = getChatById(message.chatId).firstOrNull()
 
         if (message.id.isProvisionalMessage) {
             messageLock.withLock {
@@ -3795,10 +3796,14 @@ abstract class SphinxRepository(
                 null
             ).toJson(moshi)
 
-            contact?.nodePubKey?.value?.let { contactPubkey ->
+            val contactPubKey = contact?.nodePubKey?.value ?: chatTribe?.ownerPubKey?.value
+            val isTribe = (chatTribe != null)
+
+            if (contactPubKey != null) {
                 connectManager.deleteMessage(
                     newMessage,
-                    contactPubkey
+                    contactPubKey,
+                    isTribe
                 )
             }
         }

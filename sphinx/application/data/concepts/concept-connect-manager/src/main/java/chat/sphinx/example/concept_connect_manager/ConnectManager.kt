@@ -28,6 +28,7 @@ abstract class ConnectManager {
     abstract fun deleteMessage(
         sphinxMessage: String,
         contactPubKey: String,
+        isTribe: Boolean
     )
 
     abstract fun connectToTribe(

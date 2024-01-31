@@ -398,11 +398,14 @@ class ConnectManagerImpl(
 
     override fun deleteMessage(
         sphinxMessage: String,
-        contactPubKey: String
+        contactPubKey: String,
+        isTribe: Boolean
     ) {
         coroutineScope.launch {
-
             val now = getTimestampInMilliseconds()
+
+            // Have to include al least 1 sat for tribe messages
+            val nnAmount = if (isTribe) 1000L else 0L
 
             try {
                 val message = send(
@@ -414,7 +417,8 @@ class ConnectManagerImpl(
                     getCurrentUserState(),
                     ownerInfoStateFlow.value?.alias ?: "",
                     ownerInfoStateFlow.value?.picture ?: "",
-                    0.toULong()
+                    nnAmount.toULong(),
+                    isTribe
                 )
                 handleRunReturn(message, mqttClient!!)
 
