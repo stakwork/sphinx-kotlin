@@ -125,8 +125,10 @@
         android:layout_height="wrap_content"
         app:layout_constraintBottom_toTopOf="@+id/space_message_holder_bottom"
         app:layout_constraintEnd_toStartOf="@+id/space_message_holder_right"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toEndOf="@+id/space_message_holder_left"
         app:layout_constraintTop_toBottomOf="@+id/include_message_status_header"
+        app:layout_constraintVertical_bias="0.517"
         tools:visibility="visible" />
 
     <View

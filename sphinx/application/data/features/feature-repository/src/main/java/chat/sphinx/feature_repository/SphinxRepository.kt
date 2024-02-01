@@ -602,7 +602,7 @@ abstract class SphinxRepository(
                 recipientAlias = null,
                 recipientPic = null,
                 person = null,
-                threadUUID = null,
+                threadUUID = existingMessage?.thread_uuid ?: msg.threadUuid?.toThreadUUID(),
                 errorMessage = null,
                 isPinned = false,
                 messageContentDecrypted = if (msg.content?.isNotEmpty() == true) MessageContentDecrypted(msg.content!!) else null,
@@ -3288,14 +3288,7 @@ abstract class SphinxRepository(
                 }
             }
 
-            val threadUUID = when {
-                (sendMessage.isTribePayment) -> {
-                    null
-                }
-                else -> {
-                    sendMessage.threadUUID
-                }
-            }
+            val threadUUID = sendMessage.threadUUID
 
             val provisionalMessageId: MessageId? = chat?.let { chatDbo ->
                 // Build provisional message and insert
