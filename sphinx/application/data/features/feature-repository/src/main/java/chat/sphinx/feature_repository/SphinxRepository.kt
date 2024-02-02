@@ -6422,6 +6422,7 @@ abstract class SphinxRepository(
                             LOG.e(TAG, "Failed to upload image: ", networkResponse.exception)
                             null
                         }
+
                         is Response.Success -> {
                             "https://${memeServerHost.value}/public/${networkResponse.value.muid}"
                         }
@@ -6431,7 +6432,8 @@ abstract class SphinxRepository(
                 val ownerAlias = accountOwner.value?.alias?.value ?: "unknown"
 
                 val tribeJson = createTribe.toNewCreateTribe(ownerAlias, imgUrl).toJson()
-                val tribeServerPubKey = "0356091a4d8a1bfa8e2b9d19924bf8275dd057536e12427c557dd91a6cb1c03e8b"
+                val tribeServerPubKey =
+                    "0356091a4d8a1bfa8e2b9d19924bf8275dd057536e12427c557dd91a6cb1c03e8b"
 
                 connectManager.createTribe(tribeServerPubKey, tribeJson)
 
@@ -6480,9 +6482,8 @@ abstract class SphinxRepository(
 //                        )
 //                    }
 //                }
-//            } catch (e: Exception) { }
-        }.join()
-
+            } catch (e: Exception) { }
+        }
     }
 
     override suspend fun updateTribe(
