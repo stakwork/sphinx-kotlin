@@ -60,9 +60,6 @@ interface ChatRepository {
 
     suspend fun updateChatContentSeenAt(chatId: ChatId)
 
-    fun joinTribe(
-        tribeDto: TribeDto,
-    ): Flow<LoadResponse<ChatDto, ResponseError>>
 
     fun getAllDiscoverTribes(
         page: Int,
@@ -74,7 +71,7 @@ interface ChatRepository {
     suspend fun updateTribeInfo(chat: Chat): TribeData?
     suspend fun createTribe(createTribe: CreateTribe): Response<Any, ResponseError>
     suspend fun updateTribe(chatId: ChatId, createTribe: CreateTribe): Response<Any, ResponseError>
-    suspend fun exitAndDeleteTribe(chat: Chat): Response<Boolean, ResponseError>
+    suspend fun exitAndDeleteTribe(tribe: Chat)
 
     suspend fun pinMessage(
         chatId: ChatId,

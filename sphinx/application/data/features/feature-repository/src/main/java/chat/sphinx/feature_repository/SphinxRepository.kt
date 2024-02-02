@@ -59,7 +59,6 @@ import chat.sphinx.concept_repository_message.model.AttachmentInfo
 import chat.sphinx.concept_repository_message.model.SendMessage
 import chat.sphinx.concept_repository_message.model.SendPayment
 import chat.sphinx.concept_repository_message.model.SendPaymentRequest
-import chat.sphinx.concept_repository_message.model.formatAmount
 import chat.sphinx.concept_repository_subscription.SubscriptionRepository
 import chat.sphinx.concept_socket_io.SocketIOManager
 import chat.sphinx.concept_socket_io.SphinxSocketIOMessage
@@ -319,7 +318,7 @@ abstract class SphinxRepository(
         tribeRouteHint: String,
         tribeName: String
     ) {
-        connectManager.connectToTribe(tribeHost, tribePubKey, tribeRouteHint)
+        connectManager.joinTribe(tribeHost, tribePubKey, tribeRouteHint)
 
         applicationScope.launch {
             val queries = coreDB.getSphinxDatabaseQueries()
@@ -369,6 +368,52 @@ abstract class SphinxRepository(
                 }
             }
         }
+    }
+
+    override suspend fun exitAndDeleteTribe(tribe: Chat) {
+        val queries = coreDB.getSphinxDatabaseQueries()
+        applicationScope.launch(mainImmediate) {
+
+            val currentProvisionalId: MessageId? = withContext(io) {
+                queries.messageGetLowestProvisionalMessageId().executeAsOneOrNull()
+            }
+            val provisionalId = MessageId((currentProvisionalId?.value ?: 0L) - 1)
+
+            val newMessage = chat.sphinx.example.wrapper_mqtt.Message(
+                "",
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+            ).toJson(moshi)
+
+            tribe.ownerPubKey?.value?.let { pubKey ->
+                connectManager.sendMessage(
+                    newMessage,
+                    pubKey,
+                    provisionalId.value,
+                    MessageType.GROUP_LEAVE,
+                    1L,
+                    true
+                )
+            }
+
+            chatLock.withLock {
+                messageLock.withLock {
+                    withContext(io) {
+                        queries.transaction {
+                            deleteChatById(
+                                tribe.id,
+                                queries,
+                                latestMessageUpdatedTimeMap
+                            )
+                        }
+                    }
+                }
+            }
+        }.join()
     }
 
     override fun onNewContactRegistered(
@@ -866,11 +911,18 @@ abstract class SphinxRepository(
                         }
                     }
 
+                    val mediaKey = if (messageType is MessageType.Purchase.Accepted) {
+                        mediaMessage.media_key?.value
+                    }
+                    else {
+                        null
+                    }
+
                     val newPurchaseMessage = chat.sphinx.example.wrapper_mqtt.Message(
                         null,
                         null,
                         mediaMessage.media_token.value,
-                        mediaMessage.media_key?.value,
+                        mediaKey,
                         null,
                         null,
                         null
@@ -3403,13 +3455,14 @@ abstract class SphinxRepository(
 
                             pubKey?.let { nnPubKey ->
 
-                                val amount: String? = sendMessage.paidMessagePrice?.value?.formatAmount()
+                                val amount = sendMessage.paidMessagePrice?.value
 
                                 val mediaTokenValue = connectManager.generateMediaToken(
                                     nnPubKey,
                                     response.value.muid,
                                     MediaHost.DEFAULT.value,
-                                    amount
+                                    null,
+                                    amount,
                                 )
 
                                 val mediaKey = MediaKey(password.value.copyOf().joinToString(""))
@@ -3430,7 +3483,7 @@ abstract class SphinxRepository(
                                     message ?: sendMessage.text ?: "",
                                     media,
                                     mediaTokenValue?.toMediaToken(),
-                                    if (isPaidMessage) null else mediaKey,
+                                    if (isPaidMessage && chat?.isTribe() == false) null else mediaKey,
                                     messageType,
                                     provisionalMessageId,
                                     sendMessage.tribePaymentAmount ?: messagePrice,
@@ -3901,7 +3954,8 @@ abstract class SphinxRepository(
                     contact?.node_pub_key?.value ?: "",
                     sendPayment.paymentTemplate?.muid ?: "",
                     MediaHost.DEFAULT.value,
-                    sendPayment.paymentTemplate?.getDimensions()
+                    sendPayment.paymentTemplate?.getDimensions(),
+                    null
                 )
 
                 queries.messageMediaUpsert(
@@ -4367,6 +4421,8 @@ abstract class SphinxRepository(
                         getContactById(ContactId(chatId.value)).firstOrNull()
                     }
 
+                    val chatTribe = getChatById(message.chatId).firstOrNull()
+
                     val currentProvisionalId: MessageId? = withContext(io) {
                         queries.messageGetLowestProvisionalMessageId().executeAsOneOrNull()
                     }
@@ -4410,7 +4466,6 @@ abstract class SphinxRepository(
                         thread = null
                     )
 
-
                     val newPurchaseMessage = chat.sphinx.example.wrapper_mqtt.Message(
                         null,
                         null,
@@ -4441,13 +4496,17 @@ abstract class SphinxRepository(
                         }
                     }
 
-                    contact?.let { nnContact ->
+                    val contactPubKey = contact?.nodePubKey?.value ?: chatTribe?.ownerPubKey?.value
+                    val isTribe = (chatTribe != null)
+
+                    if (contactPubKey != null) {
                         connectManager.sendMessage(
                             newPurchaseMessage,
-                            contact.nodePubKey?.value ?: "",
+                            contactPubKey,
                             provisionalId.value,
                             MessageType.PURCHASE_PROCESSING,
                             price.value,
+                            isTribe
                         )
                     }
                 }
@@ -4514,84 +4573,6 @@ abstract class SphinxRepository(
                 )
             }
         }
-    }
-
-    override fun joinTribe(
-        tribeDto: TribeDto
-    ): Flow<LoadResponse<ChatDto, ResponseError>> = flow {
-        val queries = coreDB.getSphinxDatabaseQueries()
-        var response: Response<ChatDto, ResponseError>? = null
-        val memeServerHost = MediaHost.DEFAULT
-
-        emit(LoadResponse.Loading)
-
-        applicationScope.launch(mainImmediate) {
-
-            tribeDto.myPhotoUrl = tribeDto.profileImgFile?.let { imgFile ->
-                // If an image file is provided we should upload it
-                val token = memeServerTokenHandler.retrieveAuthenticationToken(memeServerHost)
-                    ?: throw RuntimeException("MemeServerAuthenticationToken retrieval failure")
-
-                val networkResponse = networkQueryMemeServer.uploadAttachment(
-                    authenticationToken = token,
-                    mediaType = MediaType.Image("${MediaType.IMAGE}/${imgFile.extension}"),
-                    stream = object : InputStreamProvider() {
-                        override fun newInputStream(): InputStream = imgFile.inputStream()
-                    },
-                    fileName = imgFile.name,
-                    contentLength = imgFile.length(),
-                    memeServerHost = memeServerHost,
-                )
-                @Exhaustive
-                when (networkResponse) {
-                    is Response.Error -> {
-                        LOG.e(TAG, "Failed to upload image: ", networkResponse.exception)
-                        response = networkResponse
-                        null
-                    }
-                    is Response.Success -> {
-                        "https://${memeServerHost.value}/public/${networkResponse.value.muid}"
-                    }
-                }
-            }
-
-//            networkQueryChat.joinTribe(tribeDto).collect { loadResponse ->
-//                @Exhaustive
-//                when (loadResponse) {
-//                    LoadResponse.Loading -> {
-//                    }
-//                    is Response.Error -> {
-//                        response = loadResponse
-//                    }
-//                    is Response.Success -> {
-//                        chatLock.withLock {
-//                            withContext(io) {
-//                                queries.transaction {
-//                                    upsertChat(
-//                                        loadResponse.value,
-//                                        moshi,
-//                                        chatSeenMap,
-//                                        queries,
-//                                        null,
-//                                        accountOwner.value?.nodePubKey
-//                                    )
-//                                    updateNewChatTribeData(
-//                                        tribeDto,
-//                                        ChatId(loadResponse.value.id),
-//                                        queries
-//                                    )
-//                                }
-//                            }
-//                        }
-//
-//                        response = loadResponse
-//                    }
-//                }
-//            }
-
-        }.join()
-
-        emit(response ?: Response.Error(ResponseError("")))
     }
 
     override fun getAllDiscoverTribes(
@@ -6413,44 +6394,6 @@ abstract class SphinxRepository(
     }
 
 
-    override suspend fun exitAndDeleteTribe(chat: Chat): Response<Boolean, ResponseError> {
-        var response: Response<Boolean, ResponseError>? = null
-
-        applicationScope.launch(mainImmediate) {
-            networkQueryChat.deleteChat(chat.id).collect { loadResponse ->
-                when (loadResponse) {
-                    is LoadResponse.Loading -> {
-                    }
-
-                    is Response.Error -> {
-                        response = loadResponse
-                    }
-
-                    is Response.Success -> {
-                        response = Response.Success(true)
-                        val queries = coreDB.getSphinxDatabaseQueries()
-
-                        chatLock.withLock {
-                            messageLock.withLock {
-                                withContext(io) {
-                                    queries.transaction {
-                                        deleteChatById(
-                                            loadResponse.value["chat_id"]?.toChatId()
-                                                ?: chat.id,
-                                            queries,
-                                            latestMessageUpdatedTimeMap
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }.join()
-
-        return response ?: Response.Error(ResponseError(("Failed to exit tribe")))
-    }
 
     override suspend fun createTribe(createTribe: CreateTribe): Response<Any, ResponseError> {
         var response: Response<Any, ResponseError> =

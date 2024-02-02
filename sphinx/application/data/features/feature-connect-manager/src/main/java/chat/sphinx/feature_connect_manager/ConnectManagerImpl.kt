@@ -40,6 +40,7 @@ import uniffi.sphinxrs.initialSetup
 import uniffi.sphinxrs.joinTribe
 import uniffi.sphinxrs.makeMediaToken
 import uniffi.sphinxrs.makeMediaTokenWithMeta
+import uniffi.sphinxrs.makeMediaTokenWithPrice
 import uniffi.sphinxrs.mnemonicFromEntropy
 import uniffi.sphinxrs.mnemonicToSeed
 import uniffi.sphinxrs.rootSignMs
@@ -432,7 +433,7 @@ class ConnectManagerImpl(
         }
     }
 
-    override fun connectToTribe(
+    override fun joinTribe(
         tribeHost: String,
         tribePubKey: String,
         tribeRouteHint: String
@@ -463,7 +464,8 @@ class ConnectManagerImpl(
         contactPubKey: String,
         muid: String,
         host: String,
-        metaData: String?
+        metaData: String?,
+        amount: Long?
     ): String? {
         val now = getTimestampInMilliseconds()
 
@@ -478,8 +480,8 @@ class ConnectManagerImpl(
         }
 
         return try {
-            if (metaData != null) {
-                makeMediaTokenWithMeta(
+            if (amount != null && amount > 0) {
+                makeMediaTokenWithPrice(
                     ownerSeed!!,
                     now,
                     getCurrentUserState(),
@@ -487,18 +489,31 @@ class ConnectManagerImpl(
                     muid,
                     contactPubKey,
                     yearFromNow!!,
-                    metaData
+                    amount.toULong()
                 )
             } else {
-                makeMediaToken(
-                    ownerSeed!!,
-                    now,
-                    getCurrentUserState(),
-                    host,
-                    muid,
-                    contactPubKey,
-                    yearFromNow!!
-                )
+                if (metaData != null) {
+                    makeMediaTokenWithMeta(
+                        ownerSeed!!,
+                        now,
+                        getCurrentUserState(),
+                        host,
+                        muid,
+                        contactPubKey,
+                        yearFromNow!!,
+                        metaData
+                    )
+                } else {
+                    makeMediaToken(
+                        ownerSeed!!,
+                        now,
+                        getCurrentUserState(),
+                        host,
+                        muid,
+                        contactPubKey,
+                        yearFromNow!!
+                    )
+                }
             }
         } catch (e: Exception) {
             Log.d("MQTT_MESSAGES", "Error to generate media token $e")

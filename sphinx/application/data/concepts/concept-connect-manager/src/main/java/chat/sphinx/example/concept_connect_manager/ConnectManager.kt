@@ -31,7 +31,7 @@ abstract class ConnectManager {
         isTribe: Boolean
     )
 
-    abstract fun connectToTribe(
+    abstract fun joinTribe(
         tribeHost: String,
         tribePubKey: String,
         tribeRouteHint: String
@@ -41,7 +41,8 @@ abstract class ConnectManager {
         contactPubKey: String,
         muid: String,
         host: String,
-        metaData: String?
+        metaData: String?,
+        amount: Long?
     ): String?
 
     abstract fun setLspIp(ip: String)

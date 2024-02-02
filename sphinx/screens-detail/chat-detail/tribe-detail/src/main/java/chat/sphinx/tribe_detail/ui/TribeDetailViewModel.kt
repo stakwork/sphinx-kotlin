@@ -11,9 +11,7 @@ import chat.sphinx.concept_image_loader.Transformation
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_service_media.MediaPlayerServiceController
-import chat.sphinx.concept_service_media.UserAction
 import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
-import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.logger.SphinxLogger
 import chat.sphinx.logger.e
@@ -27,18 +25,13 @@ import chat.sphinx.tribe_detail.R
 import chat.sphinx.tribe_detail.navigation.TribeDetailNavigator
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_chat.ChatAlias
-import chat.sphinx.wrapper_chat.ChatMetaData
 import chat.sphinx.wrapper_chat.isTribeOwnedByAccount
-import chat.sphinx.wrapper_common.ItemId
 import chat.sphinx.wrapper_common.dashboard.ChatId
-import chat.sphinx.wrapper_common.lightning.Sat
-import chat.sphinx.wrapper_common.toItemId
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_meme_server.PublicAttachmentInfo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
-import io.matthewnelson.android_feature_viewmodel.currentViewState
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
@@ -263,14 +256,9 @@ internal class TribeDetailViewModel @Inject constructor(
             submitSideEffect(
                 TribeDetailSideEffect.AlertConfirmDeleteTribe(chat) {
                     viewModelScope.launch(mainImmediate) {
-                        when (chatRepository.exitAndDeleteTribe(chat)) {
-                            is Response.Success -> {
-                                navigator.goBackToDashboard()
-                            }
-                            is Response.Error -> {
-                                submitSideEffect(TribeDetailSideEffect.FailedToDeleteTribe)
-                            }
-                        }
+                        chatRepository.exitAndDeleteTribe(chat)
+                        navigator.goBackToDashboard()
+
                     }
                 }
             )
@@ -297,14 +285,8 @@ internal class TribeDetailViewModel @Inject constructor(
             submitSideEffect(
                 TribeDetailSideEffect.AlertConfirmExitTribe(chat) {
                     viewModelScope.launch(mainImmediate) {
-                        when (chatRepository.exitAndDeleteTribe(chat)) {
-                            is Response.Success -> {
-                                navigator.goBackToDashboard()
-                            }
-                            is Response.Error -> {
-                                submitSideEffect(TribeDetailSideEffect.FailedToExitTribe)
-                            }
-                        }
+                        chatRepository.exitAndDeleteTribe(chat)
+                        navigator.goBackToDashboard()
                     }
                 }
             )

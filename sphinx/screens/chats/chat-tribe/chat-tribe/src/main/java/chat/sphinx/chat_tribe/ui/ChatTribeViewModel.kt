@@ -37,7 +37,6 @@ import chat.sphinx.logger.SphinxLogger
 import chat.sphinx.menu_bottom.ui.MenuBottomViewState
 import chat.sphinx.wrapper_chat.*
 import chat.sphinx.wrapper_common.PhotoUrl
-import chat.sphinx.wrapper_common.chatTimeFormat
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.lightning.Sat
@@ -45,8 +44,6 @@ import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.message.MessageUUID
 import chat.sphinx.wrapper_common.util.getInitials
 import chat.sphinx.wrapper_contact.Contact
-import chat.sphinx.wrapper_contact.getColorKey
-import chat.sphinx.wrapper_contact.toContactAlias
 import chat.sphinx.wrapper_feed.FeedPlayerSpeed
 import chat.sphinx.wrapper_message.*
 import chat.sphinx.wrapper_podcast.Podcast
@@ -360,14 +357,8 @@ class ChatTribeViewModel @Inject constructor(
         viewModelScope.launch(mainImmediate) {
             chatRepository.getChatById(chatId).firstOrNull()?.let { chat ->
                 if (chat.type.isTribe()) {
-                    when (chatRepository.exitAndDeleteTribe(chat)) {
-                        is Response.Error -> {
-                            submitSideEffect(ChatSideEffect.Notify(app.getString(R.string.failed_to_delete_tribe)))
-                        }
-                        is Response.Success -> {
-                            chatNavigator.popBackStack()
-                        }
-                    }
+                    chatRepository.exitAndDeleteTribe(chat)
+                    chatNavigator.popBackStack()
                 }
             }
         }.join()

@@ -278,7 +278,7 @@ internal sealed class MessageHolderViewState(
                         )
                     }
 
-                    val lastReplyUser = replies.last().let {
+                    val lastReplyUser = replies.first().let {
                         if (it.sender == owner.id) {
                             ownerUserHolder
                         } else {
@@ -293,28 +293,28 @@ internal sealed class MessageHolderViewState(
                     val sent = message.sender == chat.contactIds.firstOrNull()
 
                     val lastReplyAttachment: LayoutState.Bubble.ContainerSecond? =
-                        when(replies.last().messageMedia?.mediaType) {
+                        when(replies.first().messageMedia?.mediaType) {
                             is MediaType.Image -> {
                                 getImageAttachment(
-                                    replies.last(),
+                                    replies.first(),
                                     true
                                 )
                             }
                             is MediaType.Video -> {
                                 getVideoAttachment(
-                                    replies.last(),
+                                    replies.first(),
                                     true
                                 )
                             }
                             is MediaType.Audio -> {
                                 getAudioAttachment(
-                                    replies.last(),
+                                    replies.first(),
                                     true
                                 )
                             }
                             is MediaType.Pdf -> {
                                 getFileAttachment(
-                                    replies.last(),
+                                    replies.first(),
                                     true
                                 )
                             }
@@ -324,8 +324,8 @@ internal sealed class MessageHolderViewState(
                     LayoutState.Bubble.ContainerThird.Thread(
                         replyCount = replies.size,
                         users = users,
-                        lastReplyMessage = replies.last().retrieveTextToShow(),
-                        lastReplyDate = replies.last().date.chatTimeFormat(),
+                        lastReplyMessage = replies.first().retrieveTextToShow(),
+                        lastReplyDate = replies.first().date.chatTimeFormat(),
                         lastReplyUser = lastReplyUser,
                         isSentMessage = sent,
                         mediaAttachment = lastReplyAttachment
