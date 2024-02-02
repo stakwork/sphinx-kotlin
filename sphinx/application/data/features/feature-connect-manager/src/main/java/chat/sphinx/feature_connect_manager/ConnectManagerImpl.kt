@@ -460,6 +460,25 @@ class ConnectManagerImpl(
         }
     }
 
+    override fun createTribe(tribeServerPubKey: String, tribeJson: String) {
+
+        val now = getTimestampInMilliseconds()
+
+        try {
+           val createTribe = uniffi.sphinxrs.createTribe(
+                ownerSeed!!,
+                now,
+                getCurrentUserState(),
+                tribeServerPubKey,
+                tribeJson
+            )
+            handleRunReturn(createTribe, mqttClient!!)
+        }
+        catch (e: Exception) {
+            Log.e("MQTT_MESSAGES", "createTribe ${e.message}")
+        }
+    }
+
     override fun generateMediaToken(
         contactPubKey: String,
         muid: String,

@@ -6395,9 +6395,7 @@ abstract class SphinxRepository(
 
 
 
-    override suspend fun createTribe(createTribe: CreateTribe): Response<Any, ResponseError> {
-        var response: Response<Any, ResponseError> =
-            Response.Error(ResponseError(("Failed to exit tribe")))
+    override suspend fun createTribe(createTribe: CreateTribe) {
         val memeServerHost = MediaHost.DEFAULT
 
         applicationScope.launch(mainImmediate) {
@@ -6422,7 +6420,6 @@ abstract class SphinxRepository(
                     when (networkResponse) {
                         is Response.Error -> {
                             LOG.e(TAG, "Failed to upload image: ", networkResponse.exception)
-                            response = networkResponse
                             null
                         }
                         is Response.Success -> {
@@ -6431,50 +6428,61 @@ abstract class SphinxRepository(
                     }
                 }
 
-                networkQueryChat.createTribe(
-                    createTribe.toPostGroupDto(imgUrl)
-                ).collect { loadResponse ->
-                    when (loadResponse) {
-                        is LoadResponse.Loading -> {
-                        }
+                val ownerAlias = accountOwner.value?.alias?.value ?: "unknown"
 
-                        is Response.Error -> {
-                            response = loadResponse
-                            LOG.e(TAG, "Failed to create tribe: ", loadResponse.exception)
-                        }
-                        is Response.Success -> {
-                            loadResponse.value?.let { chatDto ->
-                                response = Response.Success(chatDto)
-                                val queries = coreDB.getSphinxDatabaseQueries()
+                val tribeJson = createTribe.toNewCreateTribe(ownerAlias, imgUrl).toJson()
+                val tribeServerPubKey = "0356091a4d8a1bfa8e2b9d19924bf8275dd057536e12427c557dd91a6cb1c03e8b"
 
-                                chatLock.withLock {
-                                    messageLock.withLock {
-                                        withContext(io) {
-                                            queries.transaction {
-                                                upsertChat(
-                                                    chatDto,
-                                                    moshi,
-                                                    chatSeenMap,
-                                                    queries,
-                                                    null,
-                                                    accountOwner.value?.nodePubKey
-                                                )
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            } catch (e: Exception) {
-                response = Response.Error(
-                    ResponseError("Failed to update Chat Profile", e)
-                )
-            }
+                connectManager.createTribe(tribeServerPubKey, tribeJson)
+
+//                val queries = coreDB.getSphinxDatabaseQueries()
+//                val tribeId = queries.chatGetMaxTribeId().executeAsOneOrNull()?.let { it.MAX?.minus(1) }
+//                    ?: (Long.MAX_VALUE - 1)
+//                val now: String = DateTime.nowUTC()
+//
+//                val newTribe = Chat(
+//                    id = ChatId(tribeId),
+//                    uuid = ChatUUID(createTribe.name),
+//                    name = ChatName(createTribe.name),
+//                    photoUrl = imgUrl?.toPhotoUrl(),
+//                    type = ChatType.Tribe,
+//                    status = ChatStatus.Approved,
+//                    contactIds = listOf(ContactId(0), ContactId(tribeId)),
+//                    isMuted = ChatMuted.False,
+//                    createdAt = now.toDateTime(),
+//                    groupKey = null,
+//                    host = null,
+//                    pricePerMessage = createTribe.pricePerMessage?.let { Sat(it) },
+//                    escrowAmount = createTribe.escrowAmount?.let { Sat(it) },
+//                    unlisted = if (createTribe.unlisted == true) ChatUnlisted.True else ChatUnlisted.False,
+//                    privateTribe = if (createTribe.private == true) ChatPrivate.True else ChatPrivate.False,
+//                    ownerPubKey = LightningNodePubKey(tribeServerPubKey),
+//                    seen = Seen.False,
+//                    metaData = null,
+//                    myPhotoUrl = accountOwner.value?.photoUrl,
+//                    myAlias = ChatAlias(ownerAlias),
+//                    pendingContactIds = emptyList(),
+//                    latestMessageId = null,
+//                    contentSeenAt = null,
+//                    pinedMessage = null,
+//                    notify = NotificationLevel.SeeAll
+//                )
+//
+//                chatLock.withLock {
+//                    queries.transaction {
+//                        upsertNewChat(
+//                            newTribe,
+//                            moshi,
+//                            SynchronizedMap<ChatId, Seen>(),
+//                            queries,
+//                            null,
+//                            accountOwner.value?.nodePubKey
+//                        )
+//                    }
+//                }
+//            } catch (e: Exception) { }
         }.join()
 
-        return response
     }
 
     override suspend fun updateTribe(

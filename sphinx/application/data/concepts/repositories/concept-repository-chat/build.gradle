@@ -8,6 +8,7 @@ dependencies {
     api project(path: ':sphinx:application:common:wrappers:wrapper-chat')
     api project(path: ':sphinx:application:common:wrappers:wrapper-meme-server')
     api project(path: ':sphinx:application:common:wrappers:wrapper-contact')
+    api project(path: ':sphinx:application:common:wrappers:wrapper-mqtt')
 
     implementation project(path: ':sphinx:application:network:concepts:queries:concept-network-query-chat')
 

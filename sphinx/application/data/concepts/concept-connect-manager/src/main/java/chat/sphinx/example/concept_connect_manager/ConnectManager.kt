@@ -37,6 +37,11 @@ abstract class ConnectManager {
         tribeRouteHint: String
     )
 
+    abstract fun createTribe(
+        tribeServerPubKey: String,
+        tribeJson: String
+    )
+
     abstract fun generateMediaToken(
         contactPubKey: String,
         muid: String,

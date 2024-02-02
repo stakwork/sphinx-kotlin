@@ -954,12 +954,11 @@ internal class DashboardViewModel @Inject constructor(
         }
 
         viewModelScope.launch(mainImmediate) {
-            val owner = getOwner()
 
             chatListFooterButtonsViewStateContainer.updateViewState(
                 ChatListFooterButtonsViewState.ButtonsVisibility(
                     addFriendVisible = true,
-                    createTribeVisible = !owner.isOnVirtualNode(),
+                    createTribeVisible = true,
                     discoverTribesVisible = false
                 )
             )

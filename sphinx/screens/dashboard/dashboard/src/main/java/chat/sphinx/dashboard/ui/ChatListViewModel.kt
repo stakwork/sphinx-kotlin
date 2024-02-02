@@ -199,7 +199,7 @@ internal class ChatListViewModel @Inject constructor(
             chatListFooterButtonsViewStateContainer.updateViewState(
                 ChatListFooterButtonsViewState.ButtonsVisibility(
                     addFriendVisible = args.argChatListType == ChatType.CONVERSATION,
-                    createTribeVisible = args.argChatListType == ChatType.TRIBE && !owner.isOnVirtualNode(),
+                    createTribeVisible = args.argChatListType == ChatType.TRIBE,
                     discoverTribesVisible = args.argChatListType == ChatType.TRIBE,
                 )
             )
