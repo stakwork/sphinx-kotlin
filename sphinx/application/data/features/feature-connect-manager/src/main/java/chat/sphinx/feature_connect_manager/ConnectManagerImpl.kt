@@ -600,8 +600,19 @@ class ConnectManagerImpl(
                 onNewBalance(newBalance.toLong())
             }
         }
+        // Subscribe to tribe
+        rr.newSubscription?.let { newSubscription ->
+            mqttClient?.let { client ->
+                val qos = IntArray(1) { 1 }
+                client.subscribe(arrayOf(newSubscription), qos)
+            }
+            Log.d("MQTT_MESSAGES", "===> newSubscription $newSubscription")
+        }
 
         rr.newTribe?.let { newTribe ->
+            notifyListeners {
+                onNewTribe(newTribe)
+            }
             Log.d("MQTT_MESSAGES", "===> newTribe $newTribe")
         }
 

@@ -82,6 +82,8 @@ interface ConnectManagerListener {
         msgTimestamp: Long?,
     )
 
+    fun onNewTribe(newTribe: String)
+
     fun onMessageUUID(msgUUID: String, provisionalId: Long)
 
     fun onUpdateUserState(userState: String)

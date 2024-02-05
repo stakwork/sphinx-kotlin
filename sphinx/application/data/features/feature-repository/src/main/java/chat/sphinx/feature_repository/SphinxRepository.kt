@@ -68,6 +68,7 @@ import chat.sphinx.conceptcoredb.*
 import chat.sphinx.example.concept_connect_manager.ConnectManager
 import chat.sphinx.example.concept_connect_manager.ConnectManagerListener
 import chat.sphinx.example.concept_connect_manager.model.OwnerInfo
+import chat.sphinx.example.wrapper_mqtt.NewCreateTribe.Companion.toNewCreateTribe
 import chat.sphinx.example.wrapper_mqtt.toLspChannelInfo
 import chat.sphinx.feature_repository.mappers.action_track.*
 import chat.sphinx.feature_repository.mappers.chat.ChatDboPresenterMapper
@@ -514,6 +515,61 @@ abstract class SphinxRepository(
                 true,
                 null
             )
+        }
+    }
+
+    override fun onNewTribe(newTribe: String) {
+        applicationScope.launch {
+            val queries = coreDB.getSphinxDatabaseQueries()
+            val newCreateTribe = newTribe.toNewCreateTribe(moshi)
+
+            val tribeId = queries.chatGetMaxTribeId().executeAsOneOrNull()?.let { it.MAX?.minus(1) }
+                ?: (Long.MAX_VALUE - 1)
+            val now: String = DateTime.nowUTC()
+
+            newCreateTribe.pubkey?.let { tribePubKey ->
+
+                val chatTribe = Chat(
+                    id = ChatId(tribeId),
+                    uuid = ChatUUID(tribePubKey),
+                    name = ChatName(newCreateTribe.name),
+                    photoUrl = newCreateTribe.img?.toPhotoUrl(),
+                    type = ChatType.Tribe,
+                    status = ChatStatus.Approved,
+                    contactIds = listOf(ContactId(0), ContactId(tribeId)),
+                    isMuted = ChatMuted.False,
+                    createdAt = newCreateTribe.created?.toDateTime() ?: now.toDateTime(),
+                    groupKey = null,
+                    host = null,
+                    pricePerMessage = newCreateTribe.price_per_message?.let { Sat(it) },
+                    escrowAmount = newCreateTribe.escrow_amount?.let { Sat(it) },
+                    unlisted = if (newCreateTribe.unlisted == true) ChatUnlisted.True else ChatUnlisted.False,
+                    privateTribe = if (newCreateTribe.private == true) ChatPrivate.True else ChatPrivate.False,
+                    ownerPubKey = LightningNodePubKey(tribePubKey),
+                    seen = Seen.False,
+                    metaData = null,
+                    myPhotoUrl = accountOwner.value?.photoUrl,
+                    myAlias = ChatAlias(newCreateTribe.owner_alias),
+                    pendingContactIds = emptyList(),
+                    latestMessageId = null,
+                    contentSeenAt = null,
+                    pinedMessage = null,
+                    notify = NotificationLevel.SeeAll
+                )
+
+                chatLock.withLock {
+                    queries.transaction {
+                        upsertNewChat(
+                            chatTribe,
+                            moshi,
+                            SynchronizedMap<ChatId, Seen>(),
+                            queries,
+                            null,
+                            accountOwner.value?.nodePubKey
+                        )
+                    }
+                }
+            }
         }
     }
 
@@ -6432,56 +6488,10 @@ abstract class SphinxRepository(
                 val ownerAlias = accountOwner.value?.alias?.value ?: "unknown"
 
                 val tribeJson = createTribe.toNewCreateTribe(ownerAlias, imgUrl).toJson()
-                val tribeServerPubKey =
-                    "0356091a4d8a1bfa8e2b9d19924bf8275dd057536e12427c557dd91a6cb1c03e8b"
+                val tribeServerPubKey = "0356091a4d8a1bfa8e2b9d19924bf8275dd057536e12427c557dd91a6cb1c03e8b"
 
                 connectManager.createTribe(tribeServerPubKey, tribeJson)
 
-//                val queries = coreDB.getSphinxDatabaseQueries()
-//                val tribeId = queries.chatGetMaxTribeId().executeAsOneOrNull()?.let { it.MAX?.minus(1) }
-//                    ?: (Long.MAX_VALUE - 1)
-//                val now: String = DateTime.nowUTC()
-//
-//                val newTribe = Chat(
-//                    id = ChatId(tribeId),
-//                    uuid = ChatUUID(createTribe.name),
-//                    name = ChatName(createTribe.name),
-//                    photoUrl = imgUrl?.toPhotoUrl(),
-//                    type = ChatType.Tribe,
-//                    status = ChatStatus.Approved,
-//                    contactIds = listOf(ContactId(0), ContactId(tribeId)),
-//                    isMuted = ChatMuted.False,
-//                    createdAt = now.toDateTime(),
-//                    groupKey = null,
-//                    host = null,
-//                    pricePerMessage = createTribe.pricePerMessage?.let { Sat(it) },
-//                    escrowAmount = createTribe.escrowAmount?.let { Sat(it) },
-//                    unlisted = if (createTribe.unlisted == true) ChatUnlisted.True else ChatUnlisted.False,
-//                    privateTribe = if (createTribe.private == true) ChatPrivate.True else ChatPrivate.False,
-//                    ownerPubKey = LightningNodePubKey(tribeServerPubKey),
-//                    seen = Seen.False,
-//                    metaData = null,
-//                    myPhotoUrl = accountOwner.value?.photoUrl,
-//                    myAlias = ChatAlias(ownerAlias),
-//                    pendingContactIds = emptyList(),
-//                    latestMessageId = null,
-//                    contentSeenAt = null,
-//                    pinedMessage = null,
-//                    notify = NotificationLevel.SeeAll
-//                )
-//
-//                chatLock.withLock {
-//                    queries.transaction {
-//                        upsertNewChat(
-//                            newTribe,
-//                            moshi,
-//                            SynchronizedMap<ChatId, Seen>(),
-//                            queries,
-//                            null,
-//                            accountOwner.value?.nodePubKey
-//                        )
-//                    }
-//                }
             } catch (e: Exception) { }
         }
     }
