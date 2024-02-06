@@ -283,6 +283,8 @@ internal class TribeMembersListAdapter(
             onStopSupervisor.scope.launch(viewModel.mainImmediate) {
                 layoutConstraintGroupActionJoinRequestProgressBarContainer.visible
 
+                // send message
+
                 when (viewModel.processMemberRequest(contactId, type)) {
                     LoadResponse.Loading -> { }
                     is Response.Error -> {

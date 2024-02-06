@@ -53,7 +53,7 @@ class CreateTribe private constructor(
         private var img: File? = null
         private var imgUrl: String? = null
         private var unlisted: Boolean? = false
-        private var private: Boolean? = false
+        private var private: Boolean? = true
         private var appUrl: AppUrl? = null
         private var feedUrl: FeedUrl? = null
         private var feedType: FeedType? = null

@@ -206,7 +206,7 @@ internal class CreateTribeFragment: SideEffectDetailFragment<
                 viewModel.createTribeBuilder.setUnlisted(!isChecked)
             }
             switchTribeApproveMembershipOnSphinx.setOnCheckedChangeListener { _, isChecked ->
-                viewModel.createTribeBuilder.setPrivate(isChecked)
+                viewModel.createTribeBuilder.setPrivate(!isChecked)
             }
 
             buttonCreateTribe.setOnClickListener {

@@ -319,7 +319,7 @@ abstract class SphinxRepository(
         tribeRouteHint: String,
         tribeName: String
     ) {
-        connectManager.joinTribe(tribeHost, tribePubKey, tribeRouteHint)
+        connectManager.joinToTribe(tribeHost, tribePubKey, tribeRouteHint)
 
         applicationScope.launch {
             val queries = coreDB.getSphinxDatabaseQueries()
@@ -390,7 +390,7 @@ abstract class SphinxRepository(
                 null
             ).toJson(moshi)
 
-            tribe.ownerPubKey?.value?.let { pubKey ->
+            tribe.uuid?.value?.let { pubKey ->
                 connectManager.sendMessage(
                     newMessage,
                     pubKey,
@@ -545,7 +545,7 @@ abstract class SphinxRepository(
                     escrowAmount = newCreateTribe.escrow_amount?.let { Sat(it) },
                     unlisted = if (newCreateTribe.unlisted == true) ChatUnlisted.True else ChatUnlisted.False,
                     privateTribe = if (newCreateTribe.private == true) ChatPrivate.True else ChatPrivate.False,
-                    ownerPubKey = LightningNodePubKey(tribePubKey),
+                    ownerPubKey = accountOwner.value?.nodePubKey,
                     seen = Seen.False,
                     metaData = null,
                     myPhotoUrl = accountOwner.value?.photoUrl,
@@ -3507,7 +3507,7 @@ abstract class SphinxRepository(
                         }
 
                         is Response.Success -> {
-                            val pubKey = contact?.nodePubKey?.value ?: chat?.ownerPubKey?.value
+                            val pubKey = contact?.nodePubKey?.value ?: chat?.uuid?.value
 
                             pubKey?.let { nnPubKey ->
 
@@ -3535,7 +3535,7 @@ abstract class SphinxRepository(
                                 )
 
                                 sendNewMessage(
-                                    contact?.nodePubKey?.value ?: chat?.ownerPubKey?.value ?: "",
+                                    contact?.nodePubKey?.value ?: chat?.uuid?.value ?: "",
                                     message ?: sendMessage.text ?: "",
                                     media,
                                     mediaTokenValue?.toMediaToken(),
@@ -3554,7 +3554,7 @@ abstract class SphinxRepository(
                     }
                 } else {
                     sendNewMessage(
-                        contact?.nodePubKey?.value ?: chat?.ownerPubKey?.value ?: "",
+                        contact?.nodePubKey?.value ?: chat?.uuid?.value ?: "",
                         message ?: sendMessage.text ?: "",
                         null,
                         null,
@@ -3898,7 +3898,7 @@ abstract class SphinxRepository(
                 null
             ).toJson(moshi)
 
-            val contactPubKey = contact?.nodePubKey?.value ?: chatTribe?.ownerPubKey?.value
+            val contactPubKey = contact?.nodePubKey?.value ?: chatTribe?.uuid?.value
             val isTribe = (chatTribe != null)
 
             if (contactPubKey != null) {
@@ -4214,7 +4214,7 @@ abstract class SphinxRepository(
                 }
             }
 
-            val contactPubKey = contact?.nodePubKey?.value ?: chatTribe?.ownerPubKey?.value
+            val contactPubKey = contact?.nodePubKey?.value ?: chatTribe?.uuid?.value
             val isTribe = (chatTribe != null)
 
             if (contactPubKey != null) {
@@ -4552,7 +4552,7 @@ abstract class SphinxRepository(
                         }
                     }
 
-                    val contactPubKey = contact?.nodePubKey?.value ?: chatTribe?.ownerPubKey?.value
+                    val contactPubKey = contact?.nodePubKey?.value ?: chatTribe?.uuid?.value
                     val isTribe = (chatTribe != null)
 
                     if (contactPubKey != null) {

@@ -433,7 +433,7 @@ class ConnectManagerImpl(
         }
     }
 
-    override fun joinTribe(
+    override fun joinToTribe(
         tribeHost: String,
         tribePubKey: String,
         tribeRouteHint: String
@@ -450,7 +450,8 @@ class ConnectManagerImpl(
                     tribePubKey,
                     tribeRouteHint,
                     ownerInfoStateFlow.value?.alias ?: "",
-                    1.toULong()
+                    1.toULong(),
+                    true
                 )
                 handleRunReturn(joinTribeMessage, mqttClient!!)
 

@@ -448,9 +448,13 @@ internal interface _UniFFILib : Library {
     ): RustBuffer.ByValue
     fun uniffi_sphinxrs_fn_func_create_tribe(`seed`: RustBuffer.ByValue,`uniqueTime`: RustBuffer.ByValue,`state`: RustBuffer.ByValue,`tribeServerPubkey`: RustBuffer.ByValue,`tribeJson`: RustBuffer.ByValue,_uniffi_out_err: RustCallStatus, 
     ): RustBuffer.ByValue
-    fun uniffi_sphinxrs_fn_func_join_tribe(`seed`: RustBuffer.ByValue,`uniqueTime`: RustBuffer.ByValue,`state`: RustBuffer.ByValue,`tribePubkey`: RustBuffer.ByValue,`tribeRouteHint`: RustBuffer.ByValue,`alias`: RustBuffer.ByValue,`amtMsat`: Long,_uniffi_out_err: RustCallStatus, 
+    fun uniffi_sphinxrs_fn_func_join_tribe(`seed`: RustBuffer.ByValue,`uniqueTime`: RustBuffer.ByValue,`state`: RustBuffer.ByValue,`tribePubkey`: RustBuffer.ByValue,`tribeRouteHint`: RustBuffer.ByValue,`alias`: RustBuffer.ByValue,`amtMsat`: Long,`isPrivate`: Byte,_uniffi_out_err: RustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_sphinxrs_fn_func_list_tribe_members(`seed`: RustBuffer.ByValue,`uniqueTime`: RustBuffer.ByValue,`state`: RustBuffer.ByValue,`tribeServerPubkey`: RustBuffer.ByValue,`tribePubkey`: RustBuffer.ByValue,_uniffi_out_err: RustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_sphinxrs_fn_func_make_invite(`seed`: RustBuffer.ByValue,`uniqueTime`: RustBuffer.ByValue,`state`: RustBuffer.ByValue,`host`: RustBuffer.ByValue,`amtMsat`: Long,_uniffi_out_err: RustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_sphinxrs_fn_func_process_invite(`seed`: RustBuffer.ByValue,`uniqueTime`: RustBuffer.ByValue,`state`: RustBuffer.ByValue,`inviteQr`: RustBuffer.ByValue,_uniffi_out_err: RustCallStatus, 
     ): RustBuffer.ByValue
     fun ffi_sphinxrs_rustbuffer_alloc(`size`: Int,_uniffi_out_err: RustCallStatus, 
     ): RustBuffer.ByValue
@@ -547,6 +551,10 @@ internal interface _UniFFILib : Library {
     fun uniffi_sphinxrs_checksum_func_join_tribe(
     ): Short
     fun uniffi_sphinxrs_checksum_func_list_tribe_members(
+    ): Short
+    fun uniffi_sphinxrs_checksum_func_make_invite(
+    ): Short
+    fun uniffi_sphinxrs_checksum_func_process_invite(
     ): Short
     fun ffi_sphinxrs_uniffi_contract_version(
     ): Int
@@ -691,10 +699,16 @@ private fun uniffiCheckApiChecksums(lib: _UniFFILib) {
     if (lib.uniffi_sphinxrs_checksum_func_create_tribe() != 28873.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_sphinxrs_checksum_func_join_tribe() != 63841.toShort()) {
+    if (lib.uniffi_sphinxrs_checksum_func_join_tribe() != 6857.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_sphinxrs_checksum_func_list_tribe_members() != 48922.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_sphinxrs_checksum_func_make_invite() != 48075.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_sphinxrs_checksum_func_process_invite() != 52237.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
 }
@@ -919,7 +933,10 @@ data class RunReturn (
     var `settledStatus`: String?, 
     var `error`: String?, 
     var `newTribe`: String?, 
-    var `tribeMembers`: String?
+    var `tribeMembers`: String?, 
+    var `newInvite`: String?, 
+    var `inviterContactInfo`: String?, 
+    var `lspHost`: String?
 ) {
     
 }
@@ -943,6 +960,9 @@ public object FfiConverterTypeRunReturn: FfiConverterRustBuffer<RunReturn> {
             FfiConverterOptionalULong.read(buf),
             FfiConverterOptionalULong.read(buf),
             FfiConverterOptionalULong.read(buf),
+            FfiConverterOptionalString.read(buf),
+            FfiConverterOptionalString.read(buf),
+            FfiConverterOptionalString.read(buf),
             FfiConverterOptionalString.read(buf),
             FfiConverterOptionalString.read(buf),
             FfiConverterOptionalString.read(buf),
@@ -976,7 +996,10 @@ public object FfiConverterTypeRunReturn: FfiConverterRustBuffer<RunReturn> {
             FfiConverterOptionalString.allocationSize(value.`settledStatus`) +
             FfiConverterOptionalString.allocationSize(value.`error`) +
             FfiConverterOptionalString.allocationSize(value.`newTribe`) +
-            FfiConverterOptionalString.allocationSize(value.`tribeMembers`)
+            FfiConverterOptionalString.allocationSize(value.`tribeMembers`) +
+            FfiConverterOptionalString.allocationSize(value.`newInvite`) +
+            FfiConverterOptionalString.allocationSize(value.`inviterContactInfo`) +
+            FfiConverterOptionalString.allocationSize(value.`lspHost`)
     )
 
     override fun write(value: RunReturn, buf: ByteBuffer) {
@@ -1003,6 +1026,9 @@ public object FfiConverterTypeRunReturn: FfiConverterRustBuffer<RunReturn> {
             FfiConverterOptionalString.write(value.`error`, buf)
             FfiConverterOptionalString.write(value.`newTribe`, buf)
             FfiConverterOptionalString.write(value.`tribeMembers`, buf)
+            FfiConverterOptionalString.write(value.`newInvite`, buf)
+            FfiConverterOptionalString.write(value.`inviterContactInfo`, buf)
+            FfiConverterOptionalString.write(value.`lspHost`, buf)
     }
 }
 
@@ -2175,10 +2201,10 @@ fun `createTribe`(`seed`: String, `uniqueTime`: String, `state`: ByteArray, `tri
 
 @Throws(SphinxException::class)
 
-fun `joinTribe`(`seed`: String, `uniqueTime`: String, `state`: ByteArray, `tribePubkey`: String, `tribeRouteHint`: String, `alias`: String, `amtMsat`: ULong): RunReturn {
+fun `joinTribe`(`seed`: String, `uniqueTime`: String, `state`: ByteArray, `tribePubkey`: String, `tribeRouteHint`: String, `alias`: String, `amtMsat`: ULong, `isPrivate`: Boolean): RunReturn {
     return FfiConverterTypeRunReturn.lift(
     rustCallWithError(SphinxException) { _status ->
-    _UniFFILib.INSTANCE.uniffi_sphinxrs_fn_func_join_tribe(FfiConverterString.lower(`seed`),FfiConverterString.lower(`uniqueTime`),FfiConverterByteArray.lower(`state`),FfiConverterString.lower(`tribePubkey`),FfiConverterString.lower(`tribeRouteHint`),FfiConverterString.lower(`alias`),FfiConverterULong.lower(`amtMsat`),_status)
+    _UniFFILib.INSTANCE.uniffi_sphinxrs_fn_func_join_tribe(FfiConverterString.lower(`seed`),FfiConverterString.lower(`uniqueTime`),FfiConverterByteArray.lower(`state`),FfiConverterString.lower(`tribePubkey`),FfiConverterString.lower(`tribeRouteHint`),FfiConverterString.lower(`alias`),FfiConverterULong.lower(`amtMsat`),FfiConverterBoolean.lower(`isPrivate`),_status)
 })
 }
 
@@ -2188,6 +2214,24 @@ fun `listTribeMembers`(`seed`: String, `uniqueTime`: String, `state`: ByteArray,
     return FfiConverterTypeRunReturn.lift(
     rustCallWithError(SphinxException) { _status ->
     _UniFFILib.INSTANCE.uniffi_sphinxrs_fn_func_list_tribe_members(FfiConverterString.lower(`seed`),FfiConverterString.lower(`uniqueTime`),FfiConverterByteArray.lower(`state`),FfiConverterString.lower(`tribeServerPubkey`),FfiConverterString.lower(`tribePubkey`),_status)
+})
+}
+
+@Throws(SphinxException::class)
+
+fun `makeInvite`(`seed`: String, `uniqueTime`: String, `state`: ByteArray, `host`: String, `amtMsat`: ULong): RunReturn {
+    return FfiConverterTypeRunReturn.lift(
+    rustCallWithError(SphinxException) { _status ->
+    _UniFFILib.INSTANCE.uniffi_sphinxrs_fn_func_make_invite(FfiConverterString.lower(`seed`),FfiConverterString.lower(`uniqueTime`),FfiConverterByteArray.lower(`state`),FfiConverterString.lower(`host`),FfiConverterULong.lower(`amtMsat`),_status)
+})
+}
+
+@Throws(SphinxException::class)
+
+fun `processInvite`(`seed`: String, `uniqueTime`: String, `state`: ByteArray, `inviteQr`: String): RunReturn {
+    return FfiConverterTypeRunReturn.lift(
+    rustCallWithError(SphinxException) { _status ->
+    _UniFFILib.INSTANCE.uniffi_sphinxrs_fn_func_process_invite(FfiConverterString.lower(`seed`),FfiConverterString.lower(`uniqueTime`),FfiConverterByteArray.lower(`state`),FfiConverterString.lower(`inviteQr`),_status)
 })
 }
 

@@ -31,7 +31,7 @@ abstract class ConnectManager {
         isTribe: Boolean
     )
 
-    abstract fun joinTribe(
+    abstract fun joinToTribe(
         tribeHost: String,
         tribePubKey: String,
         tribeRouteHint: String
