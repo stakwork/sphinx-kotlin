@@ -430,6 +430,8 @@ internal interface _UniFFILib : Library {
     ): RustBuffer.ByValue
     fun uniffi_sphinxrs_fn_func_get_subscription_topic(`seed`: RustBuffer.ByValue,`uniqueTime`: RustBuffer.ByValue,`state`: RustBuffer.ByValue,_uniffi_out_err: RustCallStatus, 
     ): RustBuffer.ByValue
+    fun uniffi_sphinxrs_fn_func_get_tribe_management_topic(`seed`: RustBuffer.ByValue,`uniqueTime`: RustBuffer.ByValue,`state`: RustBuffer.ByValue,_uniffi_out_err: RustCallStatus, 
+    ): RustBuffer.ByValue
     fun uniffi_sphinxrs_fn_func_initial_setup(`seed`: RustBuffer.ByValue,`uniqueTime`: RustBuffer.ByValue,`state`: RustBuffer.ByValue,_uniffi_out_err: RustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_sphinxrs_fn_func_fetch_msgs(`seed`: RustBuffer.ByValue,`uniqueTime`: RustBuffer.ByValue,`state`: RustBuffer.ByValue,`lastMsgIdx`: Long,`limit`: RustBuffer.ByValue,_uniffi_out_err: RustCallStatus, 
@@ -529,6 +531,8 @@ internal interface _UniFFILib : Library {
     fun uniffi_sphinxrs_checksum_func_list_contacts(
     ): Short
     fun uniffi_sphinxrs_checksum_func_get_subscription_topic(
+    ): Short
+    fun uniffi_sphinxrs_checksum_func_get_tribe_management_topic(
     ): Short
     fun uniffi_sphinxrs_checksum_func_initial_setup(
     ): Short
@@ -670,6 +674,9 @@ private fun uniffiCheckApiChecksums(lib: _UniFFILib) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_sphinxrs_checksum_func_get_subscription_topic() != 12763.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_sphinxrs_checksum_func_get_tribe_management_topic() != 29476.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_sphinxrs_checksum_func_initial_setup() != 63727.toShort()) {
@@ -911,7 +918,6 @@ public object FfiConverterTypeKeys: FfiConverterRustBuffer<Keys> {
 
 
 data class RunReturn (
-    var `newSubscription`: String?, 
     var `topic0`: String?, 
     var `payload0`: ByteArray?, 
     var `topic1`: String?, 
@@ -945,7 +951,6 @@ public object FfiConverterTypeRunReturn: FfiConverterRustBuffer<RunReturn> {
     override fun read(buf: ByteBuffer): RunReturn {
         return RunReturn(
             FfiConverterOptionalString.read(buf),
-            FfiConverterOptionalString.read(buf),
             FfiConverterOptionalByteArray.read(buf),
             FfiConverterOptionalString.read(buf),
             FfiConverterOptionalByteArray.read(buf),
@@ -974,7 +979,6 @@ public object FfiConverterTypeRunReturn: FfiConverterRustBuffer<RunReturn> {
     }
 
     override fun allocationSize(value: RunReturn) = (
-            FfiConverterOptionalString.allocationSize(value.`newSubscription`) +
             FfiConverterOptionalString.allocationSize(value.`topic0`) +
             FfiConverterOptionalByteArray.allocationSize(value.`payload0`) +
             FfiConverterOptionalString.allocationSize(value.`topic1`) +
@@ -1003,7 +1007,6 @@ public object FfiConverterTypeRunReturn: FfiConverterRustBuffer<RunReturn> {
     )
 
     override fun write(value: RunReturn, buf: ByteBuffer) {
-            FfiConverterOptionalString.write(value.`newSubscription`, buf)
             FfiConverterOptionalString.write(value.`topic0`, buf)
             FfiConverterOptionalByteArray.write(value.`payload0`, buf)
             FfiConverterOptionalString.write(value.`topic1`, buf)
@@ -2115,6 +2118,15 @@ fun `getSubscriptionTopic`(`seed`: String, `uniqueTime`: String, `state`: ByteAr
     return FfiConverterString.lift(
     rustCallWithError(SphinxException) { _status ->
     _UniFFILib.INSTANCE.uniffi_sphinxrs_fn_func_get_subscription_topic(FfiConverterString.lower(`seed`),FfiConverterString.lower(`uniqueTime`),FfiConverterByteArray.lower(`state`),_status)
+})
+}
+
+@Throws(SphinxException::class)
+
+fun `getTribeManagementTopic`(`seed`: String, `uniqueTime`: String, `state`: ByteArray): String {
+    return FfiConverterString.lift(
+    rustCallWithError(SphinxException) { _status ->
+    _UniFFILib.INSTANCE.uniffi_sphinxrs_fn_func_get_tribe_management_topic(FfiConverterString.lower(`seed`),FfiConverterString.lower(`uniqueTime`),FfiConverterByteArray.lower(`state`),_status)
 })
 }
 

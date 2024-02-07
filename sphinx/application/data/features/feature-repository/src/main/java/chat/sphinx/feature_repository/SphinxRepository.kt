@@ -642,6 +642,8 @@ abstract class SphinxRepository(
                 queries.messageUpdateUUIDByUUID(msgUuid, uuid )
             }
 
+            // On Conversation ChatId is contactId defined by the bindings,
+            // tribes use the auto-generated chatId
             val chatId = when {
                 contact?.id?.value != null -> contact.id.value
                 chatTribe?.id?.value != null -> chatTribe.id.value
