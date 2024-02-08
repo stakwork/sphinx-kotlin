@@ -3,7 +3,6 @@ package chat.sphinx.concept_repository_message
 import chat.sphinx.concept_repository_message.model.SendPaymentRequest
 import chat.sphinx.concept_repository_message.model.SendMessage
 import chat.sphinx.concept_repository_message.model.SendPayment
-import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.wrapper_chat.Chat
@@ -109,10 +108,10 @@ interface MessageRepository {
     )
 
     suspend fun processMemberRequest(
-        contactId: ContactId,
-        messageId: MessageId,
-        type: MessageType,
-    ): LoadResponse<Any, ResponseError>
+        chatId: ChatId,
+        messageUuid: MessageUUID,
+        type: MessageType.GroupAction,
+    )
 
     suspend fun upsertMqttMessage(
         msg: Msg,

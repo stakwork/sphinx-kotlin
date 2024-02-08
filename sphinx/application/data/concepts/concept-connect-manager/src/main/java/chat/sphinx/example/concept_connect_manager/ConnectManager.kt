@@ -34,12 +34,18 @@ abstract class ConnectManager {
     abstract fun joinToTribe(
         tribeHost: String,
         tribePubKey: String,
-        tribeRouteHint: String
+        tribeRouteHint: String,
+        isPrivate: Boolean
     )
 
     abstract fun createTribe(
         tribeServerPubKey: String,
         tribeJson: String
+    )
+
+    abstract fun retrieveTribeMembersList(
+        tribeServerPubKey: String,
+        tribePubKey: String
     )
 
     abstract fun generateMediaToken(

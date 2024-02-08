@@ -4,6 +4,7 @@ import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_message.GiphyData
+import chat.sphinx.wrapper_message.MessageType
 import chat.sphinx.wrapper_message.PodcastClip
 import chat.sphinx.wrapper_message.ReplyUUID
 import chat.sphinx.wrapper_message.ThreadUUID
@@ -22,26 +23,28 @@ class SendMessage private constructor(
     val isBoost: Boolean,
     val isCall: Boolean,
     val isTribePayment: Boolean,
+    val groupAction: MessageType.GroupAction?,
     val paidMessagePrice: Sat?,
     val priceToMeet: Sat?,
     val threadUUID: ThreadUUID?
 ) {
 
     class Builder {
-        private var chatId: ChatId?                    = null
-        private var contactId: ContactId?              = null
-        private var tribePaymentAmount: Sat?           = null
-        private var attachmentInfo: AttachmentInfo?    = null
-        private var replyUUID: ReplyUUID?              = null
-        private var text: String?                      = null
-        private var giphyData: GiphyData?              = null
-        private var podcastClip: PodcastClip?          = null
-        private var isBoost: Boolean                   = false
-        private var isCall: Boolean                    = false
-        private var isTribePayment: Boolean            = false
-        private var paidMessagePrice: Sat?             = null
-        private var priceToMeet: Sat?                  = null
-        private var threadUUID: ThreadUUID?            = null
+        private var chatId: ChatId?                       = null
+        private var contactId: ContactId?                 = null
+        private var tribePaymentAmount: Sat?              = null
+        private var attachmentInfo: AttachmentInfo?       = null
+        private var replyUUID: ReplyUUID?                 = null
+        private var text: String?                         = null
+        private var giphyData: GiphyData?                 = null
+        private var podcastClip: PodcastClip?             = null
+        private var isBoost: Boolean                      = false
+        private var isCall: Boolean                       = false
+        private var isTribePayment: Boolean               = false
+        private var groupAction: MessageType.GroupAction? = null
+        private var paidMessagePrice: Sat?                = null
+        private var priceToMeet: Sat?                     = null
+        private var threadUUID: ThreadUUID?               = null
 
         enum class ValidationError {
             EMPTY_PRICE, EMPTY_DESTINATION, EMPTY_CONTENT
@@ -59,6 +62,7 @@ class SendMessage private constructor(
             podcastClip = null
             isBoost = false
             isTribePayment = false
+            groupAction = null
             paidMessagePrice = null
             priceToMeet = null
             threadUUID = null
@@ -88,7 +92,8 @@ class SendMessage private constructor(
                         text.isNullOrEmpty() &&
                         giphyData == null &&
                         podcastClip == null &&
-                        !isTribePayment
+                        !isTribePayment &&
+                        groupAction == null
                     ) {
                         return Pair(false, ValidationError.EMPTY_CONTENT)
                     }
@@ -177,6 +182,12 @@ class SendMessage private constructor(
         }
 
         @Synchronized
+        fun setGroupAction(groupAction: MessageType.GroupAction): Builder {
+            this.groupAction = groupAction
+            return this
+        }
+
+        @Synchronized
         fun setPriceToMeet(priceToMeet: Sat?): Builder {
             this.priceToMeet = priceToMeet
             return this
@@ -214,6 +225,7 @@ class SendMessage private constructor(
                         isBoost,
                         isCall,
                         isTribePayment,
+                        groupAction,
                         paidMessagePrice,
                         priceToMeet,
                         threadUUID,

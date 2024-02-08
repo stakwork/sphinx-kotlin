@@ -32,8 +32,8 @@ import chat.sphinx.resources.getString
 import chat.sphinx.resources.setBackgroundRandomColor
 import chat.sphinx.wrapper_common.PhotoUrl
 import chat.sphinx.wrapper_common.asFormattedString
-import chat.sphinx.wrapper_common.dashboard.ContactId
-import chat.sphinx.wrapper_common.message.MessageId
+import chat.sphinx.wrapper_common.dashboard.ChatId
+import chat.sphinx.wrapper_common.message.MessageUUID
 import chat.sphinx.wrapper_common.util.getInitials
 import chat.sphinx.wrapper_contact.ContactAlias
 import chat.sphinx.wrapper_message.Message
@@ -543,13 +543,14 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                     textViewGroupActionJoinRequestAcceptAction.setOnClickListener {
                         currentViewState?.message?.let { nnMessage ->
 
-                            if (nnMessage.type is MessageType.GroupAction.MemberRequest) {
+                            nnMessage.uuid?.let { messageUuid ->
                                 processMemberRequest(
-                                    nnMessage.sender,
-                                    nnMessage.id,
+                                    nnMessage.chatId,
+                                    messageUuid,
                                     MessageType.GroupAction.MemberApprove
                                 )
                             }
+                            if (nnMessage.type is MessageType.GroupAction.MemberRequest) { }
                         }
                     }
 
@@ -557,11 +558,14 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                         currentViewState?.message?.let { nnMessage ->
 
                             if (nnMessage.type is MessageType.GroupAction.MemberRequest) {
-                                processMemberRequest(
-                                    nnMessage.sender,
-                                    nnMessage.id,
-                                    MessageType.GroupAction.MemberReject
-                                )
+
+                                nnMessage.uuid?.let { messageUuid ->
+                                    processMemberRequest(
+                                        nnMessage.chatId,
+                                        messageUuid,
+                                        MessageType.GroupAction.MemberReject
+                                    )
+                                }
                             }
                         }
                     }
@@ -581,14 +585,14 @@ internal class MessageListAdapter<ARGS : NavArgs>(
             }
         }
 
-        private fun processMemberRequest(contactId: ContactId, messageId: MessageId, type: MessageType.GroupAction) {
+        private fun processMemberRequest(chatId: ChatId, messageUuid: MessageUUID, type: MessageType.GroupAction) {
             onStopSupervisor.scope.launch(viewModel.mainImmediate) {
                 binding.includeMessageTypeGroupActionHolder.includeMessageTypeGroupActionJoinRequest.apply {
                     layoutConstraintGroupActionJoinRequestProgressBarContainer.visible
 
                     viewModel.processMemberRequest(
-                        contactId,
-                        messageId,
+                        chatId,
+                        messageUuid,
                         type
                     )
 

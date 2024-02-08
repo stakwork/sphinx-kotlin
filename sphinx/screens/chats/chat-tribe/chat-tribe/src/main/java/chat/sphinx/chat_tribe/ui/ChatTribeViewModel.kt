@@ -40,7 +40,6 @@ import chat.sphinx.wrapper_common.PhotoUrl
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.lightning.Sat
-import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.message.MessageUUID
 import chat.sphinx.wrapper_common.util.getInitials
 import chat.sphinx.wrapper_contact.Contact
@@ -329,9 +328,9 @@ class ChatTribeViewModel @Inject constructor(
     }
 
     override suspend fun processMemberRequest(
-        contactId: ContactId,
-        messageId: MessageId,
-        type: MessageType,
+        chatId: ChatId,
+        messageUuid: MessageUUID,
+        type: MessageType.GroupAction,
     ) {
         viewModelScope.launch(mainImmediate) {
             val errorMessage = if (type.isMemberApprove()) {
@@ -341,14 +340,15 @@ class ChatTribeViewModel @Inject constructor(
             }
 
             if (type.isMemberApprove() || type.isMemberReject()) {
-                when (messageRepository.processMemberRequest(contactId, messageId, type)) {
-                    is LoadResponse.Loading -> {}
-                    is Response.Success -> {}
-
-                    is Response.Error -> {
-                        submitSideEffect(ChatSideEffect.Notify(errorMessage))
-                    }
-                }
+                messageRepository.processMemberRequest(chatId, messageUuid, type)
+//                when () {
+//                    is LoadResponse.Loading -> {}
+//                    is Response.Success -> {}
+//
+//                    is Response.Error -> {
+//                        submitSideEffect(ChatSideEffect.Notify(errorMessage))
+//                    }
+//                }
             }
         }.join()
     }

@@ -317,9 +317,10 @@ abstract class SphinxRepository(
         tribeHost: String,
         tribePubKey: String,
         tribeRouteHint: String,
-        tribeName: String
+        tribeName: String,
+        isPrivate: Boolean,
     ) {
-        connectManager.joinToTribe(tribeHost, tribePubKey, tribeRouteHint)
+        connectManager.joinToTribe(tribeHost, tribePubKey, tribeRouteHint, isPrivate)
 
         applicationScope.launch {
             val queries = coreDB.getSphinxDatabaseQueries()
@@ -371,6 +372,10 @@ abstract class SphinxRepository(
         }
     }
 
+    override fun getTribeMembers(tribeServerPubKey: String, tribePubKey: String) {
+        connectManager.retrieveTribeMembersList(tribeServerPubKey, tribePubKey)
+    }
+
     override suspend fun exitAndDeleteTribe(tribe: Chat) {
         val queries = coreDB.getSphinxDatabaseQueries()
         applicationScope.launch(mainImmediate) {
@@ -390,7 +395,7 @@ abstract class SphinxRepository(
                 null
             ).toJson(moshi)
 
-            tribe.uuid?.value?.let { pubKey ->
+            tribe.uuid.value.let { pubKey ->
                 connectManager.sendMessage(
                     newMessage,
                     pubKey,
@@ -1859,8 +1864,7 @@ abstract class SphinxRepository(
             ).collect { loadResponse ->
                 @Exhaustive
                 when (loadResponse) {
-                    is LoadResponse.Loading -> {
-                    }
+                    is LoadResponse.Loading -> {}
 
                     is Response.Error -> {
                         response = loadResponse
@@ -3373,6 +3377,9 @@ abstract class SphinxRepository(
             val messageType = when {
                 (media != null) -> {
                     MessageType.Attachment
+                }
+                (sendMessage.groupAction != null) -> {
+                    sendMessage.groupAction!!
                 }
                 (sendMessage.isBoost) -> {
                     MessageType.Boost
@@ -6643,61 +6650,66 @@ abstract class SphinxRepository(
     }
 
     override suspend fun processMemberRequest(
-        contactId: ContactId,
-        messageId: MessageId,
-        type: MessageType,
-    ): Response<Any, ResponseError> {
-        var response: Response<Any, ResponseError> = Response.Error(ResponseError(("")))
+        chatId: ChatId,
+        messageUuid: MessageUUID,
+        type: MessageType.GroupAction,
+    ) {
 
-        applicationScope.launch(mainImmediate) {
-            networkQueryMessage.processMemberRequest(
-                contactId,
-                messageId,
-                type
-            ).collect { loadResponse ->
+        val messageBuilder = SendMessage.Builder()
+        messageBuilder.setChatId(chatId)
+        messageBuilder.setReplyUUID(ReplyUUID(messageUuid.value))
+        messageBuilder.setGroupAction(type)
 
-                when (loadResponse) {
-                    is LoadResponse.Loading -> {
-                    }
+        sendMessage(messageBuilder.build().first)
 
-                    is Response.Error -> {
-                        response = loadResponse
-                    }
-                    is Response.Success -> {
-                        response = loadResponse
-                        val queries = coreDB.getSphinxDatabaseQueries()
+//        applicationScope.launch(mainImmediate) {
+//            networkQueryMessage.processMemberRequest(
+//                contactId,
+//                messageUuid,
+//                type
+//            ).collect { loadResponse ->
+//
+//                when (loadResponse) {
+//                    is LoadResponse.Loading -> {
+//                    }
+//
+//                    is Response.Error -> {
+//                        response = loadResponse
+//                    }
+//                    is Response.Success -> {
+//                        response = loadResponse
+//                        val queries = coreDB.getSphinxDatabaseQueries()
+//
+//                        chatLock.withLock {
+//                            messageLock.withLock {
+//                                withContext(io) {
+//                                    queries.transaction {
+//                                        upsertChat(
+//                                            loadResponse.value.chat,
+//                                            moshi,
+//                                            chatSeenMap,
+//                                            queries,
+//                                            null,
+//                                            accountOwner.value?.nodePubKey
+//                                        )
+//
+//                                        upsertMessage(loadResponse.value.message, queries)
+//
+//                                        updateChatDboLatestMessage(
+//                                            loadResponse.value.message,
+//                                            ChatId(loadResponse.value.chat.id),
+//                                            latestMessageUpdatedTimeMap,
+//                                            queries,
+//                                        )
+//                                    }
+//                                }
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+//        }.join()
 
-                        chatLock.withLock {
-                            messageLock.withLock {
-                                withContext(io) {
-                                    queries.transaction {
-                                        upsertChat(
-                                            loadResponse.value.chat,
-                                            moshi,
-                                            chatSeenMap,
-                                            queries,
-                                            null,
-                                            accountOwner.value?.nodePubKey
-                                        )
-
-                                        upsertMessage(loadResponse.value.message, queries)
-
-                                        updateChatDboLatestMessage(
-                                            loadResponse.value.message,
-                                            ChatId(loadResponse.value.chat.id),
-                                            latestMessageUpdatedTimeMap,
-                                            queries,
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }.join()
-
-        return response
     }
 
 

@@ -2121,9 +2121,9 @@ abstract class ChatViewModel<ARGS : NavArgs>(
     }
 
     open suspend fun processMemberRequest(
-        contactId: ContactId,
-        messageId: MessageId,
-        type: MessageType,
+        chatId: ChatId,
+        messageUuid: MessageUUID,
+        type: MessageType.GroupAction,
     ) {
     }
 

@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import chat.sphinx.concept_network_query_contact.NetworkQueryContact
 import chat.sphinx.concept_network_query_contact.model.ContactDto
 import chat.sphinx.concept_repository_chat.ChatRepository
+import chat.sphinx.concept_repository_connect_manager.ConnectManagerRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.kotlin_response.LoadResponse
@@ -17,6 +18,7 @@ import chat.sphinx.tribe_members_list.navigation.TribeMembersListNavigator
 import chat.sphinx.tribe_members_list.ui.viewstate.TribeMemberHolderViewState
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
+import chat.sphinx.wrapper_common.dashboard.toChatId
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_message.MessageType
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -54,6 +56,7 @@ internal class TribeMembersListViewModel @Inject constructor(
     private val chatRepository: ChatRepository,
     private val contactRepository: ContactRepository,
     private val networkQueryContact: NetworkQueryContact,
+    private val connectManagerRepository: ConnectManagerRepository,
     savedStateHandle: SavedStateHandle,
 ): SideEffectViewModel<
         Context,
@@ -99,7 +102,19 @@ internal class TribeMembersListViewModel @Inject constructor(
         loadTribeMembers()
     }
 
+
     private suspend fun loadTribeMembers() {
+        val tribeServerPubKey = "0356091a4d8a1bfa8e2b9d19924bf8275dd057536e12427c557dd91a6cb1c03e8b"
+
+        val chat = chatRepository.getChatById(ChatId(args.argChatId)).firstOrNull()
+
+        chat?.uuid?.value?.let { tribePubKey ->
+            connectManagerRepository.getTribeMembers(
+                tribeServerPubKey,
+                tribePubKey
+            )
+        }
+
         networkQueryContact.getTribeMembers(
             chatId = ChatId(args.argChatId),
             offset = page * itemsPerPage,
@@ -226,10 +241,10 @@ internal class TribeMembersListViewModel @Inject constructor(
                 ChatId(args.argChatId)
             ).firstOrNull()
 
-            if (message != null) {
-                response = messageRepository.processMemberRequest(contactId, message.id, type)
+            message?.uuid?.let { messageUuid ->
+                messageRepository.processMemberRequest(message.chatId, messageUuid, type)
             }
-        }.join()
+        }
 
         if (response is Response.Success) {
             reloadTribeMembers()

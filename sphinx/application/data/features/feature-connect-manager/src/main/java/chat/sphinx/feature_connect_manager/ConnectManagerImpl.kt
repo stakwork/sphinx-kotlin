@@ -35,9 +35,11 @@ import uniffi.sphinxrs.RunReturn
 import uniffi.sphinxrs.addContact
 import uniffi.sphinxrs.fetchMsgs
 import uniffi.sphinxrs.getSubscriptionTopic
+import uniffi.sphinxrs.getTribeManagementTopic
 import uniffi.sphinxrs.handle
 import uniffi.sphinxrs.initialSetup
 import uniffi.sphinxrs.joinTribe
+import uniffi.sphinxrs.listTribeMembers
 import uniffi.sphinxrs.makeMediaToken
 import uniffi.sphinxrs.makeMediaTokenWithMeta
 import uniffi.sphinxrs.makeMediaTokenWithPrice
@@ -333,6 +335,14 @@ class ConnectManagerImpl(
                 val qos = IntArray(1) { 1 }
                 client.subscribe(arrayOf(subtopic), qos)
 
+                // Subscribe to tribe management topic
+                val tribeSubtopic = getTribeManagementTopic(
+                    ownerSeed!!,
+                    getTimestampInMilliseconds(),
+                    getCurrentUserState()
+                )
+                client.subscribe(arrayOf(tribeSubtopic), qos)
+
                 // Initial setup and handling
                 val setUp = initialSetup(
                     ownerSeed!!,
@@ -349,7 +359,9 @@ class ConnectManagerImpl(
                     100.toUInt()
                 )
 
-                handleRunReturn(fetchMessages, client);
+                handleRunReturn(fetchMessages, client)
+
+
             }
         } catch (e: Exception) {
             Log.e("MQTT_MESSAGES", "${e.message}")
@@ -436,7 +448,8 @@ class ConnectManagerImpl(
     override fun joinToTribe(
         tribeHost: String,
         tribePubKey: String,
-        tribeRouteHint: String
+        tribeRouteHint: String,
+        isPrivate: Boolean
     ) {
         coroutineScope.launch {
 
@@ -451,7 +464,7 @@ class ConnectManagerImpl(
                     tribeRouteHint,
                     ownerInfoStateFlow.value?.alias ?: "",
                     1.toULong(),
-                    true
+                    isPrivate
                 )
                 handleRunReturn(joinTribeMessage, mqttClient!!)
 
@@ -477,6 +490,24 @@ class ConnectManagerImpl(
         }
         catch (e: Exception) {
             Log.e("MQTT_MESSAGES", "createTribe ${e.message}")
+        }
+    }
+
+    override fun retrieveTribeMembersList(tribeServerPubKey: String, tribePubKey: String) {
+        val now = getTimestampInMilliseconds()
+
+        try {
+            val tribeMembers = listTribeMembers(
+                ownerSeed!!,
+                now,
+                getCurrentUserState(),
+                tribeServerPubKey,
+                tribePubKey
+            )
+            handleRunReturn(tribeMembers, mqttClient!!)
+        }
+        catch (e: Exception) {
+            Log.e("MQTT_MESSAGES", "tribeMembers ${e.message}")
         }
     }
 
@@ -601,14 +632,6 @@ class ConnectManagerImpl(
                 onNewBalance(newBalance.toLong())
             }
         }
-        // Subscribe to tribe
-        rr.newSubscription?.let { newSubscription ->
-            mqttClient?.let { client ->
-                val qos = IntArray(1) { 1 }
-                client.subscribe(arrayOf(newSubscription), qos)
-            }
-            Log.d("MQTT_MESSAGES", "===> newSubscription $newSubscription")
-        }
 
         rr.newTribe?.let { newTribe ->
             notifyListeners {
@@ -672,6 +695,10 @@ class ConnectManagerImpl(
                     onOwnerRegistered(okKey, routeHint)
                 }
             }
+        }
+
+        rr.tribeMembers?.let { tribeMembers ->
+            Log.d("MQTT_MESSAGES", "=> tribeMembers $tribeMembers")
         }
 
         rr.msgTimestamp?.let { msgTimestamp ->
@@ -858,7 +885,6 @@ class ConnectManagerImpl(
         val result = (encodedMap as Map<*, *>?)?.let { JSONObject(it).toString() } ?: ""
 
         Log.e("MSGPACK", "dasboard encodeMapToBase64 $result")
-
 
         return result
     }

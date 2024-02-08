@@ -34,6 +34,7 @@ import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_media_cache.MediaCacheHandler
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -155,12 +156,12 @@ internal class JoinTribeViewModel @Inject constructor(
 
                             val tribeLoaded = JoinTribeViewState.TribeLoaded(
                                 loadResponse.value.name,
-                                "",
-                                null,
-                                "1",
-                                "0",
-                                "0",
-                                "0",
+                                loadResponse.value.description.toString(),
+                                loadResponse.value.img,
+                                loadResponse.value.price_to_join.toString(),
+                                loadResponse.value.price_per_message.toString(),
+                                loadResponse.value.escrow_amount.toString(),
+                                loadResponse.value.escrow_millis.toString(),
                                 accountOwnerStateFlow.value?.alias?.value,
                                 accountOwnerStateFlow.value?.photoUrl?.value
                             )
@@ -196,7 +197,9 @@ internal class JoinTribeViewModel @Inject constructor(
                     host,
                     tribeInfo.pubkey,
                     tribeInfo.route_hint,
-                    tribeInfo.name
+                    tribeInfo.name,
+                    tribeInfo.private ?: false,
+
                 )
                 updateViewState(JoinTribeViewState.TribeJoined)
             } else {
