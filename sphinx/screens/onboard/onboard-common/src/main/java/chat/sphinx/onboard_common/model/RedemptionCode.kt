@@ -16,7 +16,7 @@ sealed class RedemptionCode {
 
     companion object {
         fun decode(code: String): RedemptionCode? {
-            code.decodeBase64ToArray()
+            code.trim().decodeBase64ToArray()
                 ?.decodeToString()
                 ?.split("::")
                 ?.let { decodedSplit ->
@@ -35,7 +35,7 @@ sealed class RedemptionCode {
                         }
                     }
                 }
-            code.split("::").let { swarmSplit ->
+            code.trim().split("::").let { swarmSplit ->
                 if (swarmSplit.size == 3) {
                     if (swarmSplit.elementAt(0) == SwarmConnect.DECODED_INDEX_0) {
                         return SwarmConnect(
@@ -52,8 +52,8 @@ sealed class RedemptionCode {
                 }
             }
 
-            if (code.startsWith(Glyph.REGEX)) {
-                val parameters = code.substringAfter(Glyph.REGEX).split("&").mapNotNull { code ->
+            if (code.trim().startsWith(Glyph.REGEX)) {
+                val parameters = code.trim().substringAfter(Glyph.REGEX).split("&").mapNotNull { code ->
                     code.split("=").takeIf { it.size == 2 }?.let { pair ->
                         pair[0] to pair[1]
                     }

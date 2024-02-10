@@ -1,5 +1,8 @@
 # ChangeLog
 
+# Version 1.0.0-beta15 (2024-02-09)
+- Fixes issues during signup
+
 # Version 1.0.0-beta14 (2024-01-05)
 - Improves push notification content
 - Fixes crash on Profile
