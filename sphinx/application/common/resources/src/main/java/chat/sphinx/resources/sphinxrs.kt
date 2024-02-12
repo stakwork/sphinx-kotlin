@@ -917,7 +917,61 @@ public object FfiConverterTypeKeys: FfiConverterRustBuffer<Keys> {
 
 
 
+data class Msg (
+    var `message`: String?, 
+    var `type`: UByte?, 
+    var `uuid`: String?, 
+    var `index`: String?, 
+    var `sender`: String?, 
+    var `msat`: ULong?, 
+    var `timestamp`: ULong?, 
+    var `sentTo`: String?
+) {
+    
+}
+
+public object FfiConverterTypeMsg: FfiConverterRustBuffer<Msg> {
+    override fun read(buf: ByteBuffer): Msg {
+        return Msg(
+            FfiConverterOptionalString.read(buf),
+            FfiConverterOptionalUByte.read(buf),
+            FfiConverterOptionalString.read(buf),
+            FfiConverterOptionalString.read(buf),
+            FfiConverterOptionalString.read(buf),
+            FfiConverterOptionalULong.read(buf),
+            FfiConverterOptionalULong.read(buf),
+            FfiConverterOptionalString.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: Msg) = (
+            FfiConverterOptionalString.allocationSize(value.`message`) +
+            FfiConverterOptionalUByte.allocationSize(value.`type`) +
+            FfiConverterOptionalString.allocationSize(value.`uuid`) +
+            FfiConverterOptionalString.allocationSize(value.`index`) +
+            FfiConverterOptionalString.allocationSize(value.`sender`) +
+            FfiConverterOptionalULong.allocationSize(value.`msat`) +
+            FfiConverterOptionalULong.allocationSize(value.`timestamp`) +
+            FfiConverterOptionalString.allocationSize(value.`sentTo`)
+    )
+
+    override fun write(value: Msg, buf: ByteBuffer) {
+            FfiConverterOptionalString.write(value.`message`, buf)
+            FfiConverterOptionalUByte.write(value.`type`, buf)
+            FfiConverterOptionalString.write(value.`uuid`, buf)
+            FfiConverterOptionalString.write(value.`index`, buf)
+            FfiConverterOptionalString.write(value.`sender`, buf)
+            FfiConverterOptionalULong.write(value.`msat`, buf)
+            FfiConverterOptionalULong.write(value.`timestamp`, buf)
+            FfiConverterOptionalString.write(value.`sentTo`, buf)
+    }
+}
+
+
+
+
 data class RunReturn (
+    var `msgs`: List<Msg>, 
     var `topic0`: String?, 
     var `payload0`: ByteArray?, 
     var `topic1`: String?, 
@@ -925,17 +979,9 @@ data class RunReturn (
     var `topic2`: String?, 
     var `payload2`: ByteArray?, 
     var `stateMp`: ByteArray?, 
-    var `msg`: String?, 
-    var `msgType`: UByte?, 
-    var `msgUuid`: String?, 
-    var `msgIndex`: String?, 
-    var `msgSender`: String?, 
-    var `msgMsat`: ULong?, 
-    var `msgTimestamp`: ULong?, 
     var `newBalance`: ULong?, 
     var `myContactInfo`: String?, 
     var `sentStatus`: String?, 
-    var `sentTo`: String?, 
     var `settledStatus`: String?, 
     var `error`: String?, 
     var `newTribe`: String?, 
@@ -950,6 +996,7 @@ data class RunReturn (
 public object FfiConverterTypeRunReturn: FfiConverterRustBuffer<RunReturn> {
     override fun read(buf: ByteBuffer): RunReturn {
         return RunReturn(
+            FfiConverterSequenceTypeMsg.read(buf),
             FfiConverterOptionalString.read(buf),
             FfiConverterOptionalByteArray.read(buf),
             FfiConverterOptionalString.read(buf),
@@ -957,15 +1004,7 @@ public object FfiConverterTypeRunReturn: FfiConverterRustBuffer<RunReturn> {
             FfiConverterOptionalString.read(buf),
             FfiConverterOptionalByteArray.read(buf),
             FfiConverterOptionalByteArray.read(buf),
-            FfiConverterOptionalString.read(buf),
-            FfiConverterOptionalUByte.read(buf),
-            FfiConverterOptionalString.read(buf),
-            FfiConverterOptionalString.read(buf),
-            FfiConverterOptionalString.read(buf),
             FfiConverterOptionalULong.read(buf),
-            FfiConverterOptionalULong.read(buf),
-            FfiConverterOptionalULong.read(buf),
-            FfiConverterOptionalString.read(buf),
             FfiConverterOptionalString.read(buf),
             FfiConverterOptionalString.read(buf),
             FfiConverterOptionalString.read(buf),
@@ -979,6 +1018,7 @@ public object FfiConverterTypeRunReturn: FfiConverterRustBuffer<RunReturn> {
     }
 
     override fun allocationSize(value: RunReturn) = (
+            FfiConverterSequenceTypeMsg.allocationSize(value.`msgs`) +
             FfiConverterOptionalString.allocationSize(value.`topic0`) +
             FfiConverterOptionalByteArray.allocationSize(value.`payload0`) +
             FfiConverterOptionalString.allocationSize(value.`topic1`) +
@@ -986,17 +1026,9 @@ public object FfiConverterTypeRunReturn: FfiConverterRustBuffer<RunReturn> {
             FfiConverterOptionalString.allocationSize(value.`topic2`) +
             FfiConverterOptionalByteArray.allocationSize(value.`payload2`) +
             FfiConverterOptionalByteArray.allocationSize(value.`stateMp`) +
-            FfiConverterOptionalString.allocationSize(value.`msg`) +
-            FfiConverterOptionalUByte.allocationSize(value.`msgType`) +
-            FfiConverterOptionalString.allocationSize(value.`msgUuid`) +
-            FfiConverterOptionalString.allocationSize(value.`msgIndex`) +
-            FfiConverterOptionalString.allocationSize(value.`msgSender`) +
-            FfiConverterOptionalULong.allocationSize(value.`msgMsat`) +
-            FfiConverterOptionalULong.allocationSize(value.`msgTimestamp`) +
             FfiConverterOptionalULong.allocationSize(value.`newBalance`) +
             FfiConverterOptionalString.allocationSize(value.`myContactInfo`) +
             FfiConverterOptionalString.allocationSize(value.`sentStatus`) +
-            FfiConverterOptionalString.allocationSize(value.`sentTo`) +
             FfiConverterOptionalString.allocationSize(value.`settledStatus`) +
             FfiConverterOptionalString.allocationSize(value.`error`) +
             FfiConverterOptionalString.allocationSize(value.`newTribe`) +
@@ -1007,6 +1039,7 @@ public object FfiConverterTypeRunReturn: FfiConverterRustBuffer<RunReturn> {
     )
 
     override fun write(value: RunReturn, buf: ByteBuffer) {
+            FfiConverterSequenceTypeMsg.write(value.`msgs`, buf)
             FfiConverterOptionalString.write(value.`topic0`, buf)
             FfiConverterOptionalByteArray.write(value.`payload0`, buf)
             FfiConverterOptionalString.write(value.`topic1`, buf)
@@ -1014,17 +1047,9 @@ public object FfiConverterTypeRunReturn: FfiConverterRustBuffer<RunReturn> {
             FfiConverterOptionalString.write(value.`topic2`, buf)
             FfiConverterOptionalByteArray.write(value.`payload2`, buf)
             FfiConverterOptionalByteArray.write(value.`stateMp`, buf)
-            FfiConverterOptionalString.write(value.`msg`, buf)
-            FfiConverterOptionalUByte.write(value.`msgType`, buf)
-            FfiConverterOptionalString.write(value.`msgUuid`, buf)
-            FfiConverterOptionalString.write(value.`msgIndex`, buf)
-            FfiConverterOptionalString.write(value.`msgSender`, buf)
-            FfiConverterOptionalULong.write(value.`msgMsat`, buf)
-            FfiConverterOptionalULong.write(value.`msgTimestamp`, buf)
             FfiConverterOptionalULong.write(value.`newBalance`, buf)
             FfiConverterOptionalString.write(value.`myContactInfo`, buf)
             FfiConverterOptionalString.write(value.`sentStatus`, buf)
-            FfiConverterOptionalString.write(value.`sentTo`, buf)
             FfiConverterOptionalString.write(value.`settledStatus`, buf)
             FfiConverterOptionalString.write(value.`error`, buf)
             FfiConverterOptionalString.write(value.`newTribe`, buf)
@@ -1822,6 +1847,31 @@ public object FfiConverterOptionalByteArray: FfiConverterRustBuffer<ByteArray?> 
         } else {
             buf.put(1)
             FfiConverterByteArray.write(value, buf)
+        }
+    }
+}
+
+
+
+
+public object FfiConverterSequenceTypeMsg: FfiConverterRustBuffer<List<Msg>> {
+    override fun read(buf: ByteBuffer): List<Msg> {
+        val len = buf.getInt()
+        return List<Msg>(len) {
+            FfiConverterTypeMsg.read(buf)
+        }
+    }
+
+    override fun allocationSize(value: List<Msg>): Int {
+        val sizeForLength = 4
+        val sizeForItems = value.map { FfiConverterTypeMsg.allocationSize(it) }.sum()
+        return sizeForLength + sizeForItems
+    }
+
+    override fun write(value: List<Msg>, buf: ByteBuffer) {
+        buf.putInt(value.size)
+        value.forEach {
+            FfiConverterTypeMsg.write(it, buf)
         }
     }
 }

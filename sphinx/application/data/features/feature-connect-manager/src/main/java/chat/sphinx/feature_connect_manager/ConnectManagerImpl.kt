@@ -279,7 +279,7 @@ class ConnectManagerImpl(
 
                 override fun messageArrived(topic: String?, message: MqttMessage?) {
                     // Handle incoming messages here
-                    Log.d("MQTT_MESSAGES", "$topic")
+                    Log.d("MQTT_MESSAGES", "topic: $topic")
                     Log.d("MQTT_MESSAGES", "$message")
                     Log.d("MQTT_MESSAGES", "${message?.payload}")
 
@@ -360,8 +360,6 @@ class ConnectManagerImpl(
                 )
 
                 handleRunReturn(fetchMessages, client)
-
-
             }
         } catch (e: Exception) {
             Log.e("MQTT_MESSAGES", "${e.message}")
@@ -401,11 +399,11 @@ class ConnectManagerImpl(
                 )
                 handleRunReturn(message, mqttClient!!)
 
-                    message.msgUuid?.let { msgUUID ->
-                        notifyListeners {
-                            onMessageUUID(msgUUID, provisionalId)
-                        }
+                message.msgs.firstOrNull()?.uuid?.let { msgUUID ->
+                    notifyListeners {
+                        onMessageUUID(msgUUID, provisionalId)
                     }
+                }
 
             } catch (e: Exception) {
                 Log.e("MQTT_MESSAGES", "send ${e.message}")
@@ -600,7 +598,6 @@ class ConnectManagerImpl(
         // Set updated state into db
         rr.stateMp?.let {
             storeUserState(it)
-
             Log.d("MQTT_MESSAGES", "=> stateMp $it")
         }
 
@@ -608,7 +605,6 @@ class ConnectManagerImpl(
         rr.topic0?.let { topic ->
             val pld = rr.payload0 ?: ByteArray(0)
             client.publish(topic, MqttMessage(pld))
-
             Log.d("MQTT_MESSAGES", "=> topic_0 $topic")
         }
 
@@ -630,67 +626,64 @@ class ConnectManagerImpl(
 
         // Set your balance
         rr.newBalance?.let { newBalance ->
-
             notifyListeners {
                 onNewBalance(newBalance.toLong())
             }
-
             Log.d("MQTT_MESSAGES", "===> BALANCE ${newBalance.toLong()}")
         }
 
-        rr.newTribe?.let { newTribe ->
+        // Process each message in the new msgs array
+        rr.msgs.forEach { msg ->
+            // Handling sent messages
+            msg.sentTo?.let { sentTo ->
+                notifyListeners {
+                    onMessageSent(
+                        msg.message.orEmpty(),
+                        sentTo,
+                        msg.type?.toInt() ?: 0,
+                        msg.uuid.orEmpty(),
+                        msg.index.orEmpty(),
+                        msg.timestamp?.toLong()
+                    )
+                }
+                Log.d("MQTT_MESSAGES", "Sent message to $sentTo")
+            }
 
+            // Handling received messages
+            msg.sender?.let { sender ->
+                notifyListeners {
+                    onMessageReceived(
+                        msg.message.orEmpty(),
+                        sender,
+                        msg.type?.toInt() ?: 0,
+                        msg.uuid.orEmpty(),
+                        msg.index.orEmpty(),
+                        msg.msat?.toLong(),
+                        msg.timestamp?.toLong()
+                    )
+                }
+                Log.d("MQTT_MESSAGES", "Received message from $sender")
+            }
+        }
+
+        // Handling new tribe and tribe members
+        rr.newTribe?.let { newTribe ->
             notifyListeners {
                 onNewTribe(newTribe)
             }
-
             Log.d("MQTT_MESSAGES", "===> newTribe $newTribe")
         }
 
-        // Sent message info
-        rr.sentTo?.let { sentTo ->
-            val msg = rr.msg ?: return
-            val type = rr.msgType?.toInt() ?: return
-            val uuid = rr.msgUuid ?: return
-            val index = rr.msgIndex ?: return
-            val msgTimestamp = rr.msgTimestamp?.toLong()
-
+        rr.tribeMembers?.let { tribeMembers ->
             notifyListeners {
-                onMessageSent(msg, sentTo, type, uuid, index, msgTimestamp)
+                onTribeMembersList(tribeMembers)
             }
-
-            Log.d("MQTT_MESSAGES", "=> received sentTo $sentTo")
+            Log.d("MQTT_MESSAGES", "=> tribeMembers $tribeMembers")
         }
 
-        // Incoming message json
-        rr.msg?.let { msg ->
-            val sender = rr.msgSender ?: return
-            val type = rr.msgType?.toInt() ?: return
-            val uuid = rr.msgUuid ?: return
-            val index = rr.msgIndex ?: return
-            val amount = rr.msgMsat?.toLong()
-            val msgTimestamp = rr.msgTimestamp?.toLong()
-
-            notifyListeners {
-                onMessageReceived(msg, sender, type, uuid, index, amount, msgTimestamp)
-            }
-
-            Log.d("MQTT_MESSAGES", "=> received msg $msg, ${rr.msgUuid}, ${rr.msgIndex}")
-        }
-
-        // Incoming sender info json
-        rr.msgSender?.let { msgSender ->
-            notifyListeners {
-                onNewContactRegistered(msgSender)
-            }
-
-            Log.d("MQTT_MESSAGES", "=> received msg_sender $msgSender")
-        }
-
-        // Print my contact info
+        // Handling my contact info
         rr.myContactInfo?.let { myContactInfo ->
             val parts = myContactInfo.split("_", limit = 2)
-
             val okKey = parts.getOrNull(0)
             val routeHint = parts.getOrNull(1)
 
@@ -699,25 +692,12 @@ class ConnectManagerImpl(
                     onOwnerRegistered(okKey, routeHint)
                 }
             }
-
             Log.d("MQTT_MESSAGES", "=> my_contact_info $myContactInfo")
         }
 
-        rr.tribeMembers?.let { tribeMembers ->
-
-            notifyListeners {
-                onTribeMembersList(tribeMembers)
-            }
-
-            Log.d("MQTT_MESSAGES", "=> tribeMembers $tribeMembers")
-        }
-
-        rr.msgTimestamp?.let { msgTimestamp ->
-            Log.d("MQTT_MESSAGES", "=> msgTimestamp $msgTimestamp")
-        }
-
-        rr.msgMsat?.let { mSat ->
-            Log.d("MQTT_MESSAGES", "=> msg_msat $mSat")
+        // Handling other properties like sentStatus, settledStatus, error, etc.
+        rr.error?.let { error ->
+            Log.d("MQTT_MESSAGES", "=> error $error")
         }
 
         // Sent
@@ -730,10 +710,6 @@ class ConnectManagerImpl(
             Log.d("MQTT_MESSAGES", "=> settled_status $settledStatus")
         }
 
-        // Incoming error string
-        rr.error?.let { error ->
-            Log.d("MQTT_MESSAGES", "=> error $error")
-        }
     }
 
     override fun setLspIp(ip: String) {
