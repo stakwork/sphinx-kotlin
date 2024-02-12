@@ -2,12 +2,12 @@ package chat.sphinx.tribe_members_list.ui.viewstate
 
 import chat.sphinx.example.wrapper_mqtt.TribeMember
 
+
 internal sealed class TribeMemberHolderViewState(
     val pubkey: String? = null,
     val alias: String? = null,
     val photo_url: String? = null,
     val person: String? = null,
-    val confirmed: Boolean = false,
     val route_hint: String? = null,
     val contact_key: String? = null,
     val showInitial: Boolean = false
@@ -22,7 +22,6 @@ internal sealed class TribeMemberHolderViewState(
         alias: String?,
         photo_url: String?,
         person: String?,
-        confirmed: Boolean,
         route_hint: String?,
         contact_key: String?,
         showInitial: Boolean
@@ -31,7 +30,6 @@ internal sealed class TribeMemberHolderViewState(
         alias,
         photo_url,
         person,
-        confirmed ,
         route_hint,
         contact_key,
         showInitial
@@ -46,7 +44,6 @@ internal sealed class TribeMemberHolderViewState(
                     tribeMember.alias,
                     tribeMember.photo_url,
                     tribeMember.person,
-                    tribeMember.confirmed ?: false,
                     tribeMember.route_hint,
                     tribeMember.contact_key,
                     showInitial
@@ -59,7 +56,6 @@ internal sealed class TribeMemberHolderViewState(
         alias: String?,
         photo_url: String?,
         person: String?,
-        confirmed: Boolean,
         route_hint: String?,
         contact_key: String?,
         showInitial: Boolean
@@ -68,7 +64,6 @@ internal sealed class TribeMemberHolderViewState(
         alias,
         photo_url,
         person,
-        confirmed,
         route_hint,
         contact_key,
         showInitial
@@ -83,7 +78,6 @@ internal sealed class TribeMemberHolderViewState(
                     tribeMember.alias,
                     tribeMember.photo_url,
                     tribeMember.person,
-                    tribeMember.confirmed ?: false,
                     tribeMember.route_hint,
                     tribeMember.contact_key,
                     showInitial

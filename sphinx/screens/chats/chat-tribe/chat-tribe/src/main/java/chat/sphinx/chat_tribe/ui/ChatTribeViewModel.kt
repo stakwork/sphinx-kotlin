@@ -340,7 +340,7 @@ class ChatTribeViewModel @Inject constructor(
             }
 
             if (type.isMemberApprove() || type.isMemberReject()) {
-                messageRepository.processMemberRequest(chatId, messageUuid, type)
+                messageRepository.processMemberRequest(chatId, messageUuid, null, type)
 //                when () {
 //                    is LoadResponse.Loading -> {}
 //                    is Response.Success -> {}

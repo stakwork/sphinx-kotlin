@@ -9,6 +9,7 @@ import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_common.DateTime
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.feed.FeedId
+import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.message.MessageUUID
@@ -109,7 +110,8 @@ interface MessageRepository {
 
     suspend fun processMemberRequest(
         chatId: ChatId,
-        messageUuid: MessageUUID,
+        messageUuid: MessageUUID?,
+        memberPubKey: LightningNodePubKey?,
         type: MessageType.GroupAction,
     )
 

@@ -12,16 +12,13 @@ import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.concept_image_loader.Transformation
-import chat.sphinx.kotlin_response.LoadResponse
-import chat.sphinx.kotlin_response.Response
 import chat.sphinx.resources.setBackgroundRandomColor
 import chat.sphinx.tribe_members_list.R
 import chat.sphinx.tribe_members_list.databinding.LayoutTribeMemberHolderBinding
 import chat.sphinx.tribe_members_list.ui.TribeMembersListViewModel
 import chat.sphinx.tribe_members_list.ui.TribeMembersListViewState
 import chat.sphinx.tribe_members_list.ui.viewstate.TribeMemberHolderViewState
-import chat.sphinx.wrapper_common.dashboard.ContactId
-import chat.sphinx.wrapper_common.dashboard.toContactId
+import chat.sphinx.wrapper_common.lightning.toLightningNodePubKey
 import chat.sphinx.wrapper_common.util.getInitials
 import chat.sphinx.wrapper_message.MessageType
 import chat.sphinx.wrapper_message.SenderAlias
@@ -34,7 +31,6 @@ import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisor
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.util.*
 import kotlin.collections.ArrayList
 
 internal class TribeMembersListAdapter(
@@ -308,15 +304,10 @@ internal class TribeMembersListAdapter(
     fun removeAt(position: Int) {
         val tribeMember = tribeMembers.elementAtOrNull(position)
 
-//        tribeMember?.memberId?.toContactId()?.let {
-//            viewModel.kickMemberFromTribe(it)
-//
-//            // TODO: use returned value from kickMemberFromTribe to remove the value via
-//            //  updating of the current list state (don't remove from here within coroutine
-//            //  as list could change, the list must be updated from the ViewModel after
-//            //  iterating through the current list to find and remove.
-//            notifyItemRemoved(position)
-//        }
+        tribeMember?.pubkey?.toLightningNodePubKey()?.let {
+            viewModel.kickMemberFromTribe(it)
+            notifyItemRemoved(position)
+        }
     }
 
     init {

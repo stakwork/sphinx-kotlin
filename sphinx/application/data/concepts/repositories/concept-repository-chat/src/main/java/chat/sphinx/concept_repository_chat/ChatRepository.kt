@@ -14,6 +14,7 @@ import chat.sphinx.wrapper_chat.TribeData
 import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
+import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
 import chat.sphinx.wrapper_meme_server.PublicAttachmentInfo
 import chat.sphinx.wrapper_message.Message
 import chat.sphinx.wrapper_podcast.Podcast
@@ -91,5 +92,5 @@ interface ChatRepository {
         profilePic: PublicAttachmentInfo? = null,
     ): Response<ChatDto, ResponseError>
 
-    suspend fun kickMemberFromTribe(chatId: ChatId, contactId: ContactId): Response<Any, ResponseError>
+    suspend fun kickMemberFromTribe(chatId: ChatId, contactPubKey: LightningNodePubKey): Response<Any, ResponseError>
 }

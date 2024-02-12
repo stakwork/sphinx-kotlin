@@ -69,7 +69,7 @@ import chat.sphinx.example.concept_connect_manager.ConnectManager
 import chat.sphinx.example.concept_connect_manager.ConnectManagerListener
 import chat.sphinx.example.concept_connect_manager.model.OwnerInfo
 import chat.sphinx.example.wrapper_mqtt.NewCreateTribe.Companion.toNewCreateTribe
-import chat.sphinx.example.wrapper_mqtt.TribeMember.Companion.toTribeMembersList
+import chat.sphinx.example.wrapper_mqtt.TribeMembersResponse.Companion.toTribeMembersList
 import chat.sphinx.example.wrapper_mqtt.toLspChannelInfo
 import chat.sphinx.feature_repository.mappers.action_track.*
 import chat.sphinx.feature_repository.mappers.chat.ChatDboPresenterMapper
@@ -388,6 +388,7 @@ abstract class SphinxRepository(
 
             val newMessage = chat.sphinx.example.wrapper_mqtt.Message(
                 "",
+                null,
                 null,
                 null,
                 null,
@@ -768,7 +769,8 @@ abstract class SphinxRepository(
         amount: Sat?,
         replyUUID: ReplyUUID?,
         threadUUID: ThreadUUID?,
-        isTribe: Boolean
+        isTribe: Boolean,
+        memberPubKey: LightningNodePubKey?
     ) {
         val newMessage = chat.sphinx.example.wrapper_mqtt.Message(
             messageContent,
@@ -777,7 +779,8 @@ abstract class SphinxRepository(
             mediaKey?.value,
             attachmentInfo?.mediaType?.value,
             replyUUID?.value,
-            threadUUID?.value
+            threadUUID?.value,
+            memberPubKey?.value
         ).toJson(moshi)
 
         provisionalId?.value?.let {
@@ -993,6 +996,7 @@ abstract class SphinxRepository(
                         null,
                         mediaMessage.media_token.value,
                         mediaKey,
+                        null,
                         null,
                         null,
                         null
@@ -3561,7 +3565,8 @@ abstract class SphinxRepository(
                                     sendMessage.tribePaymentAmount ?: messagePrice,
                                     replyUUID,
                                     threadUUID,
-                                    chat?.isTribe() ?: false
+                                    chat?.isTribe() ?: false,
+                                    sendMessage.memberPubKey
                                 )
 
                                 LOG.d("MQTT_MESSAGES", "Media Message was sent. mediatoken=$mediaTokenValue mediakey$mediaKey" )
@@ -3580,7 +3585,8 @@ abstract class SphinxRepository(
                         sendMessage.tribePaymentAmount ?: messagePrice,
                         replyUUID,
                         threadUUID,
-                        chat?.isTribe() ?: false
+                        chat?.isTribe() ?: false,
+                        sendMessage.memberPubKey
                     )
                 }
             }
@@ -3911,6 +3917,7 @@ abstract class SphinxRepository(
                 null,
                 null,
                 message.uuid?.value,
+                null,
                 null
             ).toJson(moshi)
 
@@ -4049,6 +4056,7 @@ abstract class SphinxRepository(
                 mediaTokenValue,
                 null,
                 MediaType.IMAGE,
+                null,
                 null,
                 null
             ).toJson(moshi)
@@ -4207,6 +4215,7 @@ abstract class SphinxRepository(
                 null,
                 null,
                 messageUUID.value,
+                null,
                 null
             ).toJson(moshi)
 
@@ -4542,6 +4551,7 @@ abstract class SphinxRepository(
                         null,
                         null,
                         mediaToken.value,
+                        null,
                         null,
                         null,
                         null,
@@ -6504,8 +6514,7 @@ abstract class SphinxRepository(
                 val ownerAlias = accountOwner.value?.alias?.value ?: "unknown"
 
                 val tribeJson = createTribe.toNewCreateTribe(ownerAlias, imgUrl).toJson()
-                val tribeServerPubKey = "0356091a4d8a1bfa8e2b9d19924bf8275dd057536e12427c557dd91a6cb1c03e8b"
-
+                val tribeServerPubKey = "036b441c86acf790ff00694dfbf83e49cc8d537d166ec68b1077a719e61aa9bb42"
                 connectManager.createTribe(tribeServerPubKey, tribeJson)
 
             } catch (e: Exception) { }
@@ -6658,14 +6667,23 @@ abstract class SphinxRepository(
 
     override suspend fun processMemberRequest(
         chatId: ChatId,
-        messageUuid: MessageUUID,
-        type: MessageType.GroupAction,
+        messageUuid: MessageUUID?,
+        memberPubKey: LightningNodePubKey?,
+        type: MessageType.GroupAction
     ) {
-
         val messageBuilder = SendMessage.Builder()
         messageBuilder.setChatId(chatId)
-        messageBuilder.setReplyUUID(ReplyUUID(messageUuid.value))
         messageBuilder.setGroupAction(type)
+
+        // Accept or Reject member
+        messageUuid?.value?.let { nnMessageUuid ->
+        messageBuilder.setReplyUUID(ReplyUUID(nnMessageUuid))
+        }
+
+        // Kick Member
+        memberPubKey?.let { nnContactKey ->
+            messageBuilder.setMemberPubKey(nnContactKey)
+        }
 
         sendMessage(messageBuilder.build().first)
     }
@@ -6733,48 +6751,49 @@ abstract class SphinxRepository(
 
     override suspend fun kickMemberFromTribe(
         chatId: ChatId,
-        contactId: ContactId
+        contactPubKey: LightningNodePubKey
     ): Response<Any, ResponseError> {
         var response: Response<Any, ResponseError> =
             Response.Error(ResponseError(("Failed to kick member from tribe")))
 
-        applicationScope.launch(mainImmediate) {
-            networkQueryChat.kickMemberFromChat(
-                chatId,
-                contactId
-            ).collect { loadResponse ->
-
-                when (loadResponse) {
-                    is LoadResponse.Loading -> {
-                    }
-
-                    is Response.Error -> {
-                        response = loadResponse
-                    }
-                    is Response.Success -> {
-                        response = loadResponse
-                        val queries = coreDB.getSphinxDatabaseQueries()
-
-                        chatLock.withLock {
-                            messageLock.withLock {
-                                withContext(io) {
-                                    queries.transaction {
-                                        upsertChat(
-                                            loadResponse.value,
-                                            moshi,
-                                            chatSeenMap,
-                                            queries,
-                                            null,
-                                            accountOwner.value?.nodePubKey
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }.join()
+//        applicationScope.launch(mainImmediate) {
+//            val queries = coreDB.getSphinxDatabaseQueries()
+//
+//            networkQueryChat.kickMemberFromChat(
+//                chatId,
+//                contactPubKey
+//            ).collect { loadResponse ->
+//
+//                when (loadResponse) {
+//                    is LoadResponse.Loading -> {
+//                    }
+//
+//                    is Response.Error -> {
+//                        response = loadResponse
+//                    }
+//                    is Response.Success -> {
+//                        response = loadResponse
+//
+//                        chatLock.withLock {
+//                            messageLock.withLock {
+//                                withContext(io) {
+//                                    queries.transaction {
+//                                        upsertChat(
+//                                            loadResponse.value,
+//                                            moshi,
+//                                            chatSeenMap,
+//                                            queries,
+//                                            null,
+//                                            accountOwner.value?.nodePubKey
+//                                        )
+//                                    }
+//                                }
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+//        }.join()
 
         return response
     }

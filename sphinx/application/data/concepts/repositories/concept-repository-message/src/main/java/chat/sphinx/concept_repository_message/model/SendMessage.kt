@@ -2,6 +2,7 @@ package chat.sphinx.concept_repository_message.model
 
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
+import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_message.GiphyData
 import chat.sphinx.wrapper_message.MessageType
@@ -26,7 +27,8 @@ class SendMessage private constructor(
     val groupAction: MessageType.GroupAction?,
     val paidMessagePrice: Sat?,
     val priceToMeet: Sat?,
-    val threadUUID: ThreadUUID?
+    val threadUUID: ThreadUUID?,
+    val memberPubKey: LightningNodePubKey?
 ) {
 
     class Builder {
@@ -45,6 +47,7 @@ class SendMessage private constructor(
         private var paidMessagePrice: Sat?                = null
         private var priceToMeet: Sat?                     = null
         private var threadUUID: ThreadUUID?               = null
+        private var memberPubKey: LightningNodePubKey?      = null
 
         enum class ValidationError {
             EMPTY_PRICE, EMPTY_DESTINATION, EMPTY_CONTENT
@@ -66,6 +69,7 @@ class SendMessage private constructor(
             paidMessagePrice = null
             priceToMeet = null
             threadUUID = null
+            memberPubKey = null
         }
 
         @Synchronized
@@ -206,6 +210,12 @@ class SendMessage private constructor(
         }
 
         @Synchronized
+        fun setMemberPubKey(memberPubKey: LightningNodePubKey): Builder {
+            this.memberPubKey = memberPubKey
+            return this
+        }
+
+        @Synchronized
         fun build(): Pair<SendMessage?, ValidationError?> {
             val isValid = isValid()
 
@@ -229,6 +239,7 @@ class SendMessage private constructor(
                         paidMessagePrice,
                         priceToMeet,
                         threadUUID,
+                        memberPubKey
                     ), null
                 )
             }
