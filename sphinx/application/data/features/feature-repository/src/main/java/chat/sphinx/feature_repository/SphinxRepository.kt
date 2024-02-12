@@ -69,6 +69,7 @@ import chat.sphinx.example.concept_connect_manager.ConnectManager
 import chat.sphinx.example.concept_connect_manager.ConnectManagerListener
 import chat.sphinx.example.concept_connect_manager.model.OwnerInfo
 import chat.sphinx.example.wrapper_mqtt.NewCreateTribe.Companion.toNewCreateTribe
+import chat.sphinx.example.wrapper_mqtt.TribeMember.Companion.toTribeMembersList
 import chat.sphinx.example.wrapper_mqtt.toLspChannelInfo
 import chat.sphinx.feature_repository.mappers.action_track.*
 import chat.sphinx.feature_repository.mappers.chat.ChatDboPresenterMapper
@@ -575,6 +576,12 @@ abstract class SphinxRepository(
                     }
                 }
             }
+        }
+    }
+
+    override fun onTribeMembersList(tribeMembers: String) {
+        tribeMembers.toTribeMembersList(moshi)?.let { members ->
+            connectionManagerState.value = ConnectionManagerState.TribeMembersList(members)
         }
     }
 
@@ -3152,14 +3159,14 @@ abstract class SphinxRepository(
         )
     }
 
-    override fun getTribeLastMemberRequestByContactId(
-        contactId: ContactId,
+    override fun getTribeLastMemberRequestBySenderAlias(
+        alias: SenderAlias,
         chatId: ChatId,
     ): Flow<Message?> = flow {
         val queries = coreDB.getSphinxDatabaseQueries()
 
         emitAll(
-            queries.messageLastMemberRequestGetByContactId(contactId, chatId)
+            queries.messageLastMemberRequestGetBySenderAlias(alias, chatId)
                 .asFlow()
                 .mapToOneOrNull(io)
                 .map {
@@ -6661,58 +6668,7 @@ abstract class SphinxRepository(
         messageBuilder.setGroupAction(type)
 
         sendMessage(messageBuilder.build().first)
-
-//        applicationScope.launch(mainImmediate) {
-//            networkQueryMessage.processMemberRequest(
-//                contactId,
-//                messageUuid,
-//                type
-//            ).collect { loadResponse ->
-//
-//                when (loadResponse) {
-//                    is LoadResponse.Loading -> {
-//                    }
-//
-//                    is Response.Error -> {
-//                        response = loadResponse
-//                    }
-//                    is Response.Success -> {
-//                        response = loadResponse
-//                        val queries = coreDB.getSphinxDatabaseQueries()
-//
-//                        chatLock.withLock {
-//                            messageLock.withLock {
-//                                withContext(io) {
-//                                    queries.transaction {
-//                                        upsertChat(
-//                                            loadResponse.value.chat,
-//                                            moshi,
-//                                            chatSeenMap,
-//                                            queries,
-//                                            null,
-//                                            accountOwner.value?.nodePubKey
-//                                        )
-//
-//                                        upsertMessage(loadResponse.value.message, queries)
-//
-//                                        updateChatDboLatestMessage(
-//                                            loadResponse.value.message,
-//                                            ChatId(loadResponse.value.chat.id),
-//                                            latestMessageUpdatedTimeMap,
-//                                            queries,
-//                                        )
-//                                    }
-//                                }
-//                            }
-//                        }
-//                    }
-//                }
-//            }
-//        }.join()
-
     }
-
-
 
     override suspend fun addTribeMember(addMember: AddMember): Response<Any, ResponseError> {
         var response: Response<Any, ResponseError> =

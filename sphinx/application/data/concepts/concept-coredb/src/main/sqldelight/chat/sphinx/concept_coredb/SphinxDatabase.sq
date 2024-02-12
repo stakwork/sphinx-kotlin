@@ -721,13 +721,13 @@ WHERE muid = ?
 ORDER BY id ASC
 LIMIT 1;
 
-messageLastMemberRequestGetByContactId:
+messageLastMemberRequestGetBySenderAlias:
 SELECT *
 FROM messageDbo
-WHERE sender = ?
+WHERE sender_alias = ?
 AND chat_id = :chat_id
 AND type = 19
-ORDER BY id DESC
+ORDER BY id ASC
 LIMIT 1;
 
 messageGetByUUID:

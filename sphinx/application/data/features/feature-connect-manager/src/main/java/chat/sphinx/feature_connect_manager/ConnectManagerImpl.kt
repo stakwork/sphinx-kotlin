@@ -600,43 +600,50 @@ class ConnectManagerImpl(
         // Set updated state into db
         rr.stateMp?.let {
             storeUserState(it)
+
             Log.d("MQTT_MESSAGES", "=> stateMp $it")
         }
 
         // Publish to topic 0
         rr.topic0?.let { topic ->
-            Log.d("MQTT_MESSAGES", "=> topic_0 $topic")
             val pld = rr.payload0 ?: ByteArray(0)
             client.publish(topic, MqttMessage(pld))
+
+            Log.d("MQTT_MESSAGES", "=> topic_0 $topic")
         }
 
         // Publish to topic 1
         rr.topic1?.let { topic ->
-            Log.d("MQTT_MESSAGES", "=> topic_1 $topic")
             val pld = rr.payload1 ?: ByteArray(0)
             client.publish(topic, MqttMessage(pld))
+
+            Log.d("MQTT_MESSAGES", "=> topic_1 $topic")
         }
 
         // Publish to topic 2
         rr.topic2?.let { topic ->
-            Log.d("MQTT_MESSAGES", "=> topic_2 $topic")
             val pld = rr.payload2 ?: ByteArray(0)
             client.publish(topic, MqttMessage(pld))
+
+            Log.d("MQTT_MESSAGES", "=> topic_2 $topic")
         }
 
         // Set your balance
         rr.newBalance?.let { newBalance ->
-            Log.d("MQTT_MESSAGES", "===> BALANCE ${newBalance.toLong()}")
 
             notifyListeners {
                 onNewBalance(newBalance.toLong())
             }
+
+            Log.d("MQTT_MESSAGES", "===> BALANCE ${newBalance.toLong()}")
         }
 
         rr.newTribe?.let { newTribe ->
+
             notifyListeners {
                 onNewTribe(newTribe)
             }
+
             Log.d("MQTT_MESSAGES", "===> newTribe $newTribe")
         }
 
@@ -673,18 +680,15 @@ class ConnectManagerImpl(
 
         // Incoming sender info json
         rr.msgSender?.let { msgSender ->
-            try {
-                notifyListeners {
-                    onNewContactRegistered(msgSender)
-                }
-            } catch (e: Exception){}
+            notifyListeners {
+                onNewContactRegistered(msgSender)
+            }
 
             Log.d("MQTT_MESSAGES", "=> received msg_sender $msgSender")
         }
 
         // Print my contact info
         rr.myContactInfo?.let { myContactInfo ->
-            Log.d("MQTT_MESSAGES", "=> my_contact_info $myContactInfo")
             val parts = myContactInfo.split("_", limit = 2)
 
             val okKey = parts.getOrNull(0)
@@ -695,9 +699,16 @@ class ConnectManagerImpl(
                     onOwnerRegistered(okKey, routeHint)
                 }
             }
+
+            Log.d("MQTT_MESSAGES", "=> my_contact_info $myContactInfo")
         }
 
         rr.tribeMembers?.let { tribeMembers ->
+
+            notifyListeners {
+                onTribeMembersList(tribeMembers)
+            }
+
             Log.d("MQTT_MESSAGES", "=> tribeMembers $tribeMembers")
         }
 

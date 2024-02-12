@@ -1,5 +1,7 @@
 package chat.sphinx.concept_repository_connect_manager.model
 
+import chat.sphinx.example.wrapper_mqtt.TribeMember
+
 sealed class ConnectionManagerState {
 
     object OwnerRegistered: ConnectionManagerState()
@@ -7,4 +9,5 @@ sealed class ConnectionManagerState {
     data class UserState(val userState: String): ConnectionManagerState()
     data class SignedChallenge(val authToken: String): ConnectionManagerState()
     data class ErrorMessage(val message: String): ConnectionManagerState()
+    data class TribeMembersList(val tribeMembers: List<TribeMember>): ConnectionManagerState()
 }

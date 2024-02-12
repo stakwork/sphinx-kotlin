@@ -90,9 +90,9 @@ internal class TribeMembersListFragment: SideEffectDetailFragment<
 
     override suspend fun onViewStateFlowCollect(viewState: TribeMembersListViewState) {
         if (viewState is TribeMembersListViewState.ListMode) {
-            if (!viewState.firstPage) {
-                return
-            }
+//            if (!viewState.firstPage) {
+//                return
+//            }
 
             binding.apply {
                 progressBarTribeMembersList.goneIfFalse(

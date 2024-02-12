@@ -90,6 +90,8 @@ interface ConnectManagerListener {
 
     fun onNewTribe(newTribe: String)
 
+    fun onTribeMembersList(tribeMembers: String)
+
     fun onMessageUUID(msgUUID: String, provisionalId: Long)
 
     fun onUpdateUserState(userState: String)

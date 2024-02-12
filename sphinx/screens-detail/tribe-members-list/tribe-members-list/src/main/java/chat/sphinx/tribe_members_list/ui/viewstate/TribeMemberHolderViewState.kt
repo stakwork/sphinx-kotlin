@@ -1,11 +1,15 @@
 package chat.sphinx.tribe_members_list.ui.viewstate
 
-import chat.sphinx.concept_network_query_contact.model.ContactDto
+import chat.sphinx.example.wrapper_mqtt.TribeMember
 
 internal sealed class TribeMemberHolderViewState(
-    val memberId: Long? = null,
-    val memberAlias: String? = null,
-    val memberPhotoUrl: String? = null,
+    val pubkey: String? = null,
+    val alias: String? = null,
+    val photo_url: String? = null,
+    val person: String? = null,
+    val confirmed: Boolean = false,
+    val route_hint: String? = null,
+    val contact_key: String? = null,
     val showInitial: Boolean = false
 ) {
 
@@ -14,50 +18,74 @@ internal sealed class TribeMemberHolderViewState(
     object TribeMemberHeader : TribeMemberHolderViewState()
 
     class Pending(
-        memberId: Long,
-        memberAlias: String?,
-        memberPhotoUrl: String?,
+        pubkey: String?,
+        alias: String?,
+        photo_url: String?,
+        person: String?,
+        confirmed: Boolean,
+        route_hint: String?,
+        contact_key: String?,
         showInitial: Boolean
     ) : TribeMemberHolderViewState(
-        memberId,
-        memberAlias,
-        memberPhotoUrl,
+        pubkey,
+        alias,
+        photo_url,
+        person,
+        confirmed ,
+        route_hint,
+        contact_key,
         showInitial
     ) {
         companion object {
             operator fun invoke(
-                contactDto: ContactDto,
+                tribeMember: TribeMember,
                 showInitial: Boolean
             ): Pending =
                 Pending(
-                    contactDto.id,
-                    contactDto.alias,
-                    contactDto.photo_url,
+                    tribeMember.pubkey,
+                    tribeMember.alias,
+                    tribeMember.photo_url,
+                    tribeMember.person,
+                    tribeMember.confirmed ?: false,
+                    tribeMember.route_hint,
+                    tribeMember.contact_key,
                     showInitial
                 )
         }
     }
 
     class Member(
-        memberId: Long,
-        memberAlias: String?,
-        memberPhotoUrl: String?,
+        pubkey: String?,
+        alias: String?,
+        photo_url: String?,
+        person: String?,
+        confirmed: Boolean,
+        route_hint: String?,
+        contact_key: String?,
         showInitial: Boolean
     ) : TribeMemberHolderViewState(
-        memberId,
-        memberAlias,
-        memberPhotoUrl,
+        pubkey,
+        alias,
+        photo_url,
+        person,
+        confirmed,
+        route_hint,
+        contact_key,
         showInitial
     ) {
         companion object {
             operator fun invoke(
-                contactDto: ContactDto,
+                tribeMember: TribeMember,
                 showInitial: Boolean
             ): Member =
                 Member(
-                    contactDto.id,
-                    contactDto.alias,
-                    contactDto.photo_url,
+                    tribeMember.pubkey,
+                    tribeMember.alias,
+                    tribeMember.photo_url,
+                    tribeMember.person,
+                    tribeMember.confirmed ?: false,
+                    tribeMember.route_hint,
+                    tribeMember.contact_key,
                     showInitial
                 )
         }
