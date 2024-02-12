@@ -67,7 +67,6 @@ interface ConnectManagerListener {
 
     fun onMnemonicWords(words: String)
     fun onOwnerRegistered(okKey: String, routeHint: String)
-    fun onNewContactRegistered(msgSender: String)
     fun onMessageReceived(
         msg: String,
         msgSender: String,

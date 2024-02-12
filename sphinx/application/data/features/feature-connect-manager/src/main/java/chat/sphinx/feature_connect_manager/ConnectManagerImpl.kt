@@ -634,6 +634,7 @@ class ConnectManagerImpl(
 
         // Process each message in the new msgs array
         rr.msgs.forEach { msg ->
+
             // Handling sent messages
             msg.sentTo?.let { sentTo ->
                 notifyListeners {
@@ -652,6 +653,7 @@ class ConnectManagerImpl(
             // Handling received messages
             msg.sender?.let { sender ->
                 notifyListeners {
+
                     onMessageReceived(
                         msg.message.orEmpty(),
                         sender,

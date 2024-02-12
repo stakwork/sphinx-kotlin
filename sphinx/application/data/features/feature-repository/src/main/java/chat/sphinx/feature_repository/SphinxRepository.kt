@@ -424,7 +424,7 @@ abstract class SphinxRepository(
         }.join()
     }
 
-    override fun onNewContactRegistered(
+    override fun saveNewContactRegistered(
         msgSender: String
     ) {
         applicationScope.launch(io) {
@@ -452,21 +452,30 @@ abstract class SphinxRepository(
         msgTimestamp: Long?,
     ) {
         applicationScope.launch(io) {
-            val message = msg.toMsg(moshi)
-            val contactInfo = msgSender.toMsgSender(moshi)
-
-            val messageId = MessageId(msgIndex.toLong())
             val messageType = msgType.toMessageType()
-            val messageUUID = msgUuid.toMessageUUID() ?: return@launch
-            val originalUUID = message.originalUuid?.toMessageUUID()
-            val date = msgTimestamp?.let { DateTime(Date(it)) }
-            val isSent = (accountOwner.value?.alias?.value == contactInfo.alias)
 
             when (messageType) {
                 is MessageType.Delete -> {
-                    message.replyUuid?.toMessageUUID()?.let { deleteMqttMessage(it) }
+                    msg.toMsg(moshi).replyUuid?.toMessageUUID()?.let { replyUuid ->
+                        deleteMqttMessage(replyUuid)
+                    }
+                }
+                is MessageType.ContactKeyConfirmation -> {
+                    saveNewContactRegistered(msgSender)
+                }
+                is MessageType.ContactKey -> {
+                    saveNewContactRegistered(msgSender)
                 }
                 else -> {
+                    val message = msg.toMsg(moshi)
+
+                    val contactInfo = msgSender.toMsgSender(moshi)
+                    val messageId = MessageId(msgIndex.toLong())
+                    val messageUUID = msgUuid.toMessageUUID() ?: return@launch
+                    val originalUUID = message.originalUuid?.toMessageUUID()
+                    val date = msgTimestamp?.let { DateTime(Date(it)) }
+                    val isSent = (accountOwner.value?.alias?.value == contactInfo.alias)
+
                     if (messageType is MessageType.Purchase.Processing) {
                         amount?.toSat()?.let { paidAmount ->
                             sendMediaKeyOnPaidPurchase(

@@ -985,7 +985,7 @@ data class RunReturn (
     var `settledStatus`: String?, 
     var `error`: String?, 
     var `newTribe`: String?, 
-    var `tribeMembers`: String?, 
+    var `tribeMembers`: String?,
     var `newInvite`: String?, 
     var `inviterContactInfo`: String?, 
     var `lspHost`: String?
