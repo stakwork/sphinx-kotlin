@@ -2228,7 +2228,9 @@ internal inline fun LayoutMessageHolderBinding.setGroupActionIndicatorLayout(
             }
             MessageType.GroupAction.Kick,
             MessageType.GroupAction.TribeDelete -> {
-                setGroupActionMemberRemovalLayout(groupActionDetails)
+                if (!groupActionDetails.isAdminView) {
+                    setGroupActionMemberRemovalLayout(groupActionDetails)
+                }
             }
             MessageType.GroupAction.MemberApprove -> {
                 if (groupActionDetails.isAdminView) {
