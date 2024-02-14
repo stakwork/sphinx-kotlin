@@ -23,6 +23,7 @@ data class NewTribeDto(
     val updated: Long?,
     val member_count: Int?,
     val last_active: Int?,
+    val unique_name: String?
 ) {
 
     var amount: Long? = null
@@ -55,4 +56,13 @@ data class NewTribeDto(
         this.host = host
         this.uuid = tribePubKey
     }
+
+
+}
+
+fun Long.escrowMillisToHours(): Long {
+    if (this == 0L) {
+        return 0L
+    }
+    return this / (1000 * 60 * 60)
 }

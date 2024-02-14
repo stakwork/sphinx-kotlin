@@ -972,12 +972,8 @@ public object FfiConverterTypeMsg: FfiConverterRustBuffer<Msg> {
 
 data class RunReturn (
     var `msgs`: List<Msg>, 
-    var `topic0`: String?, 
-    var `payload0`: ByteArray?, 
-    var `topic1`: String?, 
-    var `payload1`: ByteArray?, 
-    var `topic2`: String?, 
-    var `payload2`: ByteArray?, 
+    var `topics`: List<String>, 
+    var `payloads`: List<ByteArray>, 
     var `stateMp`: ByteArray?, 
     var `newBalance`: ULong?, 
     var `myContactInfo`: String?, 
@@ -985,7 +981,7 @@ data class RunReturn (
     var `settledStatus`: String?, 
     var `error`: String?, 
     var `newTribe`: String?, 
-    var `tribeMembers`: String?,
+    var `tribeMembers`: String?, 
     var `newInvite`: String?, 
     var `inviterContactInfo`: String?, 
     var `lspHost`: String?
@@ -997,12 +993,8 @@ public object FfiConverterTypeRunReturn: FfiConverterRustBuffer<RunReturn> {
     override fun read(buf: ByteBuffer): RunReturn {
         return RunReturn(
             FfiConverterSequenceTypeMsg.read(buf),
-            FfiConverterOptionalString.read(buf),
-            FfiConverterOptionalByteArray.read(buf),
-            FfiConverterOptionalString.read(buf),
-            FfiConverterOptionalByteArray.read(buf),
-            FfiConverterOptionalString.read(buf),
-            FfiConverterOptionalByteArray.read(buf),
+            FfiConverterSequenceString.read(buf),
+            FfiConverterSequenceByteArray.read(buf),
             FfiConverterOptionalByteArray.read(buf),
             FfiConverterOptionalULong.read(buf),
             FfiConverterOptionalString.read(buf),
@@ -1019,12 +1011,8 @@ public object FfiConverterTypeRunReturn: FfiConverterRustBuffer<RunReturn> {
 
     override fun allocationSize(value: RunReturn) = (
             FfiConverterSequenceTypeMsg.allocationSize(value.`msgs`) +
-            FfiConverterOptionalString.allocationSize(value.`topic0`) +
-            FfiConverterOptionalByteArray.allocationSize(value.`payload0`) +
-            FfiConverterOptionalString.allocationSize(value.`topic1`) +
-            FfiConverterOptionalByteArray.allocationSize(value.`payload1`) +
-            FfiConverterOptionalString.allocationSize(value.`topic2`) +
-            FfiConverterOptionalByteArray.allocationSize(value.`payload2`) +
+            FfiConverterSequenceString.allocationSize(value.`topics`) +
+            FfiConverterSequenceByteArray.allocationSize(value.`payloads`) +
             FfiConverterOptionalByteArray.allocationSize(value.`stateMp`) +
             FfiConverterOptionalULong.allocationSize(value.`newBalance`) +
             FfiConverterOptionalString.allocationSize(value.`myContactInfo`) +
@@ -1040,12 +1028,8 @@ public object FfiConverterTypeRunReturn: FfiConverterRustBuffer<RunReturn> {
 
     override fun write(value: RunReturn, buf: ByteBuffer) {
             FfiConverterSequenceTypeMsg.write(value.`msgs`, buf)
-            FfiConverterOptionalString.write(value.`topic0`, buf)
-            FfiConverterOptionalByteArray.write(value.`payload0`, buf)
-            FfiConverterOptionalString.write(value.`topic1`, buf)
-            FfiConverterOptionalByteArray.write(value.`payload1`, buf)
-            FfiConverterOptionalString.write(value.`topic2`, buf)
-            FfiConverterOptionalByteArray.write(value.`payload2`, buf)
+            FfiConverterSequenceString.write(value.`topics`, buf)
+            FfiConverterSequenceByteArray.write(value.`payloads`, buf)
             FfiConverterOptionalByteArray.write(value.`stateMp`, buf)
             FfiConverterOptionalULong.write(value.`newBalance`, buf)
             FfiConverterOptionalString.write(value.`myContactInfo`, buf)
@@ -1847,6 +1831,56 @@ public object FfiConverterOptionalByteArray: FfiConverterRustBuffer<ByteArray?> 
         } else {
             buf.put(1)
             FfiConverterByteArray.write(value, buf)
+        }
+    }
+}
+
+
+
+
+public object FfiConverterSequenceString: FfiConverterRustBuffer<List<String>> {
+    override fun read(buf: ByteBuffer): List<String> {
+        val len = buf.getInt()
+        return List<String>(len) {
+            FfiConverterString.read(buf)
+        }
+    }
+
+    override fun allocationSize(value: List<String>): Int {
+        val sizeForLength = 4
+        val sizeForItems = value.map { FfiConverterString.allocationSize(it) }.sum()
+        return sizeForLength + sizeForItems
+    }
+
+    override fun write(value: List<String>, buf: ByteBuffer) {
+        buf.putInt(value.size)
+        value.forEach {
+            FfiConverterString.write(it, buf)
+        }
+    }
+}
+
+
+
+
+public object FfiConverterSequenceByteArray: FfiConverterRustBuffer<List<ByteArray>> {
+    override fun read(buf: ByteBuffer): List<ByteArray> {
+        val len = buf.getInt()
+        return List<ByteArray>(len) {
+            FfiConverterByteArray.read(buf)
+        }
+    }
+
+    override fun allocationSize(value: List<ByteArray>): Int {
+        val sizeForLength = 4
+        val sizeForItems = value.map { FfiConverterByteArray.allocationSize(it) }.sum()
+        return sizeForLength + sizeForItems
+    }
+
+    override fun write(value: List<ByteArray>, buf: ByteBuffer) {
+        buf.putInt(value.size)
+        value.forEach {
+            FfiConverterByteArray.write(it, buf)
         }
     }
 }

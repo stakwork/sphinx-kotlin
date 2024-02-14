@@ -1,7 +1,7 @@
 package chat.sphinx.concept_repository_chat
 
 import chat.sphinx.concept_network_query_chat.model.ChatDto
-import chat.sphinx.concept_network_query_chat.model.TribeDto
+import chat.sphinx.concept_network_query_chat.model.NewTribeDto
 import chat.sphinx.concept_repository_chat.model.AddMember
 import chat.sphinx.concept_repository_chat.model.CreateTribe
 import chat.sphinx.kotlin_response.LoadResponse
@@ -67,7 +67,7 @@ interface ChatRepository {
         itemsPerPage: Int,
         searchTerm: String? = null,
         tags: String? = null
-    ): Flow<List<TribeDto>>
+    ): Flow<List<NewTribeDto>>
 
     suspend fun updateTribeInfo(chat: Chat): TribeData?
     suspend fun createTribe(createTribe: CreateTribe)

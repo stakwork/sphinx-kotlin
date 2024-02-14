@@ -76,14 +76,8 @@ class ConnectManagerImpl(
     override val ownerInfoStateFlow: StateFlow<OwnerInfo?>
         get() = _ownerInfoStateFlow.asStateFlow()
 
-    companion object {
-        const val KEY_EXCHANGE = 10
-        const val KEY_EXCHANGE_CONFIRMATION = 11
-        const val TEXT_MESSAGE = 0
-    }
 
     // Key Generation and Management
-
     override fun createAccount() {
         coroutineScope.launch {
 
@@ -601,28 +595,13 @@ class ConnectManagerImpl(
             Log.d("MQTT_MESSAGES", "=> stateMp $it")
         }
 
-        // Publish to topic 0
-        rr.topic0?.let { topic ->
-            val pld = rr.payload0 ?: ByteArray(0)
-            client.publish(topic, MqttMessage(pld))
-            Log.d("MQTT_MESSAGES", "=> topic_0 $topic")
+        // Publish to topics based on the new array structure
+        rr.topics.forEachIndexed { index, topic ->
+            val payload = rr.payloads.getOrElse(index) { ByteArray(0) }
+            client.publish(topic, MqttMessage(payload))
+            Log.d("MQTT_MESSAGES", "=> published to $topic")
         }
 
-        // Publish to topic 1
-        rr.topic1?.let { topic ->
-            val pld = rr.payload1 ?: ByteArray(0)
-            client.publish(topic, MqttMessage(pld))
-
-            Log.d("MQTT_MESSAGES", "=> topic_1 $topic")
-        }
-
-        // Publish to topic 2
-        rr.topic2?.let { topic ->
-            val pld = rr.payload2 ?: ByteArray(0)
-            client.publish(topic, MqttMessage(pld))
-
-            Log.d("MQTT_MESSAGES", "=> topic_2 $topic")
-        }
 
         // Set your balance
         rr.newBalance?.let { newBalance ->

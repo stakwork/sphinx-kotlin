@@ -10,6 +10,7 @@ import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.concept_image_loader.Transformation
 import chat.sphinx.concept_network_query_chat.NetworkQueryChat
 import chat.sphinx.concept_network_query_chat.model.NewTribeDto
+import chat.sphinx.concept_network_query_chat.model.escrowMillisToHours
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_connect_manager.ConnectManagerRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
@@ -161,7 +162,7 @@ internal class JoinTribeViewModel @Inject constructor(
                                 loadResponse.value.price_to_join.toString(),
                                 loadResponse.value.price_per_message.toString(),
                                 loadResponse.value.escrow_amount.toString(),
-                                loadResponse.value.escrow_millis.toString(),
+                                loadResponse.value.escrow_millis.escrowMillisToHours().toString(),
                                 accountOwnerStateFlow.value?.alias?.value,
                                 accountOwnerStateFlow.value?.photoUrl?.value
                             )

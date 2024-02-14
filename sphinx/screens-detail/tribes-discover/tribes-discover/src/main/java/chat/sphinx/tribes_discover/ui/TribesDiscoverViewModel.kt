@@ -2,7 +2,6 @@ package chat.sphinx.tribes_discover.ui
 
 import android.content.Context
 import androidx.lifecycle.viewModelScope
-import chat.sphinx.concept_network_query_chat.model.TribeDto
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_view_model_coordinator.ResponseHolder
 import chat.sphinx.feature_view_model_coordinator.RequestCatcher
@@ -15,7 +14,6 @@ import chat.sphinx.tribes_discover.viewstate.DiscoverTribesTagsViewState
 import chat.sphinx.tribes_discover.viewstate.DiscoverTribesViewState
 import chat.sphinx.tribes_discover.viewstate.TribeHolderViewState
 import chat.sphinx.tribes_discover_view_model_coordinator.response.TribesDiscoverResponse
-import chat.sphinx.wrapper_chat.ChatType
 import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.chat.toChatUUID
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -42,7 +40,12 @@ internal class TribesDiscoverViewModel @Inject constructor(
     DiscoverTribesViewState,
     >(dispatchers, DiscoverTribesViewState.Loading)
 {
-    val discoverTribesTagsViewStateContainer: ViewStateContainer<DiscoverTribesTagsViewState> by lazy {
+
+    companion object {
+        private const val TRIBES_DEFAULT_SERVER_URL = "http://34.229.52.200:8801"
+    }
+
+        val discoverTribesTagsViewStateContainer: ViewStateContainer<DiscoverTribesTagsViewState> by lazy {
         ViewStateContainer(DiscoverTribesTagsViewState.Closed(0))
     }
 
@@ -182,7 +185,7 @@ internal class TribesDiscoverViewModel @Inject constructor(
                 val tribesHVSs = ArrayList<TribeHolderViewState>(discoverTribes.size)
 
                 discoverTribes.forEach {
-                    it.joined = (joinedTribesUUIDs.value as List<ChatUUID>)?.contains(it.uuid?.toChatUUID())
+                    it.joined = (joinedTribesUUIDs.value as List<ChatUUID>).contains(it.uuid?.toChatUUID())
 
                     tribesHVSs.add(
                         TribeHolderViewState.Tribe(it)
@@ -214,7 +217,7 @@ internal class TribesDiscoverViewModel @Inject constructor(
     )
 
     private var responseJob: Job? = null
-    fun handleTribeLink(uuid: String) {
+    fun handleTribeLink(pubkey: String) {
         if (responseJob?.isActive == true) {
             return
         }
@@ -229,7 +232,7 @@ internal class TribesDiscoverViewModel @Inject constructor(
                                 ResponseHolder(
                                     requestHolder,
                                     TribesDiscoverResponse(
-                                        "sphinx.chat://?action=tribe&uuid=${uuid}&host=tribes.sphinx.chat"
+                                        "sphinx.chat://?action=tribeV2&pubkey=${pubkey}&host=${TRIBES_DEFAULT_SERVER_URL}"
                                     )
                                 )
                             ),

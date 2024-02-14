@@ -4671,7 +4671,7 @@ abstract class SphinxRepository(
         itemsPerPage: Int,
         searchTerm: String?,
         tags: String?
-    ): Flow<List<TribeDto>> = flow {
+    ): Flow<List<NewTribeDto>> = flow {
         networkQueryDiscoverTribes.getAllDiscoverTribes(page, itemsPerPage, searchTerm, tags).collect { response ->
             @Exhaustive
             when(response) {
