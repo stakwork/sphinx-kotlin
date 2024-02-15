@@ -4142,7 +4142,7 @@ abstract class SphinxRepository(
         applicationScope.launch(mainImmediate) {
             val queries = coreDB.getSphinxDatabaseQueries()
             val contact = getContactById(ContactId(chatId.value)).firstOrNull()
-            val chatTribe = getChatById(chatId).firstOrNull()
+            val currentChat = getChatById(chatId).firstOrNull()
 
             val owner: Contact = accountOwner.value.let {
                 if (it != null) {
@@ -4248,8 +4248,7 @@ abstract class SphinxRepository(
                 }
             }
 
-            val contactPubKey = contact?.nodePubKey?.value ?: chatTribe?.uuid?.value
-            val isTribe = (chatTribe != null)
+            val contactPubKey = contact?.nodePubKey?.value ?: currentChat?.uuid?.value
 
             if (contactPubKey != null) {
                 connectManager.sendMessage(
@@ -4258,7 +4257,7 @@ abstract class SphinxRepository(
                     provisionalId.value,
                     MessageType.BOOST,
                     owner.tipAmount?.value ?: 20L,
-                    isTribe
+                    currentChat?.isTribe() ?: false
                 )
             }
         }.join()
@@ -4511,7 +4510,7 @@ abstract class SphinxRepository(
                         getContactById(ContactId(chatId.value)).firstOrNull()
                     }
 
-                    val chatTribe = getChatById(message.chatId).firstOrNull()
+                    val currentChat = getChatById(message.chatId).firstOrNull()
 
                     val currentProvisionalId: MessageId? = withContext(io) {
                         queries.messageGetLowestProvisionalMessageId().executeAsOneOrNull()
@@ -4587,8 +4586,7 @@ abstract class SphinxRepository(
                         }
                     }
 
-                    val contactPubKey = contact?.nodePubKey?.value ?: chatTribe?.uuid?.value
-                    val isTribe = (chatTribe != null)
+                    val contactPubKey = contact?.nodePubKey?.value ?: currentChat?.uuid?.value
 
                     if (contactPubKey != null) {
                         connectManager.sendMessage(
@@ -4597,7 +4595,7 @@ abstract class SphinxRepository(
                             provisionalId.value,
                             MessageType.PURCHASE_PROCESSING,
                             price.value,
-                            isTribe
+                            currentChat?.isTribe() ?: false
                         )
                     }
                 }
