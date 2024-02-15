@@ -602,7 +602,6 @@ class ConnectManagerImpl(
             Log.d("MQTT_MESSAGES", "=> published to $topic")
         }
 
-
         // Set your balance
         rr.newBalance?.let { newBalance ->
             notifyListeners {
@@ -915,7 +914,6 @@ class ConnectManagerImpl(
         return min(delay, maxReconnectDelay) // Ensure the delay does not exceed the maximum
     }
 
-    // Method to check if the MQTT client is connected (you need to implement this based on your MQTT client)
     private fun isConnected(): Boolean {
         return mqttClient?.isConnected ?: false // Replace with actual connection check
     }
