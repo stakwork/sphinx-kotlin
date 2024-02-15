@@ -341,7 +341,7 @@ abstract class SphinxRepository(
                 isMuted = ChatMuted.False,
                 createdAt = now.toDateTime(),
                 groupKey = null,
-                host = null,
+                host = ChatHost(tribeHost),
                 pricePerMessage = null,
                 escrowAmount = null,
                 unlisted = ChatUnlisted.False,

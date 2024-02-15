@@ -28,6 +28,7 @@ import chat.sphinx.wrapper_chat.ChatAlias
 import chat.sphinx.wrapper_chat.isTribeOwnedByAccount
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_contact.Contact
+import chat.sphinx.wrapper_feed.Feed.Companion.TRIBES_DEFAULT_SERVER_URL
 import chat.sphinx.wrapper_meme_server.PublicAttachmentInfo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
@@ -64,6 +65,7 @@ internal class TribeDetailViewModel @Inject constructor(
 {
     companion object {
         const val TAG = "TribeDetailViewModel"
+        private const val TRIBES_DEFAULT_SERVER_URL = "http://34.229.52.200:8801"
     }
 
     private val args: TribeDetailFragmentArgs by savedStateHandle.navArgs()
@@ -270,7 +272,7 @@ internal class TribeDetailViewModel @Inject constructor(
         viewModelScope.launch(mainImmediate) {
             val chat = getChat()
             if (chat.isTribeOwnedByAccount(getOwner().nodePubKey)) {
-                val shareTribeURL = "sphinx.chat://?action=tribe&uuid=${chat.uuid.value}&host=${chat.host?.value}"
+                val shareTribeURL = "sphinx.chat://?action=tribeV2&pubkey=${chat.uuid.value}&host=${TRIBES_DEFAULT_SERVER_URL}"
                 navigator.toShareTribeScreen(shareTribeURL, app.getString(R.string.qr_code_title))
             }
         }
