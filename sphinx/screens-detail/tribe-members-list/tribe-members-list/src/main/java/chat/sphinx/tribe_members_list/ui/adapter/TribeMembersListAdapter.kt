@@ -3,7 +3,6 @@ package chat.sphinx.tribe_members_list.ui.adapter
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.ImageView
-import androidx.appcompat.content.res.AppCompatResources
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
@@ -13,21 +12,16 @@ import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.concept_image_loader.Transformation
-import chat.sphinx.concept_network_query_contact.model.ContactDto
-import chat.sphinx.kotlin_response.LoadResponse
-import chat.sphinx.kotlin_response.Response
 import chat.sphinx.resources.setBackgroundRandomColor
 import chat.sphinx.tribe_members_list.R
 import chat.sphinx.tribe_members_list.databinding.LayoutTribeMemberHolderBinding
 import chat.sphinx.tribe_members_list.ui.TribeMembersListViewModel
 import chat.sphinx.tribe_members_list.ui.TribeMembersListViewState
 import chat.sphinx.tribe_members_list.ui.viewstate.TribeMemberHolderViewState
-import chat.sphinx.wrapper_common.PhotoUrl
-import chat.sphinx.wrapper_common.dashboard.ContactId
-import chat.sphinx.wrapper_common.dashboard.toContactId
+import chat.sphinx.wrapper_common.lightning.toLightningNodePubKey
 import chat.sphinx.wrapper_common.util.getInitials
-import chat.sphinx.wrapper_contact.ContactAlias
 import chat.sphinx.wrapper_message.MessageType
+import chat.sphinx.wrapper_message.SenderAlias
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.visible
@@ -37,7 +31,6 @@ import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisor
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.util.*
 import kotlin.collections.ArrayList
 
 internal class TribeMembersListAdapter(
@@ -75,7 +68,7 @@ internal class TribeMembersListAdapter(
             val same: Boolean =  try {
                 oldList[oldItemPosition].let { old ->
                     newList[newItemPosition].let { new ->
-                        old.memberId == new.memberId
+                        old.pubkey == new.pubkey
                     }
                 }
             } catch (e: IndexOutOfBoundsException) {
@@ -184,13 +177,13 @@ internal class TribeMembersListAdapter(
                         bindLoader(binding)
                     }
                     is TribeMemberHolderViewState.Member -> {
-                        bindContactDetails(binding, memberAlias, memberPhotoUrl, showInitial)
+                        bindContactDetails(binding, alias, photo_url, showInitial)
                     }
                     is TribeMemberHolderViewState.Pending -> {
-                        bindContactDetails(binding, memberAlias, memberPhotoUrl, showInitial)
+                        bindContactDetails(binding, alias, photo_url, showInitial)
 
-                        memberId?.let { nnMemberId ->
-                            bindAdminFunctions(binding, nnMemberId, position)
+                        alias?.let { nnAlias ->
+                            bindAdminFunctions(binding, alias, position)
                         }
                     }
                     is TribeMemberHolderViewState.PendingTribeMemberHeader -> {
@@ -231,7 +224,7 @@ internal class TribeMembersListAdapter(
                 textViewMemberInitials.text = alias?.getInitials() ?: ""
                 textViewMemberInitials.setBackgroundRandomColor(chat.sphinx.resources.R.drawable.chat_initials_circle)
 
-                if (photoUrl != null && photoUrl.isNotEmpty()) {
+                if (!photoUrl.isNullOrEmpty()) {
                     imageViewMemberPicture.visible
 
                     onStopSupervisor.scope.launch(viewModel.mainImmediate) {
@@ -251,14 +244,14 @@ internal class TribeMembersListAdapter(
             }
         }
 
-        private fun bindAdminFunctions(binding: LayoutTribeMemberHolderBinding, contactId: Long, position: Int) {
+        private fun bindAdminFunctions(binding: LayoutTribeMemberHolderBinding, alias: String, position: Int) {
             binding.apply {
                 constraintLayoutTribeMemberRequestActions.visible
 
                 textViewTribeMemberRequestAcceptAction.setOnClickListener {
                     processMembershipRequest(
                         layoutConstraintGroupActionJoinRequestProgressBarContainer,
-                        ContactId(contactId),
+                        SenderAlias(alias),
                         MessageType.GroupAction.MemberApprove,
                         position
                     )
@@ -266,7 +259,7 @@ internal class TribeMembersListAdapter(
                 textViewTribeMemberRequestRejectAction.setOnClickListener {
                     processMembershipRequest(
                         layoutConstraintGroupActionJoinRequestProgressBarContainer,
-                        ContactId(contactId),
+                        SenderAlias(alias),
                         MessageType.GroupAction.MemberReject,
                         position
                     )
@@ -276,21 +269,22 @@ internal class TribeMembersListAdapter(
 
         private fun processMembershipRequest(
             layoutConstraintGroupActionJoinRequestProgressBarContainer : ConstraintLayout,
-            contactId: ContactId,
+            alias: SenderAlias,
             type: MessageType.GroupAction,
             position: Int
         ) {
             onStopSupervisor.scope.launch(viewModel.mainImmediate) {
                 layoutConstraintGroupActionJoinRequestProgressBarContainer.visible
 
-                when (viewModel.processMemberRequest(contactId, type)) {
-                    LoadResponse.Loading -> { }
-                    is Response.Error -> {
-                        layoutConstraintGroupActionJoinRequestProgressBarContainer.gone
-                        viewModel.showFailedToProcessMemberMessage(type)
-                    }
-                    is Response.Success -> {}
-                }
+                viewModel.processMemberRequest(alias, type)
+//                when (viewModel.processMemberRequest(alias, type)) {
+//                    LoadResponse.Loading -> { }
+//                    is Response.Error -> {
+//                        layoutConstraintGroupActionJoinRequestProgressBarContainer.gone
+//                        viewModel.showFailedToProcessMemberMessage(type)
+//                    }
+//                    is Response.Success -> {}
+//                }
             }.let { job ->
                 holderJobs.add(job)
             }
@@ -310,13 +304,8 @@ internal class TribeMembersListAdapter(
     fun removeAt(position: Int) {
         val tribeMember = tribeMembers.elementAtOrNull(position)
 
-        tribeMember?.memberId?.toContactId()?.let {
+        tribeMember?.pubkey?.toLightningNodePubKey()?.let {
             viewModel.kickMemberFromTribe(it)
-
-            // TODO: use returned value from kickMemberFromTribe to remove the value via
-            //  updating of the current list state (don't remove from here within coroutine
-            //  as list could change, the list must be updated from the ViewModel after
-            //  iterating through the current list to find and remove.
             notifyItemRemoved(position)
         }
     }

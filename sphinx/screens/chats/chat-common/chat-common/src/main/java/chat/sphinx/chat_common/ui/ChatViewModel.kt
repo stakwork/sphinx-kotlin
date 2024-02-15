@@ -812,7 +812,7 @@ abstract class ChatViewModel<ARGS : NavArgs>(
                 }
                 is TribeLink -> {
                     try {
-                        val uuid = ChatUUID(link.tribeJoinLink.tribeUUID)
+                        val uuid = ChatUUID(link.tribeJoinLink.tribePubkey)
 
                         val thisChat = getChat()
                         if (thisChat.uuid == uuid) {
@@ -2086,7 +2086,7 @@ abstract class ChatViewModel<ARGS : NavArgs>(
     }
 
     private suspend fun handleTribeLink(tribeJoinLink: TribeJoinLink) {
-        chatRepository.getChatByUUID(ChatUUID(tribeJoinLink.tribeUUID)).firstOrNull()?.let { chat ->
+        chatRepository.getChatByUUID(ChatUUID(tribeJoinLink.tribePubkey)).firstOrNull()?.let { chat ->
             chatNavigator.toChat(chat, null, null)
         } ?: chatNavigator.toJoinTribeDetail(tribeJoinLink).also {
             audioPlayerController.pauseMediaIfPlaying()
@@ -2121,9 +2121,9 @@ abstract class ChatViewModel<ARGS : NavArgs>(
     }
 
     open suspend fun processMemberRequest(
-        contactId: ContactId,
-        messageId: MessageId,
-        type: MessageType,
+        chatId: ChatId,
+        messageUuid: MessageUUID,
+        type: MessageType.GroupAction,
     ) {
     }
 

@@ -21,19 +21,39 @@ abstract class ConnectManager {
         contactPubKey: String,
         provisionalId: Long,
         messageType: Int,
-        amount: Long?
+        amount: Long?,
+        isTribe: Boolean = false
     )
 
     abstract fun deleteMessage(
         sphinxMessage: String,
         contactPubKey: String,
+        isTribe: Boolean
+    )
+
+    abstract fun joinToTribe(
+        tribeHost: String,
+        tribePubKey: String,
+        tribeRouteHint: String,
+        isPrivate: Boolean
+    )
+
+    abstract fun createTribe(
+        tribeServerPubKey: String,
+        tribeJson: String
+    )
+
+    abstract fun retrieveTribeMembersList(
+        tribeServerPubKey: String,
+        tribePubKey: String
     )
 
     abstract fun generateMediaToken(
         contactPubKey: String,
         muid: String,
         host: String,
-        metaData: String?
+        metaData: String?,
+        amount: Long?
     ): String?
 
     abstract fun setLspIp(ip: String)
@@ -47,14 +67,15 @@ interface ConnectManagerListener {
 
     fun onMnemonicWords(words: String)
     fun onOwnerRegistered(okKey: String, routeHint: String)
-    fun onNewContactRegistered(msgSender: String)
     fun onMessageReceived(
         msg: String,
         msgSender: String,
         msgType: Int,
         msgUuid: String,
         msgIndex: String,
-        amount: Long?
+        amount: Long?,
+        msgTimestamp: Long?
+
     )
 
     fun onMessageSent(
@@ -63,7 +84,12 @@ interface ConnectManagerListener {
         msgType: Int,
         msgUUID: String,
         msgIndex: String,
+        msgTimestamp: Long?,
     )
+
+    fun onNewTribe(newTribe: String)
+
+    fun onTribeMembersList(tribeMembers: String)
 
     fun onMessageUUID(msgUUID: String, provisionalId: Long)
 

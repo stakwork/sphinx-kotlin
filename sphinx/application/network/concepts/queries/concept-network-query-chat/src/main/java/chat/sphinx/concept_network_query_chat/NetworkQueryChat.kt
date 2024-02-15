@@ -11,7 +11,7 @@ import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.feed.FeedUrl
-import chat.sphinx.wrapper_common.message.MessageId
+import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
 import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RequestSignature
 import chat.sphinx.wrapper_relay.RelayUrl
@@ -29,8 +29,8 @@ abstract class NetworkQueryChat {
 
     abstract fun getTribeInfo(
         host: ChatHost,
-        uuid: ChatUUID
-    ): Flow<LoadResponse<TribeDto, ResponseError>>
+        tribePubKey: LightningNodePubKey
+    ): Flow<LoadResponse<NewTribeDto, ResponseError>>
 
     abstract fun getFeedContent(
         host: ChatHost,

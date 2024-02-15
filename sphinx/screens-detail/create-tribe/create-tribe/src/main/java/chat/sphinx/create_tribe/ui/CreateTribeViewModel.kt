@@ -20,6 +20,7 @@ import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.menu_bottom_profile_pic.PictureMenuHandler
 import chat.sphinx.menu_bottom_profile_pic.PictureMenuViewModel
+import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
@@ -142,7 +143,7 @@ internal class CreateTribeViewModel @Inject constructor(
                 val host = chat.host
 
                 if (host != null) {
-                    networkQueryChat.getTribeInfo(host, chat.uuid).collect { loadResponse ->
+                    networkQueryChat.getTribeInfo(host, LightningNodePubKey(chat.uuid.value)).collect { loadResponse ->
                         when (loadResponse) {
                             is LoadResponse.Loading -> {}
 
@@ -152,11 +153,27 @@ internal class CreateTribeViewModel @Inject constructor(
                             }
 
                             is Response.Success -> {
-                                createTribeBuilder.load(loadResponse.value)
+                                // Needs to complete arguments
+                                createTribeBuilder.newLoad(loadResponse.value)
 
-                                updateViewState(
-                                    CreateTribeViewState.ExistingTribe(loadResponse.value)
+                                val tribeInfo = loadResponse.value
+
+                                val existingTribe = CreateTribeViewState.ExistingTribe(
+                                    tribeInfo.name,
+                                    "",
+                                    null,
+                                    arrayOf(),
+                                    "1",
+                                    "0",
+                                    "0",
+                                "0",
+                                null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
                                 )
+                                updateViewState(existingTribe)
                             }
                         }
                     }
@@ -220,14 +237,8 @@ internal class CreateTribeViewModel @Inject constructor(
                 updateViewState(CreateTribeViewState.SavingTribe)
                 saveTribeJob = viewModelScope.launch(mainImmediate) {
                     if (chatId == null) {
-                        when(chatRepository.createTribe(it)) {
-                            is Response.Error -> {
-                                submitSideEffect(CreateTribeSideEffect.FailedToCreateTribe)
-                            }
-                            is Response.Success -> {
-                                navigator.closeDetailScreen()
-                            }
-                        }
+                        chatRepository.createTribe(it)
+                        navigator.closeDetailScreen()
                     } else {
                         when(chatRepository.updateTribe(chatId, it)) {
                             is Response.Error -> {

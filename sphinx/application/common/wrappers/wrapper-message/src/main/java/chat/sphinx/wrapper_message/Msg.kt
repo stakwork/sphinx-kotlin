@@ -13,17 +13,11 @@ data class Msg(
     val mediaKey: String?,
     val mediaType: String?,
     val replyUuid: String?,
-    val threadUuid: String?
+    val threadUuid: String?,
+    val originalUuid: String?,
+    val date: Long?
 ) {
     companion object {
-        fun String.toMsgNull(moshi: Moshi): Msg? {
-            return try {
-                this.toMsg(moshi)
-            } catch (e: Exception) {
-                null
-            }
-        }
-
         @Throws(JsonDataException::class, IllegalArgumentException::class)
         fun String.toMsg(moshi: Moshi): Msg {
             val adapter = moshi.adapter(Msg::class.java)

@@ -397,7 +397,7 @@ internal class DashboardViewModel @Inject constructor(
     private suspend fun handleTribeJoinLink(tribeJoinLink: TribeJoinLink) {
         val chat: Chat? = try {
             chatRepository.getChatByUUID(
-                ChatUUID(tribeJoinLink.tribeUUID)
+                ChatUUID(tribeJoinLink.tribePubkey)
             ).firstOrNull()
         } catch (e: IllegalArgumentException) {
             null
@@ -954,12 +954,11 @@ internal class DashboardViewModel @Inject constructor(
         }
 
         viewModelScope.launch(mainImmediate) {
-            val owner = getOwner()
 
             chatListFooterButtonsViewStateContainer.updateViewState(
                 ChatListFooterButtonsViewState.ButtonsVisibility(
                     addFriendVisible = true,
-                    createTribeVisible = !owner.isOnVirtualNode(),
+                    createTribeVisible = true,
                     discoverTribesVisible = false
                 )
             )

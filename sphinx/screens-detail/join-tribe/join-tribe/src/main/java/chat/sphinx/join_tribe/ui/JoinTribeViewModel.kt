@@ -4,14 +4,15 @@ import android.app.Application
 import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import app.cash.exhaustive.Exhaustive
 import chat.sphinx.camera_view_model_coordinator.request.CameraRequest
 import chat.sphinx.camera_view_model_coordinator.response.CameraResponse
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.concept_image_loader.Transformation
 import chat.sphinx.concept_network_query_chat.NetworkQueryChat
-import chat.sphinx.concept_network_query_chat.model.TribeDto
+import chat.sphinx.concept_network_query_chat.model.NewTribeDto
+import chat.sphinx.concept_network_query_chat.model.escrowMillisToHours
 import chat.sphinx.concept_repository_chat.ChatRepository
+import chat.sphinx.concept_repository_connect_manager.ConnectManagerRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_feed.FeedRepository
 import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
@@ -22,13 +23,8 @@ import chat.sphinx.kotlin_response.Response
 import chat.sphinx.menu_bottom_profile_pic.PictureMenuHandler
 import chat.sphinx.menu_bottom_profile_pic.PictureMenuViewModel
 import chat.sphinx.wrapper_chat.ChatHost
-import chat.sphinx.wrapper_chat.toChatHost
-import chat.sphinx.wrapper_common.chat.ChatUUID
-import chat.sphinx.wrapper_common.chat.toChatUUID
 import chat.sphinx.wrapper_common.dashboard.ChatId
-import chat.sphinx.wrapper_common.dashboard.toChatId
-import chat.sphinx.wrapper_common.feed.toFeedUrl
-import chat.sphinx.wrapper_common.feed.toSubscribed
+import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
 import chat.sphinx.wrapper_common.tribe.toTribeJoinLink
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_contact.toContactAlias
@@ -39,10 +35,10 @@ import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_media_cache.MediaCacheHandler
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -58,7 +54,8 @@ internal class JoinTribeViewModel @Inject constructor(
     private val networkQueryChat: NetworkQueryChat,
     private val cameraCoordinator: ViewModelCoordinator<CameraRequest, CameraResponse>,
     private val mediaCacheHandler: MediaCacheHandler,
-): SideEffectViewModel<
+    private val connectManagerRepository: ConnectManagerRepository,
+    ): SideEffectViewModel<
         Context,
         JoinTribeSideEffect,
         JoinTribeViewState
@@ -66,10 +63,11 @@ internal class JoinTribeViewModel @Inject constructor(
     PictureMenuViewModel
 {
     private val args: JoinTribeFragmentArgs by savedStateHandle.navArgs()
-    private var tribeInfo : TribeDto? = null
+//    private var tribeInfo : TribeDto? = null
+    private var newTribeInfo : NewTribeDto? = null
 
     fun setMyAlias(alias: String?) {
-        this.tribeInfo?.myAlias = alias
+        this.newTribeInfo?.myAlias = alias
     }
 
     private val _accountOwnerStateFlow: MutableStateFlow<Contact?> by lazy {
@@ -107,7 +105,7 @@ internal class JoinTribeViewModel @Inject constructor(
                     }
 
                     if (imageFile != null) {
-                        tribeInfo?.setProfileImageFile(imageFile)
+                        newTribeInfo?.setProfileImageFile(imageFile)
                         updateViewState(JoinTribeViewState.TribeProfileImageUpdated(imageFile))
                     } else {
                         submitSideEffect(JoinTribeSideEffect.Notify.FailedToProcessImage)
@@ -136,14 +134,15 @@ internal class JoinTribeViewModel @Inject constructor(
     }
 
     fun loadTribeData() {
-        tribeInfo?.let { nnTribeInfo ->
-            viewStateContainer.updateViewState(JoinTribeViewState.TribeLoaded(nnTribeInfo))
+        newTribeInfo?.let { nnTribeInfo ->
+//            viewStateContainer.updateViewState(JoinTribeViewState.TribeLoaded(nnTribeInfo))
             return
         }
 
         args.argTribeLink.toTribeJoinLink()?.let { tribeJoinLink ->
             viewModelScope.launch(mainImmediate) {
-                networkQueryChat.getTribeInfo(ChatHost(tribeJoinLink.tribeHost), ChatUUID(tribeJoinLink.tribeUUID)).collect { loadResponse ->
+
+                networkQueryChat.getTribeInfo(ChatHost(tribeJoinLink.tribeHost), LightningNodePubKey(tribeJoinLink.tribePubkey)).collect { loadResponse ->
                     when (loadResponse) {
                         is LoadResponse.Loading ->
                             viewStateContainer.updateViewState(JoinTribeViewState.LoadingTribe)
@@ -152,10 +151,22 @@ internal class JoinTribeViewModel @Inject constructor(
                             viewStateContainer.updateViewState(JoinTribeViewState.ErrorLoadingTribe)
                         }
                         is Response.Success -> {
-                            tribeInfo = loadResponse.value
-                            tribeInfo?.set(tribeJoinLink.tribeHost, tribeJoinLink.tribeUUID)
 
-                            updateViewState(JoinTribeViewState.TribeLoaded(tribeInfo!!))
+                            newTribeInfo = loadResponse.value
+                            newTribeInfo?.set(tribeJoinLink.tribeHost, tribeJoinLink.tribePubkey)
+
+                            val tribeLoaded = JoinTribeViewState.TribeLoaded(
+                                loadResponse.value.name,
+                                loadResponse.value.description.toString(),
+                                loadResponse.value.img,
+                                loadResponse.value.price_to_join.toString(),
+                                loadResponse.value.price_per_message.toString(),
+                                loadResponse.value.escrow_amount.toString(),
+                                loadResponse.value.escrow_millis.escrowMillisToHours().toString(),
+                                accountOwnerStateFlow.value?.alias?.value,
+                                accountOwnerStateFlow.value?.photoUrl?.value
+                            )
+                            updateViewState(tribeLoaded)
                         }
                     }
                 }
@@ -167,7 +178,7 @@ internal class JoinTribeViewModel @Inject constructor(
 
     fun joinTribe(alias: String) {
         viewModelScope.launch(mainImmediate) {
-            val tribeInfo = tribeInfo ?: let {
+            val tribeInfo = newTribeInfo ?: let {
                 submitSideEffect(JoinTribeSideEffect.Notify.InvalidTribe)
                 return@launch
             }
@@ -180,44 +191,63 @@ internal class JoinTribeViewModel @Inject constructor(
                 return@launch
             }
 
-            chatRepository.joinTribe(tribeInfo).collect { loadResponse ->
-                @Exhaustive
-                when(loadResponse) {
-                    LoadResponse.Loading ->
-                        updateViewState(JoinTribeViewState.JoiningTribe)
-                    is Response.Error -> {
-                        submitSideEffect(
-                            JoinTribeSideEffect.Notify.ErrorJoining
-                        )
-                        updateViewState(JoinTribeViewState.ErrorJoiningTribe)
-                    }
-                    is Response.Success -> {
-                        updateFeedContent(
-                            ChatId(loadResponse.value.id)
-                        )
-                        updateViewState(JoinTribeViewState.TribeJoined)
-                    }
-                }
+            val host = tribeInfo.host
+
+            if (host != null) {
+                connectManagerRepository.joinTribe(
+                    host,
+                    tribeInfo.pubkey,
+                    tribeInfo.route_hint,
+                    tribeInfo.name,
+                    tribeInfo.private ?: false,
+
+                )
+                updateViewState(JoinTribeViewState.TribeJoined)
+            } else {
+                submitSideEffect(JoinTribeSideEffect.Notify.ErrorJoining)
+                updateViewState(JoinTribeViewState.ErrorJoiningTribe)
             }
+
+//            chatRepository.joinTribe(tribeInfo).collect { loadResponse ->
+//                @Exhaustive
+//                when(loadResponse) {
+//                    LoadResponse.Loading ->
+//                        updateViewState(JoinTribeViewState.JoiningTribe)
+//                    is Response.Error -> {
+//                        submitSideEffect(
+//                            JoinTribeSideEffect.Notify.ErrorJoining
+//                        )
+//                        updateViewState(JoinTribeViewState.ErrorJoiningTribe)
+//                    }
+//                    is Response.Success -> {
+//                        updateFeedContent(
+//                            ChatId(loadResponse.value.id)
+//                        )
+//                        updateViewState(JoinTribeViewState.TribeJoined)
+//                    }
+//                }
+//            }
         }
     }
 
     private suspend fun updateFeedContent(chatId: ChatId) {
-        tribeInfo?.let { nnTribeInfo ->
-            nnTribeInfo.feed_url?.toFeedUrl()?.let { feedUrl ->
-                nnTribeInfo.uuid?.toChatUUID()?.let { chatUUID ->
-                    nnTribeInfo.host?.toChatHost()?.let { chatHost ->
-                        feedRepository.updateFeedContent(
-                            chatId = chatId,
-                            host = chatHost,
-                            feedUrl = feedUrl,
-                            chatUUID = chatUUID,
-                            subscribed = false.toSubscribed(),
-                            currentItemId = null
-                        )
-                    }
-                }
-            }
-        }
+        // Needs to implement
+
+//        newTribeInfo?.let { nnTribeInfo ->
+//            nnTribeInfo.feed_url?.toFeedUrl()?.let { feedUrl ->
+//                nnTribeInfo.uuid?.toChatUUID()?.let { chatUUID ->
+//                    nnTribeInfo.host?.toChatHost()?.let { chatHost ->
+//                        feedRepository.updateFeedContent(
+//                            chatId = chatId,
+//                            host = chatHost,
+//                            feedUrl = feedUrl,
+//                            chatUUID = chatUUID,
+//                            subscribed = false.toSubscribed(),
+//                            currentItemId = null
+//                        )
+//                    }
+//                }
+//            }
+//        }
     }
 }

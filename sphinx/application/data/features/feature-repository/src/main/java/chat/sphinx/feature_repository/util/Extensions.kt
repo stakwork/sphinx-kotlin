@@ -1,6 +1,7 @@
 package chat.sphinx.feature_repository.util
 
 import chat.sphinx.concept_network_query_chat.model.ChatDto
+import chat.sphinx.concept_network_query_chat.model.NewTribeDto
 import chat.sphinx.concept_network_query_chat.model.TribeDto
 import chat.sphinx.concept_network_query_chat.model.feed.FeedDto
 import chat.sphinx.concept_network_query_contact.model.ContactDto
@@ -185,6 +186,36 @@ inline fun TransactionCallbacks.updateChatNotificationLevel(
     queries: SphinxDatabaseQueries
 ) {
     queries.chatUpdateNotificationLevel(notificationLevel, chatId)
+}
+
+@Suppress("NOTHING_TO_INLINE", "SpellCheckingInspection")
+inline fun TransactionCallbacks.updateNewChatTribeData(
+    tribe: NewTribeDto,
+    chatId: ChatId,
+    queries: SphinxDatabaseQueries,
+) {
+    // Needs to implement the rest of args
+
+    val pricePerMessage = 0L.toSat()
+    val escrowAmount = 0L.toSat()
+    val name = tribe.name.toChatName()
+    val photoUrl = null
+    val pinMessage = null
+
+    queries.chatUpdateTribeData(
+        pricePerMessage,
+        escrowAmount,
+        name,
+        photoUrl,
+        pinMessage,
+        chatId,
+    )
+
+    queries.dashboardUpdateTribe(
+        name?.value ?: "",
+        photoUrl,
+        chatId
+    )
 }
 
 @Suppress("NOTHING_TO_INLINE", "SpellCheckingInspection")
@@ -600,31 +631,31 @@ fun TransactionCallbacks.upsertNewMessage(
     }
 
     queries.messageUpsert(
-        message.status.value.toMessageStatus(),
-        message.seen.value.toSeen(),
-        message.senderAlias?.value?.toSenderAlias(),
-        message.senderPic?.value?.toPhotoUrl(),
-        message.originalMUID?.value?.toMessageMUID(),
-        message.replyUUID?.value?.toReplyUUID(),
-        message.type.value.toMessageType(),
-        message.recipientAlias?.value?.toRecipientAlias(),
-        message.recipientPic?.value?.toPhotoUrl(),
+        message.status,
+        message.seen,
+        message.senderAlias,
+        message.senderPic,
+        message.originalMUID,
+        message.replyUUID,
+        message.type,
+        message.recipientAlias,
+        message.recipientPic,
         Push.False,
-        message.person?.value?.toMessagePerson(),
-        message.threadUUID?.value?.toThreadUUID(),
-        message.errorMessage?.value?.toErrorMessage(),
+        message.person,
+        message.threadUUID,
+        message.errorMessage,
         MessageId(message.id.value),
-        message.uuid?.value?.toMessageUUID(),
+        message.uuid,
         chatId,
-        ContactId(message.sender.value),
+        message.sender,
         message.receiver?.let { ContactId(it.value) },
-        Sat(message.amount.value),
-        message.paymentHash?.value?.toLightningPaymentHash(),
-        message.paymentRequest?.value?.toLightningPaymentRequestOrNull(),
+        message.amount,
+        message.paymentHash,
+        message.paymentRequest,
         message.date,
         message.expirationDate,
-        message.messageContent?.value?.toMessageContent(),
-        message.messageContentDecrypted?.value?.toMessageContentDecrypted(),
+        message.messageContent,
+        message.messageContentDecrypted,
         message.messageMedia?.mediaToken?.getMUIDFromMediaToken()?.value?.toMessageMUID(),
         message.flagged.value.toFlagged()
     )

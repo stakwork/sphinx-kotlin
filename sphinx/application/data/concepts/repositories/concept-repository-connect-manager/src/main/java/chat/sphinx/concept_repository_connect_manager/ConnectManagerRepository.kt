@@ -13,6 +13,19 @@ interface ConnectManagerRepository {
     fun connectAndSubscribeToMqtt(userState: String?) {}
     fun setLspIp(lspIp: String)
     fun singChallenge(challenge: String)
+
+    fun joinTribe(
+        tribeHost: String,
+        tribePubKey: String,
+        tribeRouteHint: String,
+        tribeName: String,
+        isPrivate: Boolean
+    )
+
+    fun getTribeMembers(
+        tribeServerPubKey: String,
+        tribePubKey: String
+    )
     suspend fun updateLspAndOwner(data: String) {}
 
 }

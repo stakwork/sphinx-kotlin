@@ -35,10 +35,14 @@ import uniffi.sphinxrs.RunReturn
 import uniffi.sphinxrs.addContact
 import uniffi.sphinxrs.fetchMsgs
 import uniffi.sphinxrs.getSubscriptionTopic
+import uniffi.sphinxrs.getTribeManagementTopic
 import uniffi.sphinxrs.handle
 import uniffi.sphinxrs.initialSetup
+import uniffi.sphinxrs.joinTribe
+import uniffi.sphinxrs.listTribeMembers
 import uniffi.sphinxrs.makeMediaToken
 import uniffi.sphinxrs.makeMediaTokenWithMeta
+import uniffi.sphinxrs.makeMediaTokenWithPrice
 import uniffi.sphinxrs.mnemonicFromEntropy
 import uniffi.sphinxrs.mnemonicToSeed
 import uniffi.sphinxrs.rootSignMs
@@ -72,14 +76,8 @@ class ConnectManagerImpl(
     override val ownerInfoStateFlow: StateFlow<OwnerInfo?>
         get() = _ownerInfoStateFlow.asStateFlow()
 
-    companion object {
-        const val KEY_EXCHANGE = 10
-        const val KEY_EXCHANGE_CONFIRMATION = 11
-        const val TEXT_MESSAGE = 0
-    }
 
     // Key Generation and Management
-
     override fun createAccount() {
         coroutineScope.launch {
 
@@ -275,7 +273,7 @@ class ConnectManagerImpl(
 
                 override fun messageArrived(topic: String?, message: MqttMessage?) {
                     // Handle incoming messages here
-                    Log.d("MQTT_MESSAGES", "$topic")
+                    Log.d("MQTT_MESSAGES", "topic: $topic")
                     Log.d("MQTT_MESSAGES", "$message")
                     Log.d("MQTT_MESSAGES", "${message?.payload}")
 
@@ -331,6 +329,14 @@ class ConnectManagerImpl(
                 val qos = IntArray(1) { 1 }
                 client.subscribe(arrayOf(subtopic), qos)
 
+                // Subscribe to tribe management topic
+                val tribeSubtopic = getTribeManagementTopic(
+                    ownerSeed!!,
+                    getTimestampInMilliseconds(),
+                    getCurrentUserState()
+                )
+                client.subscribe(arrayOf(tribeSubtopic), qos)
+
                 // Initial setup and handling
                 val setUp = initialSetup(
                     ownerSeed!!,
@@ -347,7 +353,7 @@ class ConnectManagerImpl(
                     100.toUInt()
                 )
 
-                handleRunReturn(fetchMessages, client);
+                handleRunReturn(fetchMessages, client)
             }
         } catch (e: Exception) {
             Log.e("MQTT_MESSAGES", "${e.message}")
@@ -359,12 +365,19 @@ class ConnectManagerImpl(
         contactPubKey: String,
         provisionalId: Long,
         messageType: Int,
-        amount: Long?
+        amount: Long?,
+        isTribe: Boolean
     ) {
         coroutineScope.launch {
 
             val now = getTimestampInMilliseconds()
 
+            // Have to include al least 1 sat for tribe messages
+            val nnAmount = when {
+                isTribe && (amount == null || amount == 0L) -> 1L
+                isTribe -> amount ?: 1L
+                else -> amount ?: 0L
+            }
             try {
                 val message = send(
                     ownerSeed!!,
@@ -375,15 +388,17 @@ class ConnectManagerImpl(
                     getCurrentUserState(),
                     ownerInfoStateFlow.value?.alias ?: "",
                     ownerInfoStateFlow.value?.picture ?: "",
-                    amount?.toULong() ?: 0.toULong()
+                    nnAmount.toULong(),
+                    isTribe
                 )
                 handleRunReturn(message, mqttClient!!)
 
-                    message.msgUuid?.let { msgUUID ->
-                        notifyListeners {
-                            onMessageUUID(msgUUID, provisionalId)
-                        }
+                message.msgs.firstOrNull()?.uuid?.let { msgUUID ->
+                    notifyListeners {
+                        onMessageUUID(msgUUID, provisionalId)
                     }
+                }
+
             } catch (e: Exception) {
                 Log.e("MQTT_MESSAGES", "send ${e.message}")
             }
@@ -392,11 +407,14 @@ class ConnectManagerImpl(
 
     override fun deleteMessage(
         sphinxMessage: String,
-        contactPubKey: String
+        contactPubKey: String,
+        isTribe: Boolean
     ) {
         coroutineScope.launch {
-
             val now = getTimestampInMilliseconds()
+
+            // Have to include al least 1 sat for tribe messages
+            val nnAmount = if (isTribe) 1L else 0L
 
             try {
                 val message = send(
@@ -408,7 +426,8 @@ class ConnectManagerImpl(
                     getCurrentUserState(),
                     ownerInfoStateFlow.value?.alias ?: "",
                     ownerInfoStateFlow.value?.picture ?: "",
-                    0.toULong()
+                    nnAmount.toULong(),
+                    isTribe
                 )
                 handleRunReturn(message, mqttClient!!)
 
@@ -418,11 +437,78 @@ class ConnectManagerImpl(
         }
     }
 
+    override fun joinToTribe(
+        tribeHost: String,
+        tribePubKey: String,
+        tribeRouteHint: String,
+        isPrivate: Boolean
+    ) {
+        coroutineScope.launch {
+
+            val now = getTimestampInMilliseconds()
+
+            try {
+                val joinTribeMessage = joinTribe(
+                    ownerSeed!!,
+                    now,
+                    getCurrentUserState(),
+                    tribePubKey,
+                    tribeRouteHint,
+                    ownerInfoStateFlow.value?.alias ?: "",
+                    1.toULong(),
+                    isPrivate
+                )
+                handleRunReturn(joinTribeMessage, mqttClient!!)
+
+            } catch (e: Exception) {
+                Log.e("MQTT_MESSAGES", "joinTribe ${e.message}")
+            }
+        }
+    }
+
+    override fun createTribe(tribeServerPubKey: String, tribeJson: String) {
+
+        val now = getTimestampInMilliseconds()
+
+        try {
+           val createTribe = uniffi.sphinxrs.createTribe(
+                ownerSeed!!,
+                now,
+                getCurrentUserState(),
+                tribeServerPubKey,
+                tribeJson
+            )
+            handleRunReturn(createTribe, mqttClient!!)
+        }
+        catch (e: Exception) {
+            Log.e("MQTT_MESSAGES", "createTribe ${e.message}")
+        }
+    }
+
+    override fun retrieveTribeMembersList(tribeServerPubKey: String, tribePubKey: String) {
+        val now = getTimestampInMilliseconds()
+
+        try {
+            val tribeMembers = listTribeMembers(
+                ownerSeed!!,
+                now,
+                getCurrentUserState(),
+                tribeServerPubKey,
+                tribePubKey
+            )
+            handleRunReturn(tribeMembers, mqttClient!!)
+        }
+        catch (e: Exception) {
+            Log.e("MQTT_MESSAGES", "tribeMembers ${e.message}")
+        }
+    }
+
     override fun generateMediaToken(
         contactPubKey: String,
         muid: String,
         host: String,
-        metaData: String?
+        metaData: String?,
+        amount: Long?
     ): String? {
         val now = getTimestampInMilliseconds()
 
@@ -437,8 +523,8 @@ class ConnectManagerImpl(
         }
 
         return try {
-            if (metaData != null) {
-                makeMediaTokenWithMeta(
+            if (amount != null && amount > 0) {
+                makeMediaTokenWithPrice(
                     ownerSeed!!,
                     now,
                     getCurrentUserState(),
@@ -446,18 +532,31 @@ class ConnectManagerImpl(
                     muid,
                     contactPubKey,
                     yearFromNow!!,
-                    metaData
+                    amount.toULong()
                 )
             } else {
-                makeMediaToken(
-                    ownerSeed!!,
-                    now,
-                    getCurrentUserState(),
-                    host,
-                    muid,
-                    contactPubKey,
-                    yearFromNow!!
-                )
+                if (metaData != null) {
+                    makeMediaTokenWithMeta(
+                        ownerSeed!!,
+                        now,
+                        getCurrentUserState(),
+                        host,
+                        muid,
+                        contactPubKey,
+                        yearFromNow!!,
+                        metaData
+                    )
+                } else {
+                    makeMediaToken(
+                        ownerSeed!!,
+                        now,
+                        getCurrentUserState(),
+                        host,
+                        muid,
+                        contactPubKey,
+                        yearFromNow!!
+                    )
+                }
             }
         } catch (e: Exception) {
             Log.d("MQTT_MESSAGES", "Error to generate media token $e")
@@ -496,81 +595,76 @@ class ConnectManagerImpl(
             Log.d("MQTT_MESSAGES", "=> stateMp $it")
         }
 
-        // Publish to topic 0
-        rr.topic0?.let { topic ->
-            Log.d("MQTT_MESSAGES", "=> topic_0 $topic")
-            val pld = rr.payload0 ?: ByteArray(0)
-            client.publish(topic, MqttMessage(pld))
+        // Publish to topics based on the new array structure
+        rr.topics.forEachIndexed { index, topic ->
+            val payload = rr.payloads.getOrElse(index) { ByteArray(0) }
+            client.publish(topic, MqttMessage(payload))
+            Log.d("MQTT_MESSAGES", "=> published to $topic")
         }
 
-        // Publish to topic 1
-        rr.topic1?.let { topic ->
-            Log.d("MQTT_MESSAGES", "=> topic_1 $topic")
-            val pld = rr.payload1 ?: ByteArray(0)
-            client.publish(topic, MqttMessage(pld))
-        }
-
-        // Publish to topic 2
-        rr.topic2?.let { topic ->
-            Log.d("MQTT_MESSAGES", "=> topic_2 $topic")
-            val pld = rr.payload2 ?: ByteArray(0)
-            client.publish(topic, MqttMessage(pld))
-        }
 
         // Set your balance
         rr.newBalance?.let { newBalance ->
-            Log.d("MQTT_MESSAGES", "===> BALANCE ${newBalance.toLong()}")
-
             notifyListeners {
                 onNewBalance(newBalance.toLong())
             }
+            Log.d("MQTT_MESSAGES", "===> BALANCE ${newBalance.toLong()}")
         }
 
-        // Sent message info
-        rr.sentTo?.let { sentTo ->
-            val msg = rr.msg ?: return
-            val type = rr.msgType?.toInt() ?: return
-            val uuid = rr.msgUuid ?: return
-            val index = rr.msgIndex ?: return
+        // Process each message in the new msgs array
+        rr.msgs.forEach { msg ->
 
-            notifyListeners {
-                onMessageSent(msg, sentTo, type, uuid, index)
-            }
-
-            Log.d("MQTT_MESSAGES", "=> received sentTo $sentTo")
-        }
-
-        // Incoming message json
-        rr.msg?.let { msg ->
-            val sender = rr.msgSender ?: return
-            val type = rr.msgType?.toInt() ?: return
-            val uuid = rr.msgUuid ?: return
-            val index = rr.msgIndex ?: return
-            val amount = rr.msgMsat?.toLong()
-
-            notifyListeners {
-                onMessageReceived(msg, sender, type, uuid, index, amount)
-            }
-
-            Log.d("MQTT_MESSAGES", "=> received msg $msg, ${rr.msgUuid}, ${rr.msgIndex}")
-        }
-
-        // Incoming sender info json
-        rr.msgSender?.let { msgSender ->
-            try {
+            // Handling sent messages
+            msg.sentTo?.let { sentTo ->
                 notifyListeners {
-                    onNewContactRegistered(msgSender)
+                    onMessageSent(
+                        msg.message.orEmpty(),
+                        sentTo,
+                        msg.type?.toInt() ?: 0,
+                        msg.uuid.orEmpty(),
+                        msg.index.orEmpty(),
+                        msg.timestamp?.toLong()
+                    )
                 }
-            } catch (e: Exception){}
+                Log.d("MQTT_MESSAGES", "Sent message to $sentTo")
+            }
 
-            Log.d("MQTT_MESSAGES", "=> received msg_sender $msgSender")
+            // Handling received messages
+            msg.sender?.let { sender ->
+                notifyListeners {
+
+                    onMessageReceived(
+                        msg.message.orEmpty(),
+                        sender,
+                        msg.type?.toInt() ?: 0,
+                        msg.uuid.orEmpty(),
+                        msg.index.orEmpty(),
+                        msg.msat?.toLong(),
+                        msg.timestamp?.toLong()
+                    )
+                }
+                Log.d("MQTT_MESSAGES", "Received message from $sender")
+            }
         }
 
-        // Print my contact info
-        rr.myContactInfo?.let { myContactInfo ->
-            Log.d("MQTT_MESSAGES", "=> my_contact_info $myContactInfo")
-            val parts = myContactInfo.split("_", limit = 2)
+        // Handling new tribe and tribe members
+        rr.newTribe?.let { newTribe ->
+            notifyListeners {
+                onNewTribe(newTribe)
+            }
+            Log.d("MQTT_MESSAGES", "===> newTribe $newTribe")
+        }
 
+        rr.tribeMembers?.let { tribeMembers ->
+            notifyListeners {
+                onTribeMembersList(tribeMembers)
+            }
+            Log.d("MQTT_MESSAGES", "=> tribeMembers $tribeMembers")
+        }
+
+        // Handling my contact info
+        rr.myContactInfo?.let { myContactInfo ->
+            val parts = myContactInfo.split("_", limit = 2)
             val okKey = parts.getOrNull(0)
             val routeHint = parts.getOrNull(1)
 
@@ -579,10 +673,12 @@ class ConnectManagerImpl(
                     onOwnerRegistered(okKey, routeHint)
                 }
             }
+            Log.d("MQTT_MESSAGES", "=> my_contact_info $myContactInfo")
         }
 
-        rr.msgMsat?.let { mSat ->
-            Log.d("MQTT_MESSAGES", "=> msg_msat $mSat")
+        // Handling other properties like sentStatus, settledStatus, error, etc.
+        rr.error?.let { error ->
+            Log.d("MQTT_MESSAGES", "=> error $error")
         }
 
         // Sent
@@ -595,10 +691,6 @@ class ConnectManagerImpl(
             Log.d("MQTT_MESSAGES", "=> settled_status $settledStatus")
         }
 
-        // Incoming error string
-        rr.error?.let { error ->
-            Log.d("MQTT_MESSAGES", "=> error $error")
-        }
     }
 
     override fun setLspIp(ip: String) {
@@ -761,7 +853,6 @@ class ConnectManagerImpl(
         val result = (encodedMap as Map<*, *>?)?.let { JSONObject(it).toString() } ?: ""
 
         Log.e("MSGPACK", "dasboard encodeMapToBase64 $result")
-
 
         return result
     }

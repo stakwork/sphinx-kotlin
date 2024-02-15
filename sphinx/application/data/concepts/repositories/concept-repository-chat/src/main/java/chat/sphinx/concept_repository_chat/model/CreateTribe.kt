@@ -1,13 +1,16 @@
 package chat.sphinx.concept_repository_chat.model
 
+import chat.sphinx.concept_network_query_chat.model.NewTribeDto
 import chat.sphinx.concept_network_query_chat.model.PostGroupDto
 import chat.sphinx.concept_network_query_chat.model.TribeDto
+import chat.sphinx.example.wrapper_mqtt.NewCreateTribe
 import chat.sphinx.wrapper_chat.AppUrl
 import chat.sphinx.wrapper_common.feed.FeedUrl
 import chat.sphinx.wrapper_common.feed.toFeedUrl
 import chat.sphinx.wrapper_chat.toAppUrl
 import chat.sphinx.wrapper_common.feed.FeedType
 import chat.sphinx.wrapper_common.feed.toFeedType
+import chat.sphinx.wrapper_common.lightning.LightningRouteHint
 import java.io.File
 
 class CreateTribe private constructor(
@@ -27,7 +30,6 @@ class CreateTribe private constructor(
     val feedUrl: FeedUrl?,
     val feedType: FeedType?,
 ) {
-
     class Builder(
         val tags: Array<Tag>
     ) {
@@ -51,7 +53,7 @@ class CreateTribe private constructor(
         private var img: File? = null
         private var imgUrl: String? = null
         private var unlisted: Boolean? = false
-        private var private: Boolean? = false
+        private var private: Boolean? = true
         private var appUrl: AppUrl? = null
         private var feedUrl: FeedUrl? = null
         private var feedType: FeedType? = null
@@ -191,6 +193,13 @@ class CreateTribe private constructor(
             unlisted = tribeDto.unlisted
         }
 
+        // Needs to complete all the args
+        @Synchronized
+        fun newLoad(tribeDto: NewTribeDto) {
+            name = tribeDto.name
+            img = null
+        }
+
         @Synchronized
         fun build(): CreateTribe? =
             if (!hasRequiredFields) {
@@ -234,6 +243,31 @@ class CreateTribe private constructor(
             app_url = appUrl?.value,
             feed_url = feedUrl?.value,
             feed_type = feedType?.value?.toLong()
+        )
+    }
+
+    fun toNewCreateTribe(ownerAlias: String, image: String?): NewCreateTribe {
+        return NewCreateTribe(
+            pubkey = null,
+            route_hint = null,
+            name = this.name,
+            description = this.description,
+            tags = this.tags.toList(),
+            img = image ?: this.imgUrl,
+            price_per_message = this.pricePerMessage,
+            price_to_join = this.priceToJoin,
+            escrow_amount = this.escrowAmount,
+            escrow_millis = this.escrowMillis,
+            unlisted = this.unlisted,
+            private = this.private,
+            app_url = this.appUrl?.value,
+            feed_url = this.feedUrl?.value,
+            feed_type = this.feedType?.value,
+            created = null,
+            updated = null,
+            member_count = null,
+            last_active = null,
+            owner_alias = ownerAlias
         )
     }
 }

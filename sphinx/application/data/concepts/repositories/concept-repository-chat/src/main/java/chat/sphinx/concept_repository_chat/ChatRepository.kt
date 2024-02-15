@@ -1,8 +1,7 @@
 package chat.sphinx.concept_repository_chat
 
 import chat.sphinx.concept_network_query_chat.model.ChatDto
-import chat.sphinx.concept_network_query_chat.model.TribeDto
-import chat.sphinx.concept_network_query_chat.model.TribeMemberDto
+import chat.sphinx.concept_network_query_chat.model.NewTribeDto
 import chat.sphinx.concept_repository_chat.model.AddMember
 import chat.sphinx.concept_repository_chat.model.CreateTribe
 import chat.sphinx.kotlin_response.LoadResponse
@@ -15,12 +14,9 @@ import chat.sphinx.wrapper_chat.TribeData
 import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
-import chat.sphinx.wrapper_common.message.MessageId
-import chat.sphinx.wrapper_common.feed.FeedType
-import chat.sphinx.wrapper_contact.NewContact
+import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
 import chat.sphinx.wrapper_meme_server.PublicAttachmentInfo
 import chat.sphinx.wrapper_message.Message
-import chat.sphinx.wrapper_podcast.FeedSearchResultRow
 import chat.sphinx.wrapper_podcast.Podcast
 import kotlinx.coroutines.flow.Flow
 
@@ -65,21 +61,18 @@ interface ChatRepository {
 
     suspend fun updateChatContentSeenAt(chatId: ChatId)
 
-    fun joinTribe(
-        tribeDto: TribeDto,
-    ): Flow<LoadResponse<ChatDto, ResponseError>>
 
     fun getAllDiscoverTribes(
         page: Int,
         itemsPerPage: Int,
         searchTerm: String? = null,
         tags: String? = null
-    ): Flow<List<TribeDto>>
+    ): Flow<List<NewTribeDto>>
 
     suspend fun updateTribeInfo(chat: Chat): TribeData?
-    suspend fun createTribe(createTribe: CreateTribe): Response<Any, ResponseError>
+    suspend fun createTribe(createTribe: CreateTribe)
     suspend fun updateTribe(chatId: ChatId, createTribe: CreateTribe): Response<Any, ResponseError>
-    suspend fun exitAndDeleteTribe(chat: Chat): Response<Boolean, ResponseError>
+    suspend fun exitAndDeleteTribe(tribe: Chat)
 
     suspend fun pinMessage(
         chatId: ChatId,
@@ -99,5 +92,5 @@ interface ChatRepository {
         profilePic: PublicAttachmentInfo? = null,
     ): Response<ChatDto, ResponseError>
 
-    suspend fun kickMemberFromTribe(chatId: ChatId, contactId: ContactId): Response<Any, ResponseError>
+    suspend fun kickMemberFromTribe(chatId: ChatId, contactPubKey: LightningNodePubKey): Response<Any, ResponseError>
 }

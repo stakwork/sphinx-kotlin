@@ -55,8 +55,11 @@ data class TribeDto(
     val hourToStake: Long
         get() = (escrow_millis) / 60 / 60 / 1000
 
-    fun set(host: String?, uuid: String) {
+    fun set(
+        host: String?,
+        tribePubKey: String,
+    ) {
         this.host = host
-        this.uuid = uuid
+        this.uuid = tribePubKey
     }
 }

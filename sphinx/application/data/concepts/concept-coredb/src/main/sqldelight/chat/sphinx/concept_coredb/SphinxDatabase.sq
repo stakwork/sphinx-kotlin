@@ -218,6 +218,9 @@ FROM chatDbo
 WHERE type = 0 AND contact_ids = ?
 LIMIT 1;
 
+chatGetMaxTribeId:
+SELECT MAX(id) FROM chatDbo WHERE type = 2;
+
 chatUpsert {
     UPDATE chatDbo
     SET name = :name,
@@ -718,13 +721,13 @@ WHERE muid = ?
 ORDER BY id ASC
 LIMIT 1;
 
-messageLastMemberRequestGetByContactId:
+messageLastMemberRequestGetBySenderAlias:
 SELECT *
 FROM messageDbo
-WHERE sender = ?
+WHERE sender_alias = ?
 AND chat_id = :chat_id
 AND type = 19
-ORDER BY id DESC
+ORDER BY id ASC
 LIMIT 1;
 
 messageGetByUUID:
@@ -885,6 +888,11 @@ messageUpdateUUID:
 UPDATE messageDbo
 SET uuid = :uuid
 WHERE id = ?;
+
+messageUpdateUUIDByUUID:
+UPDATE messageDbo
+SET uuid = :newUuid
+WHERE uuid = ?;
 
 messageUpsert {
     UPDATE messageDbo

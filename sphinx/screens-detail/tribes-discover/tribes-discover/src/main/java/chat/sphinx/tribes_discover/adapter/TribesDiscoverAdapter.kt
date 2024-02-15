@@ -146,8 +146,8 @@ internal class TribesDiscoverAdapter(
             binding.root.setOnClickListener {
                 tribe?.let { nnTribe ->
                     lifecycleOwner.lifecycleScope.launch {
-                        nnTribe.tribeDto?.uuid?.let { nnUUID ->
-                            viewModel.handleTribeLink(nnUUID)
+                        nnTribe.tribeDto?.pubkey?.let { nnPubKey ->
+                            viewModel.handleTribeLink(nnPubKey)
                         }
                     }
                 }

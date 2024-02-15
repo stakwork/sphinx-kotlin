@@ -5,10 +5,12 @@ import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.concept_network_query_contact.NetworkQueryContact
-import chat.sphinx.concept_network_query_contact.model.ContactDto
 import chat.sphinx.concept_repository_chat.ChatRepository
+import chat.sphinx.concept_repository_connect_manager.ConnectManagerRepository
+import chat.sphinx.concept_repository_connect_manager.model.ConnectionManagerState
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_message.MessageRepository
+import chat.sphinx.example.wrapper_mqtt.TribeMembersResponse
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
@@ -16,9 +18,10 @@ import chat.sphinx.tribe_members_list.R
 import chat.sphinx.tribe_members_list.navigation.TribeMembersListNavigator
 import chat.sphinx.tribe_members_list.ui.viewstate.TribeMemberHolderViewState
 import chat.sphinx.wrapper_common.dashboard.ChatId
-import chat.sphinx.wrapper_common.dashboard.ContactId
+import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_message.MessageType
+import chat.sphinx.wrapper_message.SenderAlias
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
@@ -28,7 +31,6 @@ import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
-import javax.annotation.meta.Exhaustive
 import javax.inject.Inject
 
 @Suppress("NOTHING_TO_INLINE")
@@ -54,6 +56,7 @@ internal class TribeMembersListViewModel @Inject constructor(
     private val chatRepository: ChatRepository,
     private val contactRepository: ContactRepository,
     private val networkQueryContact: NetworkQueryContact,
+    private val connectManagerRepository: ConnectManagerRepository,
     savedStateHandle: SavedStateHandle,
 ): SideEffectViewModel<
         Context,
@@ -77,6 +80,7 @@ internal class TribeMembersListViewModel @Inject constructor(
     init {
         viewModelScope.launch(mainImmediate) {
             loadTribeMembers()
+            fetchTribeMembers()
         }
     }
 
@@ -99,42 +103,73 @@ internal class TribeMembersListViewModel @Inject constructor(
         loadTribeMembers()
     }
 
-    private suspend fun loadTribeMembers() {
-        networkQueryContact.getTribeMembers(
-            chatId = ChatId(args.argChatId),
-            offset = page * itemsPerPage,
-            limit = itemsPerPage
-        ).collect{ loadResponse ->
-            val firstPage = (page == 0)
 
-            @Exhaustive
-            when (loadResponse) {
-                is LoadResponse.Loading -> {
-                    updateViewState(
-                        TribeMembersListViewState.ListMode(listOf(), true, firstPage)
+    private suspend fun loadTribeMembers() {
+        val chat = chatRepository.getChatById(ChatId(args.argChatId)).firstOrNull()
+        val tribeServerPubKey = "036b441c86acf790ff00694dfbf83e49cc8d537d166ec68b1077a719e61aa9bb42"
+
+        val firstPage = (page == 0)
+
+        chat?.uuid?.value?.let { tribePubKey ->
+            connectManagerRepository.getTribeMembers(
+                tribeServerPubKey,
+                tribePubKey
+            )
+        }
+
+//        networkQueryContact.getTribeMembers(
+//            chatId = ChatId(args.argChatId),
+//            offset = page * itemsPerPage,
+//            limit = itemsPerPage
+//        ).collect{ loadResponse ->
+//            val firstPage = (page == 0)
+//
+//            @Exhaustive
+//            when (loadResponse) {
+//                is LoadResponse.Loading -> {
+//                    updateViewState(
+//                        TribeMembersListViewState.ListMode(listOf(), true, firstPage)
+//                    )
+//                }
+//                is Response.Error -> {
+//                    updateViewState(
+//                        TribeMembersListViewState.ListMode(listOf(), false, firstPage)
+//                    )
+//                }
+//                is Response.Success -> {
+//                    if (loadResponse.value.contacts.isNotEmpty()) {
+//                        updateViewState(
+//                            TribeMembersListViewState.ListMode(
+//                                processMembers(
+//                                    loadResponse.value.contacts,
+//                                    getOwner()
+//                                ),
+//                                false,
+//                                firstPage
+//                            )
+//                        )
+//                    }
+//                }
+//            }
+//        }
+    }
+
+    private suspend fun fetchTribeMembers(){
+        connectManagerRepository.connectionManagerState.collect {
+            if (it is ConnectionManagerState.TribeMembersList) {
+                updateViewState(
+                    TribeMembersListViewState.ListMode(
+                        processMembers(
+                            it.tribeMembers,
+                            getOwner()
+                        ),
+                        false,
+                        true
                     )
-                }
-                is Response.Error -> {
-                    updateViewState(
-                        TribeMembersListViewState.ListMode(listOf(), false, firstPage)
-                    )
-                }
-                is Response.Success -> {
-                    if (loadResponse.value.contacts.isNotEmpty()) {
-                        updateViewState(
-                            TribeMembersListViewState.ListMode(
-                                processMembers(
-                                    loadResponse.value.contacts,
-                                    getOwner()
-                                ),
-                                false,
-                                firstPage
-                            )
-                        )
-                    }
-                }
+                )
             }
         }
+
     }
 
     private suspend fun getOwner(): Contact {
@@ -160,52 +195,53 @@ internal class TribeMembersListViewModel @Inject constructor(
     }
 
     private fun processMembers(
-        contacts: List<ContactDto>,
+        membersResponse: TribeMembersResponse,
         owner: Contact
     ): List<TribeMemberHolderViewState> {
-        val tribeMemberHolderViewStates = ArrayList<TribeMemberHolderViewState>(contacts.size)
+        val tribeMemberHolderViewStates = ArrayList<TribeMemberHolderViewState>()
 
+        // Process confirmed members
         var lastInitial = ""
-
-        for (contact in contacts) {
-            if (owner.id.value == contact.id) {
-                continue
-            }
-
+        membersResponse.confirmed?.forEach { contact ->
             val contactInitial = contact.alias?.firstOrNull()?.toString() ?: ""
             val shouldShowInitial = contactInitial != lastInitial
-
             lastInitial = contactInitial
 
-            if (contact.pendingActual) {
-                if (tribeMemberHolderViewStates.hasNoPendingTribeMemberHeader()) {
-                    tribeMemberHolderViewStates.add(
-                        TribeMemberHolderViewState.PendingTribeMemberHeader
-                    )
-                }
+            // Assuming confirmed members should be added directly without the pending header
+            if (tribeMemberHolderViewStates.hasNoTribeMemberHeader()) {
                 tribeMemberHolderViewStates.add(
-                    TribeMemberHolderViewState.Pending(
-                        contact,
-                        shouldShowInitial
-                    )
-                )
-            } else {
-                if (tribeMemberHolderViewStates.hasNoTribeMemberHeader()) {
-                    tribeMemberHolderViewStates.add(
-                        TribeMemberHolderViewState.TribeMemberHeader
-                    )
-                }
-                tribeMemberHolderViewStates.add(
-                    TribeMemberHolderViewState.Member(
-                        contact,
-                        shouldShowInitial
-                    )
+                    TribeMemberHolderViewState.TribeMemberHeader
                 )
             }
-
+            tribeMemberHolderViewStates.add(
+                TribeMemberHolderViewState.Member(
+                    contact,
+                    shouldShowInitial
+                )
+            )
         }
 
-        if (contacts.size >= itemsPerPage) {
+        // Process pending members
+        membersResponse.pending?.forEach { contact ->
+            val contactInitial = contact.alias?.firstOrNull()?.toString() ?: ""
+            val shouldShowInitial = contactInitial != lastInitial
+            lastInitial = contactInitial
+
+            if (tribeMemberHolderViewStates.hasNoPendingTribeMemberHeader()) {
+                tribeMemberHolderViewStates.add(
+                    TribeMemberHolderViewState.PendingTribeMemberHeader
+                )
+            }
+            tribeMemberHolderViewStates.add(
+                TribeMemberHolderViewState.Pending(
+                    contact,
+                    shouldShowInitial
+                )
+            )
+        }
+
+        // Add loader if necessary (assuming the condition applies to both lists)
+        if ((membersResponse.confirmed?.size ?: 0) + (membersResponse.pending?.size ?: 0) >= itemsPerPage) {
             tribeMemberHolderViewStates.add(
                 TribeMemberHolderViewState.Loader
             )
@@ -215,21 +251,26 @@ internal class TribeMembersListViewModel @Inject constructor(
     }
 
     suspend fun processMemberRequest(
-        contactId: ContactId,
+        alias: SenderAlias,
         type: MessageType.GroupAction
     ): LoadResponse<Any, ResponseError> {
         var response: LoadResponse<Any, ResponseError>  = Response.Error(ResponseError(("")))
 
         viewModelScope.launch(mainImmediate) {
-            val message = messageRepository.getTribeLastMemberRequestByContactId(
-                contactId,
+            val message = messageRepository.getTribeLastMemberRequestBySenderAlias(
+                alias,
                 ChatId(args.argChatId)
             ).firstOrNull()
 
-            if (message != null) {
-                response = messageRepository.processMemberRequest(contactId, message.id, type)
+            message?.uuid?.let { messageUuid ->
+                messageRepository.processMemberRequest(
+                    message.chatId,
+                    messageUuid,
+                    null,
+                    type
+                )
             }
-        }.join()
+        }
 
         if (response is Response.Success) {
             reloadTribeMembers()
@@ -256,9 +297,15 @@ internal class TribeMembersListViewModel @Inject constructor(
         }
     }
 
-    fun kickMemberFromTribe(contactId: ContactId) {
+    fun kickMemberFromTribe(memberPubKey: LightningNodePubKey) {
         viewModelScope.launch(mainImmediate) {
-            chatRepository.kickMemberFromTribe(ChatId(args.argChatId), contactId)
+//            chatRepository.kickMemberFromTribe(ChatId(args.argChatId), contactPubKey)
+            messageRepository.processMemberRequest(
+                ChatId(args.argChatId),
+                null,
+                memberPubKey,
+                MessageType.GroupAction.Kick
+            )
         }
     }
 }
