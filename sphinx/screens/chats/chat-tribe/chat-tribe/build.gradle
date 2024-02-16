@@ -37,7 +37,6 @@ dependencies {
 
     implementation project(path: ':sphinx:application:network:concepts:queries:concept-network-query-chat')
     implementation project(path: ':sphinx:application:network:concepts:queries:concept-network-query-authorize-external')
-    implementation project(path: ':sphinx:application:network:features:queries:feature-network-query-message')
     implementation project(path: ':sphinx:application:common:resources')
 
     api project(path: ':sphinx:screens:chats:chat-common:chat-common')

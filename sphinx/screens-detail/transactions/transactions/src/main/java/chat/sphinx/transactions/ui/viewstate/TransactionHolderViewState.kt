@@ -1,11 +1,10 @@
 package chat.sphinx.transactions.ui.viewstate
 
-import chat.sphinx.concept_network_query_message.model.TransactionDto
 import chat.sphinx.wrapper_message.Message
 
 
 internal sealed class TransactionHolderViewState(
-    val transaction: TransactionDto? = null,
+    val transaction: String? = null,
     val invoice: Message? = null,
     val messageSenderName: String? = null,
 ) {
@@ -13,7 +12,7 @@ internal sealed class TransactionHolderViewState(
     class Loader : TransactionHolderViewState()
 
     class Outgoing(
-        transaction: TransactionDto,
+        transaction: String,
         invoice: Message?,
         messageSenderName: String?
     ) : TransactionHolderViewState(
@@ -23,7 +22,7 @@ internal sealed class TransactionHolderViewState(
     )
 
     class Incoming(
-        transaction: TransactionDto,
+        transaction: String,
         invoice: Message?,
         messageSenderName: String?
     ) : TransactionHolderViewState(
@@ -33,7 +32,7 @@ internal sealed class TransactionHolderViewState(
     )
 
     sealed class Failed(
-        transaction: TransactionDto,
+        transaction: String,
         invoice: Message?,
         messageSenderName: String?
     ) : TransactionHolderViewState(
@@ -42,7 +41,7 @@ internal sealed class TransactionHolderViewState(
         messageSenderName
     ) {
         class Open(
-            transaction: TransactionDto,
+            transaction: String,
             invoice: Message?,
             messageSenderName: String?
         ): Failed(
@@ -52,7 +51,7 @@ internal sealed class TransactionHolderViewState(
         )
 
         class Closed(
-            transaction: TransactionDto,
+            transaction: String,
             invoice: Message?,
             messageSenderName: String?
         ): Failed(

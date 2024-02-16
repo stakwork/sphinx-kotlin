@@ -1077,16 +1077,6 @@ internal class DashboardViewModel @Inject constructor(
         MutableStateFlow(null)
     }
 
-    init {
-        viewModelScope.launch(mainImmediate) {
-            socketIOManager.socketIOStateFlow.collect { state ->
-                if (state is SocketIOState.Uninitialized) {
-                    socketIOManager.connect()
-                }
-            }
-        }
-    }
-
     val networkStateFlow: StateFlow<Pair<LoadResponse<Boolean, ResponseError>, Boolean>>
         get() = _networkStateFlow.asStateFlow()
 

@@ -46,7 +46,6 @@ dependencies {
     api project(path: ':sphinx:application:data:concepts:repositories:concept-repository-message')
 
 
-    implementation project(path: ':sphinx:application:network:concepts:queries:concept-network-query-message')
 
     implementation project(path: ':sphinx:screens-detail:common:detail-resources')
 

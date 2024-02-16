@@ -8,8 +8,6 @@ import android.provider.MediaStore
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.concept_socket_io.SocketIOManager
-import chat.sphinx.concept_socket_io.SphinxSocketIOMessage
-import chat.sphinx.concept_socket_io.SphinxSocketIOMessageListener
 import chat.sphinx.qr_code.R
 import chat.sphinx.qr_code.navigation.QRCodeNavigator
 import chat.sphinx.share_qr_code.ShareQRCodeMenuHandler
@@ -55,7 +53,6 @@ internal class QRCodeViewModel @Inject constructor(
                 )
             },
         ),
-    SphinxSocketIOMessageListener,
     ShareQRCodeMenuViewModel
 {
 
@@ -70,7 +67,7 @@ internal class QRCodeViewModel @Inject constructor(
     private val args: QRCodeFragmentArgs by handle.navArgs()
 
     init {
-        socketIOManager.addListener(this)
+//        socketIOManager.addListener(this)
 
         viewModelScope.launch(default) {
             val writer = QRCodeWriter()
@@ -121,28 +118,10 @@ internal class QRCodeViewModel @Inject constructor(
         }
     }
 
-    @Suppress("BlockingMethodInNonBlockingContext")
-    override suspend fun onSocketIOMessageReceived(msg: SphinxSocketIOMessage) {
-//        if (msg is SphinxSocketIOMessage.Type.InvoicePayment) {
-//            if (args.qrText == msg.dto.invoice) {
-//                updateViewState(
-//                    QRCodeViewState(
-//                        currentViewState.showBackButton,
-//                        currentViewState.viewTitle,
-//                        currentViewState.qrText,
-//                        currentViewState.qrBitmap,
-//                        currentViewState.description,
-//                        true
-//                    )
-//                )
-//            }
-//        }
-    }
-
     override fun onCleared() {
         super.onCleared()
 
-        socketIOManager.removeListener(this)
+//        socketIOManager.removeListener(this)
     }
 
     override fun shareCodeThroughTextIntent(): Intent {

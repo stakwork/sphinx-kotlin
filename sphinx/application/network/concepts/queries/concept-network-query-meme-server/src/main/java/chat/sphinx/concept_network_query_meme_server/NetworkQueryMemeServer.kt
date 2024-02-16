@@ -28,11 +28,6 @@ abstract class NetworkQueryMemeServer {
         memeServerHost: MediaHost = MediaHost.DEFAULT,
     ): Flow<LoadResponse<MemeServerAuthenticationDto, ResponseError>>
 
-    abstract fun signChallenge(
-        challenge: AuthenticationChallenge,
-        relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>? = null,
-    ): Flow<LoadResponse<MemeServerChallengeSigDto, ResponseError>>
-
     abstract fun verifyAuthentication(
         id: AuthenticationId,
         sig: AuthenticationSig,

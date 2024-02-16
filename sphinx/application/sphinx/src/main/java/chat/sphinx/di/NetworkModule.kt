@@ -15,7 +15,6 @@ import chat.sphinx.concept_network_query_crypter.NetworkQueryCrypter
 import chat.sphinx.concept_network_query_discover_tribes.NetworkQueryDiscoverTribes
 import chat.sphinx.concept_network_query_invite.NetworkQueryInvite
 import chat.sphinx.concept_network_query_meme_server.NetworkQueryMemeServer
-import chat.sphinx.concept_network_query_message.NetworkQueryMessage
 import chat.sphinx.concept_network_query_feed_search.NetworkQueryFeedSearch
 import chat.sphinx.concept_network_query_feed_status.NetworkQueryFeedStatus
 import chat.sphinx.concept_network_query_subscription.NetworkQuerySubscription
@@ -39,7 +38,6 @@ import chat.sphinx.feature_network_query_discover_tribes.NetworkQueryDiscoverTri
 import chat.sphinx.feature_network_query_feed_status.NetworkQueryFeedStatusImpl
 import chat.sphinx.feature_network_query_invite.NetworkQueryInviteImpl
 import chat.sphinx.feature_network_query_meme_server.NetworkQueryMemeServerImpl
-import chat.sphinx.feature_network_query_message.NetworkQueryMessageImpl
 import chat.sphinx.feature_network_query_podcast_search.NetworkQueryFeedSearchImpl
 import chat.sphinx.feature_network_query_subscription.NetworkQuerySubscriptionImpl
 import chat.sphinx.feature_network_query_verify_external.NetworkQueryAuthorizeExternalImpl
@@ -299,19 +297,6 @@ object NetworkModule {
         networkQueryInviteImpl: NetworkQueryInviteImpl
     ): NetworkQueryInvite =
         networkQueryInviteImpl
-
-    @Provides
-    @Singleton
-    fun provideNetworkQueryMessageImpl(
-        networkRelayCall: NetworkRelayCall
-    ): NetworkQueryMessageImpl =
-        NetworkQueryMessageImpl(networkRelayCall)
-
-    @Provides
-    fun provideNetworkQueryMessage(
-        networkQueryMessageImpl: NetworkQueryMessageImpl
-    ): NetworkQueryMessage =
-        networkQueryMessageImpl
 
     @Provides
     @Singleton

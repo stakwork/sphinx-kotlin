@@ -2,8 +2,6 @@ package chat.sphinx.transactions.ui
 
 import android.util.Log
 import androidx.lifecycle.viewModelScope
-import chat.sphinx.concept_network_query_message.NetworkQueryMessage
-import chat.sphinx.concept_network_query_message.model.TransactionDto
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_message.MessageRepository
@@ -38,7 +36,6 @@ internal class TransactionsViewModel @Inject constructor(
     private val contactRepository: ContactRepository,
     private val chatRepository: ChatRepository,
     private val messageRepository: MessageRepository,
-    private val networkQueryMessage: NetworkQueryMessage,
 ): BaseViewModel<TransactionsViewState>(
     dispatchers,
     TransactionsViewState.ListMode(
@@ -100,206 +97,80 @@ internal class TransactionsViewModel @Inject constructor(
     private suspend fun loadTransactions(
         owner: Contact
     ) {
-        networkQueryMessage.getPayments(
-            offset = page * itemsPerPage,
-            limit = itemsPerPage
-        ).collect { loadResponse ->
-            val firstPage = (page == 0)
+        // TODO V2 getPayments
 
-            @Exhaustive
-            when (loadResponse) {
-                is LoadResponse.Loading -> {
-                    updateViewState(
-                        TransactionsViewState.ListMode(currentViewState.list, true, firstPage)
-                    )
-                }
-                is Response.Error -> {
-                    updateViewState(
-                        TransactionsViewState.ListMode(listOf(), false, firstPage)
-                    )
-                }
-                is Response.Success -> {
-                    updateViewState(
-                        TransactionsViewState.ListMode(
-                            processTransactions(loadResponse.value, owner),
-                            false,
-                            firstPage
-                        )
-                    )
-                }
-            }
-        }
-    }
-
-    private suspend fun processTransactions(
-        transactions: List<TransactionDto>,
-        owner: Contact
-    ): List<TransactionHolderViewState> {
-
-        var chatsIdsMap: MutableMap<ChatId, ArrayList<Long>> = LinkedHashMap(transactions.size)
-        var originalMessageUUIDsMap: MutableMap<MessageUUID, Long> = LinkedHashMap(transactions.size)
-
-        var contactIdsMap: MutableMap<Long, ContactId> = LinkedHashMap(transactions.size)
-        var contactAliasMap: MutableMap<Long, SenderAlias> = LinkedHashMap(transactions.size)
-
-        for (transaction in transactions) {
-            when {
-                transaction.isIncomingWithSender(owner.id) -> {
-                    transaction.getSenderId()?.let { senderId ->
-                        contactIdsMap[transaction.id] = senderId
-                    }
-                    transaction.getSenderAlias()?.let { senderAlias ->
-                        contactAliasMap[transaction.id] = senderAlias
-                    }
-                }
-                transaction.isOutgoingWithReceiver(owner.id) -> {
-                    transaction.getSenderId()?.let { senderId ->
-                        contactIdsMap[transaction.id] = senderId
-                    }
-                }
-                transaction.isOutgoingMessageBoost(owner.id) -> {
-                    transaction.reply_uuid?.toMessageUUID()?.let { originalMessageUUID ->
-                        originalMessageUUIDsMap[originalMessageUUID] = transaction.id
-                    }
-                }
-                transaction.isPaymentInChat() -> {
-                    transaction.getChatId()?.let { chatId ->
-                        if (chatsIdsMap[chatId] == null) {
-                            chatsIdsMap[chatId] = ArrayList(0)
-                        }
-                        chatsIdsMap[chatId]?.add(transaction.id)
-                    }
-                }
-            }
-        }
-
-        val chatIds = chatsIdsMap.keys.map { it }
-        chatRepository.getAllChatsByIds(chatIds).let { response ->
-            response.forEach { chat ->
-                if (
-                    (chat.isTribeNotOwnedByAccount(owner.nodePubKey) || chat.isConversation()) &&
-                    chat.contactIds.size == 2
-                ) {
-                    chatsIdsMap[chat.id]?.let { transactionIds ->
-                        for (transactionId in transactionIds) {
-                            contactIdsMap[transactionId] = chat.contactIds[1]
-                        }
-                    }
-                }
-            }
-        }
-
-        val originalMessageUUIDs = originalMessageUUIDsMap.keys.map { it }
-        messageRepository.getAllMessagesByUUID(originalMessageUUIDs).let { response ->
-            response.forEach { message ->
-                originalMessageUUIDsMap[message.uuid]?.let { transactionId ->
-                    contactIdsMap[transactionId] = message.sender
-
-                    message.senderAlias?.let { senderAlias ->
-                        contactAliasMap[transactionId] = senderAlias
-                    }
-                }
-            }
-        }
-
-        val contactsMap: MutableMap<Long, Contact> = LinkedHashMap(transactions.size)
-        val contactIds = contactIdsMap.values.map { it }
-
-        contactRepository.getAllContactsByIds(contactIds).let { response ->
-            response.forEach { contact ->
-                contactsMap[contact.id.value] = contact
-            }
-        }
-
-        val transactionsHVSs: MutableList<TransactionHolderViewState> = currentViewState.list.toMutableList()
-
-        if (transactionsHVSs.lastOrNull() is TransactionHolderViewState.Loader) {
-            transactionsHVSs.removeLast()
-        }
-
-        for (transaction in transactions) {
-            val senderId = contactIdsMap[transaction.id]
-            val senderAlias: String? = contactAliasMap[transaction.id]?.value ?: contactsMap[senderId?.value]?.alias?.value
-
-            if (transaction.isOutgoingPayment(owner.id)) {
-                transactionsHVSs.add(
-                    TransactionHolderViewState.Outgoing(
-                        transaction,
-                        null,
-                        senderAlias ?: "-",
-                    )
-                )
-            }
-            if (transaction.isIncomingPayment(owner.id)) {
-                transactionsHVSs.add(
-                    TransactionHolderViewState.Incoming(
-                        transaction,
-                        null,
-                        senderAlias ?: "-",
-                    )
-                )
-            }
-            if (transaction.isFailedPayment()) {
-                transactionsHVSs.add(
-                    TransactionHolderViewState.Failed.Closed(
-                        transaction,
-                        null,
-                        senderAlias ?: "-",
-                    )
-                )
-            }
-        }
-
-        if (transactions.size == itemsPerPage) {
-            transactionsHVSs.add(
-                TransactionHolderViewState.Loader()
-            )
-        }
-
-        return transactionsHVSs
+//        networkQueryMessage.getPayments(
+//            offset = page * itemsPerPage,
+//            limit = itemsPerPage
+//        ).collect { loadResponse ->
+//            val firstPage = (page == 0)
+//
+//            @Exhaustive
+//            when (loadResponse) {
+//                is LoadResponse.Loading -> {
+//                    updateViewState(
+//                        TransactionsViewState.ListMode(currentViewState.list, true, firstPage)
+//                    )
+//                }
+//                is Response.Error -> {
+//                    updateViewState(
+//                        TransactionsViewState.ListMode(listOf(), false, firstPage)
+//                    )
+//                }
+//                is Response.Success -> {
+//                    updateViewState(
+//                        TransactionsViewState.ListMode(
+//                            processTransactions(loadResponse.value, owner),
+//                            false,
+//                            firstPage
+//                        )
+//                    )
+//                }
+//            }
+//        }
     }
 
     fun toggleFailed(
         transactionViewHolder: TransactionHolderViewState,
         position: Int
     ) {
-        (currentViewState as? TransactionsViewState.ListMode)?.let { currentVS ->
-            var list: MutableList<TransactionHolderViewState> = currentVS.list.toMutableList()
-
-            transactionViewHolder.transaction?.let { nnTransaction ->
-
-                val toggledViewHolder = when (transactionViewHolder) {
-                    is TransactionHolderViewState.Failed.Open -> {
-                        TransactionHolderViewState.Failed.Closed(
-                            nnTransaction,
-                            transactionViewHolder.invoice,
-                            transactionViewHolder.messageSenderName
-                        )
-                    }
-                    is TransactionHolderViewState.Failed.Closed -> {
-                        TransactionHolderViewState.Failed.Open(
-                            nnTransaction,
-                            transactionViewHolder.invoice,
-                            transactionViewHolder.messageSenderName
-                        )
-                    }
-                    else -> {
-                        null
-                    }
-                }
-
-                toggledViewHolder?.let {
-                    list[position] = it
-
-                    updateViewState(
-                        TransactionsViewState.ListMode(
-                            list,
-                            currentVS.loading,
-                            currentVS.firstPage
-                        )
-                    )
-                }
-            }
-        }
+//        (currentViewState as? TransactionsViewState.ListMode)?.let { currentVS ->
+//            var list: MutableList<TransactionHolderViewState> = currentVS.list.toMutableList()
+//
+//            transactionViewHolder.transaction?.let { nnTransaction ->
+//
+//                val toggledViewHolder = when (transactionViewHolder) {
+//                    is TransactionHolderViewState.Failed.Open -> {
+//                        TransactionHolderViewState.Failed.Closed(
+//                            nnTransaction,
+//                            transactionViewHolder.invoice,
+//                            transactionViewHolder.messageSenderName
+//                        )
+//                    }
+//                    is TransactionHolderViewState.Failed.Closed -> {
+//                        TransactionHolderViewState.Failed.Open(
+//                            nnTransaction,
+//                            transactionViewHolder.invoice,
+//                            transactionViewHolder.messageSenderName
+//                        )
+//                    }
+//                    else -> {
+//                        null
+//                    }
+//                }
+//
+//                toggledViewHolder?.let {
+//                    list[position] = it
+//
+//                    updateViewState(
+//                        TransactionsViewState.ListMode(
+//                            list,
+//                            currentVS.loading,
+//                            currentVS.firstPage
+//                        )
+//                    )
+//                }
+//            }
+//        }
     }
 }

@@ -52,7 +52,7 @@ internal class TransactionsListAdapter(
             val same: Boolean =  try {
                 oldList[oldItemPosition].let { old ->
                     newList[newItemPosition].let { new ->
-                        old.transaction?.id == new.transaction?.id
+                        old.transaction == new.transaction
                     }
                 }
             } catch (e: IndexOutOfBoundsException) {
@@ -164,12 +164,12 @@ internal class TransactionsListAdapter(
                 transactionHolderViewState = t
                 disposable?.dispose()
 
-                val amount = t.transaction?.amount?.toSat()?.asFormattedString() ?: "0"
-                val date = t.transaction?.date?.toDateTime()?.value ?: Date(System.currentTimeMillis())
-
-                val hourString = DateTime.getFormathmma().format(date)
-                val dayOfMonthString = DateTime.getFormatEEEdd().format(date)
-                val dayOfWeekString = DateTime.getFormatMMM().format(date)
+//                val amount = t.transaction?.amount?.toSat()?.asFormattedString() ?: "0"
+//                val date = t.transaction?.date?.toDateTime()?.value ?: Date(System.currentTimeMillis())
+//
+//                val hourString = DateTime.getFormathmma().format(date)
+//                val dayOfMonthString = DateTime.getFormatEEEdd().format(date)
+//                val dayOfWeekString = DateTime.getFormatMMM().format(date)
 
                 val senderReceiverName = t.messageSenderName ?: "-"
 
@@ -180,36 +180,36 @@ internal class TransactionsListAdapter(
                 includeIncomingTransaction.apply {
                     root.goneIfFalse(t is TransactionHolderViewState.Incoming)
 
-                    textViewTransactionAmount.text = amount
-                    textViewTransactionAddress.text = senderReceiverName
-
-                    textViewTransactionHour.text = hourString
-                    textViewTransactionDayOfMonth.text = dayOfMonthString
-                    textViewTransactionDayOfWeek.text = dayOfWeekString
+//                    textViewTransactionAmount.text = amount
+//                    textViewTransactionAddress.text = senderReceiverName
+//
+//                    textViewTransactionHour.text = hourString
+//                    textViewTransactionDayOfMonth.text = dayOfMonthString
+//                    textViewTransactionDayOfWeek.text = dayOfWeekString
                 }
 
                 includeOutgoingTransaction.apply {
                     root.goneIfFalse(t is TransactionHolderViewState.Outgoing)
 
-                    textViewTransactionAmount.text = amount
-                    textViewTransactionAddress.text = senderReceiverName
-
-                    textViewTransactionHour.text = hourString
-                    textViewTransactionDayOfMonth.text = dayOfMonthString
-                    textViewTransactionDayOfWeek.text = dayOfWeekString
+//                    textViewTransactionAmount.text = amount
+//                    textViewTransactionAddress.text = senderReceiverName
+//
+//                    textViewTransactionHour.text = hourString
+//                    textViewTransactionDayOfMonth.text = dayOfMonthString
+//                    textViewTransactionDayOfWeek.text = dayOfWeekString
                 }
 
                 includeFailedTransaction.apply {
                     root.goneIfFalse(t is TransactionHolderViewState.Failed)
 
-                    textViewTransactionAmount.text = amount
-                    textViewTransactionAddress.text = senderReceiverName
-
-                    textViewTransactionHour.text = hourString
-                    textViewTransactionDayOfMonth.text = dayOfMonthString
-                    textViewTransactionDayOfWeek.text = dayOfWeekString
-
-                    textViewTransactionFailure.text = binding.root.context.getString(R.string.failure_reason, t.transaction?.error_message ?: "")
+//                    textViewTransactionAmount.text = amount
+//                    textViewTransactionAddress.text = senderReceiverName
+//
+//                    textViewTransactionHour.text = hourString
+//                    textViewTransactionDayOfMonth.text = dayOfMonthString
+//                    textViewTransactionDayOfWeek.text = dayOfWeekString
+//
+//                    textViewTransactionFailure.text = binding.root.context.getString(R.string.failure_reason, t.transaction?.error_message ?: "")
                     layoutConstraintTransactionFailure.goneIfFalse(t is TransactionHolderViewState.Failed.Open)
                 }
             }

@@ -6,7 +6,6 @@ import chat.sphinx.concept_network_query_chat.model.TribeDto
 import chat.sphinx.concept_network_query_chat.model.feed.FeedDto
 import chat.sphinx.concept_network_query_contact.model.ContactDto
 import chat.sphinx.concept_network_query_invite.model.InviteDto
-import chat.sphinx.concept_network_query_message.model.MessageDto
 import chat.sphinx.concept_network_query_subscription.model.SubscriptionDto
 import chat.sphinx.conceptcoredb.SphinxDatabaseQueries
 import chat.sphinx.wrapper_chat.*
@@ -57,12 +56,6 @@ inline fun Long.toNodeBalance(): NodeBalance? {
     }
 }
 
-inline val MessageDto.updateChatDboLatestMessage: Boolean
-    get() = type.toMessageType().show           &&
-            type != MessageType.BOT_RES         &&
-            status != MessageStatus.DELETED
-
-
 inline val Message.updateChatNewLatestMessage: Boolean
     get() = type.show                          &&
             type != MessageType.BotRes         &&
@@ -78,31 +71,6 @@ inline fun TransactionCallbacks.updateServerDbo(
 
 }
 
-@Suppress("NOTHING_TO_INLINE")
-inline fun TransactionCallbacks.updateChatDboLatestMessage(
-    messageDto: MessageDto,
-    chatId: ChatId,
-    latestMessageUpdatedTimeMap: MutableMap<ChatId, DateTime>,
-    queries: SphinxDatabaseQueries,
-) {
-    val dateTime = messageDto.created_at.toDateTime()
-
-    if (
-        messageDto.updateChatDboLatestMessage &&
-        (latestMessageUpdatedTimeMap[chatId]?.time ?: 0L) <= dateTime.time
-    ){
-        queries.chatUpdateLatestMessage(
-            MessageId(messageDto.id),
-            chatId,
-        )
-        queries.dashboardUpdateLatestMessage(
-            dateTime,
-            MessageId(messageDto.id),
-            chatId,
-        )
-        latestMessageUpdatedTimeMap[chatId] = dateTime
-    }
-}
 
 @Suppress("NOTHING_TO_INLINE")
 inline fun TransactionCallbacks.updateChatNewLatestMessage(
@@ -127,18 +95,6 @@ inline fun TransactionCallbacks.updateChatNewLatestMessage(
             chatId,
         )
         latestMessageUpdatedTimeMap[chatId] = dateTime
-    }
-}
-
-@Suppress("NOTHING_TO_INLINE")
-inline fun TransactionCallbacks.updateChatDboLatestMessage(
-    messageDto: MessageDto,
-    chatId: ChatId,
-    latestMessageUpdatedTimeMap: SynchronizedMap<ChatId, DateTime>,
-    queries: SphinxDatabaseQueries,
-) {
-    latestMessageUpdatedTimeMap.withLock { map ->
-        updateChatDboLatestMessage(messageDto, chatId, map, queries)
     }
 }
 
@@ -648,73 +604,6 @@ fun TransactionCallbacks.upsertNewMessage(
     if (message.type.isInvoicePayment()) {
         message.paymentHash?.let {
             queries.messageUpdateInvoiceAsPaidByPaymentHash(LightningPaymentHash(it.value))
-        }
-    }
-}
-
-
-@Suppress("SpellCheckingInspection")
-fun TransactionCallbacks.upsertMessage(
-    dto: MessageDto,
-    queries: SphinxDatabaseQueries,
-    fileName: FileName? = null
-) {
-
-    val chatId: ChatId = dto.chat_id?.let {
-        ChatId(it)
-    } ?: dto.chat?.id?.let {
-        ChatId(it)
-    } ?: ChatId(ChatId.NULL_CHAT_ID.toLong())
-
-    dto.media_token?.let { mediaToken ->
-
-        if (mediaToken.isEmpty()) return
-
-        queries.messageMediaUpsert(
-            (dto.media_key ?: "").toMediaKey(),
-            (dto.media_type ?: "").toMediaType(),
-            MediaToken(mediaToken),
-            MessageId(dto.id),
-            chatId,
-            dto.mediaKeyDecrypted?.toMediaKeyDecrypted(),
-            dto.mediaLocalFile,
-            fileName
-        )
-    }
-
-    queries.messageUpsert(
-        dto.status.toMessageStatus(),
-        dto.seenActual.toSeen(),
-        dto.sender_alias?.toSenderAlias(),
-        dto.sender_pic?.toPhotoUrl(),
-        dto.original_muid?.toMessageMUID(),
-        dto.reply_uuid?.toReplyUUID(),
-        dto.type.toMessageType(),
-        dto.recipient_alias?.toRecipientAlias(),
-        dto.recipient_pic?.toPhotoUrl(),
-        dto.pushActual.toPush(),
-        dto.person?.toMessagePerson(),
-        dto.thread_uuid?.toThreadUUID(),
-        dto.error_message?.toErrorMessage(),
-        MessageId(dto.id),
-        dto.uuid?.toMessageUUID(),
-        chatId,
-        ContactId(dto.sender),
-        dto.receiver?.let { ContactId(it) },
-        Sat(dto.amount),
-        dto.payment_hash?.toLightningPaymentHash(),
-        dto.payment_request?.toLightningPaymentRequestOrNull(),
-        dto.date.toDateTime(),
-        dto.expiration_date?.toDateTime(),
-        dto.message_content?.toMessageContent(),
-        dto.messageContentDecrypted?.toMessageContentDecrypted(),
-        dto.media_token?.toMediaToken()?.getMUIDFromMediaToken()?.value?.toMessageMUID(),
-        false.toFlagged()
-    )
-
-    if (dto.type.toMessageType()?.isInvoicePayment() == true) {
-        dto.payment_hash?.toLightningPaymentHash()?.let {
-            queries.messageUpdateInvoiceAsPaidByPaymentHash(it)
         }
     }
 }

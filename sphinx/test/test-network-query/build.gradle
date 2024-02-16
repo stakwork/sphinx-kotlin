@@ -14,7 +14,6 @@ dependencies {
     api project(path: ':sphinx:application:network:features:queries:feature-network-query-chat')
     api project(path: ':sphinx:application:network:features:queries:feature-network-query-contact')
     api project(path: ':sphinx:application:network:features:queries:feature-network-query-invite')
-    api project(path: ':sphinx:application:network:features:queries:feature-network-query-message')
     api project(path: ':sphinx:application:network:features:queries:feature-network-query-subscription')
     api project(path: ':sphinx:application:network:features:queries:feature-network-query-version')
     api project(path: ':sphinx:application:network:features:queries:feature-network-query-authorize-external')

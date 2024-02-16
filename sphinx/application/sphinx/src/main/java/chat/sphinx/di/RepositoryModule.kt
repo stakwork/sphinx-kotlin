@@ -10,7 +10,6 @@ import chat.sphinx.concept_network_query_contact.NetworkQueryContact
 import chat.sphinx.concept_network_query_discover_tribes.NetworkQueryDiscoverTribes
 import chat.sphinx.concept_network_query_invite.NetworkQueryInvite
 import chat.sphinx.concept_network_query_meme_server.NetworkQueryMemeServer
-import chat.sphinx.concept_network_query_message.NetworkQueryMessage
 import chat.sphinx.concept_network_query_feed_search.NetworkQueryFeedSearch
 import chat.sphinx.concept_network_query_feed_status.NetworkQueryFeedStatus
 import chat.sphinx.concept_network_query_people.NetworkQueryPeople
@@ -143,7 +142,6 @@ object RepositoryModule {
         networkQueryDiscoverTribes: NetworkQueryDiscoverTribes,
         networkQueryChat: NetworkQueryChat,
         networkQueryContact: NetworkQueryContact,
-        networkQueryMessage: NetworkQueryMessage,
         networkQueryInvite: NetworkQueryInvite,
         networkQueryAuthorizeExternal: NetworkQueryAuthorizeExternal,
         networkQueryPeople: NetworkQueryPeople,
@@ -176,7 +174,6 @@ object RepositoryModule {
             networkQueryMemeServer,
             networkQueryChat,
             networkQueryContact,
-            networkQueryMessage,
             networkQueryInvite,
             networkQueryAuthorizeExternal,
             networkQueryPeople,

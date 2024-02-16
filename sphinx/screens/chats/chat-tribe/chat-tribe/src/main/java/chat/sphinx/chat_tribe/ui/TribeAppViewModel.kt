@@ -14,8 +14,6 @@ import chat.sphinx.chat_tribe.ui.viewstate.WebViewLayoutScreenViewState
 import chat.sphinx.chat_tribe.ui.viewstate.TribeFeedViewState
 import chat.sphinx.chat_tribe.ui.viewstate.WebAppViewState
 import chat.sphinx.chat_tribe.ui.viewstate.WebViewViewState
-import chat.sphinx.concept_network_query_message.NetworkQueryMessage
-import chat.sphinx.concept_network_query_message.model.PostPaymentDto
 import chat.sphinx.concept_network_query_verify_external.NetworkQueryAuthorizeExternal
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.kotlin_response.LoadResponse
@@ -44,12 +42,9 @@ internal class TribeAppViewModel @Inject constructor(
     private val app: Application,
     private val contactRepository: ContactRepository,
     private val moshi: Moshi,
-    private val networkQueryAuthorizeExternal: NetworkQueryAuthorizeExternal,
-    private val networkQueryMessage: NetworkQueryMessage,
-
-
-    ) : BaseViewModel<TribeFeedViewState>(dispatchers, TribeFeedViewState.Idle) {
-
+    private val networkQueryAuthorizeExternal: NetworkQueryAuthorizeExternal
+    ) : BaseViewModel<TribeFeedViewState>(dispatchers, TribeFeedViewState.Idle)
+{
     private val _sphinxWebViewDtoStateFlow: MutableStateFlow<SphinxWebViewDto?> by lazy {
         MutableStateFlow(null)
     }
@@ -208,35 +203,38 @@ internal class TribeAppViewModel @Inject constructor(
             sphinxWebViewDtoStateFlow.value?.dest?.let { destination ->
                 if (budgetStateFlow.value.value >= amount) {
                     viewModelScope.launch(mainImmediate) {
-                        networkQueryMessage.sendPayment(
-                            PostPaymentDto(
-                                chat_id = null,
-                                contact_id = null,
-                                text = null,
-                                remote_text = null,
-                                amount = amount.toLong(),
-                                destination_key = destination
-                            )
-                        ).collect { loadResponse ->
-                            @Exhaustive
-                            when (loadResponse) {
-                                is LoadResponse.Loading -> {}
-                                is Response.Error -> {
-                                    sendMessage(
-                                        type = TYPE_KEYSEND,
-                                        success = false,
-                                        error = app.getString(R.string.side_effect_keysend_error)
-                                    )
-                                }
-                                is Response.Success -> {
-                                    sendMessage(
-                                        type = TYPE_KEYSEND,
-                                        success = true,
-                                        error = null
-                                    )
-                                }
-                            }
-                        }
+
+                        // TODO V2 sendPayment
+
+//                        networkQueryMessage.sendPayment(
+//                            PostPaymentDto(
+//                                chat_id = null,
+//                                contact_id = null,
+//                                text = null,
+//                                remote_text = null,
+//                                amount = amount.toLong(),
+//                                destination_key = destination
+//                            )
+//                        ).collect { loadResponse ->
+//                            @Exhaustive
+//                            when (loadResponse) {
+//                                is LoadResponse.Loading -> {}
+//                                is Response.Error -> {
+//                                    sendMessage(
+//                                        type = TYPE_KEYSEND,
+//                                        success = false,
+//                                        error = app.getString(R.string.side_effect_keysend_error)
+//                                    )
+//                                }
+//                                is Response.Success -> {
+//                                    sendMessage(
+//                                        type = TYPE_KEYSEND,
+//                                        success = true,
+//                                        error = null
+//                                    )
+//                                }
+//                            }
+//                        }
                     }
                     return
                 }

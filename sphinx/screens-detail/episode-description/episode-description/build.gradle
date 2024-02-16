@@ -42,7 +42,6 @@ dependencies {
     implementation project(path: ':sphinx:application:common:resources')
     implementation project(path: ':sphinx:application:data:concepts:concept-image-loader')
     implementation project(path: ':sphinx:activity:concepts:concept-connectivity-helper')
-    implementation project(path: ':sphinx:application:network:concepts:queries:concept-network-query-message')
     implementation project(path: ':sphinx:screens-detail:common:detail-resources')
     implementation project(path: ':sphinx:activity:features:feature-view-model-coordinator')
     api project(path: ':sphinx:application:data:concepts:repositories:concept-repository-contact')

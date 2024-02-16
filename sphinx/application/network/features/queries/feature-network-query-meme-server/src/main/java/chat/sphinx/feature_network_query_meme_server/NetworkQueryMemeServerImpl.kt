@@ -4,7 +4,6 @@ import chat.sphinx.concept_network_call.buildRequest
 import chat.sphinx.concept_network_query_meme_server.NetworkQueryMemeServer
 import chat.sphinx.concept_network_query_meme_server.model.*
 import chat.sphinx.concept_network_relay_call.NetworkRelayCall
-import chat.sphinx.feature_network_query_meme_server.model.MemeServerChallengeSigRelayResponse
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
@@ -14,10 +13,6 @@ import chat.sphinx.wrapper_meme_server.*
 import chat.sphinx.wrapper_message_media.FileName
 import chat.sphinx.wrapper_message_media.MediaType
 import chat.sphinx.wrapper_message_media.token.MediaHost
-import chat.sphinx.wrapper_relay.AuthorizationToken
-import chat.sphinx.wrapper_relay.RequestSignature
-import chat.sphinx.wrapper_relay.RelayUrl
-import chat.sphinx.wrapper_relay.TransportToken
 import com.squareup.moshi.*
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.crypto_common.annotations.RawPasswordAccess
@@ -50,7 +45,6 @@ class NetworkQueryMemeServerImpl(
         private const val ENDPOINT_ASK_AUTHENTICATION = "$MEME_SERVER_URL/ask"
         private const val ENDPOINT_POST_ATTACHMENT_PRIVATE = "$MEME_SERVER_URL/file"
         private const val ENDPOINT_POST_ATTACHMENT_PUBLIC = "$MEME_SERVER_URL/public"
-        private const val ENDPOINT_SIGNER = "/signer/%s"
         private const val ENDPOINT_VERIFY_AUTHENTICATION = "$MEME_SERVER_URL/verify?id=%s&sig=%s&pubkey=%s"
         private const val ENDPOINT_TEMPLATES = "$MEME_SERVER_URL/templates"
     }
@@ -61,16 +55,6 @@ class NetworkQueryMemeServerImpl(
         networkRelayCall.get(
             url = String.format(ENDPOINT_ASK_AUTHENTICATION, memeServerHost.value),
             responseJsonClass = MemeServerAuthenticationDto::class.java,
-        )
-
-    override fun signChallenge(
-        challenge: AuthenticationChallenge,
-        relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>?
-    ): Flow<LoadResponse<MemeServerChallengeSigDto, ResponseError>> =
-        networkRelayCall.relayGet(
-            responseJsonClass = MemeServerChallengeSigRelayResponse::class.java,
-            relayEndpoint = String.format(ENDPOINT_SIGNER, challenge.value),
-            relayData = relayData,
         )
 
     override fun verifyAuthentication(

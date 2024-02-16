@@ -42,7 +42,6 @@ dependencies {
     implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-chat')
     implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-contact')
     implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-message')
-    implementation project(path: ':sphinx:application:network:concepts:queries:concept-network-query-message')
     implementation project(path: ':sphinx:application:network:concepts:queries:concept-network-query-chat')
     implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-connect-manager')
 
