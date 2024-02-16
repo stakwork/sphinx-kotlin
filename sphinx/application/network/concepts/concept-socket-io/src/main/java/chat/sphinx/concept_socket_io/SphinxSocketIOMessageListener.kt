@@ -3,7 +3,6 @@ package chat.sphinx.concept_socket_io
 import chat.sphinx.concept_network_query_chat.model.ChatDto
 import chat.sphinx.concept_network_query_contact.model.ContactDto
 import chat.sphinx.concept_network_query_invite.model.InviteDto
-import chat.sphinx.concept_network_query_lightning.model.invoice.LightningPaymentInvoiceDto
 import chat.sphinx.concept_network_query_message.model.MessageDto
 
 // TODO: This will need to be moved to concept-network-query-xxx when it gets built
@@ -90,12 +89,6 @@ sealed class SphinxSocketIOMessage {
         class Invite(override val dto: InviteDto): Type<InviteDto>() {
             companion object {
                 const val JSON_TYPE = "invite"
-            }
-        }
-
-        class InvoicePayment(override val dto: LightningPaymentInvoiceDto): Type<LightningPaymentInvoiceDto>() {
-            companion object {
-                const val JSON_TYPE = "invoice_payment"
             }
         }
 

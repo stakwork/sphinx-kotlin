@@ -366,14 +366,6 @@ class SocketIOManagerImpl(
                                 )
                             )
                         }
-                        SphinxSocketIOMessage.Type.InvoicePayment.JSON_TYPE -> {
-                            SphinxSocketIOMessage.Type.InvoicePayment(
-                                moshi.getMessageResponse(
-                                    MessageResponse.ResponseInvoice::class.java,
-                                    argsString
-                                )
-                            )
-                        }
                         SphinxSocketIOMessage.Type.MessageType.Attachment.JSON_TYPE -> {
                             SphinxSocketIOMessage.Type.MessageType.Attachment(
                                 moshi.getMessageResponse(

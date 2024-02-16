@@ -25,7 +25,6 @@ import chat.sphinx.concept_network_query_feed_status.model.EpisodeStatusDto
 import chat.sphinx.concept_network_query_feed_status.model.PostFeedStatusDto
 import chat.sphinx.concept_network_query_feed_status.model.PutFeedStatusDto
 import chat.sphinx.concept_network_query_invite.NetworkQueryInvite
-import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_network_query_meme_server.NetworkQueryMemeServer
 import chat.sphinx.concept_network_query_message.NetworkQueryMessage
 import chat.sphinx.concept_network_query_message.model.*
@@ -183,7 +182,6 @@ abstract class SphinxRepository(
     private val networkQueryMemeServer: NetworkQueryMemeServer,
     private val networkQueryChat: NetworkQueryChat,
     private val networkQueryContact: NetworkQueryContact,
-    private val networkQueryLightning: NetworkQueryLightning,
     private val networkQueryMessage: NetworkQueryMessage,
     private val networkQueryInvite: NetworkQueryInvite,
     private val networkQueryAuthorizeExternal: NetworkQueryAuthorizeExternal,
@@ -616,7 +614,7 @@ abstract class SphinxRepository(
         applicationScope.launch {
 
             balanceLock.withLock {
-                accountBalanceStateFlow.value = balance.toNodeBalance()
+                accountBalanceStateFlow.value = NodeBalance(Sat(balance))
                 networkRefreshBalance.value = balance
 
                 authenticationStorage.putString(
@@ -843,9 +841,6 @@ abstract class SphinxRepository(
                             upsertInvite(msg.dto, queries)
                         }
                     }
-                }
-                is SphinxSocketIOMessage.Type.InvoicePayment -> {
-                    // TODO: Implement
                 }
                 is SphinxSocketIOMessage.Type.MessageType, is SphinxSocketIOMessage.Type.Group -> {
 
@@ -2361,9 +2356,7 @@ abstract class SphinxRepository(
                     .getString(REPOSITORY_LIGHTNING_BALANCE, null)
                     ?.let { balanceString ->
 
-                        balanceString.toNodeBalance()?.let { nodeBalance ->
-                            accountBalanceStateFlow.value = nodeBalance
-                        }
+                        accountBalanceStateFlow.value = NodeBalance(Sat(balanceString.toLong()))
                     }
             }
         }

@@ -99,7 +99,6 @@ dependencies {
     implementation project(path: ':sphinx:application:network:features:queries:feature-network-query-chat')
     implementation project(path: ':sphinx:application:network:features:queries:feature-network-query-contact')
     implementation project(path: ':sphinx:application:network:features:queries:feature-network-query-invite')
-    implementation project(path: ':sphinx:application:network:features:queries:feature-network-query-lightning')
     implementation project(path: ':sphinx:application:network:features:queries:feature-network-query-message')
     implementation project(path: ':sphinx:application:network:features:queries:feature-network-query-subscription')
     implementation project(path: ':sphinx:application:network:features:queries:feature-network-query-meme-server')

@@ -5,7 +5,6 @@ import chat.sphinx.concept_network_client.NetworkClient
 import chat.sphinx.concept_network_query_chat.NetworkQueryChat
 import chat.sphinx.concept_network_query_contact.NetworkQueryContact
 import chat.sphinx.concept_network_query_invite.NetworkQueryInvite
-import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_network_query_message.NetworkQueryMessage
 import chat.sphinx.concept_network_query_subscription.NetworkQuerySubscription
 import chat.sphinx.concept_network_query_verify_external.NetworkQueryAuthorizeExternal
@@ -21,7 +20,6 @@ import chat.sphinx.feature_network_client.NetworkClientImpl
 import chat.sphinx.feature_network_query_chat.NetworkQueryChatImpl
 import chat.sphinx.feature_network_query_contact.NetworkQueryContactImpl
 import chat.sphinx.feature_network_query_invite.NetworkQueryInviteImpl
-import chat.sphinx.feature_network_query_lightning.NetworkQueryLightningImpl
 import chat.sphinx.feature_network_query_message.NetworkQueryMessageImpl
 import chat.sphinx.feature_network_query_redeem_badge_token.NetworkQueryRedeemBadgeTokenImpl
 import chat.sphinx.feature_network_query_subscription.NetworkQuerySubscriptionImpl
@@ -236,10 +234,6 @@ abstract class NetworkQueryTestHelper: AuthenticationCoreDefaultsTestHelper() {
 
     protected open val nqVersion: NetworkQueryVersion by lazy {
         NetworkQueryVersionImpl(networkRelayCall)
-    }
-
-    protected open val nqLightning: NetworkQueryLightning by lazy {
-        NetworkQueryLightningImpl(networkRelayCall)
     }
 
     protected open val nqAuthorizeExternal: NetworkQueryAuthorizeExternal by lazy {

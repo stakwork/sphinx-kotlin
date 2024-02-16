@@ -18,7 +18,6 @@ dependencies {
     api project(path: ':sphinx:application:network:concepts:concept-socket-io')
     api project(path: ':sphinx:application:network:concepts:clients:concept-network-client')
     implementation project(path: ':sphinx:application:network:concepts:queries:concept-network-query-invite')
-    implementation project(path: ':sphinx:application:network:concepts:queries:concept-network-query-lightning')
     implementation project(path: ':sphinx:application:network:concepts:queries:concept-network-query-message')
 
     // needed to override moshi's use of 1.4.31

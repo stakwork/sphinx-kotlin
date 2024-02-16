@@ -84,8 +84,6 @@ include ':sphinx:application:network:concepts:queries:concept-network-query-cont
 include ':sphinx:application:network:features:queries:feature-network-query-contact'
 include ':sphinx:application:network:concepts:queries:concept-network-query-invite'
 include ':sphinx:application:network:features:queries:feature-network-query-invite'
-include ':sphinx:application:network:concepts:queries:concept-network-query-lightning'
-include ':sphinx:application:network:features:queries:feature-network-query-lightning'
 include ':sphinx:application:network:concepts:queries:concept-network-query-message'
 include ':sphinx:application:network:features:queries:feature-network-query-message'
 include ':sphinx:application:network:concepts:queries:concept-network-query-subscription'

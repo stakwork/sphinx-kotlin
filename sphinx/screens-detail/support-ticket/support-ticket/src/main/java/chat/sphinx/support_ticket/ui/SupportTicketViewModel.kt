@@ -5,7 +5,6 @@ import android.content.Intent
 import android.net.Uri
 import android.text.Editable
 import androidx.lifecycle.viewModelScope
-import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_repository_actions.ActionsRepository
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
@@ -26,37 +25,11 @@ internal class SupportTicketViewModel @Inject constructor(
     dispatchers: CoroutineDispatchers,
     val navigator: SupportTicketNavigator,
     private val actionsRepository: ActionsRepository,
-    private val networkQueryLightning: NetworkQueryLightning,
 ): SideEffectViewModel<
         Context,
         SupportTicketSideEffect,
         SupportTicketViewState>(dispatchers, SupportTicketViewState.Empty)
 {
-
-    fun loadLogs() {
-        viewModelScope.launch(mainImmediate) {
-            networkQueryLightning.getLogs().collect { loadedResponse ->
-                @Exhaustive
-                when (loadedResponse) {
-                    is LoadResponse.Loading -> {
-                        updateViewState(SupportTicketViewState.LoadingLogs)
-                    }
-                    is Response.Error -> {
-                        submitSideEffect(SupportTicketSideEffect.FailedToFetchLogs)
-                        updateViewState(SupportTicketViewState.Empty)
-                    }
-                    is Response.Success -> {
-                        updateViewState(
-                            SupportTicketViewState.Fetched(
-                                loadedResponse.value,
-                                actionsRepository.appLogsStateFlow.value
-                            )
-                        )
-                    }
-                }
-            }
-        }
-    }
 
     fun showLogsCopiedToast() {
         viewModelScope.launch(mainImmediate) {

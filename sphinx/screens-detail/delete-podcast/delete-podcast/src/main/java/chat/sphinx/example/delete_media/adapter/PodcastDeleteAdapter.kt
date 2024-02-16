@@ -185,10 +185,6 @@ internal class PodcastDeleteAdapter(
                     }.let { job ->
                         holderJobs.add(job)
                     }
-                } ?: run {
-                    imageViewElementPicture.setImageDrawable(
-                        ContextCompat.getDrawable(root.context, R.drawable.ic_tribe)
-                    )
                 }
                 textViewManageStorageElementText.text = section?.title
                 textViewManageStorageElementNumber.text = section?.size

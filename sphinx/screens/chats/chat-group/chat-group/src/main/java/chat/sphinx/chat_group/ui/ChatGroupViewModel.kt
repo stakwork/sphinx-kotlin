@@ -11,7 +11,6 @@ import chat.sphinx.chat_group.navigation.GroupChatNavigator
 import chat.sphinx.concept_link_preview.LinkPreviewHandler
 import chat.sphinx.concept_meme_input_stream.MemeInputStreamHandler
 import chat.sphinx.concept_meme_server.MemeServerTokenHandler
-import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_network_query_people.NetworkQueryPeople
 import chat.sphinx.concept_repository_actions.ActionsRepository
 import chat.sphinx.concept_repository_chat.ChatRepository
@@ -64,7 +63,6 @@ class ChatGroupViewModel @Inject constructor(
     messageRepository: MessageRepository,
     actionsRepository: ActionsRepository,
     repositoryDashboard: RepositoryDashboardAndroid<Any>,
-    networkQueryLightning: NetworkQueryLightning,
     networkQueryPeople: NetworkQueryPeople,
     mediaCacheHandler: MediaCacheHandler,
     savedStateHandle: SavedStateHandle,
@@ -85,7 +83,6 @@ class ChatGroupViewModel @Inject constructor(
     messageRepository,
     actionsRepository,
     repositoryDashboard,
-    networkQueryLightning,
     networkQueryPeople,
     mediaCacheHandler,
     savedStateHandle,
@@ -152,10 +149,6 @@ class ChatGroupViewModel @Inject constructor(
         } ?: message.senderAlias?.let { alias ->
             InitialHolderViewState.Initials(alias.value.getInitials(), message.getColorKey())
         } ?: InitialHolderViewState.None
-    }
-
-    override val checkRoute: Flow<LoadResponse<Boolean, ResponseError>> = flow {
-        emit(Response.Success(true))
     }
 
     override fun readMessages() {

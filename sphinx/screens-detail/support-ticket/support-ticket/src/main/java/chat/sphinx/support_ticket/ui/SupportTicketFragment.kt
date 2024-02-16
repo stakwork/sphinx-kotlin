@@ -79,7 +79,6 @@ internal class SupportTicketFragment: SideEffectDetailFragment<
             }
         }
 
-        viewModel.loadLogs()
     }
 
     override suspend fun onViewStateFlowCollect(viewState: SupportTicketViewState) {

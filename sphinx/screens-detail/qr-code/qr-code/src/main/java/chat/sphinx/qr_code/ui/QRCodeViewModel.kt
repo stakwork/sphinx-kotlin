@@ -123,20 +123,20 @@ internal class QRCodeViewModel @Inject constructor(
 
     @Suppress("BlockingMethodInNonBlockingContext")
     override suspend fun onSocketIOMessageReceived(msg: SphinxSocketIOMessage) {
-        if (msg is SphinxSocketIOMessage.Type.InvoicePayment) {
-            if (args.qrText == msg.dto.invoice) {
-                updateViewState(
-                    QRCodeViewState(
-                        currentViewState.showBackButton,
-                        currentViewState.viewTitle,
-                        currentViewState.qrText,
-                        currentViewState.qrBitmap,
-                        currentViewState.description,
-                        true
-                    )
-                )
-            }
-        }
+//        if (msg is SphinxSocketIOMessage.Type.InvoicePayment) {
+//            if (args.qrText == msg.dto.invoice) {
+//                updateViewState(
+//                    QRCodeViewState(
+//                        currentViewState.showBackButton,
+//                        currentViewState.viewTitle,
+//                        currentViewState.qrText,
+//                        currentViewState.qrBitmap,
+//                        currentViewState.description,
+//                        true
+//                    )
+//                )
+//            }
+//        }
     }
 
     override fun onCleared() {

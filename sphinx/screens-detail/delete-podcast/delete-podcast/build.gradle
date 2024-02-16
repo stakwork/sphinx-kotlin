@@ -39,7 +39,6 @@ dependencies {
     implementation project(path: ':sphinx:application:common:resources')
     implementation project(path: ':sphinx:activity:insetter-activity')
     implementation project(path: ':sphinx:screens-detail:common:detail-resources')
-    implementation project(path: ':sphinx:application:network:concepts:queries:concept-network-query-lightning')
     implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-feed')
     implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-media')
     implementation project(path: ':sphinx:application:data:concepts:concept-image-loader')

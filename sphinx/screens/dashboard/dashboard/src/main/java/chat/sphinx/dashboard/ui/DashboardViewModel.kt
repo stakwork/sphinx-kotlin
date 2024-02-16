@@ -10,9 +10,6 @@ import androidx.lifecycle.viewModelScope
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.concept_background_login.BackgroundLoginHandler
 import chat.sphinx.concept_network_query_crypter.NetworkQueryCrypter
-import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
-import chat.sphinx.concept_network_query_lightning.model.invoice.PayRequestDto
-import chat.sphinx.concept_network_query_lightning.model.invoice.PostRequestPaymentDto
 import chat.sphinx.concept_network_query_people.NetworkQueryPeople
 import chat.sphinx.concept_network_query_people.model.isClaimOnLiquidPath
 import chat.sphinx.concept_network_query_people.model.isDeleteMethod
@@ -96,7 +93,6 @@ internal class DashboardViewModel @Inject constructor(
     private val chatRepository: ChatRepository,
     private val feedRepository: FeedRepository,
     private val actionsRepository: ActionsRepository,
-    private val networkQueryLightning: NetworkQueryLightning,
     private val lightningRepository: LightningRepository,
 
     private val networkQueryVersion: NetworkQueryVersion,
@@ -446,31 +442,32 @@ internal class DashboardViewModel @Inject constructor(
 
     private fun handleCreateInvoiceLink(link: CreateInvoiceLink) {
         viewModelScope.launch(mainImmediate) {
-            val postRequestPaymentDto = PostRequestPaymentDto(
-                link.amount.toLong(),
-            )
+//            val postRequestPaymentDto = PostRequestPaymentDto(
+//                link.amount.toLong(),
+//            )
 
-            networkQueryLightning.postRequestPayment(postRequestPaymentDto)
-                .collect { loadResponse ->
-                    @javax.annotation.meta.Exhaustive
-                    when (loadResponse) {
-                        is LoadResponse.Loading -> {}
-                        is Response.Error -> {
-                            submitSideEffect(
-                                ChatListSideEffect.Notify(
-                                    app.getString(R.string.failed_to_request_payment)
-                                )
-                            )
-                        }
-                        is Response.Success -> {
-                            dashboardNavigator.toQRCodeDetail(
-                                loadResponse.value.invoice,
-                                app.getString(R.string.payment_request),
-                                app.getString(R.string.amount_n_sats, link.amount.toLong()),
-                            )
-                        }
-                    }
-                }
+            // TODO V2 postRequestPayment
+//            networkQueryLightning.postRequestPayment(postRequestPaymentDto)
+//                .collect { loadResponse ->
+//                    @javax.annotation.meta.Exhaustive
+//                    when (loadResponse) {
+//                        is LoadResponse.Loading -> {}
+//                        is Response.Error -> {
+//                            submitSideEffect(
+//                                ChatListSideEffect.Notify(
+//                                    app.getString(R.string.failed_to_request_payment)
+//                                )
+//                            )
+//                        }
+//                        is Response.Success -> {
+//                            dashboardNavigator.toQRCodeDetail(
+//                                loadResponse.value.invoice,
+//                                app.getString(R.string.payment_request),
+//                                app.getString(R.string.amount_n_sats, link.amount.toLong()),
+//                            )
+//                        }
+//                    }
+//                }
         }
     }
 
@@ -1041,31 +1038,34 @@ internal class DashboardViewModel @Inject constructor(
 
     private fun payLightningPaymentRequest(lightningPaymentRequest: LightningPaymentRequest) {
         viewModelScope.launch(mainImmediate) {
-            val payLightningPaymentRequestDto = PayRequestDto(lightningPaymentRequest.value)
-            networkQueryLightning.putLightningPaymentRequest(payLightningPaymentRequestDto).collect { loadResponse ->
-                @Exhaustive
-                when (loadResponse) {
-                    is LoadResponse.Loading -> {
-                        submitSideEffect(
-                            ChatListSideEffect.Notify(app.getString(R.string.attempting_payment_request), true)
-                        )
-                    }
-                    is Response.Error -> {
-                        submitSideEffect(
-                            ChatListSideEffect.Notify(
-                                String.format(
-                                    app.getString(R.string.error_payment_message),
-                                    loadResponse.exception?.message ?: loadResponse.cause.message
-                                ), true)
-                        )
-                    }
-                    is Response.Success -> {
-                        submitSideEffect(
-                            ChatListSideEffect.Notify(app.getString(R.string.successfully_paid_invoice), true)
-                        )
-                    }
-                }
-            }
+//            val payLightningPaymentRequestDto = PayRequestDto(lightningPaymentRequest.value)
+
+            // TODO V2 putLightningPaymentRequest
+
+//            networkQueryLightning.putLightningPaymentRequest(payLightningPaymentRequestDto).collect { loadResponse ->
+//                @Exhaustive
+//                when (loadResponse) {
+//                    is LoadResponse.Loading -> {
+//                        submitSideEffect(
+//                            ChatListSideEffect.Notify(app.getString(R.string.attempting_payment_request), true)
+//                        )
+//                    }
+//                    is Response.Error -> {
+//                        submitSideEffect(
+//                            ChatListSideEffect.Notify(
+//                                String.format(
+//                                    app.getString(R.string.error_payment_message),
+//                                    loadResponse.exception?.message ?: loadResponse.cause.message
+//                                ), true)
+//                        )
+//                    }
+//                    is Response.Success -> {
+//                        submitSideEffect(
+//                            ChatListSideEffect.Notify(app.getString(R.string.successfully_paid_invoice), true)
+//                        )
+//                    }
+//                }
+//            }
         }
     }
 

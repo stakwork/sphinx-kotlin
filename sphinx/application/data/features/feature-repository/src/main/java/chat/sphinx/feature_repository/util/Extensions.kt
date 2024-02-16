@@ -6,7 +6,6 @@ import chat.sphinx.concept_network_query_chat.model.TribeDto
 import chat.sphinx.concept_network_query_chat.model.feed.FeedDto
 import chat.sphinx.concept_network_query_contact.model.ContactDto
 import chat.sphinx.concept_network_query_invite.model.InviteDto
-import chat.sphinx.concept_network_query_lightning.model.balance.BalanceDto
 import chat.sphinx.concept_network_query_message.model.MessageDto
 import chat.sphinx.concept_network_query_subscription.model.SubscriptionDto
 import chat.sphinx.conceptcoredb.SphinxDatabaseQueries
@@ -39,20 +38,6 @@ import chat.sphinx.wrapper_message_media.*
 import chat.sphinx.wrapper_rsa.RsaPublicKey
 import com.squareup.moshi.Moshi
 import com.squareup.sqldelight.TransactionCallbacks
-
-@Suppress("NOTHING_TO_INLINE")
-inline fun BalanceDto.toNodeBalanceOrNull(): NodeBalance? =
-    try {
-        toNodeBalance()
-    } catch (e: IllegalArgumentException) {
-        null
-    }
-
-@Suppress("NOTHING_TO_INLINE")
-inline fun BalanceDto.toNodeBalance(): NodeBalance =
-    NodeBalance(
-        Sat(balance),
-    )
 
 @Suppress("NOTHING_TO_INLINE")
 inline fun String.toNodeBalance(): NodeBalance? {

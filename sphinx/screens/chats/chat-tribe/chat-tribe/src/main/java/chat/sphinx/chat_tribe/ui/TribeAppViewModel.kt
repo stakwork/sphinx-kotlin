@@ -14,8 +14,6 @@ import chat.sphinx.chat_tribe.ui.viewstate.WebViewLayoutScreenViewState
 import chat.sphinx.chat_tribe.ui.viewstate.TribeFeedViewState
 import chat.sphinx.chat_tribe.ui.viewstate.WebAppViewState
 import chat.sphinx.chat_tribe.ui.viewstate.WebViewViewState
-import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
-import chat.sphinx.concept_network_query_lightning.model.webview.LsatWebViewDto
 import chat.sphinx.concept_network_query_message.NetworkQueryMessage
 import chat.sphinx.concept_network_query_message.model.PostPaymentDto
 import chat.sphinx.concept_network_query_verify_external.NetworkQueryAuthorizeExternal
@@ -46,7 +44,6 @@ internal class TribeAppViewModel @Inject constructor(
     private val app: Application,
     private val contactRepository: ContactRepository,
     private val moshi: Moshi,
-    private val networkQueryLightning: NetworkQueryLightning,
     private val networkQueryAuthorizeExternal: NetworkQueryAuthorizeExternal,
     private val networkQueryMessage: NetworkQueryMessage,
 
@@ -261,36 +258,39 @@ internal class TribeAppViewModel @Inject constructor(
 
                 amount?.let { nnAmount ->
                     if (budgetStateFlow.value.value >= (nnAmount.value)) {
-                        viewModelScope.launch(mainImmediate) {
-                            networkQueryLightning.payLsat(
-                                LsatWebViewDto(
-                                    sphinxWebViewDtoStateFlow.value?.paymentRequest,
-                                    sphinxWebViewDtoStateFlow.value?.macaroon,
-                                    sphinxWebViewDtoStateFlow.value?.issuer
-                                )
-                            ).collect { loadResponse ->
-                                @Exhaustive
-                                when (loadResponse) {
-                                    is LoadResponse.Loading -> {}
-                                    is Response.Error -> {
-                                        sendMessage(
-                                            type = TYPE_LSAT,
-                                            success = false,
-                                            error = app.getString(R.string.side_effect_error_pay_lsat)
-                                        )
-                                    }
-                                    is Response.Success -> {
-                                        _budgetStateFlow.value = Sat(budgetStateFlow.value.value - nnAmount.value)
-                                        sendMessage(
-                                            type = TYPE_LSAT,
-                                            success = true,
-                                            lsat = loadResponse.value.lsat,
-                                            error = null
-                                        )
-                                    }
-                                }
-                            }
-                        }
+
+                        // TODO V2 payLsat
+
+//                        viewModelScope.launch(mainImmediate) {
+//                            networkQueryLightning.payLsat(
+//                                LsatWebViewDto(
+//                                    sphinxWebViewDtoStateFlow.value?.paymentRequest,
+//                                    sphinxWebViewDtoStateFlow.value?.macaroon,
+//                                    sphinxWebViewDtoStateFlow.value?.issuer
+//                                )
+//                            ).collect { loadResponse ->
+//                                @Exhaustive
+//                                when (loadResponse) {
+//                                    is LoadResponse.Loading -> {}
+//                                    is Response.Error -> {
+//                                        sendMessage(
+//                                            type = TYPE_LSAT,
+//                                            success = false,
+//                                            error = app.getString(R.string.side_effect_error_pay_lsat)
+//                                        )
+//                                    }
+//                                    is Response.Success -> {
+//                                        _budgetStateFlow.value = Sat(budgetStateFlow.value.value - nnAmount.value)
+//                                        sendMessage(
+//                                            type = TYPE_LSAT,
+//                                            success = true,
+//                                            lsat = loadResponse.value.lsat,
+//                                            error = null
+//                                        )
+//                                    }
+//                                }
+//                            }
+//                        }
                     } else {
                         sendMessage(
                             type = TYPE_LSAT,

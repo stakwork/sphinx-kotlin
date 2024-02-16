@@ -3,8 +3,6 @@ package chat.sphinx.payment_receive.ui
 import android.app.Application
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
-import chat.sphinx.concept_network_query_lightning.model.invoice.PostRequestPaymentDto
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_message.MessageRepository
@@ -53,7 +51,6 @@ internal class PaymentReceiveViewModel @Inject constructor(
     private val paymentReceiveNavigator: PaymentReceiveNavigator,
     private val app: Application,
     private val contactRepository: ContactRepository,
-    private val networkQueryLightning: NetworkQueryLightning,
     private val messageRepository: MessageRepository,
     private val chatRepository: ChatRepository,
 ): PaymentViewModel<PaymentReceiveFragmentArgs, PaymentReceiveViewState>(
@@ -107,34 +104,30 @@ internal class PaymentReceiveViewModel @Inject constructor(
             if (requestPayment != null) {
                 updateViewState(PaymentReceiveViewState.ProcessingRequest)
 
-                val postRequestPaymentDto = PostRequestPaymentDto(
-                    requestPayment.amount,
-                    requestPayment.memo,
-                )
-
-                networkQueryLightning.postRequestPayment(postRequestPaymentDto).collect { loadResponse ->
-                    @Exhaustive
-                    when (loadResponse) {
-                        is LoadResponse.Loading -> {}
-                        is Response.Error -> {
-                            submitSideEffect(
-                                PaymentSideEffect.Notify(app.getString(R.string.failed_to_request_payment))
-                            )
-                            refreshViewState()
-                        }
-                        is Response.Success -> {
-                            paymentReceiveNavigator.toQRCodeDetail(
-                                loadResponse.value.invoice,
-                                app.getString(R.string.payment_request),
-                                app.getString(R.string.amount_n_sats, requestPayment.amount),
-                                false
-                            )
-                            refreshViewState()
-                            delay(100L)
-                            updateAmount("")
-                        }
-                    }
-                }
+                // TODO V2 postRequestPayment
+//                networkQueryLightning.postRequestPayment(postRequestPaymentDto).collect { loadResponse ->
+//                    @Exhaustive
+//                    when (loadResponse) {
+//                        is LoadResponse.Loading -> {}
+//                        is Response.Error -> {
+//                            submitSideEffect(
+//                                PaymentSideEffect.Notify(app.getString(R.string.failed_to_request_payment))
+//                            )
+//                            refreshViewState()
+//                        }
+//                        is Response.Success -> {
+//                            paymentReceiveNavigator.toQRCodeDetail(
+//                                loadResponse.value.invoice,
+//                                app.getString(R.string.payment_request),
+//                                app.getString(R.string.amount_n_sats, requestPayment.amount),
+//                                false
+//                            )
+//                            refreshViewState()
+//                            delay(100L)
+//                            updateAmount("")
+//                        }
+//                    }
+//                }
             } else {
                 submitSideEffect(PaymentSideEffect.Notify("Failed to request payment"))
             }

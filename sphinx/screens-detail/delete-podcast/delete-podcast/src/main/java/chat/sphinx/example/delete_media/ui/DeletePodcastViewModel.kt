@@ -37,7 +37,6 @@ internal class DeletePodcastViewModel @Inject constructor(
     private val feedRepository: FeedRepository,
     private val repositoryMedia: RepositoryMedia,
     dispatchers: CoroutineDispatchers,
-    handle: SavedStateHandle,
 ): SideEffectViewModel<
         Context,
         DeleteNotifySideEffect,

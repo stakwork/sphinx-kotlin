@@ -16,8 +16,6 @@ import chat.sphinx.chat_tribe.ui.viewstate.*
 import chat.sphinx.concept_link_preview.LinkPreviewHandler
 import chat.sphinx.concept_meme_input_stream.MemeInputStreamHandler
 import chat.sphinx.concept_meme_server.MemeServerTokenHandler
-import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
-import chat.sphinx.concept_network_query_lightning.model.route.isRouteAvailable
 import chat.sphinx.concept_network_query_people.NetworkQueryPeople
 import chat.sphinx.concept_network_query_people.model.ChatLeaderboardDto
 import chat.sphinx.concept_repository_actions.ActionsRepository
@@ -76,7 +74,6 @@ class ChatTribeViewModel @Inject constructor(
     messageRepository: MessageRepository,
     actionsRepository: ActionsRepository,
     repositoryDashboard: RepositoryDashboardAndroid<Any>,
-    networkQueryLightning: NetworkQueryLightning,
     networkQueryPeople: NetworkQueryPeople,
     mediaCacheHandler: MediaCacheHandler,
     savedStateHandle: SavedStateHandle,
@@ -97,7 +94,6 @@ class ChatTribeViewModel @Inject constructor(
     messageRepository,
     actionsRepository,
     repositoryDashboard,
-    networkQueryLightning,
     networkQueryPeople,
     mediaCacheHandler,
     savedStateHandle,
@@ -245,23 +241,6 @@ class ChatTribeViewModel @Inject constructor(
         } ?: message.senderAlias?.let { alias ->
             InitialHolderViewState.Initials(alias.value.getInitials(), message.getColorKey())
         } ?: InitialHolderViewState.None
-    }
-
-    override val checkRoute: Flow<LoadResponse<Boolean, ResponseError>> = flow {
-        networkQueryLightning.checkRoute(chatId).collect { response ->
-            @Exhaustive
-            when (response) {
-                is LoadResponse.Loading -> {
-                    emit(response)
-                }
-                is Response.Error -> {
-                    emit(response)
-                }
-                is Response.Success -> {
-                    emit(Response.Success(response.value.isRouteAvailable))
-                }
-            }
-        }
     }
 
     override fun readMessages() {
