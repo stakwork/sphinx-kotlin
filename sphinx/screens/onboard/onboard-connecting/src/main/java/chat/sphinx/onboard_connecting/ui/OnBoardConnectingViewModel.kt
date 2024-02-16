@@ -472,22 +472,22 @@ internal class OnBoardConnectingViewModel @Inject constructor(
         )
 
         if (relayTransportToken != null) {
-            networkQueryContact.generateToken(
-                password,
-                nodePubKey,
-                Triple(Pair(authToken, relayTransportToken), null, relayUrl)
-            ).collect { loadResponse ->
-                generateTokenResponse = loadResponse
-            }
+//            networkQueryContact.generateToken(
+//                password,
+//                nodePubKey,
+//                Triple(Pair(authToken, relayTransportToken), null, relayUrl)
+//            ).collect { loadResponse ->
+//                generateTokenResponse = loadResponse
+//            }
         } else {
-            networkQueryContact.generateToken(
-                relayUrl,
-                authToken,
-                password,
-                nodePubKey
-            ).collect { loadResponse ->
-                generateTokenResponse = loadResponse
-            }
+//            networkQueryContact.generateToken(
+//                relayUrl,
+//                authToken,
+//                password,
+//                nodePubKey
+//            ).collect { loadResponse ->
+//                generateTokenResponse = loadResponse
+//            }
         }
 
         @Exhaustive

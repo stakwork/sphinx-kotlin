@@ -83,7 +83,6 @@ interface RepositoryDashboard {
     ): Response<Boolean, ResponseError>
 
     val networkRefreshBalance: MutableStateFlow<Long?>
-    val networkRefreshContacts: Flow<LoadResponse<Boolean, ResponseError>>
     val networkRefreshLatestContacts: Flow<LoadResponse<RestoreProgress, ResponseError>>
     val networkRefreshFeedContent: Flow<LoadResponse<RestoreProgress, ResponseError>>
     val networkRefreshMessages: Flow<LoadResponse<RestoreProgress, ResponseError>>

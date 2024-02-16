@@ -1487,90 +1487,6 @@ abstract class SphinxRepository(
         )
     }
 
-    override val networkRefreshContacts: Flow<LoadResponse<Boolean, ResponseError>> by lazy {
-        flow {
-            networkQueryContact.getContacts().collect { loadResponse ->
-
-                @Exhaustive
-                when (loadResponse) {
-                    is Response.Error -> {
-                        emit(loadResponse)
-                    }
-                    is Response.Success -> {
-
-                        val queries = coreDB.getSphinxDatabaseQueries()
-
-                        try {
-                            var error: Throwable? = null
-                            val handler = CoroutineExceptionHandler { _, throwable ->
-                                error = throwable
-                            }
-
-                            var processChatsResponse: Response<Boolean, ResponseError> =
-                                Response.Success(true)
-
-                            applicationScope.launch(io + handler) {
-
-                                val contactMap: MutableMap<ContactId, ContactDto> =
-                                    LinkedHashMap(loadResponse.value.contacts.size)
-
-                                chatLock.withLock {
-                                    messageLock.withLock {
-                                        contactLock.withLock {
-
-                                            val contactIdsToRemove = queries.contactGetAllIds()
-                                                .executeAsList()
-                                                .toMutableSet()
-
-                                            queries.transaction {
-                                                for (dto in loadResponse.value.contacts) {
-
-                                                    upsertContact(dto, queries)
-                                                    contactMap[ContactId(dto.id)] = dto
-
-                                                    contactIdsToRemove.remove(ContactId(dto.id))
-
-                                                }
-
-                                                for (contactId in contactIdsToRemove) {
-                                                    deleteContactById(contactId, queries)
-                                                }
-
-                                            }
-
-                                        }
-                                    }
-
-                                }
-
-                                processChatsResponse = processChatDtos(
-                                    loadResponse.value.chats,
-                                    contactMap,
-                                )
-                            }.join()
-
-                            error?.let {
-                                throw it
-                            }
-
-                            emit(processChatsResponse)
-
-                        } catch (e: ParseException) {
-                            val msg =
-                                "Failed to convert date/time from Relay while processing Contacts"
-                            LOG.e(TAG, msg, e)
-                            emit(Response.Error(ResponseError(msg, e)))
-                        }
-
-                    }
-                    is LoadResponse.Loading -> {
-                        emit(loadResponse)
-                    }
-                }
-            }
-        }
-    }
-
     var latestContactsPercentage = 1
 
     private val inviteLock = Mutex()
@@ -1596,130 +1512,130 @@ abstract class SphinxRepository(
             var offset = 0
             var limit = 1000
 
-            while (currentCoroutineContext().isActive && offset >= 0 ) {
-                networkQueryContact.getLatestContacts(
-                    lastSeenContactsDateResolved,
-                    limit,
-                    offset,
-                ).collect { loadResponse ->
-
-                    @Exhaustive
-                    when (loadResponse) {
-                        is LoadResponse.Loading -> {}
-
-                        is Response.Error -> {
-                            emit(loadResponse)
-                            offset = -1
-                        }
-
-                        is Response.Success -> {
-
-                            val queries = coreDB.getSphinxDatabaseQueries()
-
-                            try {
-                                var error: Throwable? = null
-                                val handler = CoroutineExceptionHandler { _, throwable ->
-                                    error = throwable
-                                }
-
-                                var processChatsResponse: Response<Boolean, ResponseError> =
-                                    Response.Success(true)
-
-                                applicationScope.launch(io + handler) {
-
-                                    val contactsToInsert =
-                                        loadResponse.value.contacts.filter { dto -> !dto.deletedActual && !dto.fromGroupActual }
-                                    val contactMap: MutableMap<ContactId, ContactDto> =
-                                        LinkedHashMap(contactsToInsert.size)
-
-                                    chatLock.withLock {
-                                        messageLock.withLock {
-                                            contactLock.withLock {
-                                                queries.transaction {
-                                                    for (dto in loadResponse.value.contacts) {
-                                                        if (dto.deletedActual || dto.fromGroupActual) {
-                                                            deleteContactById(
-                                                                ContactId(dto.id),
-                                                                queries
-                                                            )
-                                                        } else {
-                                                            upsertContact(dto, queries)
-                                                            contactMap[ContactId(dto.id)] = dto
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-
-                                    processChatsResponse = processChatDtos(
-                                        loadResponse.value.chats,
-                                        contactMap,
-                                    )
-
-                                    inviteLock.withLock {
-                                        contactLock.withLock {
-                                            queries.transaction {
-                                                for (dto in loadResponse.value.invites) {
-                                                    updatedContactIds.add(ContactId(dto.contact_id))
-                                                    upsertInvite(dto, queries)
-                                                }
-                                            }
-                                        }
-                                    }
-
-                                    subscriptionLock.withLock {
-                                        queries.transaction {
-                                            for (dto in loadResponse.value.subscriptions) {
-                                                upsertSubscription(dto, queries)
-                                            }
-                                        }
-                                    }
-
-                                }.join()
-
-                                error?.let {
-                                    throw it
-                                }
-
-                                emit(
-                                    if (processChatsResponse is Response.Success) {
-                                        Response.Success(
-                                            RestoreProgress(restoring, latestContactsPercentage)
-                                        )
-                                    } else {
-                                        Response.Error(ResponseError("Failed to refresh contacts and chats"))
-                                    }
-                                )
-
-                                if (loadResponse.value.chats.size >= limit || loadResponse.value.contacts.size >= limit) {
-                                    offset += limit
-                                    latestContactsPercentage += 1
-                                } else {
-                                    offset = -1
-
-                                    if (
-                                        loadResponse.value.contacts.size > 1 ||
-                                        loadResponse.value.chats.isNotEmpty()
-                                    ) {
-                                        authenticationStorage.putString(
-                                            REPOSITORY_LAST_SEEN_CONTACTS_DATE,
-                                            now
-                                        )
-                                    }
-                                }
-
-                            } catch (e: ParseException) {
-                                val msg =
-                                    "Failed to convert date/time from Relay while processing Contacts"
-                                LOG.e(TAG, msg, e)
-                                emit(Response.Error(ResponseError(msg, e)))
-                                offset = -1
-                            }
-                        }
-                    }
-                }
-            }
+//            while (currentCoroutineContext().isActive && offset >= 0 ) {
+//                networkQueryContact.getLatestContacts(
+//                    lastSeenContactsDateResolved,
+//                    limit,
+//                    offset,
+//                ).collect { loadResponse ->
+//
+//                    @Exhaustive
+//                    when (loadResponse) {
+//                        is LoadResponse.Loading -> {}
+//
+//                        is Response.Error -> {
+//                            emit(loadResponse)
+//                            offset = -1
+//                        }
+//
+//                        is Response.Success -> {
+//
+//                            val queries = coreDB.getSphinxDatabaseQueries()
+//
+//                            try {
+//                                var error: Throwable? = null
+//                                val handler = CoroutineExceptionHandler { _, throwable ->
+//                                    error = throwable
+//                                }
+//
+//                                var processChatsResponse: Response<Boolean, ResponseError> =
+//                                    Response.Success(true)
+//
+//                                applicationScope.launch(io + handler) {
+//
+//                                    val contactsToInsert =
+//                                        loadResponse.value.contacts.filter { dto -> !dto.deletedActual && !dto.fromGroupActual }
+//                                    val contactMap: MutableMap<ContactId, ContactDto> =
+//                                        LinkedHashMap(contactsToInsert.size)
+//
+//                                    chatLock.withLock {
+//                                        messageLock.withLock {
+//                                            contactLock.withLock {
+//                                                queries.transaction {
+//                                                    for (dto in loadResponse.value.contacts) {
+//                                                        if (dto.deletedActual || dto.fromGroupActual) {
+//                                                            deleteContactById(
+//                                                                ContactId(dto.id),
+//                                                                queries
+//                                                            )
+//                                                        } else {
+//                                                            upsertContact(dto, queries)
+//                                                            contactMap[ContactId(dto.id)] = dto
+//                                                        }
+//                                                    }
+//                                                }
+//                                            }
+//                                        }
+//                                    }
+//
+//                                    processChatsResponse = processChatDtos(
+//                                        loadResponse.value.chats,
+//                                        contactMap,
+//                                    )
+//
+//                                    inviteLock.withLock {
+//                                        contactLock.withLock {
+//                                            queries.transaction {
+//                                                for (dto in loadResponse.value.invites) {
+//                                                    updatedContactIds.add(ContactId(dto.contact_id))
+//                                                    upsertInvite(dto, queries)
+//                                                }
+//                                            }
+//                                        }
+//                                    }
+//
+//                                    subscriptionLock.withLock {
+//                                        queries.transaction {
+//                                            for (dto in loadResponse.value.subscriptions) {
+//                                                upsertSubscription(dto, queries)
+//                                            }
+//                                        }
+//                                    }
+//
+//                                }.join()
+//
+//                                error?.let {
+//                                    throw it
+//                                }
+//
+//                                emit(
+//                                    if (processChatsResponse is Response.Success) {
+//                                        Response.Success(
+//                                            RestoreProgress(restoring, latestContactsPercentage)
+//                                        )
+//                                    } else {
+//                                        Response.Error(ResponseError("Failed to refresh contacts and chats"))
+//                                    }
+//                                )
+//
+//                                if (loadResponse.value.chats.size >= limit || loadResponse.value.contacts.size >= limit) {
+//                                    offset += limit
+//                                    latestContactsPercentage += 1
+//                                } else {
+//                                    offset = -1
+//
+//                                    if (
+//                                        loadResponse.value.contacts.size > 1 ||
+//                                        loadResponse.value.chats.isNotEmpty()
+//                                    ) {
+//                                        authenticationStorage.putString(
+//                                            REPOSITORY_LAST_SEEN_CONTACTS_DATE,
+//                                            now
+//                                        )
+//                                    }
+//                                }
+//
+//                            } catch (e: ParseException) {
+//                                val msg =
+//                                    "Failed to convert date/time from Relay while processing Contacts"
+//                                LOG.e(TAG, msg, e)
+//                                emit(Response.Error(ResponseError(msg, e)))
+//                                offset = -1
+//                            }
+//                        }
+//                    }
+//                }
+//            }
         }
     }
 
@@ -1749,30 +1665,32 @@ abstract class SphinxRepository(
 
         var deleteContactResponse: Response<Any, ResponseError> = Response.Success(Any())
 
-        applicationScope.launch(mainImmediate) {
-            val response = networkQueryContact.deleteContact(contactId)
-            deleteContactResponse = response
-
-            if (response is Response.Success) {
-
-                chatLock.withLock {
-                    messageLock.withLock {
-                        contactLock.withLock {
-
-                            val chat: ChatDbo? =
-                                queries.chatGetConversationForContact(listOf(owner!!.id, contactId))
-                                    .executeAsOneOrNull()
-
-                            queries.transaction {
-                                deleteChatById(chat?.id, queries, latestMessageUpdatedTimeMap)
-                                deleteContactById(contactId, queries)
-                            }
-
-                        }
-                    }
-                }
-            }
-        }.join()
+        // TODO V2 deleteContact
+//        applicationScope.launch(mainImmediate) {
+//
+//            val response = networkQueryContact.deleteContact(contactId)
+//            deleteContactResponse = response
+//
+//            if (response is Response.Success) {
+//
+//                chatLock.withLock {
+//                    messageLock.withLock {
+//                        contactLock.withLock {
+//
+//                            val chat: ChatDbo? =
+//                                queries.chatGetConversationForContact(listOf(owner!!.id, contactId))
+//                                    .executeAsOneOrNull()
+//
+//                            queries.transaction {
+//                                deleteChatById(chat?.id, queries, latestMessageUpdatedTimeMap)
+//                                deleteContactById(contactId, queries)
+//                            }
+//
+//                        }
+//                    }
+//                }
+//            }
+//        }.join()
 
         return deleteContactResponse
     }
@@ -1800,27 +1718,29 @@ abstract class SphinxRepository(
 
         applicationScope.launch(mainImmediate) {
 
-            networkQueryContact.createContact(postContactDto).collect { loadResponse ->
-                @Exhaustive
-                when (loadResponse) {
-                    LoadResponse.Loading -> {
-                    }
-                    is Response.Error -> {
-                        sharedFlow.emit(loadResponse)
-                    }
-                    is Response.Success -> {
-                        contactLock.withLock {
-                            withContext(io) {
-                                queries.transaction {
-                                    upsertContact(loadResponse.value, queries)
-                                }
-                            }
-                        }
+            // TODO V2 createContact
 
-                        sharedFlow.emit(Response.Success(true))
-                    }
-                }
-            }
+//            networkQueryContact.createContact(postContactDto).collect { loadResponse ->
+//                @Exhaustive
+//                when (loadResponse) {
+//                    LoadResponse.Loading -> {
+//                    }
+//                    is Response.Error -> {
+//                        sharedFlow.emit(loadResponse)
+//                    }
+//                    is Response.Success -> {
+//                        contactLock.withLock {
+//                            withContext(io) {
+//                                queries.transaction {
+//                                    upsertContact(loadResponse.value, queries)
+//                                }
+//                            }
+//                        }
+//
+//                        sharedFlow.emit(Response.Success(true))
+//                    }
+//                }
+//            }
 
         }
 
@@ -1902,31 +1822,32 @@ abstract class SphinxRepository(
             accountOwner.collect { owner ->
 
                 if (owner != null) {
-                    networkQueryContact.updateContact(
-                        owner.id,
-                        PutContactDto(
-                            alias = alias,
-                            private_photo = privatePhoto?.isTrue(),
-                            tip_amount = tipAmount?.value
-                        )
-                    ).collect { loadResponse ->
-                        @Exhaustive
-                        when (loadResponse) {
-                            is LoadResponse.Loading -> {
-                            }
-                            is Response.Error -> {
-                                response = loadResponse
-                            }
-                            is Response.Success -> {
-                                contactLock.withLock {
-                                    queries.transaction {
-                                        upsertContact(loadResponse.value, queries)
-                                    }
-                                }
-                                LOG.d(TAG, "Owner has been successfully updated")
-                            }
-                        }
-                    }
+                    // TODO V2 updateContact
+//                    networkQueryContact.updateContact(
+//                        owner.id,
+//                        PutContactDto(
+//                            alias = alias,
+//                            private_photo = privatePhoto?.isTrue(),
+//                            tip_amount = tipAmount?.value
+//                        )
+//                    ).collect { loadResponse ->
+//                        @Exhaustive
+//                        when (loadResponse) {
+//                            is LoadResponse.Loading -> {
+//                            }
+//                            is Response.Error -> {
+//                                response = loadResponse
+//                            }
+//                            is Response.Success -> {
+//                                contactLock.withLock {
+//                                    queries.transaction {
+//                                        upsertContact(loadResponse.value, queries)
+//                                    }
+//                                }
+//                                LOG.d(TAG, "Owner has been successfully updated")
+//                            }
+//                        }
+//                    }
 
                     throw Exception()
                 }
@@ -1948,33 +1869,34 @@ abstract class SphinxRepository(
 
         applicationScope.launch(mainImmediate) {
             try {
-                networkQueryContact.updateContact(
-                    contactId,
-                    PutContactDto(
-                        alias = alias?.value,
-                        route_hint = routeHint?.value
-                    )
-                ).collect { loadResponse ->
-                    @Exhaustive
-                    when (loadResponse) {
-                        is LoadResponse.Loading -> {
-                        }
-                        is Response.Error -> {
-                            response = loadResponse
-                        }
-                        is Response.Success -> {
-                            contactLock.withLock {
-                                queries.transaction {
-                                    updatedContactIds.add(ContactId(loadResponse.value.id))
-                                    upsertContact(loadResponse.value, queries)
-                                }
-                            }
-                            response = loadResponse
-
-                            LOG.d(TAG, "Contact has been successfully updated")
-                        }
-                    }
-                }
+                // TODO V2 updateContact
+//                networkQueryContact.updateContact(
+//                    contactId,
+//                    PutContactDto(
+//                        alias = alias?.value,
+//                        route_hint = routeHint?.value
+//                    )
+//                ).collect { loadResponse ->
+//                    @Exhaustive
+//                    when (loadResponse) {
+//                        is LoadResponse.Loading -> {
+//                        }
+//                        is Response.Error -> {
+//                            response = loadResponse
+//                        }
+//                        is Response.Success -> {
+//                            contactLock.withLock {
+//                                queries.transaction {
+//                                    updatedContactIds.add(ContactId(loadResponse.value.id))
+//                                    upsertContact(loadResponse.value, queries)
+//                                }
+//                            }
+//                            response = loadResponse
+//
+//                            LOG.d(TAG, "Contact has been successfully updated")
+//                        }
+//                    }
+//                }
             } catch (e: Exception) {
                 LOG.e(TAG, "Failed to update contact", e)
 
@@ -1983,27 +1905,6 @@ abstract class SphinxRepository(
         }.join()
 
         return response ?: Response.Error(ResponseError("Failed to update contact"))
-    }
-
-    override suspend fun forceKeyExchange(
-        contactId: ContactId,
-    ) {
-        applicationScope.launch(mainImmediate) {
-            try {
-                networkQueryContact.exchangeKeys(
-                    contactId,
-                ).collect { loadResponse ->
-                    @Exhaustive
-                    when (loadResponse) {
-                        is LoadResponse.Loading -> {}
-                        is Response.Error -> {}
-                        is Response.Success -> {}
-                    }
-                }
-            } catch (e: Exception) {
-                LOG.e(TAG, "Failed to update contact", e)
-            }
-        }
     }
 
     override suspend fun updateOwnerDeviceId(deviceId: DeviceId): Response<Any, ResponseError> {
@@ -2017,30 +1918,31 @@ abstract class SphinxRepository(
 
                     if (owner.deviceId != deviceId) {
 
-                        networkQueryContact.updateContact(
-                            owner.id,
-                            PutContactDto(device_id = deviceId.value)
-                        ).collect { loadResponse ->
-                            @Exhaustive
-                            when (loadResponse) {
-                                is LoadResponse.Loading -> {
-                                }
-                                is Response.Error -> {
-                                    response = loadResponse
-                                    throw Exception()
-                                }
-                                is Response.Success -> {
-                                    contactLock.withLock {
-                                        queries.transaction {
-                                            upsertContact(loadResponse.value, queries)
-                                        }
-                                    }
-                                    LOG.d(TAG, "DeviceId has been successfully updated")
-
-                                    throw Exception()
-                                }
-                            }
-                        }
+                        // TODO V2 updateContact
+//                        networkQueryContact.updateContact(
+//                            owner.id,
+//                            PutContactDto(device_id = deviceId.value)
+//                        ).collect { loadResponse ->
+//                            @Exhaustive
+//                            when (loadResponse) {
+//                                is LoadResponse.Loading -> {
+//                                }
+//                                is Response.Error -> {
+//                                    response = loadResponse
+//                                    throw Exception()
+//                                }
+//                                is Response.Success -> {
+//                                    contactLock.withLock {
+//                                        queries.transaction {
+//                                            upsertContact(loadResponse.value, queries)
+//                                        }
+//                                    }
+//                                    LOG.d(TAG, "DeviceId has been successfully updated")
+//
+//                                    throw Exception()
+//                                }
+//                            }
+//                        }
                     } else {
                         LOG.d(TAG, "DeviceId is up to date")
                         throw Exception()
@@ -2071,33 +1973,34 @@ abstract class SphinxRepository(
         try {
             accountOwner.collect { owner ->
                 if (owner != null) {
-                    networkQueryContact.updateContact(
-                        owner.id,
-                        PutContactDto(
-                            alias = name,
-                            contact_key = publicKey
-                        )
-                    ).collect { loadResponse ->
-                        @Exhaustive
-                        when (loadResponse) {
-                            is LoadResponse.Loading -> {
-                            }
-                            is Response.Error -> {
-                                response = loadResponse
-                                throw Exception()
-                            }
-                            is Response.Success -> {
-                                contactLock.withLock {
-                                    queries.transaction {
-                                        upsertContact(loadResponse.value, queries)
-                                    }
-                                }
-                                LOG.d(TAG, "Owner name and key has been successfully updated")
-
-                                throw Exception()
-                            }
-                        }
-                    }
+                    // TODO V2 updateContact
+//                    networkQueryContact.updateContact(
+//                        owner.id,
+//                        PutContactDto(
+//                            alias = name,
+//                            contact_key = publicKey
+//                        )
+//                    ).collect { loadResponse ->
+//                        @Exhaustive
+//                        when (loadResponse) {
+//                            is LoadResponse.Loading -> {
+//                            }
+//                            is Response.Error -> {
+//                                response = loadResponse
+//                                throw Exception()
+//                            }
+//                            is Response.Success -> {
+//                                contactLock.withLock {
+//                                    queries.transaction {
+//                                        upsertContact(loadResponse.value, queries)
+//                                    }
+//                                }
+//                                LOG.d(TAG, "Owner name and key has been successfully updated")
+//
+//                                throw Exception()
+//                            }
+//                        }
+//                    }
 
                 }
 
@@ -2198,29 +2101,30 @@ abstract class SphinxRepository(
                 }
             }
 
-            networkQueryContact.toggleBlockedContact(
-                contact.id,
-                contact.blocked
-            ).collect { loadResponse ->
-                when (loadResponse) {
-                    is LoadResponse.Loading -> {}
-
-                    is Response.Error -> {
-                        response = loadResponse
-
-                        contactLock.withLock {
-                            withContext(io) {
-                                queries.contactUpdateBlocked(
-                                    currentBlockedValue,
-                                    contact.id
-                                )
-                            }
-                        }
-                    }
-
-                    is Response.Success -> {}
-                }
-            }
+            // TODO V2 toggleBlockedContact
+//            networkQueryContact.toggleBlockedContact(
+//                contact.id,
+//                contact.blocked
+//            ).collect { loadResponse ->
+//                when (loadResponse) {
+//                    is LoadResponse.Loading -> {}
+//
+//                    is Response.Error -> {
+//                        response = loadResponse
+//
+//                        contactLock.withLock {
+//                            withContext(io) {
+//                                queries.contactUpdateBlocked(
+//                                    currentBlockedValue,
+//                                    contact.id
+//                                )
+//                            }
+//                        }
+//                    }
+//
+//                    is Response.Success -> {}
+//                }
+//            }
         }.join()
 
         return response
@@ -2250,23 +2154,25 @@ abstract class SphinxRepository(
                     is Response.Error -> {}
 
                     is Response.Success -> {
-                        networkQueryContact.generateGithubPAT(
-                            GithubPATDto(
-                                encryptionResponse.value.value
-                            )
-                        ).collect { loadResponse ->
-                            @Exhaustive
-                            when (loadResponse) {
-                                is LoadResponse.Loading -> {}
 
-                                is Response.Error -> {
-                                    response = loadResponse
-                                }
-                                is Response.Success -> {
-                                    response = Response.Success(true)
-                                }
-                            }
-                        }
+                        // TODO v2 generateGithubPAT
+//                        networkQueryContact.generateGithubPAT(
+//                            GithubPATDto(
+//                                encryptionResponse.value.value
+//                            )
+//                        ).collect { loadResponse ->
+//                            @Exhaustive
+//                            when (loadResponse) {
+//                                is LoadResponse.Loading -> {}
+//
+//                                is Response.Error -> {
+//                                    response = loadResponse
+//                                }
+//                                is Response.Success -> {
+//                                    response = Response.Success(true)
+//                                }
+//                            }
+//                        }
                     }
                 }
             }.join()
@@ -3543,73 +3449,73 @@ abstract class SphinxRepository(
         val queries = coreDB.getSphinxDatabaseQueries()
 
         networkQueryMessage.sendMessage(postMessageDto).collect { loadResponse ->
-            @Exhaustive
-            when (loadResponse) {
-                is LoadResponse.Loading -> {
-                }
-                is Response.Error -> {
-                    LOG.e(TAG, loadResponse.message, loadResponse.exception)
-
-                    messageLock.withLock {
-                        provisionalMessageId?.let { provId ->
-                            withContext(io) {
-                                queries.messageUpdateStatus(MessageStatus.Failed, provId)
-                            }
-                        }
-                    }
-
-                }
-                is Response.Success -> {
-
-                    loadResponse.value.apply {
-                        if (media != null) {
-                            setMediaKeyDecrypted(media.first.value.joinToString(""))
-                            setMediaLocalFile(media.third.file)
-                        }
-
-                        if (messageContentDecrypted != null) {
-                            setMessageContentDecrypted(messageContentDecrypted.value)
-                        }
-                    }
-
-                    chatLock.withLock {
-                        messageLock.withLock {
-                            contactLock.withLock {
-                                withContext(io) {
-                                    queries.transaction {
-                                        // chat is returned only if this is the
-                                        // first message sent to a new contact
-                                        loadResponse.value.chat?.let { chatDto ->
-                                            upsertChat(
-                                                chatDto,
-                                                moshi,
-                                                chatSeenMap,
-                                                queries,
-                                                loadResponse.value.contact,
-                                                accountOwner.value?.nodePubKey
-                                            )
-                                        }
-
-                                        loadResponse.value.contact?.let { contactDto ->
-                                            upsertContact(contactDto, queries)
-                                        }
-
-                                        upsertMessage(
-                                            loadResponse.value,
-                                            queries,
-                                            media?.third?.fileName
-                                        )
-
-                                        provisionalMessageId?.let { provId ->
-                                            deleteMessageById(provId, queries)
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+//            @Exhaustive
+//            when (loadResponse) {
+//                is LoadResponse.Loading -> {
+//                }
+//                is Response.Error -> {
+//                    LOG.e(TAG, loadResponse.message, loadResponse.exception)
+//
+//                    messageLock.withLock {
+//                        provisionalMessageId?.let { provId ->
+//                            withContext(io) {
+//                                queries.messageUpdateStatus(MessageStatus.Failed, provId)
+//                            }
+//                        }
+//                    }
+//
+//                }
+//                is Response.Success -> {
+//
+//                    loadResponse.value.apply {
+//                        if (media != null) {
+//                            setMediaKeyDecrypted(media.first.value.joinToString(""))
+//                            setMediaLocalFile(media.third.file)
+//                        }
+//
+//                        if (messageContentDecrypted != null) {
+//                            setMessageContentDecrypted(messageContentDecrypted.value)
+//                        }
+//                    }
+//
+//                    chatLock.withLock {
+//                        messageLock.withLock {
+//                            contactLock.withLock {
+//                                withContext(io) {
+//                                    queries.transaction {
+//                                        // chat is returned only if this is the
+//                                        // first message sent to a new contact
+//                                        loadResponse.value.chat?.let { chatDto ->
+//                                            upsertChat(
+//                                                chatDto,
+//                                                moshi,
+//                                                chatSeenMap,
+//                                                queries,
+//                                                loadResponse.value.contact,
+//                                                accountOwner.value?.nodePubKey
+//                                            )
+//                                        }
+//
+//                                        loadResponse.value.contact?.let { contactDto ->
+//                                            upsertContact(contactDto, queries)
+//                                        }
+//
+//                                        upsertMessage(
+//                                            loadResponse.value,
+//                                            queries,
+//                                            media?.third?.fileName
+//                                        )
+//
+//                                        provisionalMessageId?.let { provId ->
+//                                            deleteMessageById(provId, queries)
+//                                        }
+//                                    }
+//                                }
+//                            }
+//                        }
+//                    }
+//                }
+//            }
         }
     }
 
@@ -5987,32 +5893,34 @@ abstract class SphinxRepository(
 
         emit(LoadResponse.Loading)
 
-        applicationScope.launch(mainImmediate) {
-            networkQueryContact.createNewInvite(nickname, welcomeMessage)
-                .collect { loadResponse ->
-                    @Exhaustive
-                    when (loadResponse) {
-                        is LoadResponse.Loading -> {
-                        }
+        // TODO v2 createNewInvite
 
-                        is Response.Error -> {
-                            response = loadResponse
-                        }
-
-                        is Response.Success -> {
-                            contactLock.withLock {
-                                withContext(io) {
-                                    queries.transaction {
-                                        updatedContactIds.add(ContactId(loadResponse.value.id))
-                                        upsertContact(loadResponse.value, queries)
-                                    }
-                                }
-                            }
-                            response = Response.Success(true)
-                        }
-                    }
-                }
-        }.join()
+//        applicationScope.launch(mainImmediate) {
+//            networkQueryContact.createNewInvite(nickname, welcomeMessage)
+//                .collect { loadResponse ->
+//                    @Exhaustive
+//                    when (loadResponse) {
+//                        is LoadResponse.Loading -> {
+//                        }
+//
+//                        is Response.Error -> {
+//                            response = loadResponse
+//                        }
+//
+//                        is Response.Success -> {
+//                            contactLock.withLock {
+//                                withContext(io) {
+//                                    queries.transaction {
+//                                        updatedContactIds.add(ContactId(loadResponse.value.id))
+//                                        upsertContact(loadResponse.value, queries)
+//                                    }
+//                                }
+//                            }
+//                            response = Response.Success(true)
+//                        }
+//                    }
+//                }
+//        }.join()
 
         emit(response ?: Response.Error(ResponseError("")))
     }
@@ -6060,20 +5968,20 @@ abstract class SphinxRepository(
     override suspend fun deleteInvite(invite: Invite): Response<Any, ResponseError> {
         val queries = coreDB.getSphinxDatabaseQueries()
 
-        val response = networkQueryContact.deleteContact(invite.contactId)
+        // TODO V2 deleteContact
 
-        if (response is Response.Success) {
-            contactLock.withLock {
-                withContext(io) {
-                    queries.transaction {
-                        updatedContactIds.add(invite.contactId)
-                        deleteContactById(invite.contactId, queries)
-                    }
-                }
-
-            }
-        }
-        return response
+//        if (response is Response.Success) {
+//            contactLock.withLock {
+//                withContext(io) {
+//                    queries.transaction {
+//                        updatedContactIds.add(invite.contactId)
+//                        deleteContactById(invite.contactId, queries)
+//                    }
+//                }
+//
+//            }
+//        }
+        return Response.Error(ResponseError("Needs to implement"))
     }
 
     override suspend fun authorizeStakwork(

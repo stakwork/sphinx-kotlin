@@ -1103,8 +1103,7 @@ internal class DashboardViewModel @Inject constructor(
             return
         }
 
-        jobNetworkRefresh = viewModelScope.launch(mainImmediate) {
-            repositoryDashboard.networkRefreshBalance.collect { response ->
+//        jobNetworkRefresh = viewModelScope.launch(mainImmediate) {
 //                @Exhaustive
 //                when (response) {
 //                    is LoadResponse.Loading,
@@ -1113,111 +1112,111 @@ internal class DashboardViewModel @Inject constructor(
 //                    }
 //                    is Response.Success -> {}
 //                }
-            }
-
-            if (_networkStateFlow.value.first is Response.Error) {
-                jobNetworkRefresh?.cancel()
-            }
-
-            repositoryDashboard.networkRefreshLatestContacts.collect { response ->
-                @Exhaustive
-                when (response) {
-                    is LoadResponse.Loading -> {}
-                    is Response.Error -> {
-                        _networkStateFlow.value = Pair(response, screenStart)
-                    }
-                    is Response.Success -> {
-                        val restoreProgress = response.value
-
-                        if (restoreProgress.restoring) {
-
-                            _restoreProgressStateFlow.value = RestoreProgressViewState(
-                                response.value.progress,
-                                R.string.dashboard_restore_progress_contacts,
-                                false
-                            )
-                        }
-                    }
-                }
-            }
-
-            repositoryDashboard.networkRefreshFeedContent.collect { response ->
-                @Exhaustive
-                when (response) {
-                    is Response.Success -> {
-                        val restoreProgress = response.value
-
-                        if (restoreProgress.restoring && restoreProgress.progress < 100) {
-                            _restoreProgressStateFlow.value = RestoreProgressViewState(
-                                response.value.progress,
-                                R.string.dashboard_restore_progress_feeds,
-                                false
-                            )
-                        } else {
-                            _restoreProgressStateFlow.value = null
-
-                            _networkStateFlow.value = Pair(Response.Success(true), screenStart)
-                        }
-                    }
-                    is Response.Error -> {
-                        _networkStateFlow.value = Pair(response, screenStart)
-                    }
-                    is LoadResponse.Loading -> {
-                        _networkStateFlow.value = Pair(response, screenStart)
-                    }
-                }
-            }
 
 
-            if (_networkStateFlow.value.first is Response.Error) {
-                jobNetworkRefresh?.cancel()
-            }
-
-            // must occur after contacts have been retrieved such that
-            // an account owner is available, otherwise it just suspends
-            // until it is.
-            if (jobPushNotificationRegistration == null) {
-                jobPushNotificationRegistration = launch(mainImmediate) {
-                    pushNotificationRegistrar
-                    pushNotificationRegistrar.register().let { response ->
-                        @Exhaustive
-                        when (response) {
-                            is Response.Error -> {
-                                // TODO: Handle on the UI
-                            }
-                            is Response.Success -> {}
-                        }
-                    }
-                }
-            }
-
-            repositoryDashboard.networkRefreshMessages.collect { response ->
-                @Exhaustive
-                when (response) {
-                    is Response.Success -> {
-                        val restoreProgress = response.value
-
-                        if (restoreProgress.restoring && restoreProgress.progress < 100) {
-                            _restoreProgressStateFlow.value = RestoreProgressViewState(
-                                response.value.progress,
-                                R.string.dashboard_restore_progress_messages,
-                                true
-                            )
-                        } else {
-                            _restoreProgressStateFlow.value = null
-
-                            _networkStateFlow.value = Pair(Response.Success(true), screenStart)
-                        }
-                    }
-                    is Response.Error -> {
-                        _networkStateFlow.value = Pair(response, screenStart)
-                    }
-                    is LoadResponse.Loading -> {
-                        _networkStateFlow.value = Pair(response, screenStart)
-                    }
-                }
-            }
-        }
+//            if (_networkStateFlow.value.first is Response.Error) {
+//                jobNetworkRefresh?.cancel()
+//            }
+//
+//            repositoryDashboard.networkRefreshLatestContacts.collect { response ->
+//                @Exhaustive
+//                when (response) {
+//                    is LoadResponse.Loading -> {}
+//                    is Response.Error -> {
+//                        _networkStateFlow.value = Pair(response, screenStart)
+//                    }
+//                    is Response.Success -> {
+//                        val restoreProgress = response.value
+//
+//                        if (restoreProgress.restoring) {
+//
+//                            _restoreProgressStateFlow.value = RestoreProgressViewState(
+//                                response.value.progress,
+//                                R.string.dashboard_restore_progress_contacts,
+//                                false
+//                            )
+//                        }
+//                    }
+//                }
+//            }
+//
+//            repositoryDashboard.networkRefreshFeedContent.collect { response ->
+//                @Exhaustive
+//                when (response) {
+//                    is Response.Success -> {
+//                        val restoreProgress = response.value
+//
+//                        if (restoreProgress.restoring && restoreProgress.progress < 100) {
+//                            _restoreProgressStateFlow.value = RestoreProgressViewState(
+//                                response.value.progress,
+//                                R.string.dashboard_restore_progress_feeds,
+//                                false
+//                            )
+//                        } else {
+//                            _restoreProgressStateFlow.value = null
+//
+//                            _networkStateFlow.value = Pair(Response.Success(true), screenStart)
+//                        }
+//                    }
+//                    is Response.Error -> {
+//                        _networkStateFlow.value = Pair(response, screenStart)
+//                    }
+//                    is LoadResponse.Loading -> {
+//                        _networkStateFlow.value = Pair(response, screenStart)
+//                    }
+//                }
+//            }
+//
+//
+//            if (_networkStateFlow.value.first is Response.Error) {
+//                jobNetworkRefresh?.cancel()
+//            }
+//
+//            // must occur after contacts have been retrieved such that
+//            // an account owner is available, otherwise it just suspends
+//            // until it is.
+//            if (jobPushNotificationRegistration == null) {
+//                jobPushNotificationRegistration = launch(mainImmediate) {
+//                    pushNotificationRegistrar
+//                    pushNotificationRegistrar.register().let { response ->
+//                        @Exhaustive
+//                        when (response) {
+//                            is Response.Error -> {
+//                                // TODO: Handle on the UI
+//                            }
+//                            is Response.Success -> {}
+//                        }
+//                    }
+//                }
+//            }
+//
+//            repositoryDashboard.networkRefreshMessages.collect { response ->
+//                @Exhaustive
+//                when (response) {
+//                    is Response.Success -> {
+//                        val restoreProgress = response.value
+//
+//                        if (restoreProgress.restoring && restoreProgress.progress < 100) {
+//                            _restoreProgressStateFlow.value = RestoreProgressViewState(
+//                                response.value.progress,
+//                                R.string.dashboard_restore_progress_messages,
+//                                true
+//                            )
+//                        } else {
+//                            _restoreProgressStateFlow.value = null
+//
+//                            _networkStateFlow.value = Pair(Response.Success(true), screenStart)
+//                        }
+//                    }
+//                    is Response.Error -> {
+//                        _networkStateFlow.value = Pair(response, screenStart)
+//                    }
+//                    is LoadResponse.Loading -> {
+//                        _networkStateFlow.value = Pair(response, screenStart)
+//                    }
+//                }
+//            }
+//        }
     }
 
     fun cancelRestore() {

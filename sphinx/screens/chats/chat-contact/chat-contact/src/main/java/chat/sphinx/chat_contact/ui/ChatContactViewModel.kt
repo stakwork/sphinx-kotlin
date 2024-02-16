@@ -204,16 +204,6 @@ internal class ChatContactViewModel @Inject constructor(
     override val threadSharedFlow: SharedFlow<List<Message>>?
         get() = null
 
-    override fun forceKeyExchange() {
-        viewModelScope.launch(io) {
-            contactSharedFlow.firstOrNull()?.let { nnContact ->
-                if (!nnContact.isEncrypted()) {
-                    contactRepository.forceKeyExchange(nnContact.id)
-                }
-            }
-        }
-    }
-
     override suspend fun shouldStreamSatsFor(podcastClip: PodcastClip, messageUUID: MessageUUID?) {
         TODO("Not yet implemented")
     }

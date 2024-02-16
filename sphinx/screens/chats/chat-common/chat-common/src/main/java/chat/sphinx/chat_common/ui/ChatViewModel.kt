@@ -962,7 +962,6 @@ abstract class ChatViewModel<ARGS : NavArgs>(
         val setupViewStateContainerJob = viewModelScope.launch(mainImmediate) {
             viewStateContainer.viewStateFlow.firstOrNull()
         }
-        forceKeyExchange()
 
         viewModelScope.launch(mainImmediate) {
             delay(500)
@@ -982,8 +981,6 @@ abstract class ChatViewModel<ARGS : NavArgs>(
             }
         }
     }
-
-    protected abstract fun forceKeyExchange()
 
     var messagesLoadJob: Job? = null
     fun screenInit() {

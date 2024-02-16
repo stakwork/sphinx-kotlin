@@ -19,88 +19,9 @@ abstract class NetworkQueryContact {
     ///////////
     /// GET ///
     ///////////
-    abstract fun getContacts(
-        relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>? = null
-    ): Flow<LoadResponse<GetContactsResponse, ResponseError>>
-
-    abstract fun getLatestContacts(
-        date: DateTime?,
-        limit: Int,
-        offset: Int,
-        relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>? = null
-    ): Flow<LoadResponse<GetLatestContactsResponse, ResponseError>>
-
-    abstract fun getTribeMembers(
-        chatId: ChatId,
-        offset: Int = 0,
-        limit: Int = 50,
-        relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>? = null
-    ): Flow<LoadResponse<GetTribeMembersResponse, ResponseError>>
-
-    ///////////
-    /// PUT ///
-    ///////////
-    abstract fun updateContact(
-        contactId: ContactId,
-        putContactDto: PutContactDto,
-        relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>? = null
-    ): Flow<LoadResponse<ContactDto, ResponseError>>
-
-    abstract fun exchangeKeys(
-        contactId: ContactId,
-        relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>? = null
-    ): Flow<LoadResponse<ContactDto, ResponseError>>
-
-    abstract fun toggleBlockedContact(
-        contactId: ContactId,
-        blocked: Blocked,
-        relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>? = null
-    ): Flow<LoadResponse<ContactDto, ResponseError>>
-
-    ////////////
-    /// POST ///
-    ////////////
-    abstract fun generateToken(
-        password: String?,
-        publicKey: String? = null,
-        relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>? = null
-    ): Flow<LoadResponse<GenerateTokenResponse, ResponseError>>
-
-    abstract fun generateToken(
-        relayUrl: RelayUrl,
-        token: AuthorizationToken,
-        password: String?,
-        publicKey: String? = null
-    ): Flow<LoadResponse<GenerateTokenResponse, ResponseError>>
-
-    abstract fun createContact(
-        postContactDto: PostContactDto,
-        relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>? = null
-    ): Flow<LoadResponse<ContactDto, ResponseError>>
-
-    abstract fun generateGithubPAT(
-        patDto: GithubPATDto,
-        relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>? = null
-    ): Flow<LoadResponse<Any, ResponseError>>
-
-    //////////////
-    /// DELETE ///
-    //////////////
-    abstract suspend fun deleteContact(
-        contactId: ContactId,
-        relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>? = null,
-    ): Response<Any, ResponseError>
-
-    abstract fun createNewInvite(
-        nickname: String,
-        welcomeMessage: String,
-        relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>? = null
-    ): Flow<LoadResponse<ContactDto, ResponseError>>
 
     abstract fun hasAdmin(
         url: RelayUrl
     ): Flow<LoadResponse<Any, ResponseError>>
 
-    //    app.post('/contacts/:id/keys', contacts.exchangeKeys)
-    //    app.post('/contacts', contacts.createContact)
 }
