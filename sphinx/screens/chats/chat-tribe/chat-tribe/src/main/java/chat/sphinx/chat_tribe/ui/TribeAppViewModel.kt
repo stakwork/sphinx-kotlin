@@ -167,30 +167,33 @@ internal class TribeAppViewModel @Inject constructor(
                 val challenge = sphinxWebViewDtoStateFlow.value?.challenge
 
                 if (challenge?.isNotEmpty() == false) {
-                    viewModelScope.launch(mainImmediate) {
-                        networkQueryAuthorizeExternal.signBase64(challenge)
-                            .collect { loadResponse ->
-                                @Exhaustive
-                                when (loadResponse) {
-                                    is LoadResponse.Loading -> {}
-                                    is Response.Error -> {
-                                        webViewViewStateContainer.updateViewState(
-                                            WebViewViewState.ChallengeError(
-                                                error = app.getString(R.string.side_effect_challenge_error))
-                                        )
-                                    }
-                                    is Response.Success -> {
-                                        val signature = loadResponse.value.sig
 
-                                        sendAuthorization(
-                                            amount.toLong(),
-                                            pubKey.value,
-                                            signature
-                                        )
-                                    }
-                                }
-                            }
-                    }
+                    // TODO V2 signBase64
+
+//                    viewModelScope.launch(mainImmediate) {
+//                        networkQueryAuthorizeExternal.signBase64(challenge)
+//                            .collect { loadResponse ->
+//                                @Exhaustive
+//                                when (loadResponse) {
+//                                    is LoadResponse.Loading -> {}
+//                                    is Response.Error -> {
+//                                        webViewViewStateContainer.updateViewState(
+//                                            WebViewViewState.ChallengeError(
+//                                                error = app.getString(R.string.side_effect_challenge_error))
+//                                        )
+//                                    }
+//                                    is Response.Success -> {
+//                                        val signature = loadResponse.value.sig
+//
+//                                        sendAuthorization(
+//                                            amount.toLong(),
+//                                            pubKey.value,
+//                                            signature
+//                                        )
+//                                    }
+//                                }
+//                            }
+//                    }
                 } else {
                     sendAuthorization(amount.toLong(), pubKey.value, null)
                 }

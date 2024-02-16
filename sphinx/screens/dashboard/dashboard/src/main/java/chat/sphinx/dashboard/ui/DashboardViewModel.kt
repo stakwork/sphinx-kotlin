@@ -680,29 +680,31 @@ internal class DashboardViewModel @Inject constructor(
                     DeepLinkPopupViewState.ExternalAuthorizePopupProcessing
                 )
 
-                val relayUrl: RelayUrl = relayDataHandler.retrieveRelayUrl() ?: return@launch
-
-                val response = repositoryDashboard.authorizeExternal(
-                    relayUrl.value,
-                    viewState.link.host,
-                    viewState.link.challenge
-                )
-
-                when (response) {
-                    is Response.Error -> {
-                        submitSideEffect(
-                            ChatListSideEffect.Notify(response.cause.message)
-                        )
-                    }
-                    is Response.Success -> {
-                        val i = Intent(Intent.ACTION_VIEW)
-                        i.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                        i.data = Uri.parse(
-                            "https://${viewState.link.host}?challenge=${viewState.link.challenge}"
-                        )
-                        app.startActivity(i)
-                    }
-                }
+                // TODO V2 authorizeExternal
+//
+//                val relayUrl: RelayUrl = relayDataHandler.retrieveRelayUrl() ?: return@launch
+//
+//                val response = repositoryDashboard.authorizeExternal(
+//                    relayUrl.value,
+//                    viewState.link.host,
+//                    viewState.link.challenge
+//                )
+//
+//                when (response) {
+//                    is Response.Error -> {
+//                        submitSideEffect(
+//                            ChatListSideEffect.Notify(response.cause.message)
+//                        )
+//                    }
+//                    is Response.Success -> {
+//                        val i = Intent(Intent.ACTION_VIEW)
+//                        i.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+//                        i.data = Uri.parse(
+//                            "https://${viewState.link.host}?challenge=${viewState.link.challenge}"
+//                        )
+//                        app.startActivity(i)
+//                    }
+//                }
             } else if (viewState is DeepLinkPopupViewState.StakworkAuthorizePopup) {
                 deepLinkPopupViewStateContainer.updateViewState(
                     DeepLinkPopupViewState.ExternalAuthorizePopupProcessing

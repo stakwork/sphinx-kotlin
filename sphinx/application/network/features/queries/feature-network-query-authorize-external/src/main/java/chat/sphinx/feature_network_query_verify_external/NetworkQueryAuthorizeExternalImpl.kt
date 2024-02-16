@@ -25,27 +25,6 @@ class NetworkQueryAuthorizeExternalImpl(
         private const val ENDPOINT_REDEEM_SATS = "https://%s"
     }
 
-    override fun verifyExternal(
-        relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>?
-    ): Flow<LoadResponse<VerifyExternalDto, ResponseError>> =
-        networkRelayCall.relayPost(
-            responseJsonClass = VerifyExternalRelayResponse::class.java,
-            relayEndpoint = ENDPOINT_VERIFY_EXTERNAL,
-            requestBodyJsonClass = Map::class.java,
-            requestBody = mapOf(Pair("", "")),
-            relayData = relayData
-        )
-
-    override fun signBase64(
-        base64: String,
-        relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>?
-    ): Flow<LoadResponse<SignBase64Dto, ResponseError>> =
-        networkRelayCall.relayGet(
-            responseJsonClass = SignBase64RelayResponse::class.java,
-            relayEndpoint = "${String.format(ENDPOINT_SIGN_BASE_64, base64)}",
-            relayData = relayData
-        )
-
     override fun authorizeExternal(
         host: String,
         challenge: String,

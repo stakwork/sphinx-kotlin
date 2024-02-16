@@ -21,9 +21,4 @@ abstract class NetworkQueryFeedSearch {
         feedType: FeedType,
     ): Flow<LoadResponse<List<FeedSearchResultDto>, ResponseError>>
 
-    abstract fun getFeedRecommendations(
-        relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>? = null
-    ): Flow<LoadResponse<List<FeedRecommendationDto>, ResponseError>>
-
-
 }

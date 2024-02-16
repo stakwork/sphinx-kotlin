@@ -5,25 +5,17 @@ import chat.sphinx.concept_coredb.CoreDB
 import chat.sphinx.concept_crypto_rsa.RSA
 import chat.sphinx.concept_meme_input_stream.MemeInputStreamHandler
 import chat.sphinx.concept_meme_server.MemeServerTokenHandler
-import chat.sphinx.concept_network_query_action_track.NetworkQueryActionTrack
-import chat.sphinx.concept_network_query_action_track.model.ActionTrackDto
-import chat.sphinx.concept_network_query_action_track.model.SyncActionsDto
-import chat.sphinx.concept_network_query_action_track.model.toActionTrackMetaDataDtoOrNull
 import chat.sphinx.concept_network_query_chat.NetworkQueryChat
 import chat.sphinx.concept_network_query_chat.model.*
 import chat.sphinx.concept_network_query_contact.NetworkQueryContact
 import chat.sphinx.concept_network_query_contact.model.ContactDto
-import chat.sphinx.concept_network_query_contact.model.GithubPATDto
 import chat.sphinx.concept_network_query_contact.model.PostContactDto
-import chat.sphinx.concept_network_query_contact.model.PutContactDto
 import chat.sphinx.concept_network_query_discover_tribes.NetworkQueryDiscoverTribes
 import chat.sphinx.concept_network_query_feed_search.NetworkQueryFeedSearch
 import chat.sphinx.concept_network_query_feed_search.model.toFeedSearchResult
 import chat.sphinx.concept_network_query_feed_status.NetworkQueryFeedStatus
 import chat.sphinx.concept_network_query_feed_status.model.ContentFeedStatusDto
 import chat.sphinx.concept_network_query_feed_status.model.EpisodeStatusDto
-import chat.sphinx.concept_network_query_feed_status.model.PostFeedStatusDto
-import chat.sphinx.concept_network_query_feed_status.model.PutFeedStatusDto
 import chat.sphinx.concept_network_query_invite.NetworkQueryInvite
 import chat.sphinx.concept_network_query_meme_server.NetworkQueryMemeServer
 import chat.sphinx.concept_network_query_people.NetworkQueryPeople
@@ -165,7 +157,6 @@ abstract class SphinxRepository(
     private val mediaCacheHandler: MediaCacheHandler,
     private val memeInputStreamHandler: MemeInputStreamHandler,
     private val memeServerTokenHandler: MemeServerTokenHandler,
-    private val networkQueryActionTrack: NetworkQueryActionTrack,
     private val networkQueryDiscoverTribes: NetworkQueryDiscoverTribes,
     private val networkQueryMemeServer: NetworkQueryMemeServer,
     private val networkQueryChat: NetworkQueryChat,
@@ -4683,38 +4674,40 @@ abstract class SphinxRepository(
 
         var results: MutableList<FeedRecommendation> = mutableListOf()
 
-        applicationScope.launch(mainImmediate) {
-            networkQueryFeedSearch.getFeedRecommendations().collect { response ->
-                @Exhaustive
-                when (response) {
-                    is LoadResponse.Loading -> {}
-                    is Response.Error -> {}
-                    is Response.Success -> {
-                        response.value.forEachIndexed { index, feedRecommendation ->
-                            results.add(
-                                FeedRecommendation(
-                                    id = feedRecommendation.ref_id,
-                                    pubKey = feedRecommendation.pub_key,
-                                    feedType = feedRecommendation.type,
-                                    description = feedRecommendation.description,
-                                    smallImageUrl = feedRecommendation.s_image_url,
-                                    mediumImageUrl = feedRecommendation.m_image_url,
-                                    largeImageUrl = feedRecommendation.l_image_url,
-                                    link = feedRecommendation.link,
-                                    title = feedRecommendation.episode_title,
-                                    showTitle = feedRecommendation.show_title,
-                                    date = feedRecommendation.date,
-                                    timestamp = feedRecommendation.timestamp,
-                                    topics = feedRecommendation.topics,
-                                    guests = feedRecommendation.guests,
-                                    position = index + 1
-                                )
-                            )
-                        }
-                    }
-                }
-            }
-        }.join()
+        // TODO V2 getFeedRecommendations
+
+//        applicationScope.launch(mainImmediate) {
+//            networkQueryFeedSearch.getFeedRecommendations().collect { response ->
+//                @Exhaustive
+//                when (response) {
+//                    is LoadResponse.Loading -> {}
+//                    is Response.Error -> {}
+//                    is Response.Success -> {
+//                        response.value.forEachIndexed { index, feedRecommendation ->
+//                            results.add(
+//                                FeedRecommendation(
+//                                    id = feedRecommendation.ref_id,
+//                                    pubKey = feedRecommendation.pub_key,
+//                                    feedType = feedRecommendation.type,
+//                                    description = feedRecommendation.description,
+//                                    smallImageUrl = feedRecommendation.s_image_url,
+//                                    mediumImageUrl = feedRecommendation.m_image_url,
+//                                    largeImageUrl = feedRecommendation.l_image_url,
+//                                    link = feedRecommendation.link,
+//                                    title = feedRecommendation.episode_title,
+//                                    showTitle = feedRecommendation.show_title,
+//                                    date = feedRecommendation.date,
+//                                    timestamp = feedRecommendation.timestamp,
+//                                    topics = feedRecommendation.topics,
+//                                    guests = feedRecommendation.guests,
+//                                    position = index + 1
+//                                )
+//                            )
+//                        }
+//                    }
+//                }
+//            }
+//        }.join()
 
         recommendationsPodcast.value = mapRecommendationsPodcast(results)
 
@@ -5751,75 +5744,6 @@ abstract class SphinxRepository(
 
                     is Response.Success -> {
                         response = Response.Success(true)
-                    }
-                }
-            }
-        }.join()
-
-        return response ?: Response.Error(ResponseError("Returned before completing"))
-    }
-
-    override suspend fun authorizeExternal(
-        relayUrl: String,
-        host: String,
-        challenge: String
-    ): Response<Boolean, ResponseError> {
-        var response: Response<Boolean, ResponseError>? = null
-
-        applicationScope.launch(mainImmediate) {
-            networkQueryAuthorizeExternal.verifyExternal().collect { loadResponse ->
-                when (loadResponse) {
-                    is LoadResponse.Loading -> {
-                    }
-
-                    is Response.Error -> {
-                        response = loadResponse
-                    }
-
-                    is Response.Success -> {
-
-                        val token = loadResponse.value.token
-                        val info = loadResponse.value.info
-
-                        networkQueryAuthorizeExternal.signBase64(
-                            AUTHORIZE_EXTERNAL_BASE_64
-                        ).collect { sigResponse ->
-
-                            when (sigResponse) {
-                                is LoadResponse.Loading -> {
-                                }
-
-                                is Response.Error -> {
-                                    response = sigResponse
-                                }
-
-                                is Response.Success -> {
-
-                                    info.verificationSignature = sigResponse.value.sig
-                                    info.url = relayUrl
-
-                                    networkQueryAuthorizeExternal.authorizeExternal(
-                                        host,
-                                        challenge,
-                                        token,
-                                        info,
-                                    ).collect { authorizeResponse ->
-                                        when (authorizeResponse) {
-                                            is LoadResponse.Loading -> {
-                                            }
-
-                                            is Response.Error -> {
-                                                response = authorizeResponse
-                                            }
-
-                                            is Response.Success -> {
-                                                response = Response.Success(true)
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
                     }
                 }
             }
@@ -7294,41 +7218,43 @@ abstract class SphinxRepository(
         if (!recommendationsToggleStateFlow.value) {
             return
         }
-        applicationScope.launch(io) {
-            val queries = coreDB.getSphinxDatabaseQueries()
-
-            val actionsDboList = queries.actionTrackGetAllNotUploaded()
-                .executeAsList()
-
-            for (chunk in actionsDboList.chunked(50)) {
-                val actionsIds = chunk.map { it.id }
-
-                val actionTrackDTOs: MutableList<ActionTrackDto> = mutableListOf()
-
-                chunk.forEach {
-                    it.meta_data.value.toActionTrackMetaDataDtoOrNull(moshi)?.let { metaDataDto ->
-                        actionTrackDTOs.add(
-                            ActionTrackDto(
-                                it.type.value,
-                                metaDataDto
-                            )
-                        )
-                    }
-                }
-
-                networkQueryActionTrack.sendActionsTracked(
-                    SyncActionsDto(actionTrackDTOs)
-                ).collect { response ->
-                    when (response) {
-                        is Response.Success -> {
-                            queries.actionTrackUpdateUploadedItems(actionsIds)
-                        }
-                        is Response.Error -> {}
-                        else -> {}
-                    }
-                }
-            }
-        }
+//        applicationScope.launch(io) {
+//            val queries = coreDB.getSphinxDatabaseQueries()
+//
+//            val actionsDboList = queries.actionTrackGetAllNotUploaded()
+//                .executeAsList()
+//
+//            for (chunk in actionsDboList.chunked(50)) {
+//                val actionsIds = chunk.map { it.id }
+//
+//                val actionTrackDTOs: MutableList<ActionTrackDto> = mutableListOf()
+//
+//                chunk.forEach {
+//                    it.meta_data.value.toActionTrackMetaDataDtoOrNull(moshi)?.let { metaDataDto ->
+//                        actionTrackDTOs.add(
+//                            ActionTrackDto(
+//                                it.type.value,
+//                                metaDataDto
+//                            )
+//                        )
+//                    }
+//                }
+//
+//                // TODO V2 sendActionsTracked
+//
+//                networkQueryActionTrack.sendActionsTracked(
+//                    SyncActionsDto(actionTrackDTOs)
+//                ).collect { response ->
+//                    when (response) {
+//                        is Response.Success -> {
+//                            queries.actionTrackUpdateUploadedItems(actionsIds)
+//                        }
+//                        is Response.Error -> {}
+//                        else -> {}
+//                    }
+//                }
+//            }
+//        }
     }
 
     override fun updateContentFeedStatus(

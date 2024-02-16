@@ -45,15 +45,6 @@ abstract class NetworkQueryPeople {
         person: MessagePerson,
     ): Flow<LoadResponse<List<BadgeDto>, ResponseError>>
 
-    abstract fun getBadgeTemplates(
-        relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>? = null
-    ): Flow<LoadResponse<List<BadgeTemplateDto>, ResponseError>>
-
-    abstract fun getUserExistingBadges(
-        chatId: ChatId,
-        relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>? = null
-    ): Flow<LoadResponse<List<BadgeDto>, ResponseError>>
-
     abstract fun changeBadgeState(
         badge: BadgeStateDto,
         state: Boolean,

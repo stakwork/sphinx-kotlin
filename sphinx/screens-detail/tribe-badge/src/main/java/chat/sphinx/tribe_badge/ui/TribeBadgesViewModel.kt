@@ -41,91 +41,94 @@ internal class TribeBadgesViewModel @Inject constructor(
     val chatId = args.argChatId
 
     fun getBadgesTemplates() {
-        viewModelScope.launch(mainImmediate) {
-            networkQueryPeople.getBadgeTemplates().collect { loadResponse ->
-                when (loadResponse) {
-                    is LoadResponse.Loading -> {
-                        updateViewState(TribeBadgesViewState.Loading)
-                    }
-                    is Response.Error -> {
-                        updateViewState(TribeBadgesViewState.Error)
-                    }
-                    is Response.Success -> {
 
-                        val badgeTemplatesList: List<BadgeTemplate> = loadResponse.value.map {
-                            BadgeTemplate(
-                                name = it.name ?: "",
-                                rewardType = it.rewardType ?: 1,
-                                rewardRequirement = it.rewardRequirement ?: 0,
-                                imageUrl = it.icon ?: "",
-                                chatId = chatId.toInt()
-                            )
-                        }
+        // TODO V2 getBadgeTemplates
 
-                        networkQueryPeople.getUserExistingBadges(
-                            ChatId(chatId)
-                        ).collect { existingBadges ->
-                            when (existingBadges) {
-                                is Response.Error -> {
-                                    updateViewState(
-                                        TribeBadgesViewState.TribeBadgesList(
-                                            badgeTemplatesList.map {
-                                                TribeBadgeHolder(
-                                                    holderType = TribeBadgeHolderType.TEMPLATE,
-                                                    badgeTemplate = it
-                                                )
-                                            }
-                                        )
-                                    )
-                                }
-                                is LoadResponse.Loading -> {}
-                                is Response.Success -> {
-                                    val existingBadgesList: List<Badge> = existingBadges.value.map {
-                                        Badge(
-                                            name = it.name ?: "",
-                                            description = it.memo ?: "",
-                                            rewardType = it.reward_type ?: 0,
-                                            rewardRequirement = it.reward_requirement,
-                                            amountCreated = it.amount_created,
-                                            amountIssued = it.amount_issued,
-                                            isActive = it.active,
-                                            imageUrl = it.icon ?: "",
-                                            badgeId = it.badge_id,
-                                            chatId = chatId.toInt(),
-                                            claimAmount = it.claim_amount
-                                        )
-                                    }.sortedWith(
-                                        compareByDescending<Badge> { it.isActive }
-                                            .thenBy { it.name }
-                                    )
-
-                                    val tribeBadgesHolderList: List<TribeBadgeHolder> = badgeTemplatesList.map { badgeTemplate ->
-                                        TribeBadgeHolder(
-                                            TribeBadgeHolderType.TEMPLATE,
-                                            badgeTemplate = badgeTemplate
-                                        )
-                                    }.plus(
-                                        TribeBadgeHolder(
-                                            holderType = TribeBadgeHolderType.HEADER,
-                                            headerTitle = "Manage Label",
-                                        )
-                                    ).plus(
-                                        existingBadgesList.map { badge ->
-                                            TribeBadgeHolder(
-                                                holderType = TribeBadgeHolderType.BADGE,
-                                                badge = badge
-                                            )
-                                        }
-                                    )
-
-                                    updateViewState(TribeBadgesViewState.TribeBadgesList(tribeBadgesHolderList))
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
+//        viewModelScope.launch(mainImmediate) {
+//            networkQueryPeople.getBadgeTemplates().collect { loadResponse ->
+//                when (loadResponse) {
+//                    is LoadResponse.Loading -> {
+//                        updateViewState(TribeBadgesViewState.Loading)
+//                    }
+//                    is Response.Error -> {
+//                        updateViewState(TribeBadgesViewState.Error)
+//                    }
+//                    is Response.Success -> {
+//
+//                        val badgeTemplatesList: List<BadgeTemplate> = loadResponse.value.map {
+//                            BadgeTemplate(
+//                                name = it.name ?: "",
+//                                rewardType = it.rewardType ?: 1,
+//                                rewardRequirement = it.rewardRequirement ?: 0,
+//                                imageUrl = it.icon ?: "",
+//                                chatId = chatId.toInt()
+//                            )
+//                        }
+//
+//                        networkQueryPeople.getUserExistingBadges(
+//                            ChatId(chatId)
+//                        ).collect { existingBadges ->
+//                            when (existingBadges) {
+//                                is Response.Error -> {
+//                                    updateViewState(
+//                                        TribeBadgesViewState.TribeBadgesList(
+//                                            badgeTemplatesList.map {
+//                                                TribeBadgeHolder(
+//                                                    holderType = TribeBadgeHolderType.TEMPLATE,
+//                                                    badgeTemplate = it
+//                                                )
+//                                            }
+//                                        )
+//                                    )
+//                                }
+//                                is LoadResponse.Loading -> {}
+//                                is Response.Success -> {
+//                                    val existingBadgesList: List<Badge> = existingBadges.value.map {
+//                                        Badge(
+//                                            name = it.name ?: "",
+//                                            description = it.memo ?: "",
+//                                            rewardType = it.reward_type ?: 0,
+//                                            rewardRequirement = it.reward_requirement,
+//                                            amountCreated = it.amount_created,
+//                                            amountIssued = it.amount_issued,
+//                                            isActive = it.active,
+//                                            imageUrl = it.icon ?: "",
+//                                            badgeId = it.badge_id,
+//                                            chatId = chatId.toInt(),
+//                                            claimAmount = it.claim_amount
+//                                        )
+//                                    }.sortedWith(
+//                                        compareByDescending<Badge> { it.isActive }
+//                                            .thenBy { it.name }
+//                                    )
+//
+//                                    val tribeBadgesHolderList: List<TribeBadgeHolder> = badgeTemplatesList.map { badgeTemplate ->
+//                                        TribeBadgeHolder(
+//                                            TribeBadgeHolderType.TEMPLATE,
+//                                            badgeTemplate = badgeTemplate
+//                                        )
+//                                    }.plus(
+//                                        TribeBadgeHolder(
+//                                            holderType = TribeBadgeHolderType.HEADER,
+//                                            headerTitle = "Manage Label",
+//                                        )
+//                                    ).plus(
+//                                        existingBadgesList.map { badge ->
+//                                            TribeBadgeHolder(
+//                                                holderType = TribeBadgeHolderType.BADGE,
+//                                                badge = badge
+//                                            )
+//                                        }
+//                                    )
+//
+//                                    updateViewState(TribeBadgesViewState.TribeBadgesList(tribeBadgesHolderList))
+//                                }
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+//        }
     }
 
     fun goToCreateBadgeScreen(

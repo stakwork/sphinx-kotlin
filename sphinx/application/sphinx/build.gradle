@@ -95,7 +95,6 @@ dependencies {
     implementation project(path: ':sphinx:application:network:features:feature-link-preview')
     implementation project(path: ':sphinx:application:network:features:feature-meme-input-stream')
     implementation project(path: ':sphinx:application:network:features:feature-network-client')
-    implementation project(path: ':sphinx:application:network:features:queries:feature-network-query-action-track')
     implementation project(path: ':sphinx:application:network:features:queries:feature-network-query-chat')
     implementation project(path: ':sphinx:application:network:features:queries:feature-network-query-contact')
     implementation project(path: ':sphinx:application:network:features:queries:feature-network-query-invite')

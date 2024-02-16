@@ -41,15 +41,5 @@ class NetworkQueryFeedSearchImpl(
             responseJsonClass = FeedSearchResultDto::class.java,
         )
 
-    override fun getFeedRecommendations(
-        relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>?
-    ): Flow<LoadResponse<List<FeedRecommendationDto>, ResponseError>> =
-        networkRelayCall.relayGetList(
-            responseJsonClass = GetFeedRecommendationsRelayResponse::class.java,
-            relayEndpoint = ENDPOINT_FEED_RECOMMENDATIONS,
-            relayData = relayData,
-            useExtendedNetworkCallClient = true
-        )
-
 
 }

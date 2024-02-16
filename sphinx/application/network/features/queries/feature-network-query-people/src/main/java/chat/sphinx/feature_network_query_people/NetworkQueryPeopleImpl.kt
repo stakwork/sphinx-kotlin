@@ -118,25 +118,6 @@ class NetworkQueryPeopleImpl(
             responseJsonClass = BadgeDto::class.java,
         )
 
-    override fun getBadgeTemplates(
-        relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>?
-    ): Flow<LoadResponse<List<BadgeTemplateDto>, ResponseError>> =
-        networkRelayCall.relayGetList(
-            responseJsonClass = GetBadgeTemplatesRelayResponse::class.java,
-            relayEndpoint = ENDPOINT_TRIBE_BADGES_TEMPLATES,
-            useExtendedNetworkCallClient = true
-        )
-
-    override fun getUserExistingBadges(
-        chatId: ChatId,
-        relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>?
-    ): Flow<LoadResponse<List<BadgeDto>, ResponseError>> =
-        networkRelayCall.relayGetList(
-            responseJsonClass = GetExistingBadgesRelayResponse::class.java,
-            relayEndpoint = String.format(ENDPOINT_TRIBE_EXISTING_BADGES, chatId.value),
-            useExtendedNetworkCallClient = true
-        )
-
     override fun changeBadgeState(
         badge: BadgeStateDto,
         state: Boolean,

@@ -11,15 +11,6 @@ import kotlinx.coroutines.flow.Flow
 
 abstract class NetworkQueryAuthorizeExternal {
 
-    abstract fun verifyExternal(
-        relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>? = null,
-    ): Flow<LoadResponse<VerifyExternalDto, ResponseError>>
-
-    abstract fun signBase64(
-        base64: String,
-        relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>? = null,
-    ): Flow<LoadResponse<SignBase64Dto, ResponseError>>
-
     abstract fun authorizeExternal(
         host: String,
         challenge: String,

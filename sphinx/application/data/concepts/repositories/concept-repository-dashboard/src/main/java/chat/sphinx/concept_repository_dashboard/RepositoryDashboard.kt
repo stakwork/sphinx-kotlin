@@ -53,12 +53,6 @@ interface RepositoryDashboard {
 
     fun getRecommendedFeeds(): Flow<List<FeedRecommendation>>
 
-    suspend fun authorizeExternal(
-        relayUrl: String,
-        host: String,
-        challenge: String
-    ): Response<Boolean, ResponseError>
-
     suspend fun authorizeStakwork(
         host: String,
         id: String,
