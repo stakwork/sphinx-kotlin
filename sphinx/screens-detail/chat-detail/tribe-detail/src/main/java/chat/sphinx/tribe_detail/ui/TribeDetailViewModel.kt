@@ -179,50 +179,52 @@ internal class TribeDetailViewModel @Inject constructor(
                     UpdatingImageViewState.UpdatingImage
                 )
 
-                viewModelScope.launch(mainImmediate) {
-                    try {
-                        val attachmentInfo = PublicAttachmentInfo(
-                            stream = streamProvider,
-                            mediaType = mediaType,
-                            fileName = fileName,
-                            contentLength = contentLength
-                        )
+                // TODO V2 implement updateChatProfileInfo
 
-                        val response = chatRepository.updateChatProfileInfo(
-                            chatId = ChatId(args.argChatId),
-                            alias = null,
-                            attachmentInfo,
-                        )
-
-                        @Exhaustive
-                        when (response) {
-                            is Response.Error -> {
-                                LOG.e(TAG, "Error update chat Profile Picture: ", response.cause.exception)
-
-                                updatingImageViewStateContainer.updateViewState(
-                                    UpdatingImageViewState.UpdatingImageFailed
-                                )
-
-                                submitSideEffect(TribeDetailSideEffect.FailedToUpdateProfilePic)
-                            }
-                            is Response.Success -> {
-                                updatingImageViewStateContainer.updateViewState(
-                                    UpdatingImageViewState.UpdatingImageSucceed
-                                )
-                            }
-                        }
-                    } catch (e: Exception) {
-                        updatingImageViewStateContainer.updateViewState(
-                            UpdatingImageViewState.UpdatingImageFailed
-                        )
-
-                        submitSideEffect(TribeDetailSideEffect.FailedToUpdateProfilePic)
-                    }
-
-                    try {
-                        file?.delete()
-                    } catch (e: Exception) {}
-                }
+//                viewModelScope.launch(mainImmediate) {
+//                    try {
+//                        val attachmentInfo = PublicAttachmentInfo(
+//                            stream = streamProvider,
+//                            mediaType = mediaType,
+//                            fileName = fileName,
+//                            contentLength = contentLength
+//                        )
+//
+//                        val response = chatRepository.updateChatProfileInfo(
+//                            chatId = ChatId(args.argChatId),
+//                            alias = null,
+//                            attachmentInfo,
+//                        )
+//
+//                        @Exhaustive
+//                        when (response) {
+//                            is Response.Error -> {
+//                                LOG.e(TAG, "Error update chat Profile Picture: ", response.cause.exception)
+//
+//                                updatingImageViewStateContainer.updateViewState(
+//                                    UpdatingImageViewState.UpdatingImageFailed
+//                                )
+//
+//                                submitSideEffect(TribeDetailSideEffect.FailedToUpdateProfilePic)
+//                            }
+//                            is Response.Success -> {
+//                                updatingImageViewStateContainer.updateViewState(
+//                                    UpdatingImageViewState.UpdatingImageSucceed
+//                                )
+//                            }
+//                        }
+//                    } catch (e: Exception) {
+//                        updatingImageViewStateContainer.updateViewState(
+//                            UpdatingImageViewState.UpdatingImageFailed
+//                        )
+//
+//                        submitSideEffect(TribeDetailSideEffect.FailedToUpdateProfilePic)
+//                    }
+//
+//                    try {
+//                        file?.delete()
+//                    } catch (e: Exception) {}
+//                }
             }
         )
     }
@@ -233,19 +235,7 @@ internal class TribeDetailViewModel @Inject constructor(
     }
 
     fun updateProfileAlias(alias: String?) {
-        viewModelScope.launch(mainImmediate) {
-            val response = chatRepository.updateChatProfileInfo(
-                ChatId(args.argChatId),
-                alias?.let { ChatAlias(it) }
-            )
-
-            when (response) {
-                is Response.Success -> {}
-                is Response.Error -> {
-                    submitSideEffect(TribeDetailSideEffect.FailedToUpdateProfileAlias)
-                }
-            }
-        }
+        // TODO V2 implement change alias
     }
 
     /***

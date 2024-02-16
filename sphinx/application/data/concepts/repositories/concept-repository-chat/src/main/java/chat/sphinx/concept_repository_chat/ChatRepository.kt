@@ -43,8 +43,6 @@ interface ChatRepository {
      * is empty.
      * */
     fun getUnseenMessagesByChatId(chatId: ChatId): Flow<Long?>
-    
-    val networkRefreshChats: Flow<LoadResponse<Boolean, ResponseError>>
 
     suspend fun getAllChatsByIds(chatIds: List<ChatId>): List<Chat>
 
@@ -85,12 +83,4 @@ interface ChatRepository {
     ): Response<Any, ResponseError>
 
     suspend fun addTribeMember(addMember: AddMember): Response<Any, ResponseError>
-
-    suspend fun updateChatProfileInfo(
-        chatId: ChatId,
-        alias: ChatAlias? = null,
-        profilePic: PublicAttachmentInfo? = null,
-    ): Response<ChatDto, ResponseError>
-
-    suspend fun kickMemberFromTribe(chatId: ChatId, contactPubKey: LightningNodePubKey): Response<Any, ResponseError>
 }
