@@ -14,35 +14,9 @@ import kotlinx.coroutines.flow.Flow
 
 abstract class NetworkQueryFeedStatus {
 
-    ////////////
-    /// POST ///
-    ////////////
-    abstract fun saveFeedStatuses(
-        feedStatusesDto: PostFeedStatusDto,
-        relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>? = null
-    ): Flow<LoadResponse<Any?, ResponseError>>
-
-    ////////////
-    /// PUT ///
-    ////////////
-    abstract fun saveFeedStatus(
-        feedId: FeedId,
-        feedStatusDto: PutFeedStatusDto,
-        relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>? = null
-    ): Flow<LoadResponse<Any?, ResponseError>>
-
     ///////////
     /// GET ///
     ///////////
-    abstract fun getFeedStatuses(
-        relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>? = null
-    ): Flow<LoadResponse<List<ContentFeedStatusDto>, ResponseError>>
-
-    abstract fun getByFeedId(
-        feedId: FeedId,
-        relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>? = null
-    ): Flow<LoadResponse<ContentFeedStatusDto, ResponseError>>
-
     abstract suspend fun checkYoutubeVideoAvailable(
         videoId: String,
     ): String?

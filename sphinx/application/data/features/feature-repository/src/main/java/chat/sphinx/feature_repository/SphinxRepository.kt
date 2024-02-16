@@ -5425,16 +5425,18 @@ abstract class SphinxRepository(
 
             var contentFeedStatuses: List<ContentFeedStatusDto> = listOf()
 
-            networkQueryFeedStatus.getFeedStatuses().collect { loadResponse ->
-                @Exhaustive
-                when (loadResponse) {
-                    is LoadResponse.Loading -> {}
-                    is Response.Error -> {}
-                    is Response.Success -> {
-                        contentFeedStatuses = loadResponse.value
-                    }
-                }
-            }
+            // TODO V2 getFeedStatuses
+
+//            networkQueryFeedStatus.getFeedStatuses().collect { loadResponse ->
+//                @Exhaustive
+//                when (loadResponse) {
+//                    is LoadResponse.Loading -> {}
+//                    is Response.Error -> {}
+//                    is Response.Success -> {
+//                        contentFeedStatuses = loadResponse.value
+//                    }
+//                }
+//            }
             if (contentFeedStatuses.isNotEmpty()) {
 
                 for ((index, contentFeedStatus) in contentFeedStatuses.withIndex()) {
@@ -7892,16 +7894,7 @@ abstract class SphinxRepository(
                 return@launch
             }
 
-            networkQueryFeedStatus.saveFeedStatuses(
-                PostFeedStatusDto(contentFeedStatuses)
-            ).collect { loadResponse ->
-                @Exhaustive
-                when (loadResponse) {
-                    is LoadResponse.Loading -> {}
-                    is Response.Error -> {}
-                    is Response.Success -> {}
-                }
-            }
+            // TODO V2 saveFeedStatuses
         }
     }
 
@@ -7915,10 +7908,7 @@ abstract class SphinxRepository(
             }
 
             contentFeedStatus?.let { feedStatus ->
-                networkQueryFeedStatus.saveFeedStatus(
-                    feedId,
-                    PutFeedStatusDto(feedStatus)
-                ).collect { }
+                // TODO V2 saveFeedStatus
             }
         }
     }
@@ -7967,23 +7957,25 @@ abstract class SphinxRepository(
         playingEpisodeId: String?,
         durationRetrieverHandler: ((url: String) -> Long)?
     ) {
-        applicationScope.launch(io) {
-            networkQueryFeedStatus.getFeedStatuses().collect { loadResponse ->
-                @Exhaustive
-                when (loadResponse) {
-                    is LoadResponse.Loading -> {}
-                    is Response.Error -> {}
-                    is Response.Success -> {
-                        restoreContentFeedStatusesFrom(
-                            loadResponse.value,
-                            playingPodcastId,
-                            playingEpisodeId,
-                            durationRetrieverHandler
-                        )
-                    }
-                }
-            }
-        }
+
+        // TODO V2 getFeedStatuses
+//        applicationScope.launch(io) {
+//            networkQueryFeedStatus.getFeedStatuses().collect { loadResponse ->
+//                @Exhaustive
+//                when (loadResponse) {
+//                    is LoadResponse.Loading -> {}
+//                    is Response.Error -> {}
+//                    is Response.Success -> {
+//                        restoreContentFeedStatusesFrom(
+//                            loadResponse.value,
+//                            playingPodcastId,
+//                            playingEpisodeId,
+//                            durationRetrieverHandler
+//                        )
+//                    }
+//                }
+//            }
+//        }
     }
 
     override fun restoreContentFeedStatusByFeedId(
@@ -7991,23 +7983,24 @@ abstract class SphinxRepository(
         playingPodcastId: String?,
         playingEpisodeId: String?
     ) {
-       applicationScope.launch(io) {
-           networkQueryFeedStatus.getByFeedId(feedId).collect { loadResponse ->
-               @Exhaustive
-               when (loadResponse) {
-                   is LoadResponse.Loading -> {}
-                   is Response.Error -> {}
-                   is Response.Success -> {
-                       restoreContentFeedStatusFrom(
-                           loadResponse.value,
-                           null,
-                           playingPodcastId,
-                           playingEpisodeId
-                       )
-                   }
-               }
-           }
-       }
+        // TODO V2 getByFeedId
+//       applicationScope.launch(io) {
+//           networkQueryFeedStatus.getByFeedId(feedId).collect { loadResponse ->
+//               @Exhaustive
+//               when (loadResponse) {
+//                   is LoadResponse.Loading -> {}
+//                   is Response.Error -> {}
+//                   is Response.Success -> {
+//                       restoreContentFeedStatusFrom(
+//                           loadResponse.value,
+//                           null,
+//                           playingPodcastId,
+//                           playingEpisodeId
+//                       )
+//                   }
+//               }
+//           }
+//       }
     }
 
     private suspend fun restoreContentFeedStatusesFrom(

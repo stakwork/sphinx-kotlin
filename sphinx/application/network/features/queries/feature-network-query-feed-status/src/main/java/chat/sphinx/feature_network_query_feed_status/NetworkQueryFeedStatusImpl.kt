@@ -30,58 +30,8 @@ class NetworkQueryFeedStatusImpl(
 ) : NetworkQueryFeedStatus() {
 
     companion object {
-        private const val ENDPOINT_CONTENT_FEED_STATUS = "/content_feed_status"
-        private const val ENDPOINT_CONTENT_FEED_STATUS_FEED_ID = "/content_feed_status/%s"
-
         private const val ENDPOINT_YOUTUBE_VIDEO = "https://stakwork-uploads.s3.amazonaws.com/uploads/customers/6040/media_to_local/00002e82-6911-4aea-a214-62c9d88740e0/%s.mp4"
-
     }
-
-    override fun saveFeedStatuses(
-        feedStatusesDto: PostFeedStatusDto,
-        relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>?
-    ): Flow<LoadResponse<Any?, ResponseError>> =
-        networkRelayCall.relayPost(
-            responseJsonClass = ContentFeedStatusRelayPostResponse::class.java,
-            relayEndpoint = ENDPOINT_CONTENT_FEED_STATUS,
-            requestBodyJsonClass = PostFeedStatusDto::class.java,
-            requestBody = feedStatusesDto,
-            relayData = relayData
-        )
-
-    override fun saveFeedStatus(
-        feedId: FeedId,
-        feedStatusDto: PutFeedStatusDto,
-        relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>?
-    ): Flow<LoadResponse<Any?, ResponseError>> =
-        networkRelayCall.relayPut(
-            responseJsonClass = ContentFeedStatusRelayPostResponse::class.java,
-            relayEndpoint = String.format(ENDPOINT_CONTENT_FEED_STATUS_FEED_ID, feedId.value),
-            requestBodyJsonClass = PutFeedStatusDto::class.java,
-            requestBody = feedStatusDto,
-            relayData = relayData
-        )
-
-    override fun getFeedStatuses(
-        relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>?
-    ): Flow<LoadResponse<List<ContentFeedStatusDto>, ResponseError>> =
-        networkRelayCall.relayGetList(
-            responseJsonClass = ContentFeedStatusRelayGetListResponse::class.java,
-            relayEndpoint = ENDPOINT_CONTENT_FEED_STATUS,
-            relayData = relayData,
-            useExtendedNetworkCallClient = true
-        )
-
-    override fun getByFeedId(
-        feedId: FeedId,
-        relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>?
-    ): Flow<LoadResponse<ContentFeedStatusDto, ResponseError>> =
-        networkRelayCall.relayGet(
-            responseJsonClass = ContentFeedStatusRelayGetResponse::class.java,
-            relayEndpoint = String.format(ENDPOINT_CONTENT_FEED_STATUS_FEED_ID, feedId.value),
-            relayData = relayData,
-            useExtendedNetworkCallClient = true
-        )
 
     override suspend fun checkYoutubeVideoAvailable(
         videoId: String,
