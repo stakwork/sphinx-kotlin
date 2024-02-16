@@ -12,8 +12,6 @@ import chat.sphinx.concept_network_query_contact.NetworkQueryContact
 import chat.sphinx.concept_network_query_contact.model.GenerateTokenResponse
 import chat.sphinx.concept_network_query_invite.NetworkQueryInvite
 import chat.sphinx.concept_network_query_invite.model.RedeemInviteDto
-import chat.sphinx.concept_network_query_relay_keys.NetworkQueryRelayKeys
-import chat.sphinx.concept_network_query_relay_keys.model.PostHMacKeyDto
 import chat.sphinx.concept_network_tor.TorManager
 import chat.sphinx.concept_relay.RelayDataHandler
 import chat.sphinx.concept_repository_connect_manager.ConnectManagerRepository
@@ -37,8 +35,6 @@ import chat.sphinx.wrapper_invite.toValidInviteStringOrNull
 import chat.sphinx.wrapper_relay.*
 import chat.sphinx.wrapper_rsa.RsaPrivateKey
 import chat.sphinx.wrapper_rsa.RsaPublicKey
-import com.ensarsarajcic.kotlinx.serialization.msgpack.MsgPack
-import com.ensarsarajcic.kotlinx.serialization.msgpack.MsgPackDynamicSerializer
 import com.squareup.moshi.Moshi
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
@@ -52,7 +48,6 @@ import io.matthewnelson.crypto_common.clazzes.*
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import org.json.JSONException
 import org.json.JSONObject
 import javax.annotation.meta.Exhaustive
 import javax.inject.Inject
@@ -124,7 +119,6 @@ internal class OnBoardConnectingViewModel @Inject constructor(
     private val torManager: TorManager,
     private val networkQueryContact: NetworkQueryContact,
     private val networkQueryInvite: NetworkQueryInvite,
-    private val networkQueryRelayKeys: NetworkQueryRelayKeys,
     private val onBoardStepHandler: OnBoardStepHandler,
     private val connectManagerRepository: ConnectManagerRepository,
     val moshi: Moshi,
@@ -174,27 +168,8 @@ internal class OnBoardConnectingViewModel @Inject constructor(
                     OnBoardConnectingViewState.Transition_Set2_DecryptKeys(restoreCode)
                 )
             } ?: args.connectionCode?.let { connectionCode ->
-                getTransportKey(
-                    ip = connectionCode.ip,
-                    nodePubKey = null,
-                    password = connectionCode.password,
-                    redeemInviteDto = null
-                )
             } ?: args.swarmConnect?.let { swarmCode ->
-                getTransportKey(
-                    ip = swarmCode.ip,
-                    nodePubKey = swarmCode.pubKey,
-                    null,
-                    null,
-                )
             } ?: args.swarmClaim?.let { claimCode ->
-                getTransportKey(
-                    ip = claimCode.ip,
-                    null,
-                    null,
-                    null,
-                    token = claimCode.token.toAuthorizationToken()
-                )
             } ?: args.inviteCode?.let { inviteCode ->
                 redeemInvite(inviteCode)
             } ?: run {
@@ -250,17 +225,17 @@ internal class OnBoardConnectingViewModel @Inject constructor(
 
                 var transportKey: RsaPublicKey? = null
 
-                networkQueryRelayKeys.getRelayTransportKey(relayUrl).collect { loadResponse ->
-                    @Exhaustive
-                    when (loadResponse) {
-                        is LoadResponse.Loading -> {}
-                        is Response.Error -> {}
-
-                        is Response.Success -> {
-                            transportKey = RsaPublicKey(loadResponse.value.transport_key.toCharArray())
-                        }
-                    }
-                }
+//                networkQueryRelayKeys.getRelayTransportKey(relayUrl).collect { loadResponse ->
+//                    @Exhaustive
+//                    when (loadResponse) {
+//                        is LoadResponse.Loading -> {}
+//                        is Response.Error -> {}
+//
+//                        is Response.Success -> {
+//                            transportKey = RsaPublicKey(loadResponse.value.transport_key.toCharArray())
+//                        }
+//                    }
+//                }
 
                 var ownerPrivateKey = RsaPrivateKey(
                     Password(decryptedCode.privateKey.value.copyOf()).value
@@ -329,12 +304,7 @@ internal class OnBoardConnectingViewModel @Inject constructor(
                     val inviteResponse = loadResponse.value.response
 
                     inviteResponse?.invite?.let { invite ->
-                        getTransportKey(
-                            ip = RelayUrl(inviteResponse.ip),
-                            nodePubKey = inviteResponse.pubkey,
-                            password = null,
-                            redeemInviteDto = invite,
-                        )
+                        // Get transport key
                     }
                 }
             }
@@ -353,17 +323,17 @@ internal class OnBoardConnectingViewModel @Inject constructor(
 
         var transportKey: RsaPublicKey? = null
 
-        networkQueryRelayKeys.getRelayTransportKey(relayUrl).collect { loadResponse ->
-            @Exhaustive
-            when (loadResponse) {
-                is LoadResponse.Loading -> {}
-                is Response.Error -> {}
-
-                is Response.Success -> {
-                    transportKey = RsaPublicKey(loadResponse.value.transport_key.toCharArray())
-                }
-            }
-        }
+//        networkQueryRelayKeys.getRelayTransportKey(relayUrl).collect { loadResponse ->
+//            @Exhaustive
+//            when (loadResponse) {
+//                is LoadResponse.Loading -> {}
+//                is Response.Error -> {}
+//
+//                is Response.Success -> {
+//                    transportKey = RsaPublicKey(loadResponse.value.transport_key.toCharArray())
+//                }
+//            }
+//        }
 
         if (token != null) {
             continueWithToken(
@@ -541,13 +511,6 @@ internal class OnBoardConnectingViewModel @Inject constructor(
         ownerPrivateKey: RsaPrivateKey,
         transportKey: RsaPublicKey?
     ) {
-        viewModelScope.launch(mainImmediate) {
-            getOrCreateHMacKey(
-                ownerPrivateKey,
-                transportKey
-            )
-        }.join()
-
         navigator.toOnBoardConnectedScreen()
     }
 
@@ -560,38 +523,38 @@ internal class OnBoardConnectingViewModel @Inject constructor(
             return
         }
 
-        networkQueryRelayKeys.getRelayHMacKey().collect { loadResponse ->
-            @Exhaustive
-            when (loadResponse) {
-                is LoadResponse.Loading -> {}
-                is Response.Error -> {
-                    createHMacKey(
-                        transportKey = transportKey
-                    )?.let { relayHMacKey ->
-                        relayDataHandler.persistRelayHMacKey(relayHMacKey)
-                    }
-                }
-                is Response.Success -> {
-                    val response = rsa.decrypt(
-                        rsaPrivateKey = ownerPrivateKey,
-                        text = EncryptedString(loadResponse.value.encrypted_key),
-                        dispatcher = default
-                    )
-
-                    when (response) {
-                        is Response.Error -> {}
-                        is Response.Error -> {}
-                        is Response.Success -> {
-                            relayDataHandler.persistRelayHMacKey(
-                                RelayHMacKey(
-                                    response.value.toUnencryptedString(trim = false).value
-                                )
-                            )
-                        }
-                    }
-                }
-            }
-        }
+//        networkQueryRelayKeys.getRelayHMacKey().collect { loadResponse ->
+//            @Exhaustive
+//            when (loadResponse) {
+//                is LoadResponse.Loading -> {}
+//                is Response.Error -> {
+//                    createHMacKey(
+//                        transportKey = transportKey
+//                    )?.let { relayHMacKey ->
+//                        relayDataHandler.persistRelayHMacKey(relayHMacKey)
+//                    }
+//                }
+//                is Response.Success -> {
+//                    val response = rsa.decrypt(
+//                        rsaPrivateKey = ownerPrivateKey,
+//                        text = EncryptedString(loadResponse.value.encrypted_key),
+//                        dispatcher = default
+//                    )
+//
+//                    when (response) {
+//                        is Response.Error -> {}
+//                        is Response.Error -> {}
+//                        is Response.Success -> {
+//                            relayDataHandler.persistRelayHMacKey(
+//                                RelayHMacKey(
+//                                    response.value.toUnencryptedString(trim = false).value
+//                                )
+//                            )
+//                        }
+//                    }
+//                }
+//            }
+//        }
     }
 
     private suspend fun createHMacKey(
@@ -621,20 +584,20 @@ internal class OnBoardConnectingViewModel @Inject constructor(
                 is Response.Error -> {
                 }
                 is Response.Success -> {
-                    networkQueryRelayKeys.addRelayHMacKey(
-                        PostHMacKeyDto(encryptionResponse.value.value),
-                        relayData
-                    ).collect { loadResponse ->
-                        @Exhaustive
-                        when (loadResponse) {
-                            is LoadResponse.Loading -> {
-                            }
-                            is Response.Error -> {}
-                            is Response.Success -> {
-                                hMacKey = RelayHMacKey(hMacKeyString)
-                            }
-                        }
-                    }
+//                    networkQueryRelayKeys.addRelayHMacKey(
+//                        PostHMacKeyDto(encryptionResponse.value.value),
+//                        relayData
+//                    ).collect { loadResponse ->
+//                        @Exhaustive
+//                        when (loadResponse) {
+//                            is LoadResponse.Loading -> {
+//                            }
+//                            is Response.Error -> {}
+//                            is Response.Success -> {
+//                                hMacKey = RelayHMacKey(hMacKeyString)
+//                            }
+//                        }
+//                    }
                 }
             }
 
@@ -657,13 +620,7 @@ internal class OnBoardConnectingViewModel @Inject constructor(
         viewModelScope.launch(mainImmediate) {
             signerManager.getPublicKeyAndRelayUrl()?.let { publicKeyAndRelayUrl ->
                 publicKeyAndRelayUrl.second.toRelayUrl()?.let {
-                    getTransportKey(
-                        ip = it,
-                        publicKeyAndRelayUrl.first,
-                        null,
-                        null,
-                        token = null
-                    )
+                    // Get transport key
                 } ?: run {
                     checkAdminFailed()
                 }

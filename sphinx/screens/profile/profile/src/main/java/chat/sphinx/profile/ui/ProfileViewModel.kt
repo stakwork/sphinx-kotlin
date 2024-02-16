@@ -10,7 +10,6 @@ import app.cash.exhaustive.Exhaustive
 import chat.sphinx.camera_view_model_coordinator.request.CameraRequest
 import chat.sphinx.camera_view_model_coordinator.response.CameraResponse
 import chat.sphinx.concept_background_login.BackgroundLoginHandler
-import chat.sphinx.concept_network_query_relay_keys.NetworkQueryRelayKeys
 import chat.sphinx.concept_network_tor.TorManager
 import chat.sphinx.concept_relay.RelayDataHandler
 import chat.sphinx.concept_repository_contact.ContactRepository
@@ -99,7 +98,6 @@ internal class ProfileViewModel @Inject constructor(
     private val lightningRepository: LightningRepository,
     private val feedRepository: FeedRepository,
     private val repositoryMedia: RepositoryMedia,
-    private val networkQueryRelayKeys: NetworkQueryRelayKeys,
     private val relayDataHandler: RelayDataHandler,
     private val torManager: TorManager,
     private val LOG: SphinxLogger,
@@ -314,100 +312,39 @@ internal class ProfileViewModel @Inject constructor(
     }
 
     suspend fun updateRelayUrl(url: String?)  {
-        if (url == null || url.isEmpty() || url == _relayUrlStateFlow.value) {
-            return
-        }
-
-        _relayUrlStateFlow.value = url
-
-        // Block updating to an onion address if Tor is not already
-        // required (which means it is not running, and thus would leak
-        // the onion address to the device DNS provider
-        if (url.isOnionAddress && torManager.isTorRequired() != true) {
-            _relayUrlStateFlow.value = relayDataHandler.retrieveRelayUrl()?.value
-            submitSideEffect(ProfileSideEffect.RelayUrlUpdateToTorNotSupported)
-            return
-        }
-
-        url.toRelayUrl()?.let { relayUrl ->
-            relayDataHandler.retrieveAuthorizationToken()?.let { authorizationToken ->
-                if (relayUrl.value.startsWith("http://") && !relayUrl.isOnionAddress) {
-                    submitSideEffect(
-                        ProfileSideEffect.RelayUrlHttpConfirmation(
-                            relayUrl = relayUrl,
-                            callback = { url ->
-                                testAndPersistRelayUrl(url, authorizationToken)
-                            }
-                        )
-                    )
-                } else {
-                    testAndPersistRelayUrl(relayUrl, authorizationToken)
-                }
-                return
-            }
-        }
-        testAndPersistRelayUrl(null, null)
-    }
-
-    private fun testAndPersistRelayUrl(relayUrl: RelayUrl?, authorizationToken: AuthorizationToken?) {
-        viewModelScope.launch(mainImmediate) {
-            var success = false
-
-            if (relayUrl != null && authorizationToken != null) {
-                _relayUrlStateFlow.value = relayUrl.value
-
-                submitSideEffect(ProfileSideEffect.UpdatingRelayUrl)
-
-                var transportKey: RsaPublicKey? = null
-
-                networkQueryRelayKeys.getRelayTransportKey(relayUrl).collect { loadResponse ->
-                    @javax.annotation.meta.Exhaustive
-                    when (loadResponse) {
-                        is LoadResponse.Loading -> {}
-                        is Response.Error -> {}
-
-                        is Response.Success -> {
-                            transportKey = RsaPublicKey(loadResponse.value.transport_key.toCharArray())
-                        }
-                    }
-                }
-
-                val transportToken = relayDataHandler.retrieveRelayTransportToken(
-                    authorizationToken,
-                    transportKey
-                )
-
-                lightningRepository.getAccountBalanceAll(
-                    Triple(Pair(authorizationToken, transportToken), null, relayUrl)
-                ).collect { loadResponse ->
-                    @Exhaustive
-                    when (loadResponse) {
-                        is LoadResponse.Loading -> {
-                        }
-
-                        is Response.Error -> {
-                            success = false
-                        }
-                        is Response.Success -> {
-                            transportKey?.let { key ->
-                                relayDataHandler.persistRelayTransportKey(key)
-                            }
-                            success = relayDataHandler.persistRelayUrl(relayUrl)
-                        }
-                    }
-                }
-            }
-
-            _relayUrlStateFlow.value = relayDataHandler.retrieveRelayUrl()?.value
-
-            val sideEffect = if (success) {
-                ProfileSideEffect.RelayUrlUpdatedSuccessfully
-            } else {
-                ProfileSideEffect.FailedToUpdateRelayUrl
-            }
-
-            submitSideEffect(sideEffect)
-        }
+//        if (url == null || url.isEmpty() || url == _relayUrlStateFlow.value) {
+//            return
+//        }
+//
+//        _relayUrlStateFlow.value = url
+//
+//        // Block updating to an onion address if Tor is not already
+//        // required (which means it is not running, and thus would leak
+//        // the onion address to the device DNS provider
+//        if (url.isOnionAddress && torManager.isTorRequired() != true) {
+//            _relayUrlStateFlow.value = relayDataHandler.retrieveRelayUrl()?.value
+//            submitSideEffect(ProfileSideEffect.RelayUrlUpdateToTorNotSupported)
+//            return
+//        }
+//
+//        url.toRelayUrl()?.let { relayUrl ->
+//            relayDataHandler.retrieveAuthorizationToken()?.let { authorizationToken ->
+//                if (relayUrl.value.startsWith("http://") && !relayUrl.isOnionAddress) {
+//                    submitSideEffect(
+//                        ProfileSideEffect.RelayUrlHttpConfirmation(
+//                            relayUrl = relayUrl,
+//                            callback = { url ->
+//                                testAndPersistRelayUrl(url, authorizationToken)
+//                            }
+//                        )
+//                    )
+//                } else {
+//                    testAndPersistRelayUrl(relayUrl, authorizationToken)
+//                }
+//                return
+//            }
+//        }
+//        testAndPersistRelayUrl(null, null)
     }
 
     fun persistPINTimeout() {

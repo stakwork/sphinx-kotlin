@@ -157,7 +157,6 @@ internal class DashboardViewModel @Inject constructor(
 
         syncFeedRecommendationsState()
 
-        getRelayKeys()
         checkAppVersion()
         handleDeepLink(args.argDeepLink)
 
@@ -190,11 +189,6 @@ internal class DashboardViewModel @Inject constructor(
 
     private fun getUserState(): String? {
         return userStateSharedPreferences.getString(ONION_STATE_KEY, null)
-    }
-
-    private fun getRelayKeys() {
-        repositoryDashboard.getAndSaveTransportKey()
-        repositoryDashboard.getOrCreateHMacKey(forceGet = true)
     }
 
     fun handleDeepLink(deepLink: String?) {

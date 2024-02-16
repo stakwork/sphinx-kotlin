@@ -105,7 +105,6 @@ dependencies {
     implementation project(path: ':sphinx:application:network:features:queries:feature-network-query-feed-search')
     implementation project(path: ':sphinx:application:network:features:queries:feature-network-query-people')
     implementation project(path: ':sphinx:application:network:features:queries:feature-network-query-redeem-badge-token')
-    implementation project(path: ':sphinx:application:network:features:queries:feature-network-query-transport-key')
     implementation project(path: ':sphinx:application:network:features:queries:feature-network-query-crypter')
     implementation project(path: ':sphinx:application:network:features:queries:feature-network-query-discover-tribes')
     implementation project(path: ':sphinx:application:network:features:queries:feature-network-query-feed-status')

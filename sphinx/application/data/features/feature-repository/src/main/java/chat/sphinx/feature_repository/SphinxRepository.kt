@@ -31,8 +31,6 @@ import chat.sphinx.concept_network_query_people.model.DeletePeopleProfileDto
 import chat.sphinx.concept_network_query_people.model.PeopleProfileDto
 import chat.sphinx.concept_network_query_redeem_badge_token.NetworkQueryRedeemBadgeToken
 import chat.sphinx.concept_network_query_redeem_badge_token.model.RedeemBadgeTokenDto
-import chat.sphinx.concept_network_query_relay_keys.NetworkQueryRelayKeys
-import chat.sphinx.concept_network_query_relay_keys.model.PostHMacKeyDto
 import chat.sphinx.concept_network_query_verify_external.NetworkQueryAuthorizeExternal
 import chat.sphinx.concept_network_query_verify_external.model.RedeemSatsDto
 import chat.sphinx.concept_relay.RelayDataHandler
@@ -177,7 +175,6 @@ abstract class SphinxRepository(
     private val networkQueryPeople: NetworkQueryPeople,
     private val networkQueryRedeemBadgeToken: NetworkQueryRedeemBadgeToken,
     private val networkQueryFeedSearch: NetworkQueryFeedSearch,
-    private val networkQueryRelayKeys: NetworkQueryRelayKeys,
     private val networkQueryFeedStatus: NetworkQueryFeedStatus,
     private val connectManager: ConnectManager,
     private val walletDataHandler: WalletDataHandler,
@@ -6979,127 +6976,12 @@ abstract class SphinxRepository(
         return response ?: Response.Error(ResponseError(("Failed to load payment templates")))
     }
 
-    override fun saveTransportKey() {
-        applicationScope.launch(io) {
-            relayDataHandler.retrieveRelayUrl()?.let { relayUrl ->
-                networkQueryRelayKeys.getRelayTransportKey(
-                    relayUrl
-                ).collect { loadResponse ->
-                    @Exhaustive
-                    when (loadResponse) {
-                        is LoadResponse.Loading -> {}
-                        is Response.Error -> {}
-                        is Response.Success -> {
-                            relayDataHandler.persistRelayTransportKey(
-                                RsaPublicKey(
-                                    loadResponse.value.transport_key.toCharArray()
-                                )
-                            )
-                        }
-                    }
-                }
-            }
-        }
-    }
-
     override fun getAndSaveTransportKey() {
         applicationScope.launch(io) {
             relayDataHandler.retrieveRelayTransportKey()?.let {
                 return@launch
             }
-            saveTransportKey()
         }
-    }
-
-    @OptIn(RawPasswordAccess::class, UnencryptedDataAccess::class)
-    override fun getOrCreateHMacKey(forceGet: Boolean) {
-        applicationScope.launch(io) {
-            if (!forceGet) {
-                relayDataHandler.retrieveRelayHMacKey()?.let {
-                    return@launch
-                }
-            }
-            networkQueryRelayKeys.getRelayHMacKey().collect { loadResponse ->
-                @Exhaustive
-                when (loadResponse) {
-                    is LoadResponse.Loading -> {}
-                    is Response.Error -> {
-                        when (val hMacKeyResponse = createHMacKey()) {
-                            is Response.Error -> {}
-                            is Response.Success -> {
-                                relayDataHandler.persistRelayHMacKey(
-                                    hMacKeyResponse.value
-                                )
-                            }
-                        }
-                    }
-                    is Response.Success -> {
-                        val privateKey: CharArray = authenticationCoreManager.getEncryptionKey()
-                            ?.privateKey
-                            ?.value
-                            ?: return@collect
-
-                        val response = rsa.decrypt(
-                            rsaPrivateKey = RsaPrivateKey(privateKey),
-                            text = EncryptedString(loadResponse.value.encrypted_key),
-                            dispatcher = default
-                        )
-
-                        when (response) {
-                            is Response.Error -> {}
-                            is Response.Success -> {
-                                relayDataHandler.persistRelayHMacKey(
-                                    RelayHMacKey(
-                                        response.value.toUnencryptedString(trim = false).value
-                                    )
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    private suspend fun createHMacKey(): Response<RelayHMacKey, ResponseError> {
-        var response: Response<RelayHMacKey, ResponseError> = Response.Error(
-            ResponseError("HMac Key creation failed")
-        )
-
-        @OptIn(RawPasswordAccess::class)
-        val hMacKeyString = PasswordGenerator(passwordLength = 20).password.value.joinToString("")
-
-        relayDataHandler.retrieveRelayTransportKey()?.let { key ->
-
-            val encryptionResponse = rsa.encrypt(
-                key,
-                UnencryptedString(hMacKeyString),
-                formatOutput = false,
-                dispatcher = default,
-            )
-
-            when (encryptionResponse) {
-                is Response.Error -> {}
-                is Response.Success -> {
-                    networkQueryRelayKeys.addRelayHMacKey(
-                        PostHMacKeyDto(encryptionResponse.value.value)
-                    ).collect { loadResponse ->
-                        @Exhaustive
-                        when (loadResponse) {
-                            is LoadResponse.Loading -> {}
-                            is Response.Error -> {}
-                            is Response.Success -> {
-                                response = Response.Success(
-                                    RelayHMacKey(hMacKeyString)
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        return response
     }
 
     private val actionTrackDboMessagePresenterMapper: ActionTrackDboMessagePresenterMapper by lazy {

@@ -103,8 +103,6 @@ include ':sphinx:application:network:concepts:queries:concept-network-query-feed
 include ':sphinx:application:network:features:queries:feature-network-query-feed-search'
 include ':sphinx:application:network:concepts:queries:concept-network-query-crypter'
 include ':sphinx:application:network:features:queries:feature-network-query-crypter'
-include ':sphinx:application:network:concepts:queries:concept-network-query-relay-keys'
-include ':sphinx:application:network:features:queries:feature-network-query-transport-key'
 include ':sphinx:application:network:concepts:queries:concept-network-query-action-track'
 include ':sphinx:application:network:features:queries:feature-network-query-action-track'
 include ':sphinx:application:network:concepts:queries:concept-network-query-discover-tribes'
