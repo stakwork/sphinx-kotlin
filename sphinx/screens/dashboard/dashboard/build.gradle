@@ -58,7 +58,6 @@ dependencies {
     implementation project(path: ':sphinx:application:data:concepts:concept-wallet')
     implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-dashboard-android')
     implementation project(path: ':sphinx:activity:concepts:concept-user-colors-helper')
-    implementation project(path: ':sphinx:application:network:concepts:queries:concept-network-query-version')
     implementation project(path: ':sphinx:application:network:concepts:queries:concept-network-query-authorize-external')
     implementation project(path: ':sphinx:application:network:concepts:queries:concept-network-query-people')
     implementation project(path: ':sphinx:application:network:concepts:queries:concept-network-query-redeem-badge-token')
