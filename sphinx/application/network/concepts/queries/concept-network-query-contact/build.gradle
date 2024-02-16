@@ -6,7 +6,6 @@ plugins {
 
 dependencies {
     api project(path: ':sphinx:application:network:concepts:queries:concept-network-query-invite')
-    api project(path: ':sphinx:application:network:concepts:queries:concept-network-query-subscription')
     implementation deps.kotlin.coroutinesCore
 
     // needed to override moshi's use of 1.4.31

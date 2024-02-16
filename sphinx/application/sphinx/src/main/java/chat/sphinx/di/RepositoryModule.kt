@@ -15,7 +15,6 @@ import chat.sphinx.concept_network_query_feed_status.NetworkQueryFeedStatus
 import chat.sphinx.concept_network_query_people.NetworkQueryPeople
 import chat.sphinx.concept_network_query_redeem_badge_token.NetworkQueryRedeemBadgeToken
 import chat.sphinx.concept_network_query_relay_keys.NetworkQueryRelayKeys
-import chat.sphinx.concept_network_query_subscription.NetworkQuerySubscription
 import chat.sphinx.concept_network_query_verify_external.NetworkQueryAuthorizeExternal
 import chat.sphinx.concept_relay.RelayDataHandler
 import chat.sphinx.concept_repository_actions.ActionsRepository
@@ -146,7 +145,6 @@ object RepositoryModule {
         networkQueryAuthorizeExternal: NetworkQueryAuthorizeExternal,
         networkQueryPeople: NetworkQueryPeople,
         networkQueryRedeemBadgeToken: NetworkQueryRedeemBadgeToken,
-        networkQuerySubscription: NetworkQuerySubscription,
         networkQueryFeedSearch: NetworkQueryFeedSearch,
         networkQueryRelayKeys: NetworkQueryRelayKeys,
         networkQueryFeedStatus: NetworkQueryFeedStatus,
@@ -178,7 +176,6 @@ object RepositoryModule {
             networkQueryAuthorizeExternal,
             networkQueryPeople,
             networkQueryRedeemBadgeToken,
-            networkQuerySubscription,
             networkQueryFeedSearch,
             networkQueryRelayKeys,
             networkQueryFeedStatus,

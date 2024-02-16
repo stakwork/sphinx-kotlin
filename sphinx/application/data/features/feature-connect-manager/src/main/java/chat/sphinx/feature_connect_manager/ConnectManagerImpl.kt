@@ -8,7 +8,6 @@ import chat.sphinx.example.concept_connect_manager.model.OwnerInfo
 import chat.sphinx.wrapper_contact.NewContact
 import chat.sphinx.wrapper_lightning.WalletMnemonic
 import chat.sphinx.wrapper_lightning.toWalletMnemonic
-import chat.sphinx.wrapper_message.MessageType
 import com.ensarsarajcic.kotlinx.serialization.msgpack.MsgPack
 import com.ensarsarajcic.kotlinx.serialization.msgpack.MsgPackDynamicSerializer
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
@@ -421,7 +420,7 @@ class ConnectManagerImpl(
                     ownerSeed!!,
                     now,
                     contactPubKey,
-                    MessageType.DELETE.toUByte(),
+                    17.toUByte(), // Fix this hardcoded value
                     sphinxMessage,
                     getCurrentUserState(),
                     ownerInfoStateFlow.value?.alias ?: "",

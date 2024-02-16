@@ -6,7 +6,6 @@ import chat.sphinx.concept_network_query_chat.model.TribeDto
 import chat.sphinx.concept_network_query_chat.model.feed.FeedDto
 import chat.sphinx.concept_network_query_contact.model.ContactDto
 import chat.sphinx.concept_network_query_invite.model.InviteDto
-import chat.sphinx.concept_network_query_subscription.model.SubscriptionDto
 import chat.sphinx.conceptcoredb.SphinxDatabaseQueries
 import chat.sphinx.wrapper_chat.*
 import chat.sphinx.wrapper_common.*
@@ -23,9 +22,6 @@ import chat.sphinx.wrapper_common.invite.toInviteStatus
 import chat.sphinx.wrapper_common.lightning.*
 import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.message.toMessageUUID
-import chat.sphinx.wrapper_common.subscription.Cron
-import chat.sphinx.wrapper_common.subscription.EndNumber
-import chat.sphinx.wrapper_common.subscription.SubscriptionCount
 import chat.sphinx.wrapper_common.subscription.SubscriptionId
 import chat.sphinx.wrapper_contact.*
 import chat.sphinx.wrapper_feed.*
@@ -648,24 +644,6 @@ inline fun TransactionCallbacks.deleteMessageById(
 ) {
     queries.messageDeleteById(messageId)
     queries.messageMediaDeleteById(messageId)
-}
-
-@Suppress("NOTHING_TO_INLINE")
-inline fun TransactionCallbacks.upsertSubscription(subscriptionDto: SubscriptionDto, queries: SphinxDatabaseQueries) {
-    queries.subscriptionUpsert(
-        id = SubscriptionId(subscriptionDto.id),
-        amount = Sat(subscriptionDto.amount),
-        contact_id = ContactId(subscriptionDto.contact_id),
-        chat_id = ChatId(subscriptionDto.chat_id),
-        count = SubscriptionCount(subscriptionDto.count.toLong()),
-        cron = Cron(subscriptionDto.cron),
-        end_date = subscriptionDto.end_date?.toDateTime(),
-        end_number = subscriptionDto.end_number?.let { EndNumber(it.toLong()) },
-        created_at = subscriptionDto.created_at.toDateTime(),
-        updated_at = subscriptionDto.updated_at.toDateTime(),
-        ended = subscriptionDto.endedActual,
-        paused = subscriptionDto.pausedActual,
-    )
 }
 
 @Suppress("NOTHING_TO_INLINE")
