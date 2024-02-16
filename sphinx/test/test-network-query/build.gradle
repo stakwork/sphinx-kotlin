@@ -16,7 +16,6 @@ dependencies {
     api project(path: ':sphinx:application:network:features:queries:feature-network-query-invite')
     api project(path: ':sphinx:application:network:features:queries:feature-network-query-authorize-external')
     api project(path: ':sphinx:application:network:features:queries:feature-network-query-people')
-    api project(path: ':sphinx:application:network:features:queries:feature-network-query-redeem-badge-token')
     api project(path: ':sphinx:application:network:features:feature-network-client')
     api project(path: ':sphinx:application:network:features:feature-network-relay-call')
 

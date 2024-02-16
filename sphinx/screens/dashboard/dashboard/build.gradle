@@ -60,7 +60,6 @@ dependencies {
     implementation project(path: ':sphinx:activity:concepts:concept-user-colors-helper')
     implementation project(path: ':sphinx:application:network:concepts:queries:concept-network-query-authorize-external')
     implementation project(path: ':sphinx:application:network:concepts:queries:concept-network-query-people')
-    implementation project(path: ':sphinx:application:network:concepts:queries:concept-network-query-redeem-badge-token')
     implementation project(path: ':sphinx:application:network:concepts:queries:concept-network-query-crypter')
     implementation project(path: ':sphinx:application:network:concepts:concept-socket-io')
     implementation project(path: ':sphinx:screens-detail:scanner:scanner-view-model-coordinator')

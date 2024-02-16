@@ -19,10 +19,6 @@ import chat.sphinx.concept_network_query_feed_status.model.EpisodeStatusDto
 import chat.sphinx.concept_network_query_invite.NetworkQueryInvite
 import chat.sphinx.concept_network_query_meme_server.NetworkQueryMemeServer
 import chat.sphinx.concept_network_query_people.NetworkQueryPeople
-import chat.sphinx.concept_network_query_people.model.DeletePeopleProfileDto
-import chat.sphinx.concept_network_query_people.model.PeopleProfileDto
-import chat.sphinx.concept_network_query_redeem_badge_token.NetworkQueryRedeemBadgeToken
-import chat.sphinx.concept_network_query_redeem_badge_token.model.RedeemBadgeTokenDto
 import chat.sphinx.concept_network_query_verify_external.NetworkQueryAuthorizeExternal
 import chat.sphinx.concept_network_query_verify_external.model.RedeemSatsDto
 import chat.sphinx.concept_relay.RelayDataHandler
@@ -164,7 +160,6 @@ abstract class SphinxRepository(
     private val networkQueryInvite: NetworkQueryInvite,
     private val networkQueryAuthorizeExternal: NetworkQueryAuthorizeExternal,
     private val networkQueryPeople: NetworkQueryPeople,
-    private val networkQueryRedeemBadgeToken: NetworkQueryRedeemBadgeToken,
     private val networkQueryFeedSearch: NetworkQueryFeedSearch,
     private val networkQueryFeedStatus: NetworkQueryFeedStatus,
     private val connectManager: ConnectManager,
@@ -5633,31 +5628,34 @@ abstract class SphinxRepository(
         }
 
         delay(25L)
-        networkQueryInvite.payInvite(invite.inviteString).collect { loadResponse ->
-            @Exhaustive
-            when (loadResponse) {
-                is LoadResponse.Loading -> {
-                }
 
-                is Response.Error -> {
-                    contactLock.withLock {
-                        withContext(io) {
-                            queries.transaction {
-                                updatedContactIds.add(invite.contactId)
-                                updateInviteStatus(
-                                    invite.id,
-                                    InviteStatus.PaymentPending,
-                                    queries
-                                )
-                            }
-                        }
-                    }
-                }
+        // TODO V2 payInvite
 
-                is Response.Success -> {
-                }
-            }
-        }
+//        networkQueryInvite.payInvite(invite.inviteString).collect { loadResponse ->
+//            @Exhaustive
+//            when (loadResponse) {
+//                is LoadResponse.Loading -> {
+//                }
+//
+//                is Response.Error -> {
+//                    contactLock.withLock {
+//                        withContext(io) {
+//                            queries.transaction {
+//                                updatedContactIds.add(invite.contactId)
+//                                updateInviteStatus(
+//                                    invite.id,
+//                                    InviteStatus.PaymentPending,
+//                                    queries
+//                                )
+//                            }
+//                        }
+//                    }
+//                }
+//
+//                is Response.Success -> {
+//                }
+//            }
+//        }
     }
 
     override suspend fun deleteInvite(invite: Invite): Response<Any, ResponseError> {
@@ -5757,24 +5755,26 @@ abstract class SphinxRepository(
     ): Response<Boolean, ResponseError> {
         var response: Response<Boolean, ResponseError>? = null
 
-        applicationScope.launch(mainImmediate) {
-            moshi.adapter(DeletePeopleProfileDto::class.java).fromJson(body)
-                ?.let { deletePeopleProfileDto ->
-                    networkQueryPeople.deletePeopleProfile(
-                        deletePeopleProfileDto
-                    ).collect { loadResponse ->
-                        when (loadResponse) {
-                            is LoadResponse.Loading -> {
-                            }
-                            is Response.Error -> {
-                            }
-                            is Response.Success -> {
-                                response = Response.Success(true)
-                            }
-                        }
-                    }
-                }
-        }.join()
+        // TODO V2 deletePeopleProfile
+
+//        applicationScope.launch(mainImmediate) {
+//            moshi.adapter(DeletePeopleProfileDto::class.java).fromJson(body)
+//                ?.let { deletePeopleProfileDto ->
+//                    networkQueryPeople.deletePeopleProfile(
+//                        deletePeopleProfileDto
+//                    ).collect { loadResponse ->
+//                        when (loadResponse) {
+//                            is LoadResponse.Loading -> {
+//                            }
+//                            is Response.Error -> {
+//                            }
+//                            is Response.Success -> {
+//                                response = Response.Success(true)
+//                            }
+//                        }
+//                    }
+//                }
+//        }.join()
 
         return response ?: Response.Error(ResponseError("Profile delete failed"))
     }
@@ -5784,26 +5784,28 @@ abstract class SphinxRepository(
     ): Response<Boolean, ResponseError> {
         var response: Response<Boolean, ResponseError>? = null
 
-        applicationScope.launch(mainImmediate) {
-            moshi.adapter(PeopleProfileDto::class.java).fromJson(body)?.let { profile ->
-                networkQueryPeople.savePeopleProfile(
-                    profile
-                ).collect { saveProfileResponse ->
-                    when (saveProfileResponse) {
-                        is LoadResponse.Loading -> {
-                        }
+        // TODO V2 savePeopleProfile
 
-                        is Response.Error -> {
-                            response = saveProfileResponse
-                        }
-
-                        is Response.Success -> {
-                            response = Response.Success(true)
-                        }
-                    }
-                }
-            }
-        }.join()
+//        applicationScope.launch(mainImmediate) {
+//            moshi.adapter(PeopleProfileDto::class.java).fromJson(body)?.let { profile ->
+//                networkQueryPeople.savePeopleProfile(
+//                    profile
+//                ).collect { saveProfileResponse ->
+//                    when (saveProfileResponse) {
+//                        is LoadResponse.Loading -> {
+//                        }
+//
+//                        is Response.Error -> {
+//                            response = saveProfileResponse
+//                        }
+//
+//                        is Response.Success -> {
+//                            response = Response.Success(true)
+//                        }
+//                    }
+//                }
+//            }
+//        }.join()
 
         return response ?: Response.Error(ResponseError("Profile save failed"))
     }
@@ -5813,26 +5815,28 @@ abstract class SphinxRepository(
     ): Response<Boolean, ResponseError> {
         var response: Response<Boolean, ResponseError>? = null
 
-        applicationScope.launch(mainImmediate) {
-            moshi.adapter(RedeemBadgeTokenDto::class.java).fromJson(body)?.let { profile ->
-                networkQueryRedeemBadgeToken.redeemBadgeToken(
-                    profile
-                ).collect { redeemBadgeTokenResponse ->
-                    when (redeemBadgeTokenResponse) {
-                        is LoadResponse.Loading -> {
-                        }
+        // TODO V2 redeemBadgeToken
 
-                        is Response.Error -> {
-                            response = redeemBadgeTokenResponse
-                        }
-
-                        is Response.Success -> {
-                            response = Response.Success(true)
-                        }
-                    }
-                }
-            }
-        }.join()
+//        applicationScope.launch(mainImmediate) {
+//            moshi.adapter(RedeemBadgeTokenDto::class.java).fromJson(body)?.let { profile ->
+//                networkQueryRedeemBadgeToken.redeemBadgeToken(
+//                    profile
+//                ).collect { redeemBadgeTokenResponse ->
+//                    when (redeemBadgeTokenResponse) {
+//                        is LoadResponse.Loading -> {
+//                        }
+//
+//                        is Response.Error -> {
+//                            response = redeemBadgeTokenResponse
+//                        }
+//
+//                        is Response.Success -> {
+//                            response = Response.Success(true)
+//                        }
+//                    }
+//                }
+//            }
+//        }.join()
 
         return response ?: Response.Error(ResponseError("Redeem Badge Token failed"))
     }

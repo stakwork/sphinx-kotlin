@@ -15,14 +15,15 @@ class NetworkQueryInviteImpl(
 ): NetworkQueryInvite() {
 
     companion object {
-        private const val ENDPOINT_INVITES = "/invites"
         private const val ENDPOINT_SIGNUP = "/api/v1/signup"
-        private const val ENDPOINT_SIGNUP_FINISH = "/invites/finish"
         private const val ENDPOINT_LOWEST_PRICE = "/api/v1/nodes/pricing"
-        private const val ENDPOINT_INVITE_PAY = "/invites/%s/pay"
 
         private const val HUB_URL = "https://hub.sphinx.chat"
     }
+
+    ///////////
+    /// GET ///
+    ///////////
 
     override fun getLowestNodePrice(): Flow<LoadResponse<HubLowestNodePriceResponse, ResponseError>> {
         return networkRelayCall.get(
@@ -31,6 +32,9 @@ class NetworkQueryInviteImpl(
         )
     }
 
+    ////////////
+    /// POST ///
+    ////////////
 
     override fun redeemInvite(
         inviteString: InviteString
@@ -45,47 +49,4 @@ class NetworkQueryInviteImpl(
         )
     }
 
-    // TODO: Refactor to use post instead of relayUnauthenticatedPost
-    override fun finishInvite(
-        inviteString: String
-    ): Flow<LoadResponse<RedeemInviteResponseDto, ResponseError>> {
-        return networkRelayCall.relayPost(
-            responseJsonClass = RedeemInviteRelayResponse::class.java,
-            relayEndpoint = ENDPOINT_SIGNUP_FINISH,
-            requestBodyJsonClass = Map::class.java,
-            requestBody = mapOf(
-                Pair("invite_string", inviteString),
-            )
-        )
-    }
-
-    override fun payInvite(
-        inviteString: InviteString
-    ): Flow<LoadResponse<PayInviteDto, ResponseError>> {
-        return networkRelayCall.relayPost(
-            responseJsonClass = PayInviteResponse::class.java,
-            relayEndpoint = String.format(ENDPOINT_INVITE_PAY, inviteString.value),
-            requestBodyJsonClass = Map::class.java,
-            requestBody = mapOf(Pair("", ""))
-        )
-    }
-
-    ///////////
-    /// GET ///
-    ///////////
-
-    ///////////
-    /// PUT ///
-    ///////////
-
-    ////////////
-    /// POST ///
-    ////////////
-//    app.post('/invites', invites.createInvite)
-//    app.post('/invites/:invite_string/pay', invites.payInvite)
-//    app.post('/invites/finish', invites.finishInvite)
-
-    //////////////
-    /// DELETE ///
-    //////////////
 }

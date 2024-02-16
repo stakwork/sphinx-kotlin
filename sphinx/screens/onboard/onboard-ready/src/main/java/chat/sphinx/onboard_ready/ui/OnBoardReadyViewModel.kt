@@ -79,20 +79,21 @@ internal class OnBoardReadyViewModel @Inject constructor(
     }
 
     fun finishInvite(inviteString: String) {
-        viewModelScope.launch(mainImmediate) {
-            networkQueryInvite.finishInvite(inviteString).collect { loadResponse ->
-                when (loadResponse) {
-                    is LoadResponse.Loading -> {}
-
-                    is Response.Error -> {
-                        finishSignup()
-                    }
-                    is Response.Success -> {
-                        finishSignup()
-                    }
-                }
-            }
-        }
+        // TODO V2 finishInvite
+//        viewModelScope.launch(mainImmediate) {
+//            networkQueryInvite.finishInvite(inviteString).collect { loadResponse ->
+//                when (loadResponse) {
+//                    is LoadResponse.Loading -> {}
+//
+//                    is Response.Error -> {
+//                        finishSignup()
+//                    }
+//                    is Response.Success -> {
+//                        finishSignup()
+//                    }
+//                }
+//            }
+//        }
     }
 
     fun finishSignup() {

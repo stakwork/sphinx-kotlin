@@ -19,16 +19,6 @@ abstract class NetworkQueryPeople {
         key: String
     ): Flow<LoadResponse<GetExternalRequestDto, ResponseError>>
 
-    abstract fun savePeopleProfile(
-        profile: PeopleProfileDto,
-        relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>? = null
-    ): Flow<LoadResponse<Any, ResponseError>>
-
-    abstract fun deletePeopleProfile(
-        deletePeopleProfileDto: DeletePeopleProfileDto,
-        relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>? = null
-    ): Flow<LoadResponse<Any, ResponseError>>
-
     abstract fun getTribeMemberProfile(
         person: MessagePerson
     ): Flow<LoadResponse<TribeMemberProfileDto, ResponseError>>
@@ -44,16 +34,5 @@ abstract class NetworkQueryPeople {
     abstract fun getBadgesByPerson(
         person: MessagePerson,
     ): Flow<LoadResponse<List<BadgeDto>, ResponseError>>
-
-    abstract fun changeBadgeState(
-        badge: BadgeStateDto,
-        state: Boolean,
-        relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>? = null
-    ): Flow<LoadResponse<Any, ResponseError>>
-
-    abstract fun createBadge(
-        badge: BadgeCreateDto,
-        relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>? = null
-    ): Flow<LoadResponse<Any, ResponseError>>
 
 }

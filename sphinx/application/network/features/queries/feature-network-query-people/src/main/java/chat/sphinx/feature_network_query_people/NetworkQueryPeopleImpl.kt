@@ -66,32 +66,6 @@ class NetworkQueryPeopleImpl(
             responseJsonClass = GetExternalRequestDto::class.java,
         )
 
-
-    override fun savePeopleProfile(
-        profile: PeopleProfileDto,
-        relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>?
-    ): Flow<LoadResponse<Any, ResponseError>> =
-        networkRelayCall.relayPost(
-            relayEndpoint = ENDPOINT_PROFILE,
-            requestBody = profile,
-            requestBodyJsonClass = PeopleProfileDto::class.java,
-            responseJsonClass = SaveProfileResponse::class.java,
-            relayData = relayData
-        )
-
-    override fun deletePeopleProfile(
-        deletePeopleProfileDto: DeletePeopleProfileDto,
-        relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>?
-    ): Flow<LoadResponse<Any, ResponseError>> =
-        networkRelayCall.relayDelete(
-            relayEndpoint = ENDPOINT_PROFILE,
-            requestBody = deletePeopleProfileDto,
-            requestBodyJsonClass = DeletePeopleProfileDto::class.java,
-            responseJsonClass = SaveProfileResponse::class.java,
-            relayData = relayData,
-            additionalHeaders = mapOf("Content-Type" to "application/json;charset=utf-8")
-        )
-
     override fun getLeaderboard(
         tribeUUID: ChatUUID
     ): Flow<LoadResponse<List<ChatLeaderboardDto>, ResponseError>> =
@@ -116,31 +90,6 @@ class NetworkQueryPeopleImpl(
         networkRelayCall.getList(
             url = String.format(ENDPOINT_TRIBE_BADGES, person.host(), person.uuid()),
             responseJsonClass = BadgeDto::class.java,
-        )
-
-    override fun changeBadgeState(
-        badge: BadgeStateDto,
-        state: Boolean,
-        relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>?
-    ): Flow<LoadResponse<Any, ResponseError>> =
-        networkRelayCall.relayPost(
-            relayEndpoint = if (state) ENDPOINT_TRIBE_ACTIVE_BADGE else ENDPOINT_TRIBE_DEACTIVATE_BADGE,
-            requestBody = badge,
-            requestBodyJsonClass = BadgeStateDto::class.java,
-            responseJsonClass = BadgeResponse::class.java,
-            relayData = relayData
-        )
-
-    override fun createBadge(
-        badge: BadgeCreateDto,
-        relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>?
-    ): Flow<LoadResponse<Any, ResponseError>> =
-        networkRelayCall.relayPost(
-            relayEndpoint = ENDPOINT_TRIBE_CREATE_BADGE,
-            requestBody = badge,
-            requestBodyJsonClass = BadgeCreateDto::class.java,
-            responseJsonClass = BadgeResponse::class.java,
-            relayData = relayData
         )
 
 }

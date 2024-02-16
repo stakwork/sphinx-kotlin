@@ -104,30 +104,32 @@ internal class CreateBadgeViewModel @Inject constructor(
 
             updateViewState(CreateBadgeViewState.ToggleBadge(updatedBadge))
 
-            updatedBadge.badgeId?.let { nnBadgeId ->
-                updatedBadge.chatId?.let { nnChatId ->
-                    viewModelScope.launch(mainImmediate) {
-                        networkQueryPeople.changeBadgeState(
-                            BadgeStateDto(
-                                nnBadgeId,
-                                nnChatId
-                            ),
-                            updatedBadge.isActive
-                        ).collect { loadResponse ->
-                            @Exhaustive
-                            when (loadResponse) {
-                                is Response.Error -> {
-                                    updateViewState(CreateBadgeViewState.ToggleBadge(badge))
-                                    submitSideEffect(CreateBadgeSideEffect.Notify.FailedToChangeState)
-                                }
-                                is Response.Success -> {}
-                                is LoadResponse.Loading -> {}
-                            }
-                        }
-                    }
-                    return
-                }
-            }
+            // TODO V2 changeBadgeState
+
+//            updatedBadge.badgeId?.let { nnBadgeId ->
+//                updatedBadge.chatId?.let { nnChatId ->
+//                    viewModelScope.launch(mainImmediate) {
+//                        networkQueryPeople.changeBadgeState(
+//                            BadgeStateDto(
+//                                nnBadgeId,
+//                                nnChatId
+//                            ),
+//                            updatedBadge.isActive
+//                        ).collect { loadResponse ->
+//                            @Exhaustive
+//                            when (loadResponse) {
+//                                is Response.Error -> {
+//                                    updateViewState(CreateBadgeViewState.ToggleBadge(badge))
+//                                    submitSideEffect(CreateBadgeSideEffect.Notify.FailedToChangeState)
+//                                }
+//                                is Response.Success -> {}
+//                                is LoadResponse.Loading -> {}
+//                            }
+//                        }
+//                    }
+//                    return
+//                }
+//            }
 
             updateViewState(CreateBadgeViewState.ToggleBadge(badge))
         }
@@ -168,29 +170,31 @@ internal class CreateBadgeViewModel @Inject constructor(
 
                 updateViewState(CreateBadgeViewState.LoadingCreateBadge)
 
-                networkQueryPeople.createBadge(
-                    BadgeCreateDto(
-                        chat_id = it.badgeTemplate.chatId,
-                        name = it.badgeTemplate.name,
-                        reward_requirement = it.badgeTemplate.rewardRequirement,
-                        memo = description,
-                        icon = it.badgeTemplate.imageUrl,
-                        reward_type = it.badgeTemplate.rewardType,
-                        active = false,
-                        amount = amount
-                    )
-                ).collect { loadResponse ->
-                    when (loadResponse) {
-                        is Response.Error -> {
-                            submitSideEffect(CreateBadgeSideEffect.Notify.FailedToCreateBadge)
-                            updateViewState(it)
-                        }
-                        is Response.Success -> {
-                            navigator.popBackStack()
-                        }
-                        is LoadResponse.Loading -> {}
-                    }
-                }
+                // TODO V2 createBadge
+
+//                networkQueryPeople.createBadge(
+//                    BadgeCreateDto(
+//                        chat_id = it.badgeTemplate.chatId,
+//                        name = it.badgeTemplate.name,
+//                        reward_requirement = it.badgeTemplate.rewardRequirement,
+//                        memo = description,
+//                        icon = it.badgeTemplate.imageUrl,
+//                        reward_type = it.badgeTemplate.rewardType,
+//                        active = false,
+//                        amount = amount
+//                    )
+//                ).collect { loadResponse ->
+//                    when (loadResponse) {
+//                        is Response.Error -> {
+//                            submitSideEffect(CreateBadgeSideEffect.Notify.FailedToCreateBadge)
+//                            updateViewState(it)
+//                        }
+//                        is Response.Success -> {
+//                            navigator.popBackStack()
+//                        }
+//                        is LoadResponse.Loading -> {}
+//                    }
+//                }
             }
         }
     }
