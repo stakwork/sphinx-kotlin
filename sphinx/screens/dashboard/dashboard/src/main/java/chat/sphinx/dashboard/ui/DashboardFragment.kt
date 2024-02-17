@@ -277,6 +277,12 @@ internal class DashboardFragment : MotionLayoutFragment<
             header.textViewDashboardHeaderNetwork.setOnClickListener {
                 viewModel.toastIfNetworkConnected()
             }
+
+            header.textViewDashboardHeaderBalance.setOnClickListener {
+                lifecycleScope.launch(viewModel.mainImmediate){
+                    viewModel.toggleHideBalanceState()
+                }
+            }
         }
     }
 
@@ -480,11 +486,14 @@ internal class DashboardFragment : MotionLayoutFragment<
 
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.getAccountBalance().collect { nodeBalance ->
-                if (nodeBalance == null) return@collect
+                viewModel.hideBalanceStateFlow.collect() shouldHide@{ shouldHide ->
+                    if (nodeBalance == null) return@shouldHide
 
-                nodeBalance.balance.asFormattedString().let { balance ->
-                    binding.layoutDashboardHeader.textViewDashboardHeaderBalance.text = balance
-                    binding.layoutDashboardNavDrawer.navDrawerTextViewSatsBalance.text = balance
+                    nodeBalance.balance.asFormattedString().let { balance ->
+                        binding.layoutDashboardHeader
+                            .textViewDashboardHeaderBalance.text = if (shouldHide) "******" else balance
+                        binding.layoutDashboardNavDrawer.navDrawerTextViewSatsBalance.text = balance
+                    }
                 }
             }
         }

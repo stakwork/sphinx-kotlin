@@ -40,7 +40,6 @@ import chat.sphinx.dashboard.navigation.DashboardNavigator
 import chat.sphinx.dashboard.ui.viewstates.*
 import chat.sphinx.kotlin_response.*
 import chat.sphinx.logger.SphinxLogger
-import chat.sphinx.logger.d
 import chat.sphinx.menu_bottom.ui.MenuBottomViewState
 import chat.sphinx.menu_bottom_scanner.ScannerMenuHandler
 import chat.sphinx.menu_bottom_scanner.ScannerMenuViewModel
@@ -70,7 +69,6 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.MotionLayoutViewModel
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
-import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.build_config.BuildConfigVersionCode
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
@@ -146,6 +144,13 @@ internal class DashboardViewModel @Inject constructor(
     val networkStateFlow: StateFlow<Pair<LoadResponse<Boolean, ResponseError>, Boolean>>
         get() = _networkStateFlow.asStateFlow()
 
+    private val _hideBalanceStateFlow: MutableStateFlow<Boolean> by lazy {
+        MutableStateFlow(false)
+    }
+
+    val hideBalanceStateFlow: StateFlow<Boolean>
+        get() = _hideBalanceStateFlow.asStateFlow()
+
 
     private lateinit var signerManager: SignerManager
 
@@ -166,6 +171,26 @@ internal class DashboardViewModel @Inject constructor(
         feedRepository.restoreContentFeedStatuses()
 
         networkRefresh(true)
+    }
+
+    suspend fun toggleHideBalanceState(){
+        val currentState = _hideBalanceStateFlow.value
+        _hideBalanceStateFlow.value = !currentState
+
+        delay(50L)
+
+        val appContext: Context = app.applicationContext
+        val generalSettingsSharedPreferences = appContext.getSharedPreferences(HideBalance.HIDE_BALANCE_SHARED_PREFERENCES, Context.MODE_PRIVATE)
+
+        withContext(dispatchers.io) {
+            generalSettingsSharedPreferences.edit()
+                .putBoolean(HideBalance.HIDE_BALANCE_ENABLED_KEY, _hideBalanceStateFlow.value)
+                .let { editor ->
+                    if (!editor.commit()) {
+                        editor.apply()
+                    }
+                }
+        }
     }
     
     private fun getRelayKeys() {
