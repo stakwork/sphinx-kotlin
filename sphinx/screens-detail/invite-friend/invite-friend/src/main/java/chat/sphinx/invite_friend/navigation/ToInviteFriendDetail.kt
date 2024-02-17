@@ -6,14 +6,15 @@ import chat.sphinx.invite_friend.R
 import io.matthewnelson.android_feature_navigation.R as nav_R
 import io.matthewnelson.concept_navigation.NavigationRequest
 
-class ToInviteFriendDetail: NavigationRequest<NavController>() {
+class ToInviteFriendDetail : NavigationRequest<NavController>() {
     override fun navigate(controller: NavController) {
         controller.navigate(
             R.id.invite_friend_nav_graph,
             null,
             DetailNavOptions.default.apply {
                 setEnterAnim(nav_R.anim.slide_in_left)
-                setPopExitAnim(nav_R.anim.slide_out_right)
+                setPopExitAnim(nav_R.anim.slide_out_bottom)
+                    .setExitAnim(nav_R.anim.slide_out_bottom)
             }.build()
         )
     }

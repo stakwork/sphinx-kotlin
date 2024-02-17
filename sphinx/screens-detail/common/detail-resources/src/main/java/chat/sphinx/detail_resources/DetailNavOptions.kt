@@ -10,8 +10,9 @@ object DetailNavOptions {
         get() = NavOptions.Builder()
             .setLaunchSingleTop(true)
 //            .setEnterAnim(R_navigation.anim.slide_in_bottom)
-            .setExitAnim(R_navigation.anim.slide_out_left)
-            .setPopEnterAnim(R_navigation.anim.slide_in_right)
+//            .setExitAnim(R_navigation.anim.slide_out_left)
+//            .setPopEnterAnim(R_navigation.anim.slide_in_right)
+            .setExitAnim(R_navigation.anim.slide_out_bottom)
             .setPopExitAnim(R_navigation.anim.slide_out_bottom)
 
     @Suppress("SpellCheckingInspection")
