@@ -3,17 +3,16 @@ package chat.sphinx.feature_network_query_feed_status
 import chat.sphinx.concept_network_query_feed_status.NetworkQueryFeedStatus
 import chat.sphinx.concept_network_query_feed_status.model.ContentFeedStatusDto
 import chat.sphinx.concept_network_query_feed_status.model.PostFeedStatusDto
+import chat.sphinx.concept_network_query_feed_status.model.PostYoutubeUrlDto
 import chat.sphinx.concept_network_query_feed_status.model.PutFeedStatusDto
 import chat.sphinx.concept_network_relay_call.NetworkRelayCall
 import chat.sphinx.feature_network_query_feed_status.model.ContentFeedStatusRelayGetListResponse
 import chat.sphinx.feature_network_query_feed_status.model.ContentFeedStatusRelayGetResponse
 import chat.sphinx.feature_network_query_feed_status.model.ContentFeedStatusRelayPostResponse
-import chat.sphinx.feature_network_query_feed_status.model.YoutubeVideoRelayGetResponse
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.kotlin_response.exception
-import chat.sphinx.kotlin_response.message
 import chat.sphinx.wrapper_common.feed.FeedId
 import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RelayUrl
@@ -21,17 +20,17 @@ import chat.sphinx.wrapper_relay.RequestSignature
 import chat.sphinx.wrapper_relay.TransportToken
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.firstOrNull
-import kotlin.math.sign
 
 class NetworkQueryFeedStatusImpl(
     private val networkRelayCall: NetworkRelayCall
 ) : NetworkQueryFeedStatus() {
 
     companion object {
+        private const val TRIBES_DEFAULT_SERVER_URL = "https://tribes.sphinx.chat"
         private const val ENDPOINT_CONTENT_FEED_STATUS = "/content_feed_status"
         private const val ENDPOINT_CONTENT_FEED_STATUS_FEED_ID = "/content_feed_status/%s"
+        private const val ENDPOINT_FEED_DOWNLOAD = "$TRIBES_DEFAULT_SERVER_URL/feed/download"
+
 
         private const val ENDPOINT_YOUTUBE_VIDEO = "https://stakwork-uploads.s3.amazonaws.com/uploads/customers/6040/media_to_local/00002e82-6911-4aea-a214-62c9d88740e0/%s.mp4"
 
@@ -107,5 +106,15 @@ class NetworkQueryFeedStatusImpl(
         val code = matchResult?.groups?.get(1)?.value
         return "200" == code
     }
+
+    override suspend fun extractYoutubeVideoFromUrl(
+        youtubeUrl: PostYoutubeUrlDto
+    ): Flow<LoadResponse<Any, ResponseError>> =
+        networkRelayCall.post(
+            url = ENDPOINT_FEED_DOWNLOAD,
+            responseJsonClass = Any::class.java,
+            requestBodyJsonClass = PostYoutubeUrlDto::class.java,
+            requestBody = youtubeUrl
+        )
 
 }

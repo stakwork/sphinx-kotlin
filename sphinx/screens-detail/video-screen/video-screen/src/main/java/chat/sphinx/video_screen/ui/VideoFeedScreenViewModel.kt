@@ -9,7 +9,9 @@ import android.util.Log
 import androidx.core.net.toUri
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.viewModelScope
+import app.cash.exhaustive.Exhaustive
 import chat.sphinx.concept_network_query_feed_status.NetworkQueryFeedStatus
+import chat.sphinx.concept_network_query_feed_status.model.PostYoutubeUrlDto
 import chat.sphinx.concept_repository_actions.ActionsRepository
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
@@ -17,7 +19,8 @@ import chat.sphinx.concept_repository_feed.FeedRepository
 import chat.sphinx.concept_repository_lightning.LightningRepository
 import chat.sphinx.concept_repository_media.RepositoryMedia
 import chat.sphinx.concept_repository_message.MessageRepository
-import chat.sphinx.concept_service_media.UserAction
+import chat.sphinx.kotlin_response.LoadResponse
+import chat.sphinx.kotlin_response.Response
 import chat.sphinx.video_screen.R
 import chat.sphinx.video_screen.navigation.VideoScreenNavigator
 import chat.sphinx.video_screen.ui.viewstate.BoostAnimationViewState
@@ -32,13 +35,10 @@ import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.feed.*
 import chat.sphinx.wrapper_common.hhmmElseDate
 import chat.sphinx.wrapper_common.lightning.Sat
-import chat.sphinx.wrapper_common.lightning.toSat
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_feed.*
 import chat.sphinx.wrapper_lightning.NodeBalance
 import chat.sphinx.wrapper_message.FeedBoost
-import chat.sphinx.wrapper_podcast.PodcastEpisode
-import chat.sphinx.wrapper_podcast.toHrAndMin
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.android_feature_viewmodel.updateViewState
@@ -48,7 +48,6 @@ import io.matthewnelson.concept_views.viewstate.value
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import java.io.File
 
 internal open class VideoFeedScreenViewModel(
     dispatchers: CoroutineDispatchers,
@@ -490,6 +489,8 @@ internal open class VideoFeedScreenViewModel(
                 videoPlayerStateContainer.updateViewState(VideoPlayerViewState.WebViewPlayer(url.toUri(), null))
             } else {
                 videoPlayerStateContainer.updateViewState(VideoPlayerViewState.YoutubeVideoIframe(videoId))
+
+                networkQueryFeedStatus.extractYoutubeVideoFromUrl(PostYoutubeUrlDto(listOf(videoId.toYoutubeUrl())))
             }
         }
     }
