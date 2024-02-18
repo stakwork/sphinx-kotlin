@@ -6892,10 +6892,12 @@ abstract class SphinxRepository(
         }
     }
 
-    override fun getAndSaveTransportKey() {
+    override fun getAndSaveTransportKey(forceGet: Boolean) {
         applicationScope.launch(io) {
-            relayDataHandler.retrieveRelayTransportKey()?.let {
-                return@launch
+            if (!forceGet) {
+                relayDataHandler.retrieveRelayTransportKey()?.let {
+                    return@launch
+                }
             }
             saveTransportKey()
         }
