@@ -1,5 +1,8 @@
 # ChangeLog
 
+# Version 1.0.0-beta16 (2024-02-18)
+- Fixes connection issues on swarm accounts
+
 # Version 1.0.0-beta15 (2024-02-09)
 - Fixes issues during signup
 
