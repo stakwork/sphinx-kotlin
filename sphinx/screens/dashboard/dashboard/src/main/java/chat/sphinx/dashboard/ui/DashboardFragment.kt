@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.constraintlayout.motion.widget.MotionLayout
@@ -502,13 +503,26 @@ internal class DashboardFragment : MotionLayoutFragment<
                     "onStart: ShouldHide Balance: ${balanceState.hideBalanceState == HideBalance.ENABLED}")
                 if (balanceState.nodeBalance == null) return@collect
                 balanceState.nodeBalance.balance.asFormattedString().let { balance ->
-                    binding.layoutDashboardHeader
-                        .textViewDashboardHeaderBalance
-                        .text = if (balanceState.hideBalanceState == HideBalance.ENABLED) "*****" else balance
-                    binding.layoutDashboardNavDrawer
-                        .navDrawerTextViewSatsBalance
-                        .text = if (balanceState.hideBalanceState == HideBalance.ENABLED) "*****" else balance
-
+                    with(binding.layoutDashboardHeader.textViewDashboardHeaderBalance){
+                        if (balanceState.hideBalanceState == HideBalance.ENABLED){
+                            layoutParams.height = resources.getDimensionPixelSize(R.dimen.hidden_balance_placeholder)
+                            text = "*****"
+                        }
+                        else {
+                            layoutParams.height = ViewGroup.LayoutParams.WRAP_CONTENT
+                            text = balance
+                        }
+                    }
+                    with(binding.layoutDashboardNavDrawer.navDrawerTextViewSatsBalance){
+                        if (balanceState.hideBalanceState == HideBalance.ENABLED){
+                            layoutParams.height = resources.getDimensionPixelSize(R.dimen.hidden_balance_placeholder)
+                            text = "*****"
+                        }
+                        else {
+                            layoutParams.height = ViewGroup.LayoutParams.WRAP_CONTENT
+                            text = balance
+                        }
+                    }
                 }
             }
         }
