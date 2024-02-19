@@ -280,9 +280,7 @@ internal class DashboardFragment : MotionLayoutFragment<
             }
 
             header.textViewDashboardHeaderBalance.setOnClickListener {
-                lifecycleScope.launch(viewModel.mainImmediate){
-                    viewModel.toggleHideBalanceState()
-                }
+                viewModel.toggleHideBalanceState()
             }
         }
     }
@@ -378,6 +376,10 @@ internal class DashboardFragment : MotionLayoutFragment<
                 .addNavigationBarPadding(navDrawer.layoutConstraintDashboardNavDrawer)
 
             navDrawer.layoutConstraintDashboardNavDrawer.setOnClickListener { viewModel }
+
+            navDrawer.navDrawerTextViewSatsBalance.setOnClickListener {
+                viewModel.toggleHideBalanceState()
+            }
 
             navDrawer.navDrawerButtonContacts.setOnClickListener {
                 lifecycleScope.launch { viewModel.navDrawerNavigator.toAddressBookScreen() }

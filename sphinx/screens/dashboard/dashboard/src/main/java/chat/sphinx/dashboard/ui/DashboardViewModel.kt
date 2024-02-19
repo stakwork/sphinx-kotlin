@@ -185,27 +185,29 @@ internal class DashboardViewModel @Inject constructor(
         }
     }
 
-    suspend fun toggleHideBalanceState(){
-        val newState = if(_hideBalanceStateFlow.value == HideBalance.DISABLED){
-            HideBalance.ENABLED
-        } else {
-            HideBalance.DISABLED
-        }
-        _hideBalanceStateFlow.value = newState
+    fun toggleHideBalanceState(){
+        viewModelScope.launch(mainImmediate) {
+            val newState = if(_hideBalanceStateFlow.value == HideBalance.DISABLED){
+                HideBalance.ENABLED
+            } else {
+                HideBalance.DISABLED
+            }
+            _hideBalanceStateFlow.value = newState
 
-        delay(50L)
+            delay(50L)
 
-        val appContext: Context = app.applicationContext
-        val hideSharedPreferences = appContext.getSharedPreferences(HideBalance.HIDE_BALANCE_SHARED_PREFERENCES, Context.MODE_PRIVATE)
+            val appContext: Context = app.applicationContext
+            val hideSharedPreferences = appContext.getSharedPreferences(HideBalance.HIDE_BALANCE_SHARED_PREFERENCES, Context.MODE_PRIVATE)
 
-        withContext(dispatchers.io) {
-            hideSharedPreferences.edit()
-                .putInt(HideBalance.HIDE_BALANCE_ENABLED_KEY, newState)
-                .let { editor ->
-                    if (!editor.commit()) {
-                        editor.apply()
+            withContext(dispatchers.io) {
+                hideSharedPreferences.edit()
+                    .putInt(HideBalance.HIDE_BALANCE_ENABLED_KEY, newState)
+                    .let { editor ->
+                        if (!editor.commit()) {
+                            editor.apply()
+                        }
                     }
-                }
+            }
         }
     }
     
