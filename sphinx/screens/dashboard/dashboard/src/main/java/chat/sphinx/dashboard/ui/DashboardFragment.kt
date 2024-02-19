@@ -37,6 +37,7 @@ import chat.sphinx.swipe_reveal_layout.SwipeRevealLayout
 import chat.sphinx.wrapper_common.HideBalance
 import chat.sphinx.wrapper_common.chat.PushNotificationLink
 import chat.sphinx.wrapper_common.lightning.*
+import chat.sphinx.wrapper_lightning.NodeBalance
 import chat.sphinx.wrapper_view.Px
 import com.google.android.material.tabs.TabLayoutMediator
 import dagger.hilt.android.AndroidEntryPoint
@@ -48,6 +49,7 @@ import io.matthewnelson.concept_views.viewstate.collect
 import io.matthewnelson.concept_views.viewstate.value
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -488,18 +490,25 @@ internal class DashboardFragment : MotionLayoutFragment<
         }
 
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-            viewModel.getAccountBalance().collect { nodeBalance ->
-                viewModel.hideBalanceStateFlow.collect hide@{ hideState ->
-                    Log.d("DashboardFrag", "onStart: ShouldHide Balance: $hideState")
-                    if (nodeBalance == null) return@hide
-                    nodeBalance.balance.asFormattedString().let { balance ->
-                        binding.layoutDashboardHeader
-                            .textViewDashboardHeaderBalance
-                            .text = if (hideState == HideBalance.ENABLED) "*****" else balance
-                        binding.layoutDashboardNavDrawer
-                            .navDrawerTextViewSatsBalance
-                            .text = if (hideState == HideBalance.ENABLED) "*****" else balance
-                    }
+            combine(
+                viewModel.hideBalanceStateFlow,
+                viewModel.getAccountBalance()
+            ) { hideBalanceState: Int, nodeBalance: NodeBalance? ->
+                BalanceState(nodeBalance, hideBalanceState)
+            }.collect { balanceState ->
+
+                Log.d(
+                    "DashboardFrag",
+                    "onStart: ShouldHide Balance: ${balanceState.hideBalanceState == HideBalance.ENABLED}")
+                if (balanceState.nodeBalance == null) return@collect
+                balanceState.nodeBalance.balance.asFormattedString().let { balance ->
+                    binding.layoutDashboardHeader
+                        .textViewDashboardHeaderBalance
+                        .text = if (balanceState.hideBalanceState == HideBalance.ENABLED) "*****" else balance
+                    binding.layoutDashboardNavDrawer
+                        .navDrawerTextViewSatsBalance
+                        .text = if (balanceState.hideBalanceState == HideBalance.ENABLED) "*****" else balance
+
                 }
             }
         }

@@ -76,6 +76,9 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import javax.inject.Inject
 
+
+data class BalanceState(val nodeBalance: NodeBalance?, val hideBalanceState: Int)
+
 @HiltViewModel
 internal class DashboardViewModel @Inject constructor(
     private val app: Application,
