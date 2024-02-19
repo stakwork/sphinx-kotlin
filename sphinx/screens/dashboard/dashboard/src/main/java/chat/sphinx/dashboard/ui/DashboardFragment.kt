@@ -34,6 +34,7 @@ import chat.sphinx.kotlin_response.Response
 import chat.sphinx.menu_bottom_scanner.BottomScannerMenu
 import chat.sphinx.resources.databinding.LayoutPodcastPlayerFooterBinding
 import chat.sphinx.swipe_reveal_layout.SwipeRevealLayout
+import chat.sphinx.wrapper_common.HideBalance
 import chat.sphinx.wrapper_common.chat.PushNotificationLink
 import chat.sphinx.wrapper_common.lightning.*
 import chat.sphinx.wrapper_view.Px
@@ -486,13 +487,16 @@ internal class DashboardFragment : MotionLayoutFragment<
 
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.getAccountBalance().collect { nodeBalance ->
-                viewModel.hideBalanceStateFlow.collect() shouldHide@{ shouldHide ->
-                    if (nodeBalance == null) return@shouldHide
-
+                viewModel.hideBalanceStateFlow.collect hide@{ hideState ->
+                    Log.d("DashboardFrag", "onStart: ShouldHide Balance: $hideState")
+                    if (nodeBalance == null) return@hide
                     nodeBalance.balance.asFormattedString().let { balance ->
                         binding.layoutDashboardHeader
-                            .textViewDashboardHeaderBalance.text = if (shouldHide) "******" else balance
-                        binding.layoutDashboardNavDrawer.navDrawerTextViewSatsBalance.text = balance
+                            .textViewDashboardHeaderBalance
+                            .text = if (hideState == HideBalance.ENABLED) "*****" else balance
+                        binding.layoutDashboardNavDrawer
+                            .navDrawerTextViewSatsBalance
+                            .text = if (hideState == HideBalance.ENABLED) "*****" else balance
                     }
                 }
             }

@@ -144,11 +144,11 @@ internal class DashboardViewModel @Inject constructor(
     val networkStateFlow: StateFlow<Pair<LoadResponse<Boolean, ResponseError>, Boolean>>
         get() = _networkStateFlow.asStateFlow()
 
-    private val _hideBalanceStateFlow: MutableStateFlow<Boolean> by lazy {
-        MutableStateFlow(false)
+    private val _hideBalanceStateFlow: MutableStateFlow<Int> by lazy {
+        MutableStateFlow(HideBalance.DISABLED)
     }
 
-    val hideBalanceStateFlow: StateFlow<Boolean>
+    val hideBalanceStateFlow: StateFlow<Int>
         get() = _hideBalanceStateFlow.asStateFlow()
 
 
@@ -160,6 +160,8 @@ internal class DashboardViewModel @Inject constructor(
                 backgroundLoginHandler.updateLoginTime()
             }
         }
+
+        getHideBalanceState()
 
         syncFeedRecommendationsState()
 
@@ -173,18 +175,32 @@ internal class DashboardViewModel @Inject constructor(
         networkRefresh(true)
     }
 
+    private fun getHideBalanceState() {
+        viewModelScope.launch(mainImmediate) {
+            val appContext: Context = app.applicationContext
+            val hideSharedPreferences = appContext.getSharedPreferences(HideBalance.HIDE_BALANCE_SHARED_PREFERENCES, Context.MODE_PRIVATE)
+
+            val shouldHide = hideSharedPreferences.getInt(HideBalance.HIDE_BALANCE_ENABLED_KEY, HideBalance.DISABLED)
+            _hideBalanceStateFlow.value = shouldHide
+        }
+    }
+
     suspend fun toggleHideBalanceState(){
-        val currentState = _hideBalanceStateFlow.value
-        _hideBalanceStateFlow.value = !currentState
+        val newState = if(_hideBalanceStateFlow.value == HideBalance.DISABLED){
+            HideBalance.ENABLED
+        } else {
+            HideBalance.DISABLED
+        }
+        _hideBalanceStateFlow.value = newState
 
         delay(50L)
 
         val appContext: Context = app.applicationContext
-        val generalSettingsSharedPreferences = appContext.getSharedPreferences(HideBalance.HIDE_BALANCE_SHARED_PREFERENCES, Context.MODE_PRIVATE)
+        val hideSharedPreferences = appContext.getSharedPreferences(HideBalance.HIDE_BALANCE_SHARED_PREFERENCES, Context.MODE_PRIVATE)
 
         withContext(dispatchers.io) {
-            generalSettingsSharedPreferences.edit()
-                .putBoolean(HideBalance.HIDE_BALANCE_ENABLED_KEY, _hideBalanceStateFlow.value)
+            hideSharedPreferences.edit()
+                .putInt(HideBalance.HIDE_BALANCE_ENABLED_KEY, newState)
                 .let { editor ->
                     if (!editor.commit()) {
                         editor.apply()
