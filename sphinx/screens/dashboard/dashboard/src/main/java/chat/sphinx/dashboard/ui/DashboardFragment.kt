@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.constraintlayout.motion.widget.MotionLayout
@@ -34,8 +35,10 @@ import chat.sphinx.kotlin_response.Response
 import chat.sphinx.menu_bottom_scanner.BottomScannerMenu
 import chat.sphinx.resources.databinding.LayoutPodcastPlayerFooterBinding
 import chat.sphinx.swipe_reveal_layout.SwipeRevealLayout
+import chat.sphinx.wrapper_common.HideBalance
 import chat.sphinx.wrapper_common.chat.PushNotificationLink
 import chat.sphinx.wrapper_common.lightning.*
+import chat.sphinx.wrapper_lightning.NodeBalance
 import chat.sphinx.wrapper_view.Px
 import com.google.android.material.tabs.TabLayoutMediator
 import dagger.hilt.android.AndroidEntryPoint
@@ -47,6 +50,7 @@ import io.matthewnelson.concept_views.viewstate.collect
 import io.matthewnelson.concept_views.viewstate.value
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -277,6 +281,10 @@ internal class DashboardFragment : MotionLayoutFragment<
             header.textViewDashboardHeaderNetwork.setOnClickListener {
                 viewModel.toastIfNetworkConnected()
             }
+
+            header.textViewDashboardHeaderBalance.setOnClickListener {
+                viewModel.toggleHideBalanceState()
+            }
         }
     }
 
@@ -371,6 +379,10 @@ internal class DashboardFragment : MotionLayoutFragment<
                 .addNavigationBarPadding(navDrawer.layoutConstraintDashboardNavDrawer)
 
             navDrawer.layoutConstraintDashboardNavDrawer.setOnClickListener { viewModel }
+
+            navDrawer.navDrawerTextViewSatsBalance.setOnClickListener {
+                viewModel.toggleHideBalanceState()
+            }
 
             navDrawer.navDrawerButtonContacts.setOnClickListener {
                 lifecycleScope.launch { viewModel.navDrawerNavigator.toAddressBookScreen() }
@@ -479,12 +491,38 @@ internal class DashboardFragment : MotionLayoutFragment<
         }
 
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-            viewModel.getAccountBalance().collect { nodeBalance ->
-                if (nodeBalance == null) return@collect
+            combine(
+                viewModel.hideBalanceStateFlow,
+                viewModel.getAccountBalance()
+            ) { hideBalanceState: Int, nodeBalance: NodeBalance? ->
+                BalanceState(nodeBalance, hideBalanceState)
+            }.collect { balanceState ->
 
-                nodeBalance.balance.asFormattedString().let { balance ->
-                    binding.layoutDashboardHeader.textViewDashboardHeaderBalance.text = balance
-                    binding.layoutDashboardNavDrawer.navDrawerTextViewSatsBalance.text = balance
+                Log.d(
+                    "DashboardFrag",
+                    "onStart: ShouldHide Balance: ${balanceState.hideBalanceState == HideBalance.ENABLED}")
+                if (balanceState.nodeBalance == null) return@collect
+                balanceState.nodeBalance.balance.asFormattedString().let { balance ->
+                    with(binding.layoutDashboardHeader.textViewDashboardHeaderBalance){
+                        if (balanceState.hideBalanceState == HideBalance.ENABLED){
+                            layoutParams.height = resources.getDimensionPixelSize(R.dimen.hidden_balance_placeholder)
+                            text = "*****"
+                        }
+                        else {
+                            layoutParams.height = ViewGroup.LayoutParams.WRAP_CONTENT
+                            text = balance
+                        }
+                    }
+                    with(binding.layoutDashboardNavDrawer.navDrawerTextViewSatsBalance){
+                        if (balanceState.hideBalanceState == HideBalance.ENABLED){
+                            layoutParams.height = resources.getDimensionPixelSize(R.dimen.hidden_balance_placeholder)
+                            text = "*****"
+                        }
+                        else {
+                            layoutParams.height = ViewGroup.LayoutParams.WRAP_CONTENT
+                            text = balance
+                        }
+                    }
                 }
             }
         }

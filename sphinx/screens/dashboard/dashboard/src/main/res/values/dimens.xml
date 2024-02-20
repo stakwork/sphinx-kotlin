@@ -4,4 +4,5 @@
     <dimen name="dashboard_chip_height">38dp</dimen>
     <dimen name="dashboard_chip_vertical_spacing">22dp</dimen>
     <dimen name="dashboard_chip_spacing">5dp</dimen>
+    <dimen name="hidden_balance_placeholder">16dp</dimen>
 </resources>
