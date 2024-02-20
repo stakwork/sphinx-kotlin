@@ -515,7 +515,7 @@ internal class DashboardFragment : MotionLayoutFragment<
                     }
                     with(binding.layoutDashboardNavDrawer.navDrawerTextViewSatsBalance){
                         if (balanceState.hideBalanceState == HideBalance.ENABLED){
-                            layoutParams.height = resources.getDimensionPixelSize(R.dimen.hidden_balance_placeholder)
+                            layoutParams.height = resources.getDimensionPixelSize(R.dimen.hidden_nav_balance_placeholder)
                             text = "*****"
                         }
                         else {
