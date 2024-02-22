@@ -96,6 +96,8 @@
 
     <string name="dashboard_network_disconnected_node_toast">Disconnected node</string>
     <string name="dashboard_network_connected_node_toast">Connected node</string>
+    <string name="dashboard_network_disconnected_mqtt_toast">MQTT Disconnected</string>
+    <string name="dashboard_network_connected_mqtt_toast">MQTT Connected</string>
 
     <string name="dashboard_save_profile_popup_title">Save Profile from:</string>
     <string name="dashboard_delete_profile_popup_title">Delete Profile from:</string>

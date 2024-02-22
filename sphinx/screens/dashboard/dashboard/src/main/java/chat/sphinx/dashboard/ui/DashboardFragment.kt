@@ -2,7 +2,6 @@ package chat.sphinx.dashboard.ui
 
 import android.content.Context
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.ImageView
@@ -22,6 +21,7 @@ import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.concept_image_loader.Transformation
+import chat.sphinx.concept_repository_connect_manager.model.NetworkStatus
 import chat.sphinx.concept_signer_manager.SignerManager
 import chat.sphinx.dashboard.R
 import chat.sphinx.dashboard.databinding.FragmentDashboardBinding
@@ -30,8 +30,6 @@ import chat.sphinx.dashboard.ui.viewstates.DashboardMotionViewState
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.insetter_activity.addStatusBarPadding
-import chat.sphinx.kotlin_response.LoadResponse
-import chat.sphinx.kotlin_response.Response
 import chat.sphinx.menu_bottom_scanner.BottomScannerMenu
 import chat.sphinx.resources.databinding.LayoutPodcastPlayerFooterBinding
 import chat.sphinx.wrapper_view.Px
@@ -46,6 +44,7 @@ import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_views.viewstate.collect
 import io.matthewnelson.concept_views.viewstate.value
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -111,8 +110,6 @@ internal class DashboardFragment : MotionLayoutFragment<
     override fun onResume() {
         super.onResume()
 
-        viewModel.networkRefresh(false)
-
         activity?.intent?.dataString?.let { deepLink ->
             viewModel.handleDeepLink(deepLink)
             activity?.intent?.data = null
@@ -121,7 +118,8 @@ internal class DashboardFragment : MotionLayoutFragment<
 
     override fun onRefresh() {
         binding.swipeRefreshLayoutDataReload.isRefreshing = false
-        viewModel.networkRefresh(true)
+//        viewModel.networkRefresh(true)
+        showProgressBar()
     }
 
     private fun setupSignerManager(){
@@ -472,16 +470,14 @@ internal class DashboardFragment : MotionLayoutFragment<
         }
 
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-            viewModel.networkStateFlow.collect { (loadResponse, screenInit) ->
+            viewModel.networkStatusStateFlow.collect { networkStatus ->
                 binding.layoutDashboardHeader.let { dashboardHeader ->
-                    @Exhaustive
-                    when (loadResponse) {
-                        is LoadResponse.Loading -> {
-                            dashboardHeader.progressBarDashboardHeaderNetwork.invisibleIfFalse(screenInit)
-                            dashboardHeader.textViewDashboardHeaderNetwork.invisibleIfFalse(!screenInit)
-                            timeTrackerStart = System.currentTimeMillis()
+
+                    when (networkStatus) {
+                        is NetworkStatus.Loading -> {
+                            showProgressBar()
                         }
-                        is Response.Error -> {
+                        is NetworkStatus.Disconnected -> {
                             dashboardHeader.progressBarDashboardHeaderNetwork.invisibleIfFalse(false)
                             dashboardHeader.textViewDashboardHeaderNetwork.invisibleIfFalse(true)
                             dashboardHeader.textViewDashboardHeaderNetwork.setTextColor(
@@ -491,7 +487,8 @@ internal class DashboardFragment : MotionLayoutFragment<
                                 )
                             )
                         }
-                        is Response.Success -> {
+
+                        is NetworkStatus.Connected -> {
                             dashboardHeader.progressBarDashboardHeaderNetwork.invisibleIfFalse(false)
                             dashboardHeader.textViewDashboardHeaderNetwork.invisibleIfFalse(true)
                             dashboardHeader.textViewDashboardHeaderNetwork.setTextColor(
@@ -500,13 +497,48 @@ internal class DashboardFragment : MotionLayoutFragment<
                                     R.color.primaryGreen
                                 )
                             )
-                            Log.d("TimeTracker", "Your node went online in ${System.currentTimeMillis() - timeTrackerStart} milliseconds")
-                            viewModel.sendAppLog("- Your node went online in ${System.currentTimeMillis() - timeTrackerStart} milliseconds")
                         }
                     }
                 }
             }
         }
+
+//        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+//            viewModel.networkStateFlow.collect { (loadResponse, screenInit) ->
+//                binding.layoutDashboardHeader.let { dashboardHeader ->
+//                    @Exhaustive
+//                    when (loadResponse) {
+//                        is LoadResponse.Loading -> {
+//                            dashboardHeader.progressBarDashboardHeaderNetwork.invisibleIfFalse(screenInit)
+//                            dashboardHeader.textViewDashboardHeaderNetwork.invisibleIfFalse(!screenInit)
+//                            timeTrackerStart = System.currentTimeMillis()
+//                        }
+//                        is Response.Error -> {
+//                            dashboardHeader.progressBarDashboardHeaderNetwork.invisibleIfFalse(false)
+//                            dashboardHeader.textViewDashboardHeaderNetwork.invisibleIfFalse(true)
+//                            dashboardHeader.textViewDashboardHeaderNetwork.setTextColor(
+//                                ContextCompat.getColor(
+//                                    binding.root.context,
+//                                    R.color.primaryRed
+//                                )
+//                            )
+//                        }
+//                        is Response.Success -> {
+//                            dashboardHeader.progressBarDashboardHeaderNetwork.invisibleIfFalse(false)
+//                            dashboardHeader.textViewDashboardHeaderNetwork.invisibleIfFalse(true)
+//                            dashboardHeader.textViewDashboardHeaderNetwork.setTextColor(
+//                                ContextCompat.getColor(
+//                                    binding.root.context,
+//                                    R.color.primaryGreen
+//                                )
+//                            )
+//                            Log.d("TimeTracker", "Your node went online in ${System.currentTimeMillis() - timeTrackerStart} milliseconds")
+//                            viewModel.sendAppLog("- Your node went online in ${System.currentTimeMillis() - timeTrackerStart} milliseconds")
+//                        }
+//                    }
+//                }
+//            }
+//        }
 
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.restoreProgressStateFlow.collect { response ->
@@ -573,6 +605,19 @@ internal class DashboardFragment : MotionLayoutFragment<
             }
         }
         viewState.transitionToEndSet(binding.layoutMotionDashboard)
+    }
+
+    private fun showProgressBar(){
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            binding.layoutDashboardHeader.let { dashboardHeader ->
+                dashboardHeader.progressBarDashboardHeaderNetwork.visible
+                dashboardHeader.textViewDashboardHeaderNetwork.visible
+
+                delay(2000)
+
+                dashboardHeader.progressBarDashboardHeaderNetwork.invisible
+            }
+        }
     }
 
     private val progressWidth: Px by lazy {

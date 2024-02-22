@@ -49,6 +49,7 @@ import chat.sphinx.concept_repository_chat.model.AddMember
 import chat.sphinx.concept_repository_chat.model.CreateTribe
 import chat.sphinx.concept_repository_connect_manager.ConnectManagerRepository
 import chat.sphinx.concept_repository_connect_manager.model.ConnectionManagerState
+import chat.sphinx.concept_repository_connect_manager.model.NetworkStatus
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_dashboard.RepositoryDashboard
 import chat.sphinx.concept_repository_feed.FeedRepository
@@ -244,6 +245,10 @@ abstract class SphinxRepository(
 
     override val connectionManagerState: MutableStateFlow<ConnectionManagerState?> by lazy {
         MutableStateFlow(null)
+    }
+
+    override val networkStatus: MutableStateFlow<NetworkStatus> by lazy {
+        MutableStateFlow(NetworkStatus.Loading)
     }
 
     init {
@@ -624,6 +629,14 @@ abstract class SphinxRepository(
                     balance.toString()
                 )
             }
+        }
+    }
+
+    override fun onNetworkStatusChange(isConnected: Boolean) {
+        networkStatus.value = if (isConnected) {
+            NetworkStatus.Connected
+        } else {
+            NetworkStatus.Disconnected
         }
     }
 

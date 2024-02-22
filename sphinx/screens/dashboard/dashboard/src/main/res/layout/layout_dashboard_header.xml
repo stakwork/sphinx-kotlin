@@ -72,7 +72,7 @@
             android:layout_height="match_parent"
             android:fontFamily="@font/material_icons_regular"
             android:textSize="15sp"
-            android:textColor="@color/washedOutReceivedText"
+            android:textColor="@color/primaryRed"
             android:text="@string/material_icon_name_bolt"
             android:gravity="center"
             app:layout_constraintBottom_toBottomOf="@+id/progress_bar_dashboard_header_network"

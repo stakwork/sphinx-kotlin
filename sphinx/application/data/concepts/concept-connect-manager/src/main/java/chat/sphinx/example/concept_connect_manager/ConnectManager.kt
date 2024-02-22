@@ -99,6 +99,8 @@ interface ConnectManagerListener {
 
     fun onNewBalance(balance: Long)
 
+    fun onNetworkStatusChange(isConnected: Boolean)
+
 }
 
 
