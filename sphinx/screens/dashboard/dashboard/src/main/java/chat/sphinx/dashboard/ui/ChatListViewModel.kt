@@ -100,6 +100,13 @@ internal class ChatListViewModel @Inject constructor(
         MutableStateFlow(emptyList())
     }
 
+
+    private val _hasSingleContact: MutableStateFlow<Boolean?> by lazy {
+        MutableStateFlow(null)
+    }
+    val hasSingleContact: StateFlow<Boolean?>
+        get() = _hasSingleContact.asStateFlow()
+
     private val collectionLock = Mutex()
 
     private var contactsCollectionInitialized: Boolean = false
@@ -234,6 +241,10 @@ internal class ChatListViewModel @Inject constructor(
 
             if (contacts.isEmpty()) {
                 return@withLock
+            }
+
+            if (contacts.size == 1 && contacts.first().isOwner.isTrue()) {
+                _hasSingleContact.value = true
             }
 
             val newList = ArrayList<Contact>(contacts.size)
