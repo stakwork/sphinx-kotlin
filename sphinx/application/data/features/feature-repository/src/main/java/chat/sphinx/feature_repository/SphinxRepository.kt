@@ -2347,10 +2347,6 @@ abstract class SphinxRepository(
     }
 
     override suspend fun createNewContact(contact: NewContact) {
-        if (!contact.confirmed) {
-            return
-        }
-
         val queries = coreDB.getSphinxDatabaseQueries()
         val now = DateTime.nowUTC()
         val contactId = getNewContactIndex().firstOrNull()?.value
@@ -2359,11 +2355,14 @@ abstract class SphinxRepository(
             ?.let { getContactByPubKey(it).firstOrNull() }
 
         if (exitingContact?.nodePubKey != null) {
+            val contactStatus = if (contact.confirmed) ContactStatus.Confirmed else ContactStatus.Pending
+            val chatStatus = if (contact.confirmed) ChatStatus.Approved else ChatStatus.Pending
+
             contactLock.withLock {
-                queries.contactUpdatePhotoUrl(contact.photoUrl, exitingContact.id)
+                queries.contactUpdateDetails(contact.contactAlias, contact.photoUrl, contactStatus, exitingContact.id)
             }
             chatLock.withLock {
-                queries.chatUpdatePhotoUrlById(contact.photoUrl, ChatId(exitingContact.id.value))
+                queries.chatUpdateDetails(contact.photoUrl, chatStatus, ChatId(exitingContact.id.value))
             }
 
         } else {
@@ -2377,7 +2376,7 @@ abstract class SphinxRepository(
                 photoUrl = contact.photoUrl,
                 privatePhoto = PrivatePhoto.False,
                 isOwner = Owner.False,
-                status = if (contact.confirmed || contact.lightningNodePubKey != null) ContactStatus.Confirmed else ContactStatus.Pending,
+                status = if (contact.confirmed) ContactStatus.Confirmed else ContactStatus.Pending,
                 rsaPublicKey = null,
                 deviceId = null,
                 createdAt = now.toDateTime(),
@@ -2398,7 +2397,7 @@ abstract class SphinxRepository(
                 ),
                 photoUrl = contact.photoUrl,
                 type = ChatType.Conversation,
-                status = if (contact.confirmed || contact.lightningNodePubKey != null) ChatStatus.Approved else ChatStatus.Pending,
+                status = if (contact.confirmed) ChatStatus.Approved else ChatStatus.Pending,
                 contactIds = listOf(ContactId(0), ContactId(contactId ?: -1)),
                 isMuted = ChatMuted.False,
                 createdAt = now.toDateTime(),

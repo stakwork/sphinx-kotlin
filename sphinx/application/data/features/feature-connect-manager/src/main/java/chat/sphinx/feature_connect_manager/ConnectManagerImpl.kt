@@ -281,9 +281,7 @@ class ConnectManagerImpl(
 
                 override fun messageArrived(topic: String?, message: MqttMessage?) {
                     // Handle incoming messages here
-                    Log.d("MQTT_MESSAGES", "topic: $topic")
-                    Log.d("MQTT_MESSAGES", "$message")
-                    Log.d("MQTT_MESSAGES", "${message?.payload}")
+                    Log.d("MQTT_MESSAGES", "messageArrived: $message")
 
                     if (topic != null && message?.payload != null) {
 
