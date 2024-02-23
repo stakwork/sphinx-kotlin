@@ -323,21 +323,16 @@ internal class DashboardViewModel @Inject constructor(
 
                     handlePeopleConnectLink(peopleConnectLink)
 
-                } ?: code.toLightningNodePubKey()?.let { lightningNodePubKey ->
+                } ?: run {
+                    val contactInfo = code.split(":")
+                    val pubKey = contactInfo.getOrNull(0)?.toLightningNodePubKey()
+                    val contactRouteHint = contactInfo.getOrNull(1)?.toLightningRouteHint()
 
-                    handleContactLink(lightningNodePubKey, null)
-
-                } ?: code.toVirtualLightningNodeAddress()?.let { virtualNodeAddress ->
-
-                    virtualNodeAddress.getPubKey()?.let { lightningNodePubKey ->
-
-                        handleContactLink(
-                            lightningNodePubKey,
-                            virtualNodeAddress.getRouteHint()
-                        )
-
+                    if (pubKey != null && contactRouteHint != null) {
+                        handleContactLink(pubKey, contactRouteHint)
+                    } else {
+                        null
                     }
-
                 } ?: code.toLightningPaymentRequestOrNull()?.let { lightningPaymentRequest ->
                     try {
                         val bolt11 = Bolt11.decode(lightningPaymentRequest)

@@ -76,16 +76,16 @@ internal class NewContactViewModel @Inject constructor(
             return
         }
 
-        args.argPubKey?.toLightningNodePubKey()?.let { lightningNodePubKey ->
-            val lightningRouteHint = args.argRouteHint?.toLightningRouteHint()
-
-            initContactJob = viewModelScope.launch(mainImmediate) {
-                submitSideEffect(
-                    ContactSideEffect.ContactInfo(
-                        lightningNodePubKey,
-                        lightningRouteHint
+        args.argPubKey?.toLightningNodePubKey()?.let { pubKey ->
+            args.argRouteHint?.toLightningRouteHint()?.let { routeHint ->
+                initContactJob = viewModelScope.launch(mainImmediate) {
+                    submitSideEffect(
+                        ContactSideEffect.ContactInfo(
+                            pubKey,
+                            routeHint
+                        )
                     )
-                )
+                }
             }
         }
     }
