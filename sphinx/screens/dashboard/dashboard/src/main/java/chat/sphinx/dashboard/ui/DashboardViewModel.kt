@@ -57,6 +57,8 @@ import chat.sphinx.wrapper_common.dashboard.RestoreProgressViewState
 import chat.sphinx.wrapper_common.dashboard.toChatId
 import chat.sphinx.wrapper_common.feed.*
 import chat.sphinx.wrapper_common.lightning.*
+import chat.sphinx.wrapper_common.message.SphinxCallLink
+import chat.sphinx.wrapper_common.message.toSphinxCallLink
 import chat.sphinx.wrapper_common.tribe.TribeJoinLink
 import chat.sphinx.wrapper_common.tribe.isValidTribeJoinLink
 import chat.sphinx.wrapper_common.tribe.toTribeJoinLink
@@ -74,6 +76,9 @@ import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
+import org.jitsi.meet.sdk.JitsiMeetActivity
+import org.jitsi.meet.sdk.JitsiMeetConferenceOptions
+import org.jitsi.meet.sdk.JitsiMeetUserInfo
 import javax.inject.Inject
 
 
@@ -241,6 +246,37 @@ internal class DashboardViewModel @Inject constructor(
                 handleFeedItemLink(feedItemLink)
             } ?: deepLink?.toPushNotificationLink()?.let { pushNotificationLink ->
                 handlePushNotification(pushNotificationLink)
+            } ?: deepLink?.toSphinxCallLink()?.let { sphinxCallLink ->
+                joinCall(sphinxCallLink, sphinxCallLink.startAudioOnly)
+            }
+        }
+    }
+
+    private fun joinCall(link: SphinxCallLink, audioOnly: Boolean) {
+        link.callServerUrl?.let { nnCallUrl ->
+
+            viewModelScope.launch(mainImmediate) {
+
+                val owner = getOwner()
+
+                val userInfo = JitsiMeetUserInfo()
+                userInfo.displayName = owner.alias?.value ?: ""
+
+                owner.avatarUrl?.let { nnAvatarUrl ->
+                    userInfo.avatar = nnAvatarUrl
+                }
+
+                val options = JitsiMeetConferenceOptions.Builder()
+                    .setServerURL(nnCallUrl)
+                    .setRoom(link.callRoom)
+                    .setAudioMuted(false)
+                    .setVideoMuted(false)
+                    .setFeatureFlag("welcomepage.enabled", false)
+                    .setAudioOnly(audioOnly)
+                    .setUserInfo(userInfo)
+                    .build()
+
+                JitsiMeetActivity.launch(app, options)
             }
         }
     }

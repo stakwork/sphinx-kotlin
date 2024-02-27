@@ -78,6 +78,7 @@ dependencies {
     implementation deps.jna.sdk
     implementation deps.lottie.sdk
     implementation deps.square.moshi
+    implementation deps.jitsi.sdk
     kapt kaptDeps.google.hilt
 
     testImplementation testDeps.junit
