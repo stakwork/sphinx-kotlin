@@ -758,16 +758,20 @@ abstract class SphinxRepository(
             )
 
             messageLock.withLock {
-                queries.transaction {
-                    upsertNewMessage(newMessage, queries, null)
+                    queries.transaction {
+                        upsertNewMessage(newMessage, queries, null)
 
-                    updateChatNewLatestMessage(
-                        newMessage,
-                        ChatId(chatId),
-                        latestMessageUpdatedTimeMap,
-                        queries
-                    )
+                        updateChatNewLatestMessage(
+                            newMessage,
+                            ChatId(chatId),
+                            latestMessageUpdatedTimeMap,
+                            queries
+                        )
+                    }
                 }
+
+            chatLock.withLock {
+                queries.chatUpdateSeen(Seen.False, ChatId(chatId))
             }
         }
     }
@@ -3294,30 +3298,38 @@ abstract class SphinxRepository(
         queries: SphinxDatabaseQueries,
         executeNetworkRequest: Boolean
     ) {
-        val wasMarkedSeen: Boolean =
-            chatLock.withLock {
-                messageLock.withLock {
-                    withContext(io) {
-                        chatSeenMap.withLock { map ->
-
-                            if (map[chatId]?.isTrue() != true) {
-
-                                queries.updateSeen(chatId)
-                                LOG.d(TAG, "Chat [$chatId] marked as Seen")
-                                map[chatId] = Seen.True
-
-                                true
-                            } else {
-                                false
-                            }
-                        }
-                    }
+        messageLock.withLock {
+            withContext(io) {
+                queries.transaction {
+                    queries.updateSeen(chatId)
                 }
             }
-
-        if (executeNetworkRequest && wasMarkedSeen) {
-            networkQueryMessage.readMessages(chatId).collect { _ -> }
         }
+
+//        val wasMarkedSeen: Boolean =
+//            chatLock.withLock {
+//                messageLock.withLock {
+//                    withContext(io) {
+//                        chatSeenMap.withLock { map ->
+//
+//                            if (map[chatId]?.isTrue() != true) {
+//
+//                                queries.updateSeen(chatId)
+//                                LOG.d(TAG, "Chat [$chatId] marked as Seen")
+//                                map[chatId] = Seen.True
+//
+//                                true
+//                            } else {
+//                                false
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+
+//        if (executeNetworkRequest && wasMarkedSeen) {
+//            networkQueryMessage.readMessages(chatId).collect { _ -> }
+//        }
     }
 
     private val provisionalMessageLock = Mutex()
