@@ -941,7 +941,6 @@ internal class DashboardViewModel @Inject constructor(
 
     init {
         viewModelScope.launch(mainImmediate) {
-            getOwner()
             repositoryDashboard.getUnseenTribeMessagesCount()
                 .collect { unseenTribeMessagesCount ->
                     updateTabsState(
@@ -959,6 +958,12 @@ internal class DashboardViewModel @Inject constructor(
                     discoverTribesVisible = false
                 )
             )
+        }
+    }
+
+    fun initOwner() {
+        viewModelScope.launch(mainImmediate) {
+            getOwner()
         }
     }
 

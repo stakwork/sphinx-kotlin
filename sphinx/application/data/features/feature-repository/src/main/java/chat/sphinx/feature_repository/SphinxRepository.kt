@@ -773,6 +773,15 @@ abstract class SphinxRepository(
             chatLock.withLock {
                 queries.chatUpdateSeen(Seen.False, ChatId(chatId))
             }
+
+            if ((contact?.photoUrl?.value ?: "") != msgSender.photo_url) {
+
+                contact?.id?.let { contactId ->
+                    contactLock.withLock {
+                        queries.contactUpdatePhotoUrl(msgSender.photo_url?.toPhotoUrl(), contactId)
+                    }
+                }
+            }
         }
     }
 

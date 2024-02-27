@@ -109,6 +109,7 @@ internal class DashboardFragment : MotionLayoutFragment<
 
     override fun onResume() {
         super.onResume()
+        viewModel.initOwner()
 
         activity?.intent?.dataString?.let { deepLink ->
             viewModel.handleDeepLink(deepLink)
