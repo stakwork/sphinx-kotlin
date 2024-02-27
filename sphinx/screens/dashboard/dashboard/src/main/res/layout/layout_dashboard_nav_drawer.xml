@@ -11,7 +11,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/nav_drawer_header"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="85dp"
         android:layout_marginTop="@dimen/nav_drawer_header_margin"
         android:layout_marginBottom="@dimen/nav_drawer_header_margin"
         android:layout_marginStart="@dimen/default_layout_margin"
@@ -62,33 +62,43 @@
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-        <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/nav_drawer_text_view_sats_balance"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:ellipsize="end"
-            android:singleLine="true"
-            android:text="@string/default_sats_amount"
-            android:textColor="@color/text"
-            android:textSize="14sp"
-            android:fontFamily="@font/montserrat_regular"
-            android:layout_marginTop="15dp"
-            app:layout_constraintStart_toStartOf="@+id/nav_drawer_button_header_profile"
-            app:layout_constraintTop_toBottomOf="@+id/nav_drawer_button_header_profile"
-            tools:text="100,000,000" />
-
-        <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/nav_drawer_text_view_balance_denomination"
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="4dp"
-            android:alpha=".5"
-            android:text="@string/sats"
-            android:textColor="@color/secondaryText"
-            android:textSize="14sp"
-            android:fontFamily="@font/montserrat_regular"
-            app:layout_constraintBottom_toBottomOf="@+id/nav_drawer_text_view_sats_balance"
-            app:layout_constraintStart_toEndOf="@+id/nav_drawer_text_view_sats_balance" />
+            android:layout_height="20dp"
+            android:layout_marginTop="@dimen/default_layout_margin"
+            app:layout_constraintStart_toStartOf="@+id/nav_drawer_button_header_profile"
+            app:layout_constraintTop_toBottomOf="@+id/nav_drawer_button_header_profile">
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/nav_drawer_text_view_sats_balance"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:singleLine="true"
+                android:text="@string/default_sats_amount"
+                android:textColor="@color/text"
+                android:textSize="14sp"
+                android:fontFamily="@font/montserrat_regular"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                tools:text="1 000 000" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/nav_drawer_text_view_balance_denomination"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/default_small_layout_margin"
+                android:alpha=".5"
+                android:text="@string/sats"
+                android:textColor="@color/secondaryText"
+                android:textSize="14sp"
+                android:fontFamily="@font/montserrat_regular"
+                app:layout_constraintBottom_toBottomOf="@+id/nav_drawer_text_view_sats_balance"
+                app:layout_constraintTop_toTopOf="@+id/nav_drawer_text_view_sats_balance"
+                app:layout_constraintStart_toEndOf="@+id/nav_drawer_text_view_sats_balance" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
 <!--        <androidx.appcompat.widget.AppCompatTextView-->
 <!--            android:id="@+id/nav_drawer_button_add_sats"-->
