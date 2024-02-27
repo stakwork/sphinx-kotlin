@@ -359,7 +359,7 @@ class ConnectManagerImpl(
                     ownerSeed!!,
                     getTimestampInMilliseconds(),
                     getCurrentUserState(),
-                    ownerInfoStateFlow.value?.messageLastIndex?.toULong() ?: 0.toULong(),
+                    ownerInfoStateFlow.value?.messageLastIndex?.plus(1)?.toULong() ?: 0.toULong(),
                     100.toUInt()
                 )
 
