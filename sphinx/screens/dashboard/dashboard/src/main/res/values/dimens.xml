@@ -11,6 +11,17 @@
     <dimen name="dashboard_search_bar_height">58dp</dimen>
     <dimen name="dashboard_header_network_xy">24dp</dimen>
 
+    <dimen name="nav_drawer_width">240dp</dimen>
+    <dimen name="nav_drawer_default_text_size">16sp</dimen>
+    <dimen name="nav_drawer_button_margin_top">32dp</dimen>
+    <dimen name="nav_drawer_button_image_xy">29dp</dimen>
+    <dimen name="nav_drawer_button_image_margin_start">8dp</dimen>
+    <dimen name="nav_drawer_button_text_margin_start">53dp</dimen>
+    <dimen name="nav_drawer_version_text_size">10sp</dimen>
+    <dimen name="nav_drawer_header_margin">32dp</dimen>
+    <dimen name="nav_drawer_header_profile_picture_xy">46dp</dimen>
+    <dimen name="nav_drawer_header_profile_picture_radius">23dp</dimen>
+
     <dimen name="dashboard_progress_bar_status">16dp</dimen>
 
 </resources>
