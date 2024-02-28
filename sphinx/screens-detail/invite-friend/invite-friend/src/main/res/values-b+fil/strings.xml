@@ -8,4 +8,5 @@
     <string name="invite_friend_estimated_cost_text_view">TINATAYANG HALAGA</string>
     <string name="invite_friend_nickname_empty">Nickname can not be empty</string>
     <string name="invite_failed">Invite failed. Please try again later.</string>
+    <string name="invite_empty_sats">Choose a sat amount before creating an invite</string>
 </resources>

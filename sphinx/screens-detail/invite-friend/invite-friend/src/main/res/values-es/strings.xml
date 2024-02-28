@@ -10,4 +10,6 @@
 
     <string name="invite_friend_nickname_empty">Alias no puede ser vacío</string>
     <string name="invite_failed">La invitación falló. Por favor inténtalo luego.</string>
+    <string name="invite_empty_sats">Elige una cantidad de sats antes de crear una invitación</string>
+
 </resources>

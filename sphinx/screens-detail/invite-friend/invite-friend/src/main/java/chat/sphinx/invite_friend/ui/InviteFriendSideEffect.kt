@@ -45,4 +45,13 @@ internal sealed class InviteFriendSideEffect: SideEffect<Context>() {
         override val toastLengthLong: Boolean
             get() = true
     }
+
+    object EmptySats : Notify() {
+        override val stringRes: Int
+            get() = R.string.invite_empty_sats
+        override val showIcon: Boolean
+            get() = false
+        override val toastLengthLong: Boolean
+            get() = true
+    }
 }

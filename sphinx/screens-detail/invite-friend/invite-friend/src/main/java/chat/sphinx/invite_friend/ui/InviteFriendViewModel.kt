@@ -7,7 +7,6 @@ import app.cash.exhaustive.Exhaustive
 import chat.sphinx.concept_network_query_invite.NetworkQueryInvite
 import chat.sphinx.concept_repository_connect_manager.ConnectManagerRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
-import chat.sphinx.invite_friend.R
 import chat.sphinx.invite_friend.navigation.InviteFriendNavigator
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
@@ -18,7 +17,6 @@ import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -61,7 +59,8 @@ internal class InviteFriendViewModel @Inject constructor(
     private var createInviteJob: Job? = null
     fun createNewInvite(
         nickname: String?,
-        welcomeMessage: String?
+        welcomeMessage: String?,
+        sats: Long?
     ) {
         if (createInviteJob?.isActive == true) {
             return
@@ -69,8 +68,13 @@ internal class InviteFriendViewModel @Inject constructor(
 
         createInviteJob = viewModelScope.launch(mainImmediate) {
 
-            connectManagerRepository.createInvite(nickname ?: "", welcomeMessage ?: "", 1000)
-            updateViewState(InviteFriendViewState.InviteCreationSucceed)
+            if (sats != null && sats > 0L) {
+                connectManagerRepository.createInvite(nickname ?: "", welcomeMessage ?: "", sats)
+                updateViewState(InviteFriendViewState.InviteCreationSucceed)
+            } else {
+                submitSideEffect(InviteFriendSideEffect.EmptySats)
+                updateViewState(InviteFriendViewState.InviteCreationFailed)
+            }
 
 //            if (nickname == null || nickname.isEmpty()) {
 //                submitSideEffect(InviteFriendSideEffect.EmptyNickname)

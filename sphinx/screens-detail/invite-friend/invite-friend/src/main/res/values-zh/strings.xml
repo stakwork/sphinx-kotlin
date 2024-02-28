@@ -10,4 +10,5 @@
 
     <string name="invite_friend_nickname_empty">暱稱不可無填</string>
     <string name="invite_failed">邀請失敗. 請稍後再試一次.</string>
+    <string name="invite_empty_sats">Choose a sat amount before creating an invite</string>w
 </resources>
