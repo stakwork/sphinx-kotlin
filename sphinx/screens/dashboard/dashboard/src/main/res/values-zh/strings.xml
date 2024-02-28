@@ -164,4 +164,5 @@
     <string name="refresh_while_loading">You can\'t get new recommendations while playing them. Please stop playing before refreshing</string>
 
     <string name="time_left">%s left</string>
+    <string name="dashboard_invite_code_screen">INVITE CODE</string>
 </resources>

@@ -40,6 +40,7 @@ import uniffi.sphinxrs.handle
 import uniffi.sphinxrs.initialSetup
 import uniffi.sphinxrs.joinTribe
 import uniffi.sphinxrs.listTribeMembers
+import uniffi.sphinxrs.makeInvite
 import uniffi.sphinxrs.makeMediaToken
 import uniffi.sphinxrs.makeMediaTokenWithMeta
 import uniffi.sphinxrs.makeMediaTokenWithPrice
@@ -168,7 +169,8 @@ class ConnectManagerImpl(
                     contact.lightningRouteHint?.value!!,
                     ownerInfoStateFlow.value?.alias ?: "",
                     ownerInfoStateFlow.value?.picture ?: "",
-                    3000.toULong()
+                    3000.toULong(),
+                    null
                 )
 
                 handleRunReturn(
@@ -495,6 +497,24 @@ class ConnectManagerImpl(
         }
     }
 
+    override fun createInvite(nickname: String, welcomeMessage: String, sats: Long) {
+        val now = getTimestampInMilliseconds()
+
+            try {
+                val createInvite = makeInvite(
+                    ownerSeed!!,
+                    now,
+                    getCurrentUserState(),
+                    mixer!!,
+                    sats.toULong()
+                )
+                handleRunReturn(createInvite, mqttClient!!)
+            }
+            catch (e: Exception) {
+                Log.e("MQTT_MESSAGES", "createInvite ${e.message}")
+            }
+    }
+
     override fun retrieveTribeMembersList(tribeServerPubKey: String, tribePubKey: String) {
         val now = getTimestampInMilliseconds()
 
@@ -683,6 +703,14 @@ class ConnectManagerImpl(
                 }
             }
             Log.d("MQTT_MESSAGES", "=> my_contact_info $myContactInfo")
+        }
+
+        // Handling new invite created
+        rr.newInvite?.let { invite ->
+            notifyListeners {
+                onNewInviteCreated(invite)
+            }
+            Log.d("MQTT_MESSAGES", "=> new_invite $invite")
         }
 
         // Handling other properties like sentStatus, settledStatus, error, etc.

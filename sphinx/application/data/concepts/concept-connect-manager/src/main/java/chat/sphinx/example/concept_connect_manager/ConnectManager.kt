@@ -43,6 +43,12 @@ abstract class ConnectManager {
         tribeJson: String
     )
 
+    abstract fun createInvite(
+        nickname: String,
+        welcomeMessage: String,
+        sats: Long
+    )
+
     abstract fun retrieveTribeMembersList(
         tribeServerPubKey: String,
         tribePubKey: String
@@ -100,6 +106,8 @@ interface ConnectManagerListener {
     fun onNewBalance(balance: Long)
 
     fun onNetworkStatusChange(isConnected: Boolean)
+
+    fun onNewInviteCreated(inviteString: String)
 
 }
 

@@ -15,6 +15,7 @@ interface ConnectManagerRepository {
     fun connectAndSubscribeToMqtt(userState: String?) {}
     fun setLspIp(lspIp: String)
     fun singChallenge(challenge: String)
+    fun createInvite(nickname: String, welcomeMessage: String, sats: Long)
 
     fun joinTribe(
         tribeHost: String,

@@ -180,6 +180,13 @@ internal class DashboardViewModel @Inject constructor(
                     is ConnectionManagerState.UserState -> {
                         storeUserState(connectionState.userState)
                     }
+                    is ConnectionManagerState.NewInviteCode -> {
+                        delay(500L)
+                        dashboardNavigator.toQRCodeDetail(
+                            connectionState.inviteCode,
+                            app.getString(R.string.dashboard_invite_code_screen),
+                        )
+                    }
                     else -> {}
                 }
             }

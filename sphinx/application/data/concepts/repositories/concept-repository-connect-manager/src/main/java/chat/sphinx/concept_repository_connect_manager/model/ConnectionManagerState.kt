@@ -11,4 +11,5 @@ sealed class ConnectionManagerState {
     data class SignedChallenge(val authToken: String): ConnectionManagerState()
     data class ErrorMessage(val message: String): ConnectionManagerState()
     data class TribeMembersList(val tribeMembers: TribeMembersResponse): ConnectionManagerState()
+    data class NewInviteCode(val inviteCode: String): ConnectionManagerState()
 }

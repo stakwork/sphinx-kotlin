@@ -378,6 +378,10 @@ abstract class SphinxRepository(
         }
     }
 
+    override fun createInvite(nickname: String, welcomeMessage: String, sats: Long) {
+        connectManager.createInvite(nickname, welcomeMessage, sats)
+    }
+
     override fun getTribeMembers(tribeServerPubKey: String, tribePubKey: String) {
         connectManager.retrieveTribeMembersList(tribeServerPubKey, tribePubKey)
     }
@@ -638,6 +642,11 @@ abstract class SphinxRepository(
         } else {
             NetworkStatus.Disconnected
         }
+    }
+
+    override fun onNewInviteCreated(inviteString: String) {
+
+        connectionManagerState.value = ConnectionManagerState.NewInviteCode(inviteString)
     }
 
     override suspend fun updateLspAndOwner(data: String) {
