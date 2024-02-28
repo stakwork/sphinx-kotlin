@@ -35,6 +35,7 @@ import chat.sphinx.screen_detail_fragment.SideEffectDetailFragment
 import chat.sphinx.wrapper_common.lightning.getPubKey
 import chat.sphinx.wrapper_common.lightning.getRouteHint
 import chat.sphinx.wrapper_common.lightning.toLightningNodePubKey
+import chat.sphinx.wrapper_common.lightning.toLightningRouteHint
 import chat.sphinx.wrapper_common.lightning.toVirtualLightningNodeAddress
 import chat.sphinx.wrapper_common.util.getInitials
 import io.matthewnelson.android_feature_screens.util.gone
@@ -202,12 +203,12 @@ abstract class ContactFragment<
 
     @SuppressLint("SetTextI18n")
     private fun pastePubKey(s: Editable?) {
-        s?.toString()?.toLightningNodePubKey()?.let { nnPubKey ->
+        val contactInfo = s?.split(":")
+        contactInfo?.getOrNull(0)?.toLightningNodePubKey()?.let { nnPubKey ->
             contactBinding.editTextContactAddress.setText(nnPubKey.value)
         }
-        s?.toString()?.toVirtualLightningNodeAddress()?.let { nnVirtualAddress ->
-            contactBinding.editTextContactAddress.setText(nnVirtualAddress.getPubKey()?.value)
-            contactBinding.editTextContactRouteHint.setText(nnVirtualAddress.getRouteHint()?.value ?: "")
+        contactInfo?.getOrNull(1)?.toLightningRouteHint()?.let { nnVirtualAddress ->
+            contactBinding.editTextContactRouteHint.setText(nnVirtualAddress.value)
         }
     }
 

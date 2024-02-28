@@ -92,6 +92,8 @@
     <string name="dashboard_feed_tab_name">Feed</string>
     <string name="dashboard_friends_tab_name">Kaibigan</string>
     <string name="dashboard_tribes_tab_name">Tribo</string>
+    <string name="dashboard_network_disconnected_mqtt_toast">MQTT Disconnected</string>
+    <string name="dashboard_network_connected_mqtt_toast">MQTT Connected</string>
     <string name="all">Lhat</string>
     <string name="listen">Makinig</string>
     <string name="watch">Manood</string>
@@ -126,4 +128,5 @@
     <string name="loading_recommendations">Naglo-load ng Mga Rekomendasyon...</string>
     <string name="refresh_while_loading">You can\'t get new recommendations while playing them. Please stop playing before refreshing</string>
     <string name="time_left">%s left</string>
+
 </resources>

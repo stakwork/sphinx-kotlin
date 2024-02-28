@@ -255,6 +255,10 @@ class ConnectManagerImpl(
                     Log.d("MQTT_MESSAGES", "MQTT CONNECTED!")
 
                     subscribeOwnerMQTT()
+
+                    notifyListeners {
+                        onNetworkStatusChange(true)
+                    }
                 }
 
                 override fun onFailure(asyncActionToken: IMqttToken?, exception: Throwable?) {
@@ -268,14 +272,16 @@ class ConnectManagerImpl(
                 override fun connectionLost(cause: Throwable?) {
                     Log.d("MQTT_MESSAGES", "MQTT DISCONNECTED! $cause ${cause?.message}")
 
+                    notifyListeners {
+                        onNetworkStatusChange(false)
+                    }
+
                     reconnectWithBackoff()
                 }
 
                 override fun messageArrived(topic: String?, message: MqttMessage?) {
                     // Handle incoming messages here
-                    Log.d("MQTT_MESSAGES", "topic: $topic")
-                    Log.d("MQTT_MESSAGES", "$message")
-                    Log.d("MQTT_MESSAGES", "${message?.payload}")
+                    Log.d("MQTT_MESSAGES", "messageArrived: $message")
 
                     if (topic != null && message?.payload != null) {
 
@@ -304,6 +310,10 @@ class ConnectManagerImpl(
         } catch (e: MqttException) {
             Log.d("MQTT_MESSAGES", "MQTT DISCONNECTED! exception")
             e.printStackTrace()
+
+            notifyListeners {
+                onNetworkStatusChange(false)
+            }
         }
     }
 
@@ -349,7 +359,7 @@ class ConnectManagerImpl(
                     ownerSeed!!,
                     getTimestampInMilliseconds(),
                     getCurrentUserState(),
-                    ownerInfoStateFlow.value?.messageLastIndex?.toULong() ?: 0.toULong(),
+                    ownerInfoStateFlow.value?.messageLastIndex?.plus(1)?.toULong() ?: 0.toULong(),
                     100.toUInt()
                 )
 
@@ -805,7 +815,6 @@ class ConnectManagerImpl(
             val decoded = MsgPack.decodeFromByteArray(MsgPackDynamicSerializer, state)
             (decoded as? MutableMap<String, ByteArray>)?.let {
                 storeUserStateOnSharedPreferences(it)
-                Log.e("MSGPACK", "Dashboard storeUserState $it")
             }
 
         } catch (e: Exception) { }
@@ -814,7 +823,6 @@ class ConnectManagerImpl(
     private fun storeUserStateOnSharedPreferences(newUserState: MutableMap<String, ByteArray>) {
         val existingUserState = retrieveUserStateMap(ownerInfoStateFlow.value?.userState)
         existingUserState.putAll(newUserState)
-        Log.e("MSGPACK", "Dashboard $existingUserState")
 
         val encodedString = encodeMapToBase64(existingUserState)
 
@@ -851,7 +859,6 @@ class ConnectManagerImpl(
 
         val result = (encodedMap as Map<*, *>?)?.let { JSONObject(it).toString() } ?: ""
 
-        Log.e("MSGPACK", "dasboard encodeMapToBase64 $result")
 
         return result
     }
@@ -915,7 +922,7 @@ class ConnectManagerImpl(
     }
 
     private fun isConnected(): Boolean {
-        return mqttClient?.isConnected ?: false // Replace with actual connection check
+        return mqttClient?.isConnected ?: false
     }
 
 }

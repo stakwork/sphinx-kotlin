@@ -318,6 +318,12 @@ UPDATE chatDbo
 SET photo_url = :photo_url
 WHERE id = ?;
 
+chatUpdateDetails:
+UPDATE chatDbo
+SET photo_url = :photo_url,
+    status = :status
+WHERE id = ?;
+
 chatUpdateTribeData:
 UPDATE chatDbo
 SET price_per_message = :price_per_message,
@@ -470,6 +476,13 @@ WHERE id = ?;
 contactUpdatePhotoUrl:
 UPDATE contactDbo
 SET photo_url = :photo_url
+WHERE id = ?;
+
+contactUpdateDetails:
+UPDATE contactDbo
+SET alias = :alias,
+    photo_url = :photo_url,
+    status = :status
 WHERE id = ?;
 
 contactUpdateBlocked:

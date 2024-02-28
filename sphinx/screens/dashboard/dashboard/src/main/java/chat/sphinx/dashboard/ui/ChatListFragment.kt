@@ -35,6 +35,8 @@ import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.concept_views.viewstate.collect
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -222,13 +224,26 @@ internal class ChatListFragment : SideEffectFragment<
 
     override fun subscribeToViewStateFlow() {
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-            viewModel.chatViewStateContainer.collect { viewState ->
+
+            val chatViewStateFlow = flow {
+                viewModel.chatViewStateContainer.collect { emit(it) }
+            }
+
+            chatViewStateFlow.combine(viewModel.hasSingleContact) { chatViewState, isSingleContact ->
+                Pair(chatViewState, isSingleContact)
+            }.collect { (chatViewState, isSingleContact) ->
                 when {
-                    viewState.list.isEmpty() -> {
+                    chatViewState.list.isEmpty() -> {
                         binding.progressBarChatList.visible
+
+                        if (isSingleContact == true) {
+                            binding.progressBarChatList.gone
+//                            binding.welcomeToSphinx.visible
+                        }
                     }
-                    viewState.list.isNotEmpty() -> {
+                    else -> {
                         binding.progressBarChatList.gone
+                        binding.welcomeToSphinx.gone
                     }
                 }
             }

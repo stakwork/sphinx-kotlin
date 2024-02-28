@@ -49,6 +49,7 @@ import chat.sphinx.concept_repository_chat.model.AddMember
 import chat.sphinx.concept_repository_chat.model.CreateTribe
 import chat.sphinx.concept_repository_connect_manager.ConnectManagerRepository
 import chat.sphinx.concept_repository_connect_manager.model.ConnectionManagerState
+import chat.sphinx.concept_repository_connect_manager.model.NetworkStatus
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_dashboard.RepositoryDashboard
 import chat.sphinx.concept_repository_feed.FeedRepository
@@ -244,6 +245,10 @@ abstract class SphinxRepository(
 
     override val connectionManagerState: MutableStateFlow<ConnectionManagerState?> by lazy {
         MutableStateFlow(null)
+    }
+
+    override val networkStatus: MutableStateFlow<NetworkStatus> by lazy {
+        MutableStateFlow(NetworkStatus.Loading)
     }
 
     init {
@@ -627,6 +632,14 @@ abstract class SphinxRepository(
         }
     }
 
+    override fun onNetworkStatusChange(isConnected: Boolean) {
+        networkStatus.value = if (isConnected) {
+            NetworkStatus.Connected
+        } else {
+            NetworkStatus.Disconnected
+        }
+    }
+
     override suspend fun updateLspAndOwner(data: String) {
         val lspChannelInfo = data.toLspChannelInfo(moshi)
         val serverIp = connectManager.retrieveLspIp()
@@ -745,15 +758,28 @@ abstract class SphinxRepository(
             )
 
             messageLock.withLock {
-                queries.transaction {
-                    upsertNewMessage(newMessage, queries, null)
+                    queries.transaction {
+                        upsertNewMessage(newMessage, queries, null)
 
-                    updateChatNewLatestMessage(
-                        newMessage,
-                        ChatId(chatId),
-                        latestMessageUpdatedTimeMap,
-                        queries
-                    )
+                        updateChatNewLatestMessage(
+                            newMessage,
+                            ChatId(chatId),
+                            latestMessageUpdatedTimeMap,
+                            queries
+                        )
+                    }
+                }
+
+            chatLock.withLock {
+                queries.chatUpdateSeen(Seen.False, ChatId(chatId))
+            }
+
+            if ((contact?.photoUrl?.value ?: "") != msgSender.photo_url) {
+
+                contact?.id?.let { contactId ->
+                    contactLock.withLock {
+                        queries.contactUpdatePhotoUrl(msgSender.photo_url?.toPhotoUrl(), contactId)
+                    }
                 }
             }
         }
@@ -2334,10 +2360,6 @@ abstract class SphinxRepository(
     }
 
     override suspend fun createNewContact(contact: NewContact) {
-        if (!contact.confirmed) {
-            return
-        }
-
         val queries = coreDB.getSphinxDatabaseQueries()
         val now = DateTime.nowUTC()
         val contactId = getNewContactIndex().firstOrNull()?.value
@@ -2346,11 +2368,14 @@ abstract class SphinxRepository(
             ?.let { getContactByPubKey(it).firstOrNull() }
 
         if (exitingContact?.nodePubKey != null) {
+            val contactStatus = if (contact.confirmed) ContactStatus.Confirmed else ContactStatus.Pending
+            val chatStatus = if (contact.confirmed) ChatStatus.Approved else ChatStatus.Pending
+
             contactLock.withLock {
-                queries.contactUpdatePhotoUrl(contact.photoUrl, exitingContact.id)
+                queries.contactUpdateDetails(contact.contactAlias, contact.photoUrl, contactStatus, exitingContact.id)
             }
             chatLock.withLock {
-                queries.chatUpdatePhotoUrlById(contact.photoUrl, ChatId(exitingContact.id.value))
+                queries.chatUpdateDetails(contact.photoUrl, chatStatus, ChatId(exitingContact.id.value))
             }
 
         } else {
@@ -2364,7 +2389,7 @@ abstract class SphinxRepository(
                 photoUrl = contact.photoUrl,
                 privatePhoto = PrivatePhoto.False,
                 isOwner = Owner.False,
-                status = if (contact.confirmed || contact.lightningNodePubKey != null) ContactStatus.Confirmed else ContactStatus.Pending,
+                status = if (contact.confirmed) ContactStatus.Confirmed else ContactStatus.Pending,
                 rsaPublicKey = null,
                 deviceId = null,
                 createdAt = now.toDateTime(),
@@ -2385,7 +2410,7 @@ abstract class SphinxRepository(
                 ),
                 photoUrl = contact.photoUrl,
                 type = ChatType.Conversation,
-                status = if (contact.confirmed || contact.lightningNodePubKey != null) ChatStatus.Approved else ChatStatus.Pending,
+                status = if (contact.confirmed) ChatStatus.Approved else ChatStatus.Pending,
                 contactIds = listOf(ContactId(0), ContactId(contactId ?: -1)),
                 isMuted = ChatMuted.False,
                 createdAt = now.toDateTime(),
@@ -3282,30 +3307,38 @@ abstract class SphinxRepository(
         queries: SphinxDatabaseQueries,
         executeNetworkRequest: Boolean
     ) {
-        val wasMarkedSeen: Boolean =
-            chatLock.withLock {
-                messageLock.withLock {
-                    withContext(io) {
-                        chatSeenMap.withLock { map ->
-
-                            if (map[chatId]?.isTrue() != true) {
-
-                                queries.updateSeen(chatId)
-                                LOG.d(TAG, "Chat [$chatId] marked as Seen")
-                                map[chatId] = Seen.True
-
-                                true
-                            } else {
-                                false
-                            }
-                        }
-                    }
+        messageLock.withLock {
+            withContext(io) {
+                queries.transaction {
+                    queries.updateSeen(chatId)
                 }
             }
-
-        if (executeNetworkRequest && wasMarkedSeen) {
-            networkQueryMessage.readMessages(chatId).collect { _ -> }
         }
+
+//        val wasMarkedSeen: Boolean =
+//            chatLock.withLock {
+//                messageLock.withLock {
+//                    withContext(io) {
+//                        chatSeenMap.withLock { map ->
+//
+//                            if (map[chatId]?.isTrue() != true) {
+//
+//                                queries.updateSeen(chatId)
+//                                LOG.d(TAG, "Chat [$chatId] marked as Seen")
+//                                map[chatId] = Seen.True
+//
+//                                true
+//                            } else {
+//                                false
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+
+//        if (executeNetworkRequest && wasMarkedSeen) {
+//            networkQueryMessage.readMessages(chatId).collect { _ -> }
+//        }
     }
 
     private val provisionalMessageLock = Mutex()

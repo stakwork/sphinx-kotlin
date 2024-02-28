@@ -1122,7 +1122,7 @@ abstract class ChatFragment<
                             viewModel.sendAppLog("- Chat contact/tribe name was displayed in ${System.currentTimeMillis() - timeTrackerStart} milliseconds")
 
                             imageViewChatHeaderMuted.apply {
-                                viewState.isMuted?.let { muted ->
+                                viewState.isMuted.let { muted ->
                                     if (muted) {
                                         imageLoader.load(
                                             headerBinding.imageViewChatHeaderMuted,
@@ -1135,6 +1135,18 @@ abstract class ChatFragment<
                                         )
                                     }
                                 } ?: gone
+                            }
+
+                            textViewChatHeaderConnectivity.apply {
+                                viewState.isChatAvailable.let { available ->
+                                    if (available) {
+                                        setTextColorExt(R.color.primaryGreen)
+                                        textViewChatHeaderLock.text = getString(R.string.material_icon_name_lock)
+                                    } else {
+                                        setTextColorExt(R.color.sphinxOrange)
+                                        textViewChatHeaderLock.text = getString(R.string.material_icon_name_lock_open)
+                                    }
+                                }
                             }
                         }
                     }
@@ -1214,30 +1226,30 @@ abstract class ChatFragment<
             }
         }
 
-        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-            viewModel.checkRoute.collect { loadResponse ->
-                headerBinding.textViewChatHeaderConnectivity.apply {
-                    @Exhaustive
-                    when (loadResponse) {
-                        is LoadResponse.Loading -> {
-                            setTextColorExt(R.color.washedOutReceivedText)
-                        }
-                        is Response.Error -> {
-                            setTextColorExt(R.color.sphinxOrange)
-                        }
-                        is Response.Success -> {
-                            val colorRes = if (loadResponse.value) {
-                                R.color.primaryGreen
-                            } else {
-                                R.color.sphinxOrange
-                            }
-
-                            setTextColorExt(colorRes)
-                        }
-                    }
-                }
-            }
-        }
+//        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+//            viewModel.checkRoute.collect { loadResponse ->
+//                headerBinding.textViewChatHeaderConnectivity.apply {
+//                    @Exhaustive
+//                    when (loadResponse) {
+//                        is LoadResponse.Loading -> {
+//                            setTextColorExt(R.color.washedOutReceivedText)
+//                        }
+//                        is Response.Error -> {
+//                            setTextColorExt(R.color.sphinxOrange)
+//                        }
+//                        is Response.Success -> {
+//                            val colorRes = if (loadResponse.value) {
+//                                R.color.primaryGreen
+//                            } else {
+//                                R.color.sphinxOrange
+//                            }
+//
+//                            setTextColorExt(colorRes)
+//                        }
+//                    }
+//                }
+//            }
+//        }
 
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.getSelectedMessageViewStateFlow().collect { viewState ->

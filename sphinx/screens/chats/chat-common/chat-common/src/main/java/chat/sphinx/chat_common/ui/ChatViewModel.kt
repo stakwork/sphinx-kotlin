@@ -235,6 +235,7 @@ abstract class ChatViewModel<ARGS : NavArgs>(
                                 chatHeaderName = contact.alias?.value ?: "",
                                 showLock = currentState.showLock || contact.isEncrypted(),
                                 isMuted = currentState.isMuted,
+                                isChatAvailable = getChat().status.isApproved(),
                             )
                         }
                     }
@@ -248,6 +249,7 @@ abstract class ChatViewModel<ARGS : NavArgs>(
                         chatHeaderName = chat?.name?.value ?: getChatInfo()?.first?.value ?: "",
                         showLock = chat != null,
                         isMuted = chat?.notify?.isMuteChat() == true,
+                        isChatAvailable = chat?.status?.isApproved() ?: false
                     )
                     chat?.let { nnChat ->
                         if (nnChat.isPrivateTribe()) {
