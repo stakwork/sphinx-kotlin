@@ -21,7 +21,7 @@ ext.versions = [
     'okhttp'     : '4.10.0',
     'sqlDelight' : '1.5.4',
     'toplAndroid': '2.1.2',
-    'targetSdk'  : 30
+    'targetSdk'  : 33
 ]
 
 /**
