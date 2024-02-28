@@ -6,6 +6,8 @@ import android.view.View
 import androidx.annotation.ColorInt
 import chat.sphinx.wrapper_common.feed.isValidFeedItemLink
 import chat.sphinx.wrapper_common.lightning.*
+import chat.sphinx.wrapper_common.message.isValidJitsiCallLink
+import chat.sphinx.wrapper_common.message.isValidSphinxCallLink
 import chat.sphinx.wrapper_common.tribe.isValidTribeJoinLink
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -14,7 +16,9 @@ inline val String.isSphinxUrl: Boolean
             isValidLightningNodePubKey ||
             isValidVirtualNodeAddress ||
             isValidTribeJoinLink ||
-            isValidFeedItemLink
+            isValidFeedItemLink ||
+            isValidSphinxCallLink ||
+            isValidJitsiCallLink
 
 open class SphinxUrlSpan(
     url: String?,

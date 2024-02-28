@@ -203,7 +203,11 @@ inline fun Message.retrievePurchaseStatus(): PurchaseStatus? {
 @Suppress("NOTHING_TO_INLINE")
 inline fun Message.retrieveSphinxCallLink(): SphinxCallLink? =
     messageContentDecrypted?.value?.toSphinxCallLink()?.let {
-        it
+        if (it.value.split(" ").count() == 1) {
+            it
+        } else {
+            null
+        }
     } ?: callLinkMessage?.let {
         it.link
     }

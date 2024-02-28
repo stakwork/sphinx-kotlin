@@ -15,6 +15,9 @@ inline fun String.toSphinxCallLink(): SphinxCallLink? =
 inline val String.isValidSphinxCallLink: Boolean
     get() = isNotEmpty() && matches("^${SphinxCallLink.REGEX}\$".toRegex())
 
+inline val String.isValidJitsiCallLink: Boolean
+    get() = isNotEmpty() && startsWith(SphinxCallLink.DEFAULT_CALL_SERVER_URL)
+
 @JvmInline
 value class SphinxCallLink(val value: String) {
 
@@ -63,7 +66,7 @@ value class SphinxCallLink(val value: String) {
     }
 
     init {
-        require(value.isValidSphinxCallLink) {
+        require(value.isValidSphinxCallLink || value.isValidJitsiCallLink) {
             "Invalid Sphinx Call Link"
         }
     }
