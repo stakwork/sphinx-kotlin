@@ -40,7 +40,6 @@ import chat.sphinx.dashboard.navigation.DashboardNavigator
 import chat.sphinx.dashboard.ui.viewstates.*
 import chat.sphinx.kotlin_response.*
 import chat.sphinx.logger.SphinxLogger
-import chat.sphinx.logger.d
 import chat.sphinx.menu_bottom.ui.MenuBottomViewState
 import chat.sphinx.menu_bottom_scanner.ScannerMenuHandler
 import chat.sphinx.menu_bottom_scanner.ScannerMenuViewModel
@@ -58,6 +57,8 @@ import chat.sphinx.wrapper_common.dashboard.RestoreProgressViewState
 import chat.sphinx.wrapper_common.dashboard.toChatId
 import chat.sphinx.wrapper_common.feed.*
 import chat.sphinx.wrapper_common.lightning.*
+import chat.sphinx.wrapper_common.message.SphinxCallLink
+import chat.sphinx.wrapper_common.message.toSphinxCallLink
 import chat.sphinx.wrapper_common.tribe.TribeJoinLink
 import chat.sphinx.wrapper_common.tribe.isValidTribeJoinLink
 import chat.sphinx.wrapper_common.tribe.toTribeJoinLink
@@ -70,13 +71,18 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.MotionLayoutViewModel
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
-import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.build_config.BuildConfigVersionCode
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
+import org.jitsi.meet.sdk.JitsiMeetActivity
+import org.jitsi.meet.sdk.JitsiMeetConferenceOptions
+import org.jitsi.meet.sdk.JitsiMeetUserInfo
 import javax.inject.Inject
+
+
+data class BalanceState(val nodeBalance: NodeBalance?, val hideBalanceState: Int)
 
 @HiltViewModel
 internal class DashboardViewModel @Inject constructor(
@@ -146,6 +152,13 @@ internal class DashboardViewModel @Inject constructor(
     val networkStateFlow: StateFlow<Pair<LoadResponse<Boolean, ResponseError>, Boolean>>
         get() = _networkStateFlow.asStateFlow()
 
+    private val _hideBalanceStateFlow: MutableStateFlow<Int> by lazy {
+        MutableStateFlow(HideBalance.DISABLED)
+    }
+
+    val hideBalanceStateFlow: StateFlow<Int>
+        get() = _hideBalanceStateFlow.asStateFlow()
+
 
     private lateinit var signerManager: SignerManager
 
@@ -155,6 +168,8 @@ internal class DashboardViewModel @Inject constructor(
                 backgroundLoginHandler.updateLoginTime()
             }
         }
+
+        getHideBalanceState()
 
         syncFeedRecommendationsState()
 
@@ -166,6 +181,42 @@ internal class DashboardViewModel @Inject constructor(
         feedRepository.restoreContentFeedStatuses()
 
         networkRefresh(true)
+    }
+
+    private fun getHideBalanceState() {
+        viewModelScope.launch(mainImmediate) {
+            val appContext: Context = app.applicationContext
+            val hideSharedPreferences = appContext.getSharedPreferences(HideBalance.HIDE_BALANCE_SHARED_PREFERENCES, Context.MODE_PRIVATE)
+
+            val shouldHide = hideSharedPreferences.getInt(HideBalance.HIDE_BALANCE_ENABLED_KEY, HideBalance.DISABLED)
+            _hideBalanceStateFlow.value = shouldHide
+        }
+    }
+
+    fun toggleHideBalanceState(){
+        viewModelScope.launch(mainImmediate) {
+            val newState = if(_hideBalanceStateFlow.value == HideBalance.DISABLED){
+                HideBalance.ENABLED
+            } else {
+                HideBalance.DISABLED
+            }
+            _hideBalanceStateFlow.value = newState
+
+            delay(50L)
+
+            val appContext: Context = app.applicationContext
+            val hideSharedPreferences = appContext.getSharedPreferences(HideBalance.HIDE_BALANCE_SHARED_PREFERENCES, Context.MODE_PRIVATE)
+
+            withContext(dispatchers.io) {
+                hideSharedPreferences.edit()
+                    .putInt(HideBalance.HIDE_BALANCE_ENABLED_KEY, newState)
+                    .let { editor ->
+                        if (!editor.commit()) {
+                            editor.apply()
+                        }
+                    }
+            }
+        }
     }
     
     private fun getRelayKeys() {
@@ -195,6 +246,37 @@ internal class DashboardViewModel @Inject constructor(
                 handleFeedItemLink(feedItemLink)
             } ?: deepLink?.toPushNotificationLink()?.let { pushNotificationLink ->
                 handlePushNotification(pushNotificationLink)
+            } ?: deepLink?.toSphinxCallLink()?.let { sphinxCallLink ->
+                joinCall(sphinxCallLink, sphinxCallLink.startAudioOnly)
+            }
+        }
+    }
+
+    private fun joinCall(link: SphinxCallLink, audioOnly: Boolean) {
+        link.callServerUrl?.let { nnCallUrl ->
+
+            viewModelScope.launch(mainImmediate) {
+
+                val owner = getOwner()
+
+                val userInfo = JitsiMeetUserInfo()
+                userInfo.displayName = owner.alias?.value ?: ""
+
+                owner.avatarUrl?.let { nnAvatarUrl ->
+                    userInfo.avatar = nnAvatarUrl
+                }
+
+                val options = JitsiMeetConferenceOptions.Builder()
+                    .setServerURL(nnCallUrl)
+                    .setRoom(link.callRoom)
+                    .setAudioMuted(false)
+                    .setVideoMuted(false)
+                    .setFeatureFlag("welcomepage.enabled", false)
+                    .setAudioOnly(audioOnly)
+                    .setUserInfo(userInfo)
+                    .build()
+
+                JitsiMeetActivity.launch(app, options)
             }
         }
     }

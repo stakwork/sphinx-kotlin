@@ -2044,6 +2044,10 @@ abstract class ChatViewModel<ARGS : NavArgs>(
 
                     handleFeedItemLink(feedItemLink)
 
+                } ?: url.toSphinxCallLink()?.let { sphinxCallLink ->
+
+                    joinCall(sphinxCallLink, sphinxCallLink.startAudioOnly)
+
                 }
             }
 

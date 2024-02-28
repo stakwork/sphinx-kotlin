@@ -1,5 +1,14 @@
 # ChangeLog
 
+# Version 1.0.0-beta18 (2024-02-28)
+- Adds support for jitsi call universal links
+- Adds balance privacy feature
+- Fixes jitsi links handling from chat view
+
+# Version 1.0.0-beta17 (2024-02-27)
+- Adds support for jitsi call universal links
+- Adds balance privacy feature
+
 # Version 1.0.0-beta16 (2024-02-18)
 - Fixes connection issues on swarm accounts
 
