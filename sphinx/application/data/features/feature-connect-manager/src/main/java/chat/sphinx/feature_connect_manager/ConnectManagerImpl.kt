@@ -5,6 +5,8 @@ import android.util.Log
 import chat.sphinx.example.concept_connect_manager.ConnectManager
 import chat.sphinx.example.concept_connect_manager.ConnectManagerListener
 import chat.sphinx.example.concept_connect_manager.model.OwnerInfo
+import chat.sphinx.wrapper_common.lightning.toLightningNodePubKey
+import chat.sphinx.wrapper_common.lightning.toLightningRouteHint
 import chat.sphinx.wrapper_contact.NewContact
 import chat.sphinx.wrapper_lightning.WalletMnemonic
 import chat.sphinx.wrapper_lightning.toWalletMnemonic
@@ -33,6 +35,7 @@ import org.json.JSONException
 import org.json.JSONObject
 import uniffi.sphinxrs.RunReturn
 import uniffi.sphinxrs.addContact
+import uniffi.sphinxrs.codeFromInvite
 import uniffi.sphinxrs.fetchMsgs
 import uniffi.sphinxrs.getSubscriptionTopic
 import uniffi.sphinxrs.getTribeManagementTopic
@@ -63,11 +66,12 @@ class ConnectManagerImpl(
 ): ConnectManager(),
     CoroutineDispatchers by dispatchers
 {
-    private var mixer: String? = null
+    private var mixerIp: String? = null
     private var walletMnemonic: WalletMnemonic? = null
     private var mqttClient: MqttAsyncClient? = null
     private val network = "regtest"
     private var ownerSeed: String? = null
+    private var inviteCode: String? = null
     private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
 
@@ -80,98 +84,86 @@ class ConnectManagerImpl(
 
 
     // Key Generation and Management
-    override fun createAccount() {
+    override fun createAccount(lspIp: String) {
         coroutineScope.launch {
+            mixerIp = lspIp
 
             val seed = generateMnemonic()
             val now = getTimestampInMilliseconds()
 
-            val serverURI = mixer
+            seed.first?.let { firstSeed ->
+                val xPub = generateXPub(firstSeed, now, network)
+                val sig = rootSignMs(firstSeed, now, network)
+                ownerSeed = firstSeed
 
-            val xPub = seed.first?.let {
-                generateXPub(
-                    it,
-                    getTimestampInMilliseconds(),
-                    network
-                )
-            }
+                if (xPub != null) {
+                    var invite: RunReturn? = null
 
-            val sig = seed.first?.let {
-                rootSignMs(
-                    it,
-                    now,
-                    network
-                )
-            }
+                    if (inviteCode != null) {
+                        invite = processInvite(ownerSeed!!, now, getCurrentUserState(), inviteCode!!)
+                        mixerIp = invite.lspHost
+                    }
 
-            if (xPub != null && sig != null && serverURI != null) {
-
-                ownerSeed = seed.first
-
-                connectToMQTT(
-                    serverURI,
-                    xPub,
-                    now,
-                    sig
-                )
+                    connectToMQTT(mixerIp!!, xPub, now, sig, invite)
+                }
             }
         }
     }
 
-    override fun createAccountFromInvite(inviteString: String) {
-        coroutineScope.launch {
+    override fun setInviteCode(inviteString: String) {
 
-        try {
-            val seed = generateMnemonic()
-            val now = getTimestampInMilliseconds()
-
-            val serverURI = mixer
-
-            val xPub = seed.first?.let {
-                generateXPub(
-                    it,
-                    getTimestampInMilliseconds(),
-                    network
-                )
-            }
-
-            val sig = seed.first?.let {
-                rootSignMs(
-                    it,
-                    now,
-                    network
-                )
-            }
-
-            val processInvite = processInvite(
-                seed.first!!,
-                now,
-                getCurrentUserState(),
-                inviteString
-            )
-            handleRunReturn(processInvite, mqttClient!!)
-
-            if (xPub != null && sig != null && serverURI != null) {
-
-                ownerSeed = seed.first
-
-                delay(500L)
-
-                connectToMQTT(
-                    mixer!!,
-                    xPub,
-                    now,
-                    sig
-                )
-            }
-
-        }
-        catch (e: Exception) {
-            Log.e("MQTT_MESSAGES", "processInvite ${e.message}")
-        }
-        }
-
-
+        this.inviteCode = inviteString
+//        coroutineScope.launch {
+//
+//        try {
+//            val seed = generateMnemonic()
+//            val now = getTimestampInMilliseconds()
+//
+//            val serverURI = mixerIp
+//
+//            val xPub = seed.first?.let {
+//                generateXPub(
+//                    it,
+//                    getTimestampInMilliseconds(),
+//                    network
+//                )
+//            }
+//
+//            val sig = seed.first?.let {
+//                rootSignMs(
+//                    it,
+//                    now,
+//                    network
+//                )
+//            }
+//
+//            val processInvite = processInvite(
+//                seed.first!!,
+//                now,
+//                getCurrentUserState(),
+//                inviteString
+//            )
+//            handleRunReturn(processInvite, mqttClient!!)
+//
+//            if (xPub != null && sig != null && serverURI != null) {
+//
+//                ownerSeed = seed.first
+//
+//                delay(500L)
+//
+//                connectToMQTT(
+//                    mixerIp!!,
+//                    xPub,
+//                    now,
+//                    sig
+//                )
+//            }
+//
+//        }
+//        catch (e: Exception) {
+//            Log.e("MQTT_MESSAGES", "processInvite ${e.message}")
+//        }
+//        }
     }
 
 
@@ -228,7 +220,7 @@ class ConnectManagerImpl(
                     ownerInfoStateFlow.value?.alias ?: "",
                     ownerInfoStateFlow.value?.picture ?: "",
                     3000.toULong(),
-                    null
+                    contact.inviteCode
                 )
 
                 handleRunReturn(
@@ -276,7 +268,7 @@ class ConnectManagerImpl(
 
             if (xPub != null && sig != null) {
 
-                mixer = serverUri
+                mixerIp = serverUri
                 walletMnemonic = mnemonicWords
                 ownerSeed = seed
                 _ownerInfoStateFlow.value = ownerInfo
@@ -296,6 +288,7 @@ class ConnectManagerImpl(
         clientId: String,
         key: String,
         password: String,
+        invite: RunReturn? = null
     ) {
         mqttClient = try {
             MqttAsyncClient(serverURI, clientId, null)
@@ -313,6 +306,10 @@ class ConnectManagerImpl(
             mqttClient?.connect(options, null, object : IMqttActionListener {
                 override fun onSuccess(asyncActionToken: IMqttToken?) {
                     Log.d("MQTT_MESSAGES", "MQTT CONNECTED!")
+
+                    if (invite != null) {
+                        handleRunReturn(invite, mqttClient!!)
+                    }
 
                     subscribeOwnerMQTT()
 
@@ -563,7 +560,7 @@ class ConnectManagerImpl(
                     ownerSeed!!,
                     now,
                     getCurrentUserState(),
-                    mixer!!,
+                    mixerIp!!,
                     sats.toULong()
                 )
                 handleRunReturn(createInvite, mqttClient!!)
@@ -771,6 +768,25 @@ class ConnectManagerImpl(
             Log.d("MQTT_MESSAGES", "=> new_invite $invite")
         }
 
+        rr.inviterContactInfo?.let { inviterInfo ->
+            val parts = inviterInfo.split("_", limit = 2)
+            val okKey = parts.getOrNull(0)?.toLightningNodePubKey()
+            val routeHint = parts.getOrNull(1)?.toLightningRouteHint()
+
+            val code = codeFromInvite(inviteCode!!)
+
+            val newContact = NewContact(
+                null,
+                okKey,
+                routeHint,
+                null,
+                false,
+                code
+            )
+
+            createContact(newContact)
+        }
+
         // Handling other properties like sentStatus, settledStatus, error, etc.
         rr.error?.let { error ->
             Log.d("MQTT_MESSAGES", "=> error $error")
@@ -787,17 +803,12 @@ class ConnectManagerImpl(
         }
 
         rr.lspHost?.let { lspHost ->
-            mixer = lspHost
+            mixerIp = lspHost
         }
 
     }
-
-    override fun setLspIp(ip: String) {
-        mixer = ip
-    }
-
     override fun retrieveLspIp(): String? {
-        return mixer
+        return mixerIp
     }
 
     override fun processChallengeSignature(challenge: String) {
@@ -987,7 +998,7 @@ class ConnectManagerImpl(
 
             if (!isConnected()) {
                 initializeMqttAndSubscribe(
-                    mixer!!,
+                    mixerIp!!,
                     walletMnemonic!!,
                     ownerInfoStateFlow.value!!,
                 )

@@ -109,7 +109,8 @@ internal class NewContactViewModel @Inject constructor(
                     lightningNodePubKey,
                     lightningRouteHint,
                     null,
-                    false
+                    false,
+                    null
                 )
                 connectManagerRepository.createContact(newContact)
                 viewStateContainer.updateViewState(ContactViewState.Saved)

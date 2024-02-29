@@ -9,8 +9,8 @@ abstract class ConnectManager {
 
     abstract val ownerInfoStateFlow: StateFlow<OwnerInfo?>
 
-    abstract fun createAccount()
-    abstract fun createAccountFromInvite(inviteString: String)
+    abstract fun createAccount(lspIp: String)
+    abstract fun setInviteCode(inviteString: String)
     abstract fun createContact(contact: NewContact)
     abstract fun initializeMqttAndSubscribe(
         serverUri: String,
@@ -64,7 +64,6 @@ abstract class ConnectManager {
         amount: Long?
     ): String?
 
-    abstract fun setLspIp(ip: String)
     abstract fun retrieveLspIp(): String?
     abstract fun addListener(listener: ConnectManagerListener): Boolean
     abstract fun removeListener(listener: ConnectManagerListener): Boolean

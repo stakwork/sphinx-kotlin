@@ -3,8 +3,6 @@ package chat.sphinx.onboard_connecting.ui
 import android.app.Application
 import android.content.Context
 import android.content.SharedPreferences
-import android.util.Base64
-import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.concept_crypto_rsa.RSA
@@ -37,8 +35,6 @@ import chat.sphinx.wrapper_invite.toValidInviteStringOrNull
 import chat.sphinx.wrapper_relay.*
 import chat.sphinx.wrapper_rsa.RsaPrivateKey
 import chat.sphinx.wrapper_rsa.RsaPublicKey
-import com.ensarsarajcic.kotlinx.serialization.msgpack.MsgPack
-import com.ensarsarajcic.kotlinx.serialization.msgpack.MsgPackDynamicSerializer
 import com.squareup.moshi.Moshi
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
@@ -52,8 +48,6 @@ import io.matthewnelson.crypto_common.clazzes.*
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import org.json.JSONException
-import org.json.JSONObject
 import javax.annotation.meta.Exhaustive
 import javax.inject.Inject
 
@@ -201,8 +195,7 @@ internal class OnBoardConnectingViewModel @Inject constructor(
                 if (signerManager.isPhoneSignerSettingUp()) {
                     continuePhoneSignerSetup()
                 } else {
-                    connectManagerRepository.setLspIp("tcp://34.229.52.200:1883")
-                    connectManagerRepository.createOwnerAccount()
+                    connectManagerRepository.createOwnerAccount("tcp://34.229.52.200:1883")
 
 //                    submitSideEffect(OnBoardConnectingSideEffect.InvalidCode)
 //                    navigator.popBackStack()

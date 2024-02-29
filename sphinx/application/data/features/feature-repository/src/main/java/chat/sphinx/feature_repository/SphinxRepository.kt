@@ -300,8 +300,8 @@ abstract class SphinxRepository(
         }
     }
 
-    override fun createOwnerAccount() {
-        connectManager.createAccount()
+    override fun createOwnerAccount(lspIp: String) {
+        connectManager.createAccount(lspIp)
     }
 
     override fun createContact(contact: NewContact) {
@@ -309,10 +309,6 @@ abstract class SphinxRepository(
             createNewContact(contact)
             connectManager.createContact(contact)
         }
-    }
-
-    override fun setLspIp(lspIp: String) {
-        connectManager.setLspIp(lspIp)
     }
 
     override fun singChallenge(challenge: String) {
@@ -382,8 +378,8 @@ abstract class SphinxRepository(
         connectManager.createInvite(nickname, welcomeMessage, sats)
     }
 
-    override fun processInvite(inviteString: String) {
-        connectManager.createAccountFromInvite(inviteString)
+    override fun setInviteCode(inviteString: String) {
+        connectManager.setInviteCode(inviteString)
     }
 
     override fun getTribeMembers(tribeServerPubKey: String, tribePubKey: String) {
@@ -449,7 +445,8 @@ abstract class SphinxRepository(
                     lightningNodePubKey = contactInfo.pubkey.toLightningNodePubKey(),
                     lightningRouteHint = null,
                     photoUrl = contactInfo.photo_url?.toPhotoUrl(),
-                    confirmed = contactInfo.confirmed
+                    confirmed = contactInfo.confirmed,
+                    inviteCode = null
                 )
             )
         }

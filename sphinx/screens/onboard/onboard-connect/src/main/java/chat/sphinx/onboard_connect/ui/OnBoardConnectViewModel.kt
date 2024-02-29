@@ -137,8 +137,6 @@ internal class OnBoardConnectViewModel @Inject constructor(
             }
             if (redemptionCode != null &&
                 redemptionCode is RedemptionCode.NewInvite) {
-                connectManagerRepository.processInvite(redemptionCode.code)
-
                 isValid = true
             }
 
@@ -179,7 +177,12 @@ internal class OnBoardConnectViewModel @Inject constructor(
                             redemptionCode.relay
                         )
                         signerMenuHandler.viewStateContainer.updateViewState(MenuBottomViewState.Open)
-                    } else {
+                    }
+                    if (redemptionCode is RedemptionCode.NewInvite) {
+                        connectManagerRepository.setInviteCode(code)
+                        presentLoginModal()
+                    }
+                    else {
                         viewModelScope.launch(mainImmediate) {
                             navigator.toOnBoardConnectingScreen(code)
                         }
@@ -195,16 +198,21 @@ internal class OnBoardConnectViewModel @Inject constructor(
 
         if (submitButtonVS is OnBoardConnectSubmitButtonViewState.Enabled) {
 
-            if (redemptionCode is RedemptionCode.Glyph) {
-                signerManager.setSeedFromGlyph(
-                    redemptionCode.mqtt,
-                    redemptionCode.network,
-                    redemptionCode.relay
-                )
-                signerMenuHandler.viewStateContainer.updateViewState(MenuBottomViewState.Open)
-            } else {
-                viewModelScope.launch(mainImmediate) {
+            viewModelScope.launch(mainImmediate) {
+
+                if (redemptionCode is RedemptionCode.Glyph) {
+                    signerManager.setSeedFromGlyph(
+                        redemptionCode.mqtt,
+                        redemptionCode.network,
+                        redemptionCode.relay
+                    )
                     navigator.toOnBoardConnectingScreen(code)
+
+                    signerMenuHandler.viewStateContainer.updateViewState(MenuBottomViewState.Open)
+                }
+                if (redemptionCode is RedemptionCode.NewInvite) {
+                    connectManagerRepository.setInviteCode(code)
+                    presentLoginModal()
                 }
             }
         } else {

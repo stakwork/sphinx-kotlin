@@ -9,5 +9,6 @@ data class NewContact(
     val lightningNodePubKey: LightningNodePubKey?,
     val lightningRouteHint: LightningRouteHint?,
     val photoUrl: PhotoUrl?,
-    val confirmed: Boolean
+    val confirmed: Boolean,
+    val inviteCode: String?
     )
