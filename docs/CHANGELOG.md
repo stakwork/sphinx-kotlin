@@ -1,9 +1,12 @@
 # ChangeLog
 
+# Version 1.0.0-beta19 (2024-02-28)
+- Fixes Jitsi links handling
+
 # Version 1.0.0-beta18 (2024-02-28)
 - Adds support for jitsi call universal links
 - Adds balance privacy feature
-- Fixes jitsi links handling from chat view
+- Fixes Jitsi links handling from chat view
 
 # Version 1.0.0-beta17 (2024-02-27)
 - Adds support for jitsi call universal links

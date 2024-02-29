@@ -78,7 +78,7 @@ value class SphinxCallLink(val value: String) {
         get() = value.substringBefore("sphinx.call")
 
     inline val callRoom : String
-        get() = "sphinx.call." + value.substringAfter("sphinx.call.").substringBefore("#")
+        get() = "sphinx.call." + value.substringAfter("sphinx.call.").substringBefore("#").substringBefore("?")
 
     inline val callServerUrl : URL?
         get() {
