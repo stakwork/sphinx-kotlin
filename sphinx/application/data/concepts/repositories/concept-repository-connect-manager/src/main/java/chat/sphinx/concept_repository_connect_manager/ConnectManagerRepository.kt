@@ -16,6 +16,7 @@ interface ConnectManagerRepository {
     fun setLspIp(lspIp: String)
     fun singChallenge(challenge: String)
     fun createInvite(nickname: String, welcomeMessage: String, sats: Long)
+    fun processInvite(inviteString: String)
 
     fun joinTribe(
         tribeHost: String,

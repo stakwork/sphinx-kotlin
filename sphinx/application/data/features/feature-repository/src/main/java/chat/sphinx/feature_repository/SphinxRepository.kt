@@ -382,6 +382,10 @@ abstract class SphinxRepository(
         connectManager.createInvite(nickname, welcomeMessage, sats)
     }
 
+    override fun processInvite(inviteString: String) {
+        connectManager.createAccountFromInvite(inviteString)
+    }
+
     override fun getTribeMembers(tribeServerPubKey: String, tribePubKey: String) {
         connectManager.retrieveTribeMembersList(tribeServerPubKey, tribePubKey)
     }

@@ -46,6 +46,7 @@ import uniffi.sphinxrs.makeMediaTokenWithMeta
 import uniffi.sphinxrs.makeMediaTokenWithPrice
 import uniffi.sphinxrs.mnemonicFromEntropy
 import uniffi.sphinxrs.mnemonicToSeed
+import uniffi.sphinxrs.processInvite
 import uniffi.sphinxrs.rootSignMs
 import uniffi.sphinxrs.send
 import uniffi.sphinxrs.setBlockheight
@@ -116,6 +117,63 @@ class ConnectManagerImpl(
             }
         }
     }
+
+    override fun createAccountFromInvite(inviteString: String) {
+        coroutineScope.launch {
+
+        try {
+            val seed = generateMnemonic()
+            val now = getTimestampInMilliseconds()
+
+            val serverURI = mixer
+
+            val xPub = seed.first?.let {
+                generateXPub(
+                    it,
+                    getTimestampInMilliseconds(),
+                    network
+                )
+            }
+
+            val sig = seed.first?.let {
+                rootSignMs(
+                    it,
+                    now,
+                    network
+                )
+            }
+
+            val processInvite = processInvite(
+                seed.first!!,
+                now,
+                getCurrentUserState(),
+                inviteString
+            )
+            handleRunReturn(processInvite, mqttClient!!)
+
+            if (xPub != null && sig != null && serverURI != null) {
+
+                ownerSeed = seed.first
+
+                delay(500L)
+
+                connectToMQTT(
+                    mixer!!,
+                    xPub,
+                    now,
+                    sig
+                )
+            }
+
+        }
+        catch (e: Exception) {
+            Log.e("MQTT_MESSAGES", "processInvite ${e.message}")
+        }
+        }
+
+
+    }
+
 
     @OptIn(ExperimentalUnsignedTypes::class)
     private fun generateMnemonic(): Pair<String?, WalletMnemonic?> {
@@ -726,6 +784,10 @@ class ConnectManagerImpl(
         // Settled
         rr.settledStatus?.let { settledStatus ->
             Log.d("MQTT_MESSAGES", "=> settled_status $settledStatus")
+        }
+
+        rr.lspHost?.let { lspHost ->
+            mixer = lspHost
         }
 
     }

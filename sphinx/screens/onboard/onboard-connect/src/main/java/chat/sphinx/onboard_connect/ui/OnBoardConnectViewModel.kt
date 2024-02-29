@@ -6,6 +6,7 @@ import android.text.InputType
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.concept_network_query_crypter.NetworkQueryCrypter
+import chat.sphinx.concept_repository_connect_manager.ConnectManagerRepository
 import chat.sphinx.concept_signer_manager.SignerHardwareCallback
 import chat.sphinx.concept_signer_manager.SignerManager
 import chat.sphinx.concept_signer_manager.SignerPhoneCallback
@@ -59,6 +60,7 @@ internal class OnBoardConnectViewModel @Inject constructor(
     private val walletDataHandler: WalletDataHandler,
     private val networkQueryCrypter: NetworkQueryCrypter,
     private val authenticationCoordinator: AuthenticationCoordinator,
+    private val connectManagerRepository: ConnectManagerRepository,
     private val app: Application,
     val moshi: Moshi,
     val navigator: OnBoardConnectNavigator
@@ -131,6 +133,12 @@ internal class OnBoardConnectViewModel @Inject constructor(
                     redemptionCode.network,
                     redemptionCode.relay
                 )
+                isValid = true
+            }
+            if (redemptionCode != null &&
+                redemptionCode is RedemptionCode.NewInvite) {
+                connectManagerRepository.processInvite(redemptionCode.code)
+
                 isValid = true
             }
 

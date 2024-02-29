@@ -10,6 +10,7 @@ abstract class ConnectManager {
     abstract val ownerInfoStateFlow: StateFlow<OwnerInfo?>
 
     abstract fun createAccount()
+    abstract fun createAccountFromInvite(inviteString: String)
     abstract fun createContact(contact: NewContact)
     abstract fun initializeMqttAndSubscribe(
         serverUri: String,
@@ -48,6 +49,7 @@ abstract class ConnectManager {
         welcomeMessage: String,
         sats: Long
     )
+
 
     abstract fun retrieveTribeMembersList(
         tribeServerPubKey: String,
