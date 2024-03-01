@@ -8,6 +8,7 @@ import chat.sphinx.example.concept_connect_manager.model.OwnerInfo
 import chat.sphinx.wrapper_common.lightning.toLightningNodePubKey
 import chat.sphinx.wrapper_common.lightning.toLightningRouteHint
 import chat.sphinx.wrapper_contact.NewContact
+import chat.sphinx.wrapper_contact.toContactAlias
 import chat.sphinx.wrapper_lightning.WalletMnemonic
 import chat.sphinx.wrapper_lightning.toWalletMnemonic
 import chat.sphinx.wrapper_message.MessageType
@@ -72,6 +73,7 @@ class ConnectManagerImpl(
     private val network = "regtest"
     private var ownerSeed: String? = null
     private var inviteCode: String? = null
+    private var inviterContact: NewContact? = null
     private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
 
@@ -111,59 +113,7 @@ class ConnectManagerImpl(
     }
 
     override fun setInviteCode(inviteString: String) {
-
         this.inviteCode = inviteString
-//        coroutineScope.launch {
-//
-//        try {
-//            val seed = generateMnemonic()
-//            val now = getTimestampInMilliseconds()
-//
-//            val serverURI = mixerIp
-//
-//            val xPub = seed.first?.let {
-//                generateXPub(
-//                    it,
-//                    getTimestampInMilliseconds(),
-//                    network
-//                )
-//            }
-//
-//            val sig = seed.first?.let {
-//                rootSignMs(
-//                    it,
-//                    now,
-//                    network
-//                )
-//            }
-//
-//            val processInvite = processInvite(
-//                seed.first!!,
-//                now,
-//                getCurrentUserState(),
-//                inviteString
-//            )
-//            handleRunReturn(processInvite, mqttClient!!)
-//
-//            if (xPub != null && sig != null && serverURI != null) {
-//
-//                ownerSeed = seed.first
-//
-//                delay(500L)
-//
-//                connectToMQTT(
-//                    mixerIp!!,
-//                    xPub,
-//                    now,
-//                    sig
-//                )
-//            }
-//
-//        }
-//        catch (e: Exception) {
-//            Log.e("MQTT_MESSAGES", "processInvite ${e.message}")
-//        }
-//        }
     }
 
 
@@ -217,7 +167,7 @@ class ConnectManagerImpl(
                     getCurrentUserState(),
                     contact.lightningNodePubKey?.value!!,
                     contact.lightningRouteHint?.value!!,
-                    ownerInfoStateFlow.value?.alias ?: "",
+                    ownerInfoStateFlow.value?.alias ?: "pedro",
                     ownerInfoStateFlow.value?.picture ?: "",
                     3000.toULong(),
                     contact.inviteCode
@@ -309,9 +259,9 @@ class ConnectManagerImpl(
 
                     if (invite != null) {
                         handleRunReturn(invite, mqttClient!!)
+                    } else {
+                        subscribeOwnerMQTT()
                     }
-
-                    subscribeOwnerMQTT()
 
                     notifyListeners {
                         onNetworkStatusChange(true)
@@ -412,7 +362,7 @@ class ConnectManagerImpl(
                 )
                 handleRunReturn(setUp, client)
 
-               val fetchMessages = fetchMsgs(
+                val fetchMessages = fetchMsgs(
                     ownerSeed!!,
                     getTimestampInMilliseconds(),
                     getCurrentUserState(),
@@ -421,6 +371,11 @@ class ConnectManagerImpl(
                 )
 
                 handleRunReturn(fetchMessages, client)
+
+                if (inviterContact != null) {
+                    createContact(inviterContact!!)
+                    inviterContact = null
+                }
             }
         } catch (e: Exception) {
             Log.e("MQTT_MESSAGES", "${e.message}")
@@ -561,7 +516,8 @@ class ConnectManagerImpl(
                     now,
                     getCurrentUserState(),
                     mixerIp!!,
-                    sats.toULong()
+                    sats.toULong(),
+                    ownerInfoStateFlow.value?.alias ?: "",
                 )
                 handleRunReturn(createInvite, mqttClient!!)
             }
@@ -775,7 +731,11 @@ class ConnectManagerImpl(
 
             val code = codeFromInvite(inviteCode!!)
 
-            val newContact = NewContact(
+            // Ensure the owner is subscribed before set the inviter contact
+            // The inviter will be added after the owner sets its alias and first init the dashboard
+            subscribeOwnerMQTT()
+
+            inviterContact = NewContact(
                 null,
                 okKey,
                 routeHint,
@@ -784,7 +744,7 @@ class ConnectManagerImpl(
                 code
             )
 
-            createContact(newContact)
+            Log.d("MQTT_MESSAGES", "=> inviterInfo $inviterInfo")
         }
 
         // Handling other properties like sentStatus, settledStatus, error, etc.
@@ -807,6 +767,7 @@ class ConnectManagerImpl(
         }
 
     }
+
     override fun retrieveLspIp(): String? {
         return mixerIp
     }
