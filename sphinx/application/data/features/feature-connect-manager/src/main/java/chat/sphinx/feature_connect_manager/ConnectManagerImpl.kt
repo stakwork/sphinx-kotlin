@@ -167,7 +167,7 @@ class ConnectManagerImpl(
                     getCurrentUserState(),
                     contact.lightningNodePubKey?.value!!,
                     contact.lightningRouteHint?.value!!,
-                    ownerInfoStateFlow.value?.alias ?: "pedro",
+                    ownerInfoStateFlow.value?.alias ?: "",
                     ownerInfoStateFlow.value?.picture ?: "",
                     3000.toULong(),
                     contact.inviteCode
@@ -767,7 +767,6 @@ class ConnectManagerImpl(
         }
 
     }
-
     override fun retrieveLspIp(): String? {
         return mixerIp
     }

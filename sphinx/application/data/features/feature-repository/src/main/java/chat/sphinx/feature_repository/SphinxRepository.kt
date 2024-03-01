@@ -646,7 +646,7 @@ abstract class SphinxRepository(
     }
 
     override fun onNewInviteCreated(inviteString: String) {
-
+        // Create the invite and save it to the database. inviteDbo.
         connectionManagerState.value = ConnectionManagerState.NewInviteCode(inviteString)
     }
 

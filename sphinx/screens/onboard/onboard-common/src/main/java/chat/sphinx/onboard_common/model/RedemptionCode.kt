@@ -67,16 +67,6 @@ sealed class RedemptionCode {
             }
 
             if (code.trim().startsWith(NewInvite.REGEX)) {
-//                val parameters = code.trim().substringAfter(NewInvite.REGEX).split("&")
-//                    .mapNotNull {
-//                        it.split("=").takeIf { it.size >= 2 }?.let { pair ->
-//                            pair[0] to pair[1]
-//                        }
-//                    }.toMap()
-//
-//                val encryptedData = parameters[NewInvite.PARAM_ENCRYPTED_DATA]?.decodeBase64ToArray()?.decodeToString() ?: return null
-//                val code = parameters[NewInvite.PARAM_CODE] ?: return null
-
                 return NewInvite(code.trim())
             }
 
