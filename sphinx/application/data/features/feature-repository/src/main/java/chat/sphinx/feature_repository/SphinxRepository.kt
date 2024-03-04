@@ -122,6 +122,7 @@ import chat.sphinx.wrapper_common.subscription.SubscriptionId
 import chat.sphinx.wrapper_contact.*
 import chat.sphinx.wrapper_feed.*
 import chat.sphinx.wrapper_invite.Invite
+import chat.sphinx.wrapper_invite.InviteString
 import chat.sphinx.wrapper_io_utils.InputStreamProvider
 import chat.sphinx.wrapper_lightning.LightningServiceProvider
 import chat.sphinx.wrapper_lightning.NodeBalance
@@ -375,7 +376,21 @@ abstract class SphinxRepository(
     }
 
     override fun createInvite(nickname: String, welcomeMessage: String, sats: Long) {
-        connectManager.createInvite(nickname, welcomeMessage, sats)
+        applicationScope.launch(io) {
+            val invite = connectManager.createInvite(nickname, welcomeMessage, sats)
+
+            val newInvitee = NewContact(
+                contactAlias = nickname.toContactAlias(),
+                lightningNodePubKey = null,
+                lightningRouteHint = null,
+                photoUrl = null,
+                confirmed = false,
+                inviteString = invite?.first,
+                inviteCode = invite?.second,
+                invitePrice = sats.toSat()
+            )
+            createNewContact(newInvitee)
+        }
     }
 
     override fun setInviteCode(inviteString: String) {
@@ -446,7 +461,9 @@ abstract class SphinxRepository(
                     lightningRouteHint = null,
                     photoUrl = contactInfo.photo_url?.toPhotoUrl(),
                     confirmed = contactInfo.confirmed,
-                    inviteCode = null
+                    null,
+                    inviteCode = contactInfo.code,
+                    invitePrice = null
                 )
             )
         }
@@ -522,7 +539,7 @@ abstract class SphinxRepository(
     ) {
         applicationScope.launch(io) {
             val message = msg.toMsg(moshi)
-            val msgSender = MsgSender(contactPubKey, null,null,null,true)
+            val msgSender = MsgSender(contactPubKey, null, null, null, true, null)
 
             val messageType = msgType.toMessageType()
             val messageUUID = msgUUID.toMessageUUID() ?: return@launch
@@ -2389,6 +2406,20 @@ abstract class SphinxRepository(
             }
 
         } else {
+
+            val invite = if (contact.invitePrice != null) {
+                Invite(
+                    id = InviteId(contactId ?: -1L),
+                    contactId = ContactId(contactId ?: -1L),
+                    inviteString = InviteString(contact.inviteString ?: ""),
+                    paymentRequest = null,
+                    status = InviteStatus.Pending,
+                    price = contact.invitePrice,
+                    createdAt = now.toDateTime()
+                )
+            } else {
+                null
+            }
 
             val newContact = Contact(
                 id = ContactId(exitingContact?.id?.value ?: contactId ?: -1L),

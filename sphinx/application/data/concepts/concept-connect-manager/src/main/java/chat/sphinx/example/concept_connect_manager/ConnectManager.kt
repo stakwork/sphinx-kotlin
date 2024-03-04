@@ -48,7 +48,7 @@ abstract class ConnectManager {
         nickname: String,
         welcomeMessage: String,
         sats: Long
-    )
+    ): Pair<String, String>? // inviteString, inviteCode
 
 
     abstract fun retrieveTribeMembersList(

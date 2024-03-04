@@ -68,8 +68,8 @@ internal class InviteFriendViewModel @Inject constructor(
 
         createInviteJob = viewModelScope.launch(mainImmediate) {
 
-            if (sats != null && sats > 0L) {
-                connectManagerRepository.createInvite(nickname ?: "", welcomeMessage ?: "", sats)
+            if (sats != null && sats > 0L && !nickname.isNullOrEmpty()) {
+                connectManagerRepository.createInvite(nickname , welcomeMessage ?: "", sats)
                 updateViewState(InviteFriendViewState.InviteCreationSucceed)
             } else {
                 submitSideEffect(InviteFriendSideEffect.EmptySats)

@@ -110,6 +110,8 @@ internal class NewContactViewModel @Inject constructor(
                     lightningRouteHint,
                     null,
                     false,
+                    null,
+                    null,
                     null
                 )
                 connectManagerRepository.createContact(newContact)

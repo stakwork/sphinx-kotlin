@@ -8,7 +8,6 @@ import chat.sphinx.example.concept_connect_manager.model.OwnerInfo
 import chat.sphinx.wrapper_common.lightning.toLightningNodePubKey
 import chat.sphinx.wrapper_common.lightning.toLightningRouteHint
 import chat.sphinx.wrapper_contact.NewContact
-import chat.sphinx.wrapper_contact.toContactAlias
 import chat.sphinx.wrapper_lightning.WalletMnemonic
 import chat.sphinx.wrapper_lightning.toWalletMnemonic
 import chat.sphinx.wrapper_message.MessageType
@@ -507,24 +506,34 @@ class ConnectManagerImpl(
         }
     }
 
-    override fun createInvite(nickname: String, welcomeMessage: String, sats: Long) {
+    override fun createInvite(nickname: String, welcomeMessage: String, sats: Long): Pair<String, String>? {
         val now = getTimestampInMilliseconds()
 
-            try {
-                val createInvite = makeInvite(
-                    ownerSeed!!,
-                    now,
-                    getCurrentUserState(),
-                    mixerIp!!,
-                    sats.toULong(),
-                    ownerInfoStateFlow.value?.alias ?: "",
-                )
+        try {
+            val createInvite = makeInvite(
+                ownerSeed!!,
+                now,
+                getCurrentUserState(),
+                mixerIp!!,
+                sats.toULong(),
+                ownerInfoStateFlow.value?.alias ?: "",
+            )
+
+            if (createInvite.newInvite != null) {
                 handleRunReturn(createInvite, mqttClient!!)
+
+                val invite = createInvite.newInvite ?: return null
+                val code = codeFromInvite(invite)
+
+                return Pair(invite, code)
             }
-            catch (e: Exception) {
-                Log.e("MQTT_MESSAGES", "createInvite ${e.message}")
-            }
+
+        } catch (e: Exception) {
+            Log.e("MQTT_MESSAGES", "createInvite ${e.message}")
+        }
+        return null
     }
+
 
     override fun retrieveTribeMembersList(tribeServerPubKey: String, tribePubKey: String) {
         val now = getTimestampInMilliseconds()
@@ -741,7 +750,9 @@ class ConnectManagerImpl(
                 routeHint,
                 null,
                 false,
-                code
+                null,
+                code,
+                null
             )
 
             Log.d("MQTT_MESSAGES", "=> inviterInfo $inviterInfo")
