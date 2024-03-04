@@ -82,7 +82,6 @@ interface ConnectManagerListener {
         msgIndex: String,
         amount: Long?,
         msgTimestamp: Long?
-
     )
 
     fun onMessageSent(

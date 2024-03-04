@@ -31,6 +31,7 @@ import chat.sphinx.wrapper_common.subscription.SubscriptionCount
 import chat.sphinx.wrapper_common.subscription.SubscriptionId
 import chat.sphinx.wrapper_contact.*
 import chat.sphinx.wrapper_feed.*
+import chat.sphinx.wrapper_invite.Invite
 import chat.sphinx.wrapper_invite.InviteString
 import chat.sphinx.wrapper_lightning.LightningServiceProvider
 import chat.sphinx.wrapper_lightning.NodeBalance
@@ -546,6 +547,28 @@ inline fun TransactionCallbacks.upsertContact(dto: ContactDto, queries: SphinxDa
 }
 
 @Suppress("NOTHING_TO_INLINE")
+inline fun TransactionCallbacks.upsertNewInvite(invite: Invite, queries: SphinxDatabaseQueries) {
+
+    queries.inviteUpsert(
+        invite.inviteString,
+        invite.inviteCode,
+        invite.paymentRequest,
+        invite.status,
+        invite.price,
+        invite.id,
+        invite.contactId,
+        invite.createdAt,
+    )
+
+    queries.contactUpdateInvite(
+        invite.status,
+        invite.id,
+        invite.contactId
+    )
+}
+
+
+@Suppress("NOTHING_TO_INLINE")
 inline fun TransactionCallbacks.upsertInvite(dto: InviteDto, queries: SphinxDatabaseQueries) {
 
     val inviteStatus = dto.status.toInviteStatus().let { dtoStatus ->
@@ -566,6 +589,7 @@ inline fun TransactionCallbacks.upsertInvite(dto: InviteDto, queries: SphinxData
 
     queries.inviteUpsert(
         InviteString(dto.invite_string),
+        null,
         dto.invoice?.toLightningPaymentRequestOrNull(),
         inviteStatus,
         dto.price?.toSat(),

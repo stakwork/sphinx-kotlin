@@ -10,6 +10,7 @@ internal class InviteDboPresenterMapper(dispatchers: CoroutineDispatchers): Clas
         return Invite(
             value.id,
             value.invite_string,
+            null,
             value.invoice,
             value.contact_id,
             value.status,
@@ -22,6 +23,7 @@ internal class InviteDboPresenterMapper(dispatchers: CoroutineDispatchers): Clas
         return InviteDbo(
             value.id,
             value.inviteString,
+            value.inviteCode,
             value.paymentRequest,
             value.contactId,
             value.status,

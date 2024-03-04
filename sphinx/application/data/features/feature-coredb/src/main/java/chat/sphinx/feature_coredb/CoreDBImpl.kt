@@ -11,6 +11,7 @@ import chat.sphinx.feature_coredb.adapters.chat.*
 import chat.sphinx.feature_coredb.adapters.common.*
 import chat.sphinx.feature_coredb.adapters.contact.*
 import chat.sphinx.feature_coredb.adapters.feed.*
+import chat.sphinx.feature_coredb.adapters.invite.InviteCodeAdapter
 import chat.sphinx.feature_coredb.adapters.invite.InviteStringAdapter
 import chat.sphinx.feature_coredb.adapters.media.*
 import chat.sphinx.feature_coredb.adapters.media.FileNameAdapter
@@ -114,6 +115,7 @@ abstract class CoreDBImpl(private val moshi: Moshi): CoreDB() {
                 inviteDboAdapter = InviteDbo.Adapter(
                     idAdapter = InviteIdAdapter.getInstance(),
                     invite_stringAdapter = InviteStringAdapter(),
+                    invite_codeAdapter = InviteCodeAdapter(),
                     invoiceAdapter = LightningPaymentRequestAdapter.getInstance(),
                     contact_idAdapter = ContactIdAdapter.getInstance(),
                     statusAdapter = InviteStatusAdapter.getInstance(),

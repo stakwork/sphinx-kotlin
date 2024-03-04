@@ -122,7 +122,9 @@ import chat.sphinx.wrapper_common.subscription.SubscriptionId
 import chat.sphinx.wrapper_contact.*
 import chat.sphinx.wrapper_feed.*
 import chat.sphinx.wrapper_invite.Invite
+import chat.sphinx.wrapper_invite.InviteCode
 import chat.sphinx.wrapper_invite.InviteString
+import chat.sphinx.wrapper_invite.toInviteCodeOrNull
 import chat.sphinx.wrapper_io_utils.InputStreamProvider
 import chat.sphinx.wrapper_lightning.LightningServiceProvider
 import chat.sphinx.wrapper_lightning.NodeBalance
@@ -453,19 +455,45 @@ abstract class SphinxRepository(
     ) {
         applicationScope.launch(io) {
             val contactInfo = msgSender.toMsgSender(moshi)
-
-            createNewContact(
-                NewContact(
-                    contactAlias = contactInfo.alias?.toContactAlias(),
-                    lightningNodePubKey = contactInfo.pubkey.toLightningNodePubKey(),
-                    lightningRouteHint = null,
-                    photoUrl = contactInfo.photo_url?.toPhotoUrl(),
-                    confirmed = contactInfo.confirmed,
-                    null,
-                    inviteCode = contactInfo.code,
-                    invitePrice = null
-                )
+            val contact = NewContact(
+                contactAlias = contactInfo.alias?.toContactAlias(),
+                lightningNodePubKey = contactInfo.pubkey.toLightningNodePubKey(),
+                lightningRouteHint = null,
+                photoUrl = contactInfo.photo_url?.toPhotoUrl(),
+                confirmed = contactInfo.confirmed,
+                null,
+                inviteCode = contactInfo.code,
+                invitePrice = null
             )
+
+            if (contactInfo.code != null) {
+                updateNewContactInvited(contact)
+            } else {
+                createNewContact(contact)
+            }
+        }
+    }
+
+    override fun updateNewContactInvited(contact: NewContact) {
+        applicationScope.launch(io) {
+            val queries = coreDB.getSphinxDatabaseQueries()
+            val invite = queries.inviteGetByCode(contact.inviteCode?.let { InviteCode(it) }).executeAsOneOrNull()
+
+            if (invite != null) {
+                val contactId = invite.contact_id
+
+                    queries.contactUpdateInvitee(
+                        contact.contactAlias,
+                        contact.photoUrl,
+                        contact.lightningNodePubKey,
+                        ContactStatus.Confirmed,
+                        ContactId(invite.id.value)
+                    )
+
+                queries.inviteUpdateStatus(InviteStatus.Complete, invite.id)
+                queries.chatUpdateSatusById(ChatStatus.Approved, ChatId(contactId.value))
+
+            } else { }
         }
     }
 
@@ -2410,9 +2438,10 @@ abstract class SphinxRepository(
             val invite = if (contact.invitePrice != null) {
                 Invite(
                     id = InviteId(contactId ?: -1L),
-                    contactId = ContactId(contactId ?: -1L),
                     inviteString = InviteString(contact.inviteString ?: ""),
+                    inviteCode = InviteCode(contact.inviteCode ?: ""),
                     paymentRequest = null,
+                    contactId = ContactId(contactId ?: -1L),
                     status = InviteStatus.Pending,
                     price = contact.invitePrice,
                     createdAt = now.toDateTime()
@@ -2438,8 +2467,8 @@ abstract class SphinxRepository(
                 fromGroup = ContactFromGroup.False,
                 notificationSound = null,
                 tipAmount = null,
-                inviteId = null,
-                inviteStatus = null,
+                inviteId = invite?.id,
+                inviteStatus = invite?.status,
                 blocked = Blocked.False
             )
 
@@ -2474,11 +2503,13 @@ abstract class SphinxRepository(
             )
 
             applicationScope.launch(mainImmediate) {
+
                 contactLock.withLock {
                     queries.transaction {
                         upsertNewContact(newContact, queries)
                     }
                 }
+
                 chatLock.withLock {
                     queries.transaction {
                         upsertNewChat(
@@ -2489,6 +2520,14 @@ abstract class SphinxRepository(
                             newContact,
                             accountOwner.value?.nodePubKey
                         )
+                    }
+                }
+
+                inviteLock.withLock {
+                    invite?.let { invite ->
+                        queries.transaction {
+                            upsertNewInvite(invite, queries)
+                        }
                     }
                 }
             }

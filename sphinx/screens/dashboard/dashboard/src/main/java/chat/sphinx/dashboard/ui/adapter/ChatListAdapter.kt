@@ -13,7 +13,6 @@ import app.cash.exhaustive.Exhaustive
 import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
-import chat.sphinx.concept_image_loader.Transformation
 import chat.sphinx.concept_user_colors_helper.UserColorsHelper
 import chat.sphinx.dashboard.R
 import chat.sphinx.dashboard.databinding.LayoutChatListChatHolderBinding
@@ -33,7 +32,6 @@ import io.matthewnelson.android_feature_screens.util.invisibleIfFalse
 import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisor
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.*
@@ -76,7 +74,7 @@ internal class ChatListAdapter(
                         old.chat.latestMessageId    == new.chat.latestMessageId
                     }
                     old is DashboardChat.Inactive.Invite && new is DashboardChat.Inactive.Invite -> {
-                        old.invite?.status          == new.invite?.status           &&
+                        old.invite?.status == new.invite?.status &&
                         old.invite?.id              == new.invite?.id               &&
                         old.contact.status          == new.contact.status
                     }
@@ -113,7 +111,7 @@ internal class ChatListAdapter(
                         old.chat.photoUrl           == new.chat.photoUrl
                     }
                     old is DashboardChat.Inactive.Invite && new is DashboardChat.Inactive.Invite -> {
-                        old.invite?.status          == new.invite?.status           &&
+                        old.invite?.status == new.invite?.status &&
                         old.invite?.id              == new.invite?.id               &&
                         old.contact.status          == new.contact.status
                     }
@@ -245,18 +243,12 @@ internal class ChatListAdapter(
                         is DashboardChat.Inactive.Invite -> {
                             dashboardChat.invite?.let { invite ->
                                 lifecycleOwner.lifecycleScope.launch {
-                                    if (invite.status.isReady() || invite.status.isDelivered()) {
-                                        viewModel.dashboardNavigator.toQRCodeDetail(
-                                            invite.inviteString.value,
-                                            binding.root.context.getString(
-                                                R.string.invite_qr_code_header_name
-                                            )
+                                    viewModel.dashboardNavigator.toQRCodeDetail(
+                                        invite.inviteString.value,
+                                        binding.root.context.getString(
+                                            R.string.invite_qr_code_header_name
                                         )
-                                    } else if (invite.status.isPaymentPending()) {
-                                        viewModel.payForInvite(invite)
-                                    } else if (invite.status.isExpired()) {
-                                        viewModel.deleteInvite(invite)
-                                    }
+                                    )
                                 }
                             }
                         }
