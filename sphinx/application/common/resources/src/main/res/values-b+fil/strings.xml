@@ -91,7 +91,7 @@
     <string name="group_pin_label">Setting ng Privacy</string>
     <string name="new_contact_pin_standard_private_label">Karaniwang PIN / Pribadong PIN</string>
     <string name="invalid_url">Wala</string>
-    <string name="relay_url_http_message">Ang URL ng Relay na isasave ay gumagamit ng 'http'. Ang trapiko sa network ay hindi magiging encrypted. Mariing inirerekomenda ang Https. Pakikumpirma ang URL Scheme na gagamitin.</string>
+    <string name="relay_url_http_message">Ang URL ng Relay na isasave ay gumagamit ng \'http\'. Ang trapiko sa network ay hindi magiging encrypted. Mariing inirerekomenda ang Https. Pakikumpirma ang URL Scheme na gagamitin.</string>
     <string name="relay_url_http_negative_keep_http">http</string>
     <string name="relay_url_http_positive_change_to_https">https</string>
     <string name="payment_request">Kahilingan sa Pagbabayad</string>
