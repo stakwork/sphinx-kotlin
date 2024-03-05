@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="bottom_menu_profile_pic_option_camera">Camera</string>
-    <string name="bottom_menu_profile_pic_option_photo_library">Photo Library</string>
+    <string name="bottom_menu_profile_pic_option_camera">Kamera</string>
+    <string name="bottom_menu_profile_pic_option_photo_library">Larawang Aklatan</string>
+
 </resources>

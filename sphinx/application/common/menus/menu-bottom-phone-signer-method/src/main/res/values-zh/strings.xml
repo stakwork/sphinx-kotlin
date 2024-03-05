@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="bottom_menu_phone_signer_method_header_text">Choose Your Seed Method</string>
-    <string name="bottom_menu_phone_signer_method_sub_header_text">Would you like to generate a new seed phrase or import an existing one?</string>
-
+    <string name="bottom_menu_phone_signer_method_header_text">選擇您的種子方法</string>
+    <string name="bottom_menu_phone_signer_method_sub_header_text">您希望生成一個新的種子詞組還是導入已有的一個？</string>
     <!-- Menu -->
-    <string name="bottom_menu_phone_signer_method_generate">Generate</string>
-    <string name="bottom_menu_phone_signer_method_import">Import</string>
+    <string name="bottom_menu_phone_signer_method_generate">生成</string>
+    <string name="bottom_menu_phone_signer_method_import">導入</string>
+
 </resources>

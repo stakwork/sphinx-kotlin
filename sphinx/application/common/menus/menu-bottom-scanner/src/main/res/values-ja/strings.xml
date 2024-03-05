@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="bottom_menu_scanner_header_text">Public Key Options</string>
+    <string name="bottom_menu_scanner_header_text">公開キーのオプション</string>
     <!-- Menu -->
-    <string name="bottom_menu_scanner_option_set_create_contact">Create Contact</string>
-    <string name="bottom_menu_scanner_option_set_direct_payment">Send Direct Payment</string>
+    <string name="bottom_menu_scanner_option_set_create_contact">連絡先を作成</string>
+    <string name="bottom_menu_scanner_option_set_direct_payment">ダイレクトペイメントを送る</string>
+
 </resources>
