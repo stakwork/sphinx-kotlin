@@ -124,7 +124,6 @@ import chat.sphinx.wrapper_feed.*
 import chat.sphinx.wrapper_invite.Invite
 import chat.sphinx.wrapper_invite.InviteCode
 import chat.sphinx.wrapper_invite.InviteString
-import chat.sphinx.wrapper_invite.toInviteCodeOrNull
 import chat.sphinx.wrapper_io_utils.InputStreamProvider
 import chat.sphinx.wrapper_lightning.LightningServiceProvider
 import chat.sphinx.wrapper_lightning.NodeBalance
@@ -377,9 +376,19 @@ abstract class SphinxRepository(
         }
     }
 
-    override fun createInvite(nickname: String, welcomeMessage: String, sats: Long) {
+    override fun createInvite(
+        nickname: String,
+        welcomeMessage: String,
+        sats: Long,
+        tribeServerPubKey: String?
+    ) {
         applicationScope.launch(io) {
-            val invite = connectManager.createInvite(nickname, welcomeMessage, sats)
+            val invite = connectManager.createInvite(
+                nickname,
+                welcomeMessage,
+                sats,
+                tribeServerPubKey
+            )
 
             val newInvitee = NewContact(
                 contactAlias = nickname.toContactAlias(),

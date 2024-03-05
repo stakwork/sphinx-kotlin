@@ -506,7 +506,12 @@ class ConnectManagerImpl(
         }
     }
 
-    override fun createInvite(nickname: String, welcomeMessage: String, sats: Long): Pair<String, String>? {
+    override fun createInvite(
+        nickname: String,
+        welcomeMessage: String,
+        sats: Long,
+        tribeServerPubKey: String?
+    ): Pair<String, String>? {
         val now = getTimestampInMilliseconds()
 
         try {
@@ -517,6 +522,8 @@ class ConnectManagerImpl(
                 mixerIp!!,
                 sats.toULong(),
                 ownerInfoStateFlow.value?.alias ?: "",
+                mixerIp,
+                tribeServerPubKey
             )
 
             if (createInvite.newInvite != null) {

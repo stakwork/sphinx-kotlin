@@ -14,7 +14,7 @@ interface ConnectManagerRepository {
     fun createContact(contact: NewContact)
     fun connectAndSubscribeToMqtt(userState: String?) {}
     fun singChallenge(challenge: String)
-    fun createInvite(nickname: String, welcomeMessage: String, sats: Long)
+    fun createInvite(nickname: String, welcomeMessage: String, sats: Long, tribeServerPubKey: String?)
     fun setInviteCode(inviteString: String)
 
     fun joinTribe(

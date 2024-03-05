@@ -47,7 +47,8 @@ abstract class ConnectManager {
     abstract fun createInvite(
         nickname: String,
         welcomeMessage: String,
-        sats: Long
+        sats: Long,
+        tribeServerPubKey: String?
     ): Pair<String, String>? // inviteString, inviteCode
 
 
