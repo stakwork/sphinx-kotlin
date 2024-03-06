@@ -450,6 +450,8 @@ internal interface _UniFFILib : Library {
     ): RustBuffer.ByValue
     fun uniffi_sphinxrs_fn_func_pay_invoice(`seed`: RustBuffer.ByValue,`uniqueTime`: RustBuffer.ByValue,`state`: RustBuffer.ByValue,`bolt11`: RustBuffer.ByValue,`overpayMsat`: RustBuffer.ByValue,_uniffi_out_err: RustCallStatus, 
     ): RustBuffer.ByValue
+    fun uniffi_sphinxrs_fn_func_payment_hash_from_invoice(`bolt11`: RustBuffer.ByValue,_uniffi_out_err: RustCallStatus, 
+    ): RustBuffer.ByValue
     fun uniffi_sphinxrs_fn_func_create_tribe(`seed`: RustBuffer.ByValue,`uniqueTime`: RustBuffer.ByValue,`state`: RustBuffer.ByValue,`tribeServerPubkey`: RustBuffer.ByValue,`tribeJson`: RustBuffer.ByValue,_uniffi_out_err: RustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_sphinxrs_fn_func_join_tribe(`seed`: RustBuffer.ByValue,`uniqueTime`: RustBuffer.ByValue,`state`: RustBuffer.ByValue,`tribePubkey`: RustBuffer.ByValue,`tribeRouteHint`: RustBuffer.ByValue,`alias`: RustBuffer.ByValue,`amtMsat`: Long,`isPrivate`: Byte,_uniffi_out_err: RustCallStatus, 
@@ -555,6 +557,8 @@ internal interface _UniFFILib : Library {
     fun uniffi_sphinxrs_checksum_func_make_invoice(
     ): Short
     fun uniffi_sphinxrs_checksum_func_pay_invoice(
+    ): Short
+    fun uniffi_sphinxrs_checksum_func_payment_hash_from_invoice(
     ): Short
     fun uniffi_sphinxrs_checksum_func_create_tribe(
     ): Short
@@ -712,6 +716,9 @@ private fun uniffiCheckApiChecksums(lib: _UniFFILib) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_sphinxrs_checksum_func_pay_invoice() != 40951.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_sphinxrs_checksum_func_payment_hash_from_invoice() != 3194.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_sphinxrs_checksum_func_create_tribe() != 28873.toShort()) {
@@ -2322,6 +2329,15 @@ fun `payInvoice`(`seed`: String, `uniqueTime`: String, `state`: ByteArray, `bolt
     return FfiConverterTypeRunReturn.lift(
     rustCallWithError(SphinxException) { _status ->
     _UniFFILib.INSTANCE.uniffi_sphinxrs_fn_func_pay_invoice(FfiConverterString.lower(`seed`),FfiConverterString.lower(`uniqueTime`),FfiConverterByteArray.lower(`state`),FfiConverterString.lower(`bolt11`),FfiConverterOptionalULong.lower(`overpayMsat`),_status)
+})
+}
+
+@Throws(SphinxException::class)
+
+fun `paymentHashFromInvoice`(`bolt11`: String): String {
+    return FfiConverterString.lift(
+    rustCallWithError(SphinxException) { _status ->
+    _UniFFILib.INSTANCE.uniffi_sphinxrs_fn_func_payment_hash_from_invoice(FfiConverterString.lower(`bolt11`),_status)
 })
 }
 
