@@ -102,6 +102,8 @@ interface ConnectManagerListener {
 
     fun onUpdateUserState(userState: String)
 
+    fun onDeleteUserState(userState: List<String>)
+
     fun onSignedChallenge(sign: String)
 
     fun onNewBalance(balance: Long)

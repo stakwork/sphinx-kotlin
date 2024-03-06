@@ -522,7 +522,7 @@ class ConnectManagerImpl(
                 mixerIp!!,
                 sats.toULong(),
                 ownerInfoStateFlow.value?.alias ?: "",
-                mixerIp,
+                "34.229.52.200:1883",
                 tribeServerPubKey
             )
 
@@ -763,6 +763,14 @@ class ConnectManagerImpl(
             )
 
             Log.d("MQTT_MESSAGES", "=> inviterInfo $inviterInfo")
+        }
+
+        rr.stateToDelete.let {
+            notifyListeners {
+                onDeleteUserState(it)
+            }
+
+            Log.d("MQTT_MESSAGES", "=> stateToDelete $it")
         }
 
         // Handling other properties like sentStatus, settledStatus, error, etc.

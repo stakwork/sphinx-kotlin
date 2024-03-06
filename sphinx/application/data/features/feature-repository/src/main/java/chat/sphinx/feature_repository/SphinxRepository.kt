@@ -387,7 +387,7 @@ abstract class SphinxRepository(
                 nickname,
                 welcomeMessage,
                 sats,
-                tribeServerPubKey
+                "02e7066a3685f13b36f26c5e6915e603def40afd36bc4ed93a9455a7bf12b7a20f"
             )
 
             val newInvitee = NewContact(
@@ -670,6 +670,10 @@ abstract class SphinxRepository(
 
     override fun onUpdateUserState(userState: String) {
         connectionManagerState.value = ConnectionManagerState.UserState(userState)
+    }
+
+    override fun onDeleteUserState(userState: List<String>) {
+        connectionManagerState.value = ConnectionManagerState.DeleteUserState(userState)
     }
 
     override fun onSignedChallenge(sign: String) {
@@ -2444,10 +2448,10 @@ abstract class SphinxRepository(
 
         } else {
 
-            val invite = if (contact.invitePrice != null) {
+            val invite = if (contact.invitePrice != null && contact.inviteCode != null) {
                 Invite(
                     id = InviteId(contactId ?: -1L),
-                    inviteString = InviteString(contact.inviteString ?: ""),
+                    inviteString = InviteString(contact.inviteString ?: "null"),
                     inviteCode = InviteCode(contact.inviteCode ?: ""),
                     paymentRequest = null,
                     contactId = ContactId(contactId ?: -1L),

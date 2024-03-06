@@ -180,6 +180,9 @@ internal class DashboardViewModel @Inject constructor(
                     is ConnectionManagerState.UserState -> {
                         storeUserState(connectionState.userState)
                     }
+                    is ConnectionManagerState.DeleteUserState -> {
+                        deleteUserState(connectionState.userState)
+                    }
                     is ConnectionManagerState.NewInviteCode -> {
                         delay(500L)
                         dashboardNavigator.toQRCodeDetail(
@@ -203,6 +206,16 @@ internal class DashboardViewModel @Inject constructor(
     private fun getUserState(): String? {
         return userStateSharedPreferences.getString(ONION_STATE_KEY, null)
     }
+
+    private fun deleteUserState(userStates: List<String>) {
+        val editor = userStateSharedPreferences.edit()
+
+        for (state in userStates) {
+            editor.remove(state)
+        }
+        editor.apply()
+    }
+
 
     private fun getRelayKeys() {
         repositoryDashboard.getAndSaveTransportKey()
