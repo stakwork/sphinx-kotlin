@@ -90,110 +90,99 @@
     <string name="tribe_welcome_announcement_member_side">Tribeにようこそ！</string>
     <string name="tribe_deleted_announcement_button_delete">Tribeを削除</string>
 
+
     <!-- Selected Item Menu Labels -->
-    <string name="selected_message_menu_item_boost">投げ銭する</string>
+    <string name="selected_message_menu_item_boost">ブースト</string>
     <string name="selected_message_menu_item_copy_text">テキストをコピー</string>
-    <string name="selected_message_menu_item_copy_call_link">コールリンクをコピー</string>
+    <string name="selected_message_menu_item_copy_call_link">通話リンクをコピー</string>
     <string name="selected_message_menu_item_copy_link">リンクをコピー</string>
-    <string name="selected_message_menu_item_delete">メッセージを削除</string>
+    <string name="selected_message_menu_item_delete">メッセージを消去</string>
     <string name="selected_message_menu_item_reply">返信</string>
     <string name="selected_message_menu_item_save_file">ファイルを保存</string>
-    <string name="selected_message_menu_item_resend">再送信</string>
-    <string name="selected_message_menu_item_flag">Flag</string>
+    <string name="selected_message_menu_item_resend">再送</string>
+    <string name="selected_message_menu_item_flag">フラグ</string>
+    <string name="selected_message_menu_item_pin">ピン留め</string>
+    <string name="selected_message_menu_item_unpin">ピン留めを外す</string>
 
-    <string name="alert_confirm_flag_message_title">Confirm Flagging message</string>
-    <string name="alert_confirm_flag_message_message">Are you sure you want to flag this message? This action can not be undone</string>
+    <string name="alert_confirm_flag_message_title">メッセージにフラグを付けることを確認</string>
+    <string name="alert_confirm_flag_message_message">このメッセージにフラグを付けますか？  この操作は取り消せません</string>
 
-    <string name="alert_confirm_delete_message_title">Confirm Deleting message</string>
-    <string name="alert_confirm_delete_message_message">Are you sure you want to delete this message? This action can not be undone</string>
+    <string name="alert_confirm_delete_message_title">メッセージの削除を確認</string>
+    <string name="alert_confirm_delete_message_message">このメッセージを削除しますか？この操作は取り消せません</string>
 
-    <!-- Notify -->
-    <string name="notify_boost_failure">投げ銭に失敗しました</string>
+    <string name="notify_boost_failure">ブーストの支払い失敗</string>
     <string name="side_effect_text_copied">テキストをクリップボードにコピーしました</string>
-    <string name="side_effect_call_link_copied">コールリンクをクリップボードにコピーしました</string>
-    <string name="side_effect_link_copied">%sをコピーしました</string>
+    <string name="side_effect_call_link_copied">通話リンクをクリップボードにコピーしました</string>
+    <string name="side_effect_link_copied">%s をコピーしました</string>
     <string name="side_effect_no_link_to_copy">コピーするリンクがありません</string>
-    <string name="side_effect_insufficient_budget">Budget is not enough to perform the search</string>
-    <string name="side_effect_error_pay_lsat">There was an error trying to pay Lsat</string>
+    <string name="side_effect_insufficient_budget">検索を実行するための予算が不足しています</string>
+    <string name="side_effect_error_pay_lsat">Lsatの決済中にエラーが発生しました</string>
+    <string name="side_effect_keysend_error">鍵送信エラー</string>
+    <string name="side_effect_challenge_error">認証エラー</string>
 
-    <string name="file_name_loading">Loading...</string>
-    <string name="pdf_page">page</string>
-    <string name="pdf_pages">pages</string>
-    <string name="pdf_page_of">Page %d of %d</string>
+    <string name="file_name_loading">読み込み中...</string>
+    <string name="pdf_page">ページ</string>
+    <string name="pdf_pages">ページ</string>
+    <string name="pdf_page_of">ページ %d/%d</string>
 
-    <!-- Send Attachment -->
-    <string name="attachment_send_header_image">写真を送る</string>
-    <string name="attachment_send_header_video">動画を送る</string>
-    <string name="attachment_send_header_pdf">SEND PDF</string>
-    <string name="attachment_send_header_file">SEND FILE</string>
-    <string name="attachment_send_header_giphy">ミームを送る</string>
-    <string name="attachment_send_header_paid_message">SEND PAID MESSAGE</string>
+    <string name="attachment_send_header_image">画像を送信</string>
+    <string name="attachment_send_header_video">動画を送信</string>
+    <string name="attachment_send_header_pdf">PDFを送信</string>
+    <string name="attachment_send_header_file">ファイルを送信</string>
+    <string name="attachment_send_header_giphy">GIFを送信</string>
+    <string name="attachment_send_header_paid_message">有料メッセージを送信</string>
 
-    <!-- Pay Attachment -->
-    <string name="paid_message_pay_to_unlock">Satsを支払いメッセージを開封する</string>
-    <string name="paid_file_pay_to_unlock">PAY TO UNLOCK FILE</string>
-    <string name="paid_message_loading">メッセージを読み込んでいます</string>
-    <string name="paid_message_unable_to_load">メッセージを読み込めませんでした</string>
-    <string name="attachment_price_label">課金額: </string>
-    <string name="alert_confirm_pay_attachment_title">購入する</string>
-    <string name="alert_confirm_pay_attachment_message">このアイテムを購入しますか？</string>
+    <string name="paid_message_pay_to_unlock">メッセージを表示するには支払いが必要です</string>
+    <string name="paid_file_pay_to_unlock">ファイルを閲覧するには支払いが必要です</string>
+    <string name="paid_message_loading">メッセージを読み込み中...</string>
+    <string name="paid_message_unable_to_load">メッセージデータを読み込めません</string>
+    <string name="attachment_price_label">価格: </string>
+    <string name="alert_confirm_pay_attachment_title">購入の確認</string>
+    <string name="alert_confirm_pay_attachment_message">この商品の購入を確定しますか？</string>
 
-    <!-- Save Attachment -->
     <string name="saved_attachment_successfully">添付ファイルを保存しました</string>
-    <string name="failed_to_save_file">ファイルを保存できませんでした</string>
+    <string name="failed_to_save_file">ファイルの保存に失敗しました</string>
 
-    <!-- Exit Tribe -->
-    <string name="delete_own_tribe_not_supported">自分で作成したTribeは削除できません</string>
-    <string name="alert_confirm_exit_tribe_title">Tribeから抜ける</string>
-    <string name="alert_confirm_exit_tribe_message">Tribeから抜け、Tribeを削除してよいですか？</string>
+    <string name="delete_own_tribe_not_supported">自分のトライブの削除はまだサポートされていません</string>
+    <string name="alert_confirm_exit_tribe_title">トライブから退会</string>
+    <string name="alert_confirm_exit_tribe_message">このトライブを削除し、退会しますか？</string>
 
-    <!-- Menu -->
-    <string name="attachments_menu_cancel" tools:ignore="ButtonCase">キャンセル</string>
-    <string name="camera_attachment_option">カメラで撮影</string>
-    <string name="library_attachment_option">アルバムから選ぶ</string>
-    <string name="gif_attachment_option">ミームを探す</string>
-    <string name="file_attachment_option">ファイルを送信</string>
-    <string name="paid_message_attachment_option">有料メッセージを作成</string>
-    <string name="request_attachment_option">送金をリクエスト</string>
-    <string name="send_attachment_option">送金する</string>
-    <string name="waiting_for_admin_approval">管理人の承認を待っています</string>
-    <string name="failed_to_delete_tribe">Tribeを削除できませんでした</string>
+    <string name="attachments_menu_cancel">キャンセル</string>
+    <string name="camera_attachment_option">カメラ</string>
+    <string name="library_attachment_option">ライブラリ</string>
+    <string name="gif_attachment_option">Gif</string>
+    <string name="file_attachment_option">ファイル</string>
+    <string name="paid_message_attachment_option">有料メッセージ</string>
+    <string name="request_attachment_option">リクエスト</string>
+    <string name="send_attachment_option">送信</string>
+    <string name="waiting_for_admin_approval">管理者の承認待ち</string>
+    <string name="failed_to_delete_tribe">トライブの削除に失敗しました</string>
 
-    <string name="podcast_boost_label">投げ銭！</string>
+    <string name="podcast_boost_label">ブースト！</string>
+    <string name="bottom_menu_call_header_text">通話オプション</string>
+    <string name="bottom_menu_call_option_audio">オーディオ</string>
+    <string name="bottom_menu_call_option_video_or_audio">ビデオまたはオーディオ</string>
 
-    <string name="bottom_menu_call_header_text">コール方法</string>
-    <string name="bottom_menu_call_option_audio">音声</string>
-    <string name="bottom_menu_call_option_video_or_audio">動画または音声</string>
+    <string name="bottom_menu_more_header_text">チャットオプション</string>
+    <string name="bottom_menu_more_option_call">通話を作成</string>
+    <string name="bottom_menu_more_option_share">トライブリンクを共有</string>
+    <string name="bottom_menu_more_option_search">メッセージを検索</string>
+    <string name="bottom_menu_more_option_notification">通知</string>
 
-    <string name="bottom_menu_more_header_text">Chat Options</string>
-    <string name="bottom_menu_more_option_call">Create Call</string>
-    <string name="bottom_menu_more_option_share">Share Tribe Link</string>
-    <string name="bottom_menu_more_option_search">Search Messages</string>
-    <string name="bottom_menu_more_option_notification">Notifications</string>
+    <string name="searching_messages">検索中...</string>
+    <string name="results_found">%d 件の結果が見つかりました</string>
 
-    <string name="searching_messages">Searching...</string>
-    <string name="results_found">%d Results Found</string>
+    <string name="slide_to_cancel">&lt;&lt; キャンセルする為スワイプ</string>
+    <string name="recording_permission_granted">録音許可が付与されました</string>
+    <string name="recording_permission_required">録音許可が必要です</string>
 
-    <string name="slide_to_cancel">&lt;&lt; スライドするとキャンセルできます</string>
-    <string name="recording_permission_granted">録音が許可されました</string>
-    <string name="recording_permission_required">録音許可を取ってください</string>
+    <string name="send_sats">Satsを送る</string>
 
-    <string name="send_sats">Send Sats</string>
-    <string name="option_block_user">ブロック</string>
-    <string name="option_delete_user">消去</string>
-    <string name="alert_confirm_delete_contact">Are you sure you want to delete this contact?</string>
-    <string name="alert_confirm_delete_contact_title">Delete Contact</string>
-    <string name="alert_confirm_block_contact">Are you sure you want to block this contact?</string>
-    <string name="alert_confirm_block_contact_title">Block Contact</string>
-    <string name="alert_confirm_unblock_contact_title">Unblock Contact</string>
-    <string name="alert_confirm_unblock_contact">Are you sure you want to unblock this contact?</string>
-    <string name="alert_not_encrypted_contact">You can\'t send a message to an unencrypted contact</string>
+    <string name="unpin_message">メッセージのピン留めを外す</string>
+    <string name="pinned_message">ピン留めしたメッセージ</string>
+    <string name="message_pinned">メッセージをピン留めしました</string>
+    <string name="message_unpinned">メッセージのピン留めを外しました</string>
+    <string name="pin_message_error">エラーが発生しました。後でもう一度お試しください</string>
 
-    <string name="unpin_message">Unpin Message</string>
-    <string name="pinned_message">Pinned Message</string>
-    <string name="message_pinned">Message Pinned</string>
-    <string name="message_unpinned">Message Unpinned</string>
-    <string name="pin_message_error">Something went wrong. Please try again later</string>
-
-    <string name="cancel_search">CANCEL</string>
+    <string name="cancel_search">キャンセル</string>
 </resources>

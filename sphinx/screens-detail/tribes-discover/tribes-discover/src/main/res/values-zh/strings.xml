@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="discover_tribes_header_name">DISCOVER TRIBES</string>
-    <string name="discover_tribes_tags">Tags</string>
-    <string name="discover_tribes_join">Join</string>
-    <string name="discover_tribes_open">Open</string>
-    <string name="discover_tribes_apply">Apply</string>
-    <string name="discover_tribes_no_results">No tribes found</string>
-    <string name="discover_tribes_loading">Loading...</string>
+    <string name="discover_tribes_header_name">發現部落</string>
+    <string name="discover_tribes_tags">標籤</string>
+    <string name="discover_tribes_join">加入</string>
+    <string name="discover_tribes_open">打開</string>
+    <string name="discover_tribes_apply">申請</string>
+    <string name="discover_tribes_no_results">找不到部落</string>
+    <string name="discover_tribes_loading">加載中...</string>
 </resources>

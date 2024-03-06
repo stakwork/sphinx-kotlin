@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="bottom_menu_scanner_header_text">Public Key Options</string>
+    <string name="bottom_menu_scanner_header_text">公鑰選項</string>
     <!-- Menu -->
-    <string name="bottom_menu_scanner_option_set_create_contact">Create Contact</string>
-    <string name="bottom_menu_scanner_option_set_direct_payment">Send Direct Payment</string>
+    <string name="bottom_menu_scanner_option_set_create_contact">創建聯繫人</string>
+    <string name="bottom_menu_scanner_option_set_direct_payment">發送直接付款</string>
+
 </resources>

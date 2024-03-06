@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="newsletter">NEWSLETTER</string>
-    <string name="articles">Articles</string>
+    <string name="newsletter">ニュースレター</string>
+    <string name="articles">記事</string>
 </resources>

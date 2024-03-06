@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="transactions_header_name">交易紀錄</string>
-    <string name="loading_more">載入更多...</string>
-    <string name="failed_payment">Failed Payment</string>
-    <string name="failure_reason">Failure reason: %s</string>
+    <string name="transactions_header_name">交易</string>
+    <string name="loading_more">加載中...</string>
+    <string name="failed_payment">付款失败</string>
+    <string name="failure_reason">失败原因: %s</string>
 </resources>

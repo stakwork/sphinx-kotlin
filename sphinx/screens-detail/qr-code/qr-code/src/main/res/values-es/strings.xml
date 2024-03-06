@@ -4,6 +4,6 @@
     <string name="copy">Copiar</string>
     <string name="paid">PAGADO</string>
     <string name="qr_code_notify_copied">%s copiado al portapapeles</string>
-    <string name="share_qr_code_as_image_plus_text">Share QR Code as Image+Text</string>
-    <string name="share_qr_code_as_text">Share QR Code as Text</string>
+    <string name="share_qr_code_as_image_plus_text">Compartir código QR como imagen + texto</string>
+    <string name="share_qr_code_as_text">Compartir código QR como texto</string>
 </resources>

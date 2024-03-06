@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="tribe_members_list">會員列表</string>
-    <string name="tribe_members_list_header">TRIBE 會員</string>
-    <string name="pending_tribe_members_header">未決定 會員</string>
-    <string name="loading_more">載入更多...</string>
-    <string name="delete_member">Delete</string>
+    <string name="tribe_members_list">成員列表</string>
+    <string name="tribe_members_list_header">部落成員</string>
+    <string name="pending_tribe_members_header">待審成員</string>
+    <string name="loading_more">加載中...</string>
+    <string name="delete_member">刪除</string>
 </resources>

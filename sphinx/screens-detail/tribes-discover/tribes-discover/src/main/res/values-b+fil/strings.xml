@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="discover_tribes_header_name">DISCOVER TRIBES</string>
-    <string name="discover_tribes_tags">Tags</string>
+    <string name="discover_tribes_header_name">TUKLASAN ANG MGA TRIBO</string>
+    <string name="discover_tribes_tags">Mga Tag</string>
     <string name="discover_tribes_join">Sumali</string>
     <string name="discover_tribes_open">Buksan</string>
-    <string name="discover_tribes_apply">Apply</string>
-    <string name="discover_tribes_no_results">No tribes found</string>
-    <string name="discover_tribes_loading">Loading...</string>
+    <string name="discover_tribes_apply">Mag-apply</string>
+    <string name="discover_tribes_no_results">Walang natagpuang mga tribo</string>
+    <string name="discover_tribes_loading">Naglo-load...</string>
 </resources>

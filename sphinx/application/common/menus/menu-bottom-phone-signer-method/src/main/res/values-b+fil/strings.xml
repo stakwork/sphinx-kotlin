@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="bottom_menu_phone_signer_method_header_text">Choose Your Seed Method</string>
-    <string name="bottom_menu_phone_signer_method_sub_header_text">Would you like to generate a new seed phrase or import an existing one?</string>
-
+    <string name="bottom_menu_phone_signer_method_header_text">Pumili ng Iyong Paraan ng Seed</string>
+    <string name="bottom_menu_phone_signer_method_sub_header_text">Gusto mo bang gumawa ng bagong seed phrase o mag-import ng umiiral na isa?</string>
+    
     <!-- Menu -->
-    <string name="bottom_menu_phone_signer_method_generate">Generate</string>
-    <string name="bottom_menu_phone_signer_method_import">Import</string>
+    <string name="bottom_menu_phone_signer_method_generate">Gumawa</string>
+    <string name="bottom_menu_phone_signer_method_import">Mag-import</string>
+
 </resources>
