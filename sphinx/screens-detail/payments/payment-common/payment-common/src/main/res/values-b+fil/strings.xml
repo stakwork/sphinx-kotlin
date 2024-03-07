@@ -6,8 +6,8 @@
     <string name="add_message_hint">Magdagdag ng Mensahe</string>
     <string name="confirm_button">KUMPIRMAHIN</string>
     <string name="continue_button">IPAGPATULOY</string>
-    <string name="error_processing_payment">There was an error processing payment, please try again later.</string>
-    <string name="payment_sent">Payment of %1$d sat sent to %2$s</string>
-    <string name="alert_confirm_payment_send_title">None</string>
-    <string name="alert_confirm_payment_send_message">Are you sure you want to send a payment of %1$d sat to %2$s?</string>
+    <string name="error_processing_payment">Nagkaroon ng error sa pagproseso ng bayad. Subukang muli mamaya.</string>
+    <string name="payment_sent">Ang bayad ng %1$d sat ay ipinadala kay %2$s</string>
+    <string name="alert_confirm_payment_send_title">Ipadala ang Bayad</string>
+    <string name="alert_confirm_payment_send_message">Sigurado ka bang gusto mong magpadala ng bayad ng %1$d sat kay %2$s?</string>
 </resources>

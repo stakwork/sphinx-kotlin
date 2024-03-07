@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="error_loading_recommendations">Error loading recommendations. Please try again later.</string>
-    <string name="error_playing_clip">This clip can\'t be played.</string>
+    <string name="error_loading_recommendations">Nagkakaroon ng error sa paglo-load ng mga rekomendasyon. Subukan muli mamaya.</string>
+    <string name="error_playing_clip">Hindi ma-play ang clip na ito.</string>
 </resources>

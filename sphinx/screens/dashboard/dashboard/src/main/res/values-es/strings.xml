@@ -160,7 +160,7 @@
     <string name="dashboard_stop_restore">Continuar más tarde</string>
 
     <string name="loading_recommendations">Cargando Recomendaciones...</string>
-    <string name="refresh_while_loading">You can\'t get new recommendations while playing them. Please stop playing before refreshing</string>
+    <string name="refresh_while_loading">No puedes obtener nuevas recomendaciones mientras las estás reproduciendo. Detén la reproducción antes de actualizar.</string>
 
     <string name="time_left">Faltan %s</string>
 </resources>

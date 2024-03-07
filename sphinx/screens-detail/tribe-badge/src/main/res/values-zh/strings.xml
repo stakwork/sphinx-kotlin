@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="badge_already_exist">You already have a badge of this type. You can manage it in the Existing Badges section</string>
+    <string name="badge_already_exist">您已經擁有此類型的徽章。您可以在現有徽章部分進行管理</string>
 </resources>

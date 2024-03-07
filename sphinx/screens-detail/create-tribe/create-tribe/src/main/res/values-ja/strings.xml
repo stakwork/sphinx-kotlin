@@ -24,10 +24,10 @@
     <string name="time_to_stake_hours">ステーキング期間（時間）</string>
     <string name="app_url">アプリURL</string>
     <string name="rss_feed_url">フィードURL</string>
-    <string name="feed_content_type">Feed Content Type</string>
+    <string name="feed_content_type">フィードのコンテンツタイプ</string>
     <string name="approve_each_membership_request">参加申請を１件ずつ承認しますか？</string>
 
-    <string name="feed_type_podcast">Podcast</string>
-    <string name="feed_type_video">Video</string>
-    <string name="feed_type_newsletter">Newsletter</string>
+    <string name="feed_type_podcast">ポッドキャスト</string>
+    <string name="feed_type_video">ビデオ</string>
+    <string name="feed_type_newsletter">ニュースレター</string>
 </resources>

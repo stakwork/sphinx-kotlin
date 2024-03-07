@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Menu -->
-    <string name="bottom_menu_share_qr_code_header_text">Share QR Code Options</string>
-    <string name="bottom_menu_share_qr_code_option_share_text">Share Text</string>
-    <string name="bottom_menu_share_qr_code_option_save_and_share_image">Save and Share Image</string>
+    <string name="bottom_menu_share_qr_code_header_text">QRコード共有オプション</string>
+    <string name="bottom_menu_share_qr_code_option_share_text">テキストを共有</string>
+    <string name="bottom_menu_share_qr_code_option_save_and_share_image">画像を保存して共有</string>
+
 </resources>

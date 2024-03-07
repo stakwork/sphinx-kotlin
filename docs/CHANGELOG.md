@@ -1,5 +1,10 @@
 # ChangeLog
 
+# Version 1.0.0-beta20 (2024-03-07)
+- Adds Japanese localization
+- Adds Chinese localization
+- Adds Philippine localization
+
 # Version 1.0.0-beta19 (2024-02-28)
 - Fixes Jitsi links handling
 
