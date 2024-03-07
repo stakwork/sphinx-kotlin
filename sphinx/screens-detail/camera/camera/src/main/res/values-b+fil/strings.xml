@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="camera_permissions_required">Camera and Audio Permissions are required to use this feature, please enable them in Settings.</string>
-    <string name="camera_retake">Retake</string>
-    <string name="camera_use_photo">Use Photo</string>
-    <string name="camera_use_video">Use Video</string>
+    <string name="camera_permissions_required">Kailangan ng mga pahintulot sa Camera at Audio para magamit ang feature na ito, pakim paganahin ang mga ito sa Settings.</string>
+    <string name="camera_retake">Kunang muli</string>
+    <string name="camera_use_photo">Gamitin ang Litrato</string>
+    <string name="camera_use_video">Gamitin ang Video</string>
     <string name="camera_cancel">Kanselahin</string>
-    <string name="camera_shutter_instruction">Tap for picture, hold for video</string>
+    <string name="camera_shutter_instruction">I-tap para sa larawan, pindutin nang matagal para sa video</string>
 </resources>

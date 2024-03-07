@@ -8,6 +8,6 @@
     <string name="new_contact_invalid_public_key_error">無効な公開鍵</string>
     <string name="new_contact_invalid_route_hint_error">無効なルートヒント</string>
     <string name="failed_to_update_contact">連絡先の保存に失敗しました</string>
-    <string name="edit_contact_header_subscribe_button">Subscribe</string>
-    <string name="edit_contact_header_subscribed_button">Subscribed</string>
+    <string name="edit_contact_header_subscribe_button">購読する</string>
+    <string name="edit_contact_header_subscribed_button">購読済み</string>
 </resources>

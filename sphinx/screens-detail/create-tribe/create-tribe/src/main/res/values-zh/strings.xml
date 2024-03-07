@@ -22,12 +22,12 @@
     <string name="price_per_message_sats">訊息費用</string>
     <string name="amount_to_stake_sats">訂金</string>
     <string name="time_to_stake_hours">訂金時期 (小時)</string>
-    <string name="app_url">App Url</string>
-    <string name="rss_feed_url">Feed URL</string>
-    <string name="feed_content_type">Feed Content Type</string>
+    <string name="app_url">應用網址</string>
+    <string name="rss_feed_url">內容源網址</string>
+    <string name="feed_content_type">內容源內容類型</string>
     <string name="approve_each_membership_request">需要許可每位會員邀請嗎?</string>
 
-    <string name="feed_type_podcast">Podcast</string>
-    <string name="feed_type_video">Video</string>
-    <string name="feed_type_newsletter">Newsletter</string>
+    <string name="feed_type_podcast">播客</string>
+    <string name="feed_type_video">影片</string>
+    <string name="feed_type_newsletter">時事通訊</string>
 </resources>

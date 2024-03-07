@@ -4,6 +4,6 @@
     <string name="copy">Kopya</string>
     <string name="paid">BINAYARAN</string>
     <string name="qr_code_notify_copied">%s copied to clipboard</string>
-    <string name="share_qr_code_as_image_plus_text">Share QR Code as Image+Text</string>
-    <string name="share_qr_code_as_text">Share QR Code as Text</string>
+    <string name="share_qr_code_as_image_plus_text">Ibahagi ang QR Code bilang Larawan+Teksto</string>
+    <string name="share_qr_code_as_text">Ibahagi ang QR Code bilang Teksto</string>
 </resources>

@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="payment_send_header_name">支払う</string>
-
     <string name="invalid_node_pub_key_qr_code">QRコードはLightningノードの公開鍵ではありません</string>
-    <string name="amount_too_high">Amount is too high</string>
+    <string name="amount_too_high">金額が高すぎます</string>
 </resources>

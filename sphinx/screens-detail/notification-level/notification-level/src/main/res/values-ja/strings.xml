@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="notification_level_header_name">NOTIFICATIONS</string>
-    <string name="notification_level_failed">Failed to set notification level</string>
-
-    <string name="notification_level_see_all">See all</string>
-    <string name="notification_level_only_mentions">Only mentions</string>
-    <string name="notification_level_mute_chat">Mute chat</string>
+    <string name="notification_level_header_name">通知ヘッダー名</string>
+    <string name="notification_level_failed">通知レベルの設定に失敗しました</string>
+    <string name="notification_level_see_all">全てを見る</string>
+    <string name="notification_level_only_mentions">メンションのみ</string>
+    <string name="notification_level_mute_chat">チャットをミュート</string>
 </resources>

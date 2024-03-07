@@ -101,6 +101,8 @@
     <string name="selected_message_menu_item_save_file">Descargar</string>
     <string name="selected_message_menu_item_resend">Reenviar</string>
     <string name="selected_message_menu_item_flag">Reportar</string>
+    <string name="selected_message_menu_item_pin">Fijar</string>
+    <string name="selected_message_menu_item_unpin">Desfijar</string>
 
     <string name="alert_confirm_flag_message_title">Confirmar Mensaje reportado</string>
     <string name="alert_confirm_flag_message_message">¿Estas seguro de que quieres reportar este mensaje? Esta acción no puede revertirse</string>
