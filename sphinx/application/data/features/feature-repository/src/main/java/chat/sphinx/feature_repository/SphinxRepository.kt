@@ -387,7 +387,7 @@ abstract class SphinxRepository(
                 nickname,
                 welcomeMessage,
                 sats,
-                "02e7066a3685f13b36f26c5e6915e603def40afd36bc4ed93a9455a7bf12b7a20f"
+                tribeServerPubKey
             )
 
             val newInvitee = NewContact(

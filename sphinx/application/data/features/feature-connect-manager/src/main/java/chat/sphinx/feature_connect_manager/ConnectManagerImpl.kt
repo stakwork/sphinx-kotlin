@@ -514,6 +514,8 @@ class ConnectManagerImpl(
     ): Pair<String, String>? {
         val now = getTimestampInMilliseconds()
 
+        // Needs to implement tribeServerPubKey and tribeHost in the future
+
         try {
             val createInvite = makeInvite(
                 ownerSeed!!,
@@ -522,7 +524,7 @@ class ConnectManagerImpl(
                 mixerIp!!,
                 sats.toULong(),
                 ownerInfoStateFlow.value?.alias ?: "",
-                "34.229.52.200:1883",
+                null,
                 tribeServerPubKey
             )
 
@@ -763,6 +765,12 @@ class ConnectManagerImpl(
             )
 
             Log.d("MQTT_MESSAGES", "=> inviterInfo $inviterInfo")
+        }
+
+        rr.initialTribe?.let { initialTribe ->
+            // Call joinTribe with the url that comes on initialTribe
+
+            Log.d("MQTT_MESSAGES", "=> initialTribe $initialTribe")
         }
 
         rr.stateToDelete.let {
