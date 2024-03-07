@@ -58,8 +58,9 @@ internal class InviteFriendFragment : SideEffectDetailFragment<
         binding.buttonInviteFriendCreate.setOnClickListener {
             val nickname = binding.editTextInviteFriendNickname.text?.toString()
             val welcomeMessage = binding.editTextInviteFriendMessage.text?.toString()
+            val sats = binding.editTextPriceForInvite.text?.toString()?.toLongOrNull()
 
-            viewModel.createNewInvite(nickname, welcomeMessage)
+            viewModel.createNewInvite(nickname, welcomeMessage, sats)
 
         }
 

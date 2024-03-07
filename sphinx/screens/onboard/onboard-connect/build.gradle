@@ -43,6 +43,7 @@ dependencies {
     implementation project(path: ':sphinx:application:data:concepts:concept-wallet')
     implementation project(path: ':sphinx:application:network:concepts:queries:concept-network-query-crypter')
     implementation project(path: ':kotlin:concepts:authentication:concept-authentication')
+    implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-connect-manager')
     api project(path: ':sphinx:screens:onboard:onboard-common')
     api project(path: ':sphinx:screens:onboard:onboard-resources')
     api project(path: ':sphinx:application:common:menus:menu-bottom-signer')

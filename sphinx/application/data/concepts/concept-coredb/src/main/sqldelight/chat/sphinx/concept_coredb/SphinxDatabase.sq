@@ -35,10 +35,10 @@ import chat.sphinx.wrapper_common.lightning.LightningPaymentHash;
 import chat.sphinx.wrapper_common.lightning.LightningPaymentRequest;
 import chat.sphinx.wrapper_common.lightning.LightningRouteHint;
 import chat.sphinx.wrapper_common.lightning.Sat;
+import chat.sphinx.wrapper_common.lightning.ServerIp;
 import chat.sphinx.wrapper_common.lightning.ShortChannelId;
 import chat.sphinx.wrapper_common.message.MessageId;
 import chat.sphinx.wrapper_common.message.MessageUUID;
-import chat.sphinx.wrapper_common.lightning.ServerIp;
 import chat.sphinx.wrapper_common.subscription.Cron;
 import chat.sphinx.wrapper_common.subscription.EndNumber;
 import chat.sphinx.wrapper_common.subscription.SubscriptionCount;
@@ -65,6 +65,7 @@ import chat.sphinx.wrapper_feed.FeedModelSuggested;
 import chat.sphinx.wrapper_feed.FeedModelType;
 import chat.sphinx.wrapper_feed.FeedPlayerSpeed;
 import chat.sphinx.wrapper_feed.FeedTitle;
+import chat.sphinx.wrapper_invite.InviteCode;
 import chat.sphinx.wrapper_invite.InviteString;
 import chat.sphinx.wrapper_message.ErrorMessage;
 import chat.sphinx.wrapper_message.Flagged;
@@ -485,6 +486,14 @@ SET alias = :alias,
     status = :status
 WHERE id = ?;
 
+contactUpdateInvitee:
+UPDATE contactDbo
+SET alias = :alias,
+    photo_url = :photo_url,
+    node_pub_key = :node_pub_key,
+    status = :status
+WHERE id = ?;
+
 contactUpdateBlocked:
 UPDATE contactDbo
 SET blocked = :blocked
@@ -497,6 +506,7 @@ WHERE id = ?;
 CREATE TABLE inviteDbo(
     id                          INTEGER         AS InviteId NOT NULL PRIMARY KEY,
     invite_string               TEXT            AS InviteString NOT NULL,
+    invite_code                 TEXT            AS InviteCode,
     invoice                     TEXT            AS LightningPaymentRequest,
 --     welcome_message             TEXT,
     contact_id                  INTEGER         AS ContactId NOT NULL,
@@ -524,9 +534,15 @@ UPDATE inviteDbo
 SET status = :status
 WHERE id = ?;
 
+inviteGetByCode:
+SELECT *
+FROM inviteDbo
+WHERE invite_code = ?;
+
 inviteUpsert {
     UPDATE inviteDbo
     SET invite_string = :invite_string,
+        invite_code = :invite_code,
         invoice = :invoice,
         status = :status,
         price = :price
@@ -535,6 +551,7 @@ inviteUpsert {
     INSERT OR IGNORE INTO inviteDbo(
         id,
         invite_string,
+        invite_code,
         invoice,
         contact_id,
         status,
@@ -544,6 +561,7 @@ inviteUpsert {
     VALUES (
         :id,
         :invite_string,
+        :invite_code,
         :invoice,
         :contact_id,
         :status,

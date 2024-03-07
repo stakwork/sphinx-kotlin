@@ -10,6 +10,7 @@ import chat.sphinx.wrapper_common.lightning.Sat
 data class Invite(
     val id: InviteId,
     val inviteString: InviteString,
+    val inviteCode: InviteCode?,
     val paymentRequest: LightningPaymentRequest?,
     val contactId: ContactId,
     val status: InviteStatus,

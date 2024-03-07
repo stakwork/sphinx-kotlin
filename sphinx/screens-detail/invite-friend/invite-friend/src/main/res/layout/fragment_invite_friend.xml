@@ -125,11 +125,59 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/constraint_layout_price_for_invite"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/search_bar_height"
+        android:paddingHorizontal="@dimen/default_layout_margin"
+        android:layout_marginTop="@dimen/default_layout_margin"
+        app:layout_constraintTop_toBottomOf="@+id/layout_constraint_invite_friend_message_outer">
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_tribe_price_for_invite"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Sats for invite"
+            android:textColor="@color/secondaryText"
+            android:fontFamily="@font/roboto_regular"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            android:textSize="@dimen/default_form_text_view_text_size"
+            android:singleLine="true" />
+
+        <androidx.appcompat.widget.AppCompatEditText
+            android:id="@+id/edit_text_price_for_invite"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/text"
+            android:fontFamily="@font/roboto_regular"
+            app:backgroundTint="@android:color/transparent"
+            android:textSize="@dimen/default_form_edit_view_text_size"
+            android:inputType="number"
+            android:singleLine="true"
+            android:layout_marginLeft="@dimen/default_form_edit_text_left_margin"
+            app:layout_constraintTop_toBottomOf="@+id/text_view_tribe_price_for_invite"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            tools:text="200"/>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/constraint_layout_price_to_invite_bottom_border"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/lightDivider"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/text_view_tribe_price_for_invite" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/layout_constraint_invite_friend_confirm"
         android:layout_width="match_parent"
         android:layout_height="@dimen/invite_friend_confirm_container_height"
         android:paddingHorizontal="@dimen/default_layout_margin"
-        app:layout_constraintTop_toBottomOf="@+id/layout_constraint_invite_friend_message_outer">
+        app:layout_constraintTop_toBottomOf="@+id/constraint_layout_price_for_invite">
 
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/button_invite_friend_create"

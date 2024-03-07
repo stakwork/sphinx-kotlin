@@ -10,11 +10,12 @@ interface ConnectManagerRepository {
     val connectionManagerState: MutableStateFlow<ConnectionManagerState?>
     val networkStatus: MutableStateFlow<NetworkStatus>
 
-    fun createOwnerAccount()
+    fun createOwnerAccount(lspIp: String)
     fun createContact(contact: NewContact)
     fun connectAndSubscribeToMqtt(userState: String?) {}
-    fun setLspIp(lspIp: String)
     fun singChallenge(challenge: String)
+    fun createInvite(nickname: String, welcomeMessage: String, sats: Long, tribeServerPubKey: String?)
+    fun setInviteCode(inviteString: String)
 
     fun joinTribe(
         tribeHost: String,

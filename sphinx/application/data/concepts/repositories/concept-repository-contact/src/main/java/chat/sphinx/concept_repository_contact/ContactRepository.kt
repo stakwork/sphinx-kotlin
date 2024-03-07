@@ -71,6 +71,8 @@ interface ContactRepository {
 
     fun saveNewContactRegistered(msgSender: String)
 
+    fun updateNewContactInvited(contact: NewContact)
+
 
     /** Sphinx V1 (likely to be removed) **/
 

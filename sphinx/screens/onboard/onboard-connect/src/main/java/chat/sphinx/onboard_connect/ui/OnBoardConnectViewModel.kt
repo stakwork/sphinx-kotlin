@@ -6,6 +6,7 @@ import android.text.InputType
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.concept_network_query_crypter.NetworkQueryCrypter
+import chat.sphinx.concept_repository_connect_manager.ConnectManagerRepository
 import chat.sphinx.concept_signer_manager.SignerHardwareCallback
 import chat.sphinx.concept_signer_manager.SignerManager
 import chat.sphinx.concept_signer_manager.SignerPhoneCallback
@@ -59,6 +60,7 @@ internal class OnBoardConnectViewModel @Inject constructor(
     private val walletDataHandler: WalletDataHandler,
     private val networkQueryCrypter: NetworkQueryCrypter,
     private val authenticationCoordinator: AuthenticationCoordinator,
+    private val connectManagerRepository: ConnectManagerRepository,
     private val app: Application,
     val moshi: Moshi,
     val navigator: OnBoardConnectNavigator
@@ -133,6 +135,10 @@ internal class OnBoardConnectViewModel @Inject constructor(
                 )
                 isValid = true
             }
+            if (redemptionCode != null &&
+                redemptionCode is RedemptionCode.NewInvite) {
+                isValid = true
+            }
 
         } else if (vs is OnBoardConnectViewState.ExistingUser) {
             if (redemptionCode != null &&
@@ -171,7 +177,12 @@ internal class OnBoardConnectViewModel @Inject constructor(
                             redemptionCode.relay
                         )
                         signerMenuHandler.viewStateContainer.updateViewState(MenuBottomViewState.Open)
-                    } else {
+                    }
+                    if (redemptionCode is RedemptionCode.NewInvite) {
+                        connectManagerRepository.setInviteCode(code)
+                        presentLoginModal()
+                    }
+                    else {
                         viewModelScope.launch(mainImmediate) {
                             navigator.toOnBoardConnectingScreen(code)
                         }
@@ -187,16 +198,21 @@ internal class OnBoardConnectViewModel @Inject constructor(
 
         if (submitButtonVS is OnBoardConnectSubmitButtonViewState.Enabled) {
 
-            if (redemptionCode is RedemptionCode.Glyph) {
-                signerManager.setSeedFromGlyph(
-                    redemptionCode.mqtt,
-                    redemptionCode.network,
-                    redemptionCode.relay
-                )
-                signerMenuHandler.viewStateContainer.updateViewState(MenuBottomViewState.Open)
-            } else {
-                viewModelScope.launch(mainImmediate) {
+            viewModelScope.launch(mainImmediate) {
+
+                if (redemptionCode is RedemptionCode.Glyph) {
+                    signerManager.setSeedFromGlyph(
+                        redemptionCode.mqtt,
+                        redemptionCode.network,
+                        redemptionCode.relay
+                    )
                     navigator.toOnBoardConnectingScreen(code)
+
+                    signerMenuHandler.viewStateContainer.updateViewState(MenuBottomViewState.Open)
+                }
+                if (redemptionCode is RedemptionCode.NewInvite) {
+                    connectManagerRepository.setInviteCode(code)
+                    presentLoginModal()
                 }
             }
         } else {

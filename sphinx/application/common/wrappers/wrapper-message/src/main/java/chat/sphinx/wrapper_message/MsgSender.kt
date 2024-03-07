@@ -11,7 +11,8 @@ data class MsgSender(
     val alias: String?,
     val photo_url: String?,
     val person: String?,
-    val confirmed: Boolean
+    val confirmed: Boolean,
+    val code: String?
 ) {
     companion object {
         fun String.toMsgSenderNull(moshi: Moshi): MsgSender? {

@@ -9,7 +9,8 @@ abstract class ConnectManager {
 
     abstract val ownerInfoStateFlow: StateFlow<OwnerInfo?>
 
-    abstract fun createAccount()
+    abstract fun createAccount(lspIp: String)
+    abstract fun setInviteCode(inviteString: String)
     abstract fun createContact(contact: NewContact)
     abstract fun initializeMqttAndSubscribe(
         serverUri: String,
@@ -43,6 +44,14 @@ abstract class ConnectManager {
         tribeJson: String
     )
 
+    abstract fun createInvite(
+        nickname: String,
+        welcomeMessage: String,
+        sats: Long,
+        tribeServerPubKey: String?
+    ): Pair<String, String>? // inviteString, inviteCode
+
+
     abstract fun retrieveTribeMembersList(
         tribeServerPubKey: String,
         tribePubKey: String
@@ -56,7 +65,6 @@ abstract class ConnectManager {
         amount: Long?
     ): String?
 
-    abstract fun setLspIp(ip: String)
     abstract fun retrieveLspIp(): String?
     abstract fun addListener(listener: ConnectManagerListener): Boolean
     abstract fun removeListener(listener: ConnectManagerListener): Boolean
@@ -75,7 +83,6 @@ interface ConnectManagerListener {
         msgIndex: String,
         amount: Long?,
         msgTimestamp: Long?
-
     )
 
     fun onMessageSent(
@@ -95,11 +102,15 @@ interface ConnectManagerListener {
 
     fun onUpdateUserState(userState: String)
 
+    fun onDeleteUserState(userState: List<String>)
+
     fun onSignedChallenge(sign: String)
 
     fun onNewBalance(balance: Long)
 
     fun onNetworkStatusChange(isConnected: Boolean)
+
+    fun onNewInviteCreated(inviteString: String)
 
 }
 

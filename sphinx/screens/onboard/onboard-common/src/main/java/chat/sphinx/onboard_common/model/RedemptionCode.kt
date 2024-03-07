@@ -66,6 +66,10 @@ sealed class RedemptionCode {
                 return Glyph(mqtt, network, relay)
             }
 
+            if (code.trim().startsWith(NewInvite.REGEX)) {
+                return NewInvite(code.trim())
+            }
+
             return null
         }
     }
@@ -193,6 +197,22 @@ sealed class RedemptionCode {
             @JvmSynthetic
             internal operator fun invoke(mqtt: String, network: String, relay: String): Glyph =
                 Glyph(mqtt, network, relay)
+        }
+    }
+    @Suppress("DataClassPrivateConstructor")
+    data class NewInvite private constructor(
+        val code: String,
+    ) : RedemptionCode() {
+
+        companion object {
+            const val ACTION = "i"
+            const val PARAM_ENCRYPTED_DATA = "d"
+            const val PARAM_CODE = "c"
+            const val REGEX = "sphinx.chat://?action=i&"
+
+            @JvmSynthetic
+            internal operator fun invoke(code: String): NewInvite =
+                NewInvite(code)
         }
     }
 

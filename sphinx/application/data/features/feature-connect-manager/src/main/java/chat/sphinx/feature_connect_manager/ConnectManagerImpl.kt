@@ -5,6 +5,8 @@ import android.util.Log
 import chat.sphinx.example.concept_connect_manager.ConnectManager
 import chat.sphinx.example.concept_connect_manager.ConnectManagerListener
 import chat.sphinx.example.concept_connect_manager.model.OwnerInfo
+import chat.sphinx.wrapper_common.lightning.toLightningNodePubKey
+import chat.sphinx.wrapper_common.lightning.toLightningRouteHint
 import chat.sphinx.wrapper_contact.NewContact
 import chat.sphinx.wrapper_lightning.WalletMnemonic
 import chat.sphinx.wrapper_lightning.toWalletMnemonic
@@ -33,6 +35,7 @@ import org.json.JSONException
 import org.json.JSONObject
 import uniffi.sphinxrs.RunReturn
 import uniffi.sphinxrs.addContact
+import uniffi.sphinxrs.codeFromInvite
 import uniffi.sphinxrs.fetchMsgs
 import uniffi.sphinxrs.getSubscriptionTopic
 import uniffi.sphinxrs.getTribeManagementTopic
@@ -40,11 +43,13 @@ import uniffi.sphinxrs.handle
 import uniffi.sphinxrs.initialSetup
 import uniffi.sphinxrs.joinTribe
 import uniffi.sphinxrs.listTribeMembers
+import uniffi.sphinxrs.makeInvite
 import uniffi.sphinxrs.makeMediaToken
 import uniffi.sphinxrs.makeMediaTokenWithMeta
 import uniffi.sphinxrs.makeMediaTokenWithPrice
 import uniffi.sphinxrs.mnemonicFromEntropy
 import uniffi.sphinxrs.mnemonicToSeed
+import uniffi.sphinxrs.processInvite
 import uniffi.sphinxrs.rootSignMs
 import uniffi.sphinxrs.send
 import uniffi.sphinxrs.setBlockheight
@@ -61,11 +66,13 @@ class ConnectManagerImpl(
 ): ConnectManager(),
     CoroutineDispatchers by dispatchers
 {
-    private var mixer: String? = null
+    private var mixerIp: String? = null
     private var walletMnemonic: WalletMnemonic? = null
     private var mqttClient: MqttAsyncClient? = null
     private val network = "regtest"
     private var ownerSeed: String? = null
+    private var inviteCode: String? = null
+    private var inviterContact: NewContact? = null
     private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
 
@@ -78,43 +85,36 @@ class ConnectManagerImpl(
 
 
     // Key Generation and Management
-    override fun createAccount() {
+    override fun createAccount(lspIp: String) {
         coroutineScope.launch {
+            mixerIp = lspIp
 
             val seed = generateMnemonic()
             val now = getTimestampInMilliseconds()
 
-            val serverURI = mixer
+            seed.first?.let { firstSeed ->
+                val xPub = generateXPub(firstSeed, now, network)
+                val sig = rootSignMs(firstSeed, now, network)
+                ownerSeed = firstSeed
 
-            val xPub = seed.first?.let {
-                generateXPub(
-                    it,
-                    getTimestampInMilliseconds(),
-                    network
-                )
-            }
+                if (xPub != null) {
+                    var invite: RunReturn? = null
 
-            val sig = seed.first?.let {
-                rootSignMs(
-                    it,
-                    now,
-                    network
-                )
-            }
+                    if (inviteCode != null) {
+                        invite = processInvite(ownerSeed!!, now, getCurrentUserState(), inviteCode!!)
+                        mixerIp = invite.lspHost
+                    }
 
-            if (xPub != null && sig != null && serverURI != null) {
-
-                ownerSeed = seed.first
-
-                connectToMQTT(
-                    serverURI,
-                    xPub,
-                    now,
-                    sig
-                )
+                    connectToMQTT(mixerIp!!, xPub, now, sig, invite)
+                }
             }
         }
     }
+
+    override fun setInviteCode(inviteString: String) {
+        this.inviteCode = inviteString
+    }
+
 
     @OptIn(ExperimentalUnsignedTypes::class)
     private fun generateMnemonic(): Pair<String?, WalletMnemonic?> {
@@ -168,7 +168,8 @@ class ConnectManagerImpl(
                     contact.lightningRouteHint?.value!!,
                     ownerInfoStateFlow.value?.alias ?: "",
                     ownerInfoStateFlow.value?.picture ?: "",
-                    3000.toULong()
+                    3000.toULong(),
+                    contact.inviteCode
                 )
 
                 handleRunReturn(
@@ -216,7 +217,7 @@ class ConnectManagerImpl(
 
             if (xPub != null && sig != null) {
 
-                mixer = serverUri
+                mixerIp = serverUri
                 walletMnemonic = mnemonicWords
                 ownerSeed = seed
                 _ownerInfoStateFlow.value = ownerInfo
@@ -236,6 +237,7 @@ class ConnectManagerImpl(
         clientId: String,
         key: String,
         password: String,
+        invite: RunReturn? = null
     ) {
         mqttClient = try {
             MqttAsyncClient(serverURI, clientId, null)
@@ -254,7 +256,11 @@ class ConnectManagerImpl(
                 override fun onSuccess(asyncActionToken: IMqttToken?) {
                     Log.d("MQTT_MESSAGES", "MQTT CONNECTED!")
 
-                    subscribeOwnerMQTT()
+                    if (invite != null) {
+                        handleRunReturn(invite, mqttClient!!)
+                    } else {
+                        subscribeOwnerMQTT()
+                    }
 
                     notifyListeners {
                         onNetworkStatusChange(true)
@@ -355,7 +361,7 @@ class ConnectManagerImpl(
                 )
                 handleRunReturn(setUp, client)
 
-               val fetchMessages = fetchMsgs(
+                val fetchMessages = fetchMsgs(
                     ownerSeed!!,
                     getTimestampInMilliseconds(),
                     getCurrentUserState(),
@@ -364,6 +370,11 @@ class ConnectManagerImpl(
                 )
 
                 handleRunReturn(fetchMessages, client)
+
+                if (inviterContact != null) {
+                    createContact(inviterContact!!)
+                    inviterContact = null
+                }
             }
         } catch (e: Exception) {
             Log.e("MQTT_MESSAGES", "${e.message}")
@@ -494,6 +505,44 @@ class ConnectManagerImpl(
             Log.e("MQTT_MESSAGES", "createTribe ${e.message}")
         }
     }
+
+    override fun createInvite(
+        nickname: String,
+        welcomeMessage: String,
+        sats: Long,
+        tribeServerPubKey: String?
+    ): Pair<String, String>? {
+        val now = getTimestampInMilliseconds()
+
+        // Needs to implement tribeServerPubKey and tribeHost in the future
+
+        try {
+            val createInvite = makeInvite(
+                ownerSeed!!,
+                now,
+                getCurrentUserState(),
+                mixerIp!!,
+                sats.toULong(),
+                ownerInfoStateFlow.value?.alias ?: "",
+                null,
+                tribeServerPubKey
+            )
+
+            if (createInvite.newInvite != null) {
+                handleRunReturn(createInvite, mqttClient!!)
+
+                val invite = createInvite.newInvite ?: return null
+                val code = codeFromInvite(invite)
+
+                return Pair(invite, code)
+            }
+
+        } catch (e: Exception) {
+            Log.e("MQTT_MESSAGES", "createInvite ${e.message}")
+        }
+        return null
+    }
+
 
     override fun retrieveTribeMembersList(tribeServerPubKey: String, tribePubKey: String) {
         val now = getTimestampInMilliseconds()
@@ -685,6 +734,53 @@ class ConnectManagerImpl(
             Log.d("MQTT_MESSAGES", "=> my_contact_info $myContactInfo")
         }
 
+        // Handling new invite created
+        rr.newInvite?.let { invite ->
+            notifyListeners {
+                onNewInviteCreated(invite)
+            }
+            Log.d("MQTT_MESSAGES", "=> new_invite $invite")
+        }
+
+        rr.inviterContactInfo?.let { inviterInfo ->
+            val parts = inviterInfo.split("_", limit = 2)
+            val okKey = parts.getOrNull(0)?.toLightningNodePubKey()
+            val routeHint = parts.getOrNull(1)?.toLightningRouteHint()
+
+            val code = codeFromInvite(inviteCode!!)
+
+            // Ensure the owner is subscribed before set the inviter contact
+            // The inviter will be added after the owner sets its alias and first init the dashboard
+            subscribeOwnerMQTT()
+
+            inviterContact = NewContact(
+                null,
+                okKey,
+                routeHint,
+                null,
+                false,
+                null,
+                code,
+                null
+            )
+
+            Log.d("MQTT_MESSAGES", "=> inviterInfo $inviterInfo")
+        }
+
+        rr.initialTribe?.let { initialTribe ->
+            // Call joinTribe with the url that comes on initialTribe
+
+            Log.d("MQTT_MESSAGES", "=> initialTribe $initialTribe")
+        }
+
+        rr.stateToDelete.let {
+            notifyListeners {
+                onDeleteUserState(it)
+            }
+
+            Log.d("MQTT_MESSAGES", "=> stateToDelete $it")
+        }
+
         // Handling other properties like sentStatus, settledStatus, error, etc.
         rr.error?.let { error ->
             Log.d("MQTT_MESSAGES", "=> error $error")
@@ -700,14 +796,13 @@ class ConnectManagerImpl(
             Log.d("MQTT_MESSAGES", "=> settled_status $settledStatus")
         }
 
-    }
+        rr.lspHost?.let { lspHost ->
+            mixerIp = lspHost
+        }
 
-    override fun setLspIp(ip: String) {
-        mixer = ip
     }
-
     override fun retrieveLspIp(): String? {
-        return mixer
+        return mixerIp
     }
 
     override fun processChallengeSignature(challenge: String) {
@@ -897,7 +992,7 @@ class ConnectManagerImpl(
 
             if (!isConnected()) {
                 initializeMqttAndSubscribe(
-                    mixer!!,
+                    mixerIp!!,
                     walletMnemonic!!,
                     ownerInfoStateFlow.value!!,
                 )

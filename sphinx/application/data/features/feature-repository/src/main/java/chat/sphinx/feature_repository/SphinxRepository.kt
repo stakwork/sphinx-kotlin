@@ -122,6 +122,8 @@ import chat.sphinx.wrapper_common.subscription.SubscriptionId
 import chat.sphinx.wrapper_contact.*
 import chat.sphinx.wrapper_feed.*
 import chat.sphinx.wrapper_invite.Invite
+import chat.sphinx.wrapper_invite.InviteCode
+import chat.sphinx.wrapper_invite.InviteString
 import chat.sphinx.wrapper_io_utils.InputStreamProvider
 import chat.sphinx.wrapper_lightning.LightningServiceProvider
 import chat.sphinx.wrapper_lightning.NodeBalance
@@ -300,8 +302,8 @@ abstract class SphinxRepository(
         }
     }
 
-    override fun createOwnerAccount() {
-        connectManager.createAccount()
+    override fun createOwnerAccount(lspIp: String) {
+        connectManager.createAccount(lspIp)
     }
 
     override fun createContact(contact: NewContact) {
@@ -309,10 +311,6 @@ abstract class SphinxRepository(
             createNewContact(contact)
             connectManager.createContact(contact)
         }
-    }
-
-    override fun setLspIp(lspIp: String) {
-        connectManager.setLspIp(lspIp)
     }
 
     override fun singChallenge(challenge: String) {
@@ -378,6 +376,38 @@ abstract class SphinxRepository(
         }
     }
 
+    override fun createInvite(
+        nickname: String,
+        welcomeMessage: String,
+        sats: Long,
+        tribeServerPubKey: String?
+    ) {
+        applicationScope.launch(io) {
+            val invite = connectManager.createInvite(
+                nickname,
+                welcomeMessage,
+                sats,
+                tribeServerPubKey
+            )
+
+            val newInvitee = NewContact(
+                contactAlias = nickname.toContactAlias(),
+                lightningNodePubKey = null,
+                lightningRouteHint = null,
+                photoUrl = null,
+                confirmed = false,
+                inviteString = invite?.first,
+                inviteCode = invite?.second,
+                invitePrice = sats.toSat()
+            )
+            createNewContact(newInvitee)
+        }
+    }
+
+    override fun setInviteCode(inviteString: String) {
+        connectManager.setInviteCode(inviteString)
+    }
+
     override fun getTribeMembers(tribeServerPubKey: String, tribePubKey: String) {
         connectManager.retrieveTribeMembersList(tribeServerPubKey, tribePubKey)
     }
@@ -434,16 +464,45 @@ abstract class SphinxRepository(
     ) {
         applicationScope.launch(io) {
             val contactInfo = msgSender.toMsgSender(moshi)
-
-            createNewContact(
-                NewContact(
-                    contactAlias = contactInfo.alias?.toContactAlias(),
-                    lightningNodePubKey = contactInfo.pubkey.toLightningNodePubKey(),
-                    lightningRouteHint = null,
-                    photoUrl = contactInfo.photo_url?.toPhotoUrl(),
-                    confirmed = contactInfo.confirmed
-                )
+            val contact = NewContact(
+                contactAlias = contactInfo.alias?.toContactAlias(),
+                lightningNodePubKey = contactInfo.pubkey.toLightningNodePubKey(),
+                lightningRouteHint = null,
+                photoUrl = contactInfo.photo_url?.toPhotoUrl(),
+                confirmed = contactInfo.confirmed,
+                null,
+                inviteCode = contactInfo.code,
+                invitePrice = null
             )
+
+            if (contactInfo.code != null) {
+                updateNewContactInvited(contact)
+            } else {
+                createNewContact(contact)
+            }
+        }
+    }
+
+    override fun updateNewContactInvited(contact: NewContact) {
+        applicationScope.launch(io) {
+            val queries = coreDB.getSphinxDatabaseQueries()
+            val invite = queries.inviteGetByCode(contact.inviteCode?.let { InviteCode(it) }).executeAsOneOrNull()
+
+            if (invite != null) {
+                val contactId = invite.contact_id
+
+                    queries.contactUpdateInvitee(
+                        contact.contactAlias,
+                        contact.photoUrl,
+                        contact.lightningNodePubKey,
+                        ContactStatus.Confirmed,
+                        ContactId(invite.id.value)
+                    )
+
+                queries.inviteUpdateStatus(InviteStatus.Complete, invite.id)
+                queries.chatUpdateSatusById(ChatStatus.Approved, ChatId(contactId.value))
+
+            } else { }
         }
     }
 
@@ -517,7 +576,7 @@ abstract class SphinxRepository(
     ) {
         applicationScope.launch(io) {
             val message = msg.toMsg(moshi)
-            val msgSender = MsgSender(contactPubKey, null,null,null,true)
+            val msgSender = MsgSender(contactPubKey, null, null, null, true, null)
 
             val messageType = msgType.toMessageType()
             val messageUUID = msgUUID.toMessageUUID() ?: return@launch
@@ -613,6 +672,10 @@ abstract class SphinxRepository(
         connectionManagerState.value = ConnectionManagerState.UserState(userState)
     }
 
+    override fun onDeleteUserState(userState: List<String>) {
+        connectionManagerState.value = ConnectionManagerState.DeleteUserState(userState)
+    }
+
     override fun onSignedChallenge(sign: String) {
         connectionManagerState.value = ConnectionManagerState.SignedChallenge(sign)
     }
@@ -638,6 +701,11 @@ abstract class SphinxRepository(
         } else {
             NetworkStatus.Disconnected
         }
+    }
+
+    override fun onNewInviteCreated(inviteString: String) {
+        // Create the invite and save it to the database. inviteDbo.
+        connectionManagerState.value = ConnectionManagerState.NewInviteCode(inviteString)
     }
 
     override suspend fun updateLspAndOwner(data: String) {
@@ -2380,6 +2448,21 @@ abstract class SphinxRepository(
 
         } else {
 
+            val invite = if (contact.invitePrice != null && contact.inviteCode != null) {
+                Invite(
+                    id = InviteId(contactId ?: -1L),
+                    inviteString = InviteString(contact.inviteString ?: "null"),
+                    inviteCode = InviteCode(contact.inviteCode ?: ""),
+                    paymentRequest = null,
+                    contactId = ContactId(contactId ?: -1L),
+                    status = InviteStatus.Pending,
+                    price = contact.invitePrice,
+                    createdAt = now.toDateTime()
+                )
+            } else {
+                null
+            }
+
             val newContact = Contact(
                 id = ContactId(exitingContact?.id?.value ?: contactId ?: -1L),
                 routeHint = contact.lightningRouteHint,
@@ -2397,8 +2480,8 @@ abstract class SphinxRepository(
                 fromGroup = ContactFromGroup.False,
                 notificationSound = null,
                 tipAmount = null,
-                inviteId = null,
-                inviteStatus = null,
+                inviteId = invite?.id,
+                inviteStatus = invite?.status,
                 blocked = Blocked.False
             )
 
@@ -2433,11 +2516,13 @@ abstract class SphinxRepository(
             )
 
             applicationScope.launch(mainImmediate) {
+
                 contactLock.withLock {
                     queries.transaction {
                         upsertNewContact(newContact, queries)
                     }
                 }
+
                 chatLock.withLock {
                     queries.transaction {
                         upsertNewChat(
@@ -2448,6 +2533,14 @@ abstract class SphinxRepository(
                             newContact,
                             accountOwner.value?.nodePubKey
                         )
+                    }
+                }
+
+                inviteLock.withLock {
+                    invite?.let { invite ->
+                        queries.transaction {
+                            upsertNewInvite(invite, queries)
+                        }
                     }
                 }
             }

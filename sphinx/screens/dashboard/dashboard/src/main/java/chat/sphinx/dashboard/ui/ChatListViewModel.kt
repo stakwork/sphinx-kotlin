@@ -158,6 +158,21 @@ internal class ChatListViewModel @Inject constructor(
                                     newList.add(
                                         DashboardChat.Inactive.Conversation(contact)
                                     )
+
+                                    if (contact.isInviteContact()) {
+                                        var contactInvite: Invite? = null
+
+                                        contact.inviteId?.let { inviteId ->
+                                            contactInvite = withContext(io) {
+                                                repositoryDashboard.getInviteById(inviteId).firstOrNull()
+                                            }
+                                        }
+                                        if (contactInvite != null) {
+                                            newList.add(
+                                                DashboardChat.Inactive.Invite(contact, contactInvite)
+                                            )
+                                        }
+                                    }
                                 }
 
                                 if (!contact.isBlocked() && chat.status is ChatStatus.Approved) {
@@ -185,6 +200,34 @@ internal class ChatListViewModel @Inject constructor(
                             }
                         }
                     }
+
+//                    if (contactsCollectionInitialized) {
+//                        withContext(default) {
+//                            for (contact in _contactsStateFlow.value) {
+//
+//                                if (!contactsAdded.contains(contact.id)) {
+//                                    if (contact.isInviteContact()) {
+//                                        var contactInvite: Invite? = null
+//
+//                                        contact.inviteId?.let { inviteId ->
+//                                            contactInvite = withContext(io) {
+//                                                repositoryDashboard.getInviteById(inviteId).firstOrNull()
+//                                            }
+//                                        }
+//                                        if (contactInvite != null) {
+//                                            newList.add(
+//                                                DashboardChat.Inactive.Invite(contact, contactInvite)
+//                                            )
+//                                            continue
+//                                        }
+//                                    }
+//                                    newList.add(
+//                                        DashboardChat.Inactive.Conversation(contact)
+//                                    )
+//                                }
+//                            }
+//                        }
+//                    }
                     chatViewStateContainer.updateDashboardChats(newList)
                 }
             }

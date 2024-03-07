@@ -249,9 +249,7 @@ internal class CreateTribeViewModel @Inject constructor(
                             }
                         }
                     }
-
                 }
-
             }
         } else {
             viewModelScope.launch(mainImmediate) {
