@@ -51,6 +51,10 @@ abstract class ConnectManager {
         tribeServerPubKey: String?
     ): Pair<String, String>? // inviteString, inviteCode
 
+    abstract fun createInvoice(
+        amount: Long,
+        memo: String
+    ): Pair<String, String>? // invoice, paymentHash
 
     abstract fun retrieveTribeMembersList(
         tribeServerPubKey: String,

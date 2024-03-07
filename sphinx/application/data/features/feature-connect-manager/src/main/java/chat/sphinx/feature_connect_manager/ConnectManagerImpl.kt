@@ -49,6 +49,7 @@ import uniffi.sphinxrs.makeMediaTokenWithMeta
 import uniffi.sphinxrs.makeMediaTokenWithPrice
 import uniffi.sphinxrs.mnemonicFromEntropy
 import uniffi.sphinxrs.mnemonicToSeed
+import uniffi.sphinxrs.paymentHashFromInvoice
 import uniffi.sphinxrs.processInvite
 import uniffi.sphinxrs.rootSignMs
 import uniffi.sphinxrs.send
@@ -488,7 +489,6 @@ class ConnectManagerImpl(
     }
 
     override fun createTribe(tribeServerPubKey: String, tribeJson: String) {
-
         val now = getTimestampInMilliseconds()
 
         try {
@@ -543,6 +543,31 @@ class ConnectManagerImpl(
         return null
     }
 
+    override fun createInvoice(amount: Long, memo: String): Pair<String, String>? {
+        val now = getTimestampInMilliseconds()
+
+        try {
+            val makeInvoice = uniffi.sphinxrs.makeInvoice(
+                ownerSeed!!,
+                now,
+                getCurrentUserState(),
+                amount.toULong(),
+                memo
+            )
+            handleRunReturn(makeInvoice, mqttClient!!)
+
+            val invoice = makeInvoice.invoice
+
+            if (invoice != null) {
+                val paymentHash = paymentHashFromInvoice(invoice)
+                return Pair(invoice, paymentHash)
+            }
+
+        } catch (e: Exception) {
+            Log.e("MQTT_MESSAGES", "makeInvoice ${e.message}")
+        }
+        return null
+    }
 
     override fun retrieveTribeMembersList(tribeServerPubKey: String, tribePubKey: String) {
         val now = getTimestampInMilliseconds()

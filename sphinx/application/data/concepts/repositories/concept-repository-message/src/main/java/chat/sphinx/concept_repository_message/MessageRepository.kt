@@ -94,6 +94,10 @@ interface MessageRepository {
 
     suspend fun payPaymentRequest(message: Message) : Response<Any, ResponseError>
 
+    suspend fun sendNewPaymentRequest(
+        requestPayment: SendPaymentRequest
+    )
+
     suspend fun boostMessage(
         chatId: ChatId,
         pricePerMessage: Sat,

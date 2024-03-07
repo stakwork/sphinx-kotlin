@@ -101,44 +101,44 @@ internal class PaymentReceiveViewModel @Inject constructor(
             return
         }
 
-        viewModelScope.launch(mainImmediate) {
-            val requestPayment = sendPaymentRequestBuilder.build()
-
-            if (requestPayment != null) {
-                updateViewState(PaymentReceiveViewState.ProcessingRequest)
-
-                val postRequestPaymentDto = PostRequestPaymentDto(
-                    requestPayment.amount,
-                    requestPayment.memo,
-                )
-
-                networkQueryLightning.postRequestPayment(postRequestPaymentDto).collect { loadResponse ->
-                    @Exhaustive
-                    when (loadResponse) {
-                        is LoadResponse.Loading -> {}
-                        is Response.Error -> {
-                            submitSideEffect(
-                                PaymentSideEffect.Notify(app.getString(R.string.failed_to_request_payment))
-                            )
-                            refreshViewState()
-                        }
-                        is Response.Success -> {
-                            paymentReceiveNavigator.toQRCodeDetail(
-                                loadResponse.value.invoice,
-                                app.getString(R.string.payment_request),
-                                app.getString(R.string.amount_n_sats, requestPayment.amount),
-                                false
-                            )
-                            refreshViewState()
-                            delay(100L)
-                            updateAmount("")
-                        }
-                    }
-                }
-            } else {
-                submitSideEffect(PaymentSideEffect.Notify("Failed to request payment"))
-            }
-        }
+//        viewModelScope.launch(mainImmediate) {
+//            val requestPayment = sendPaymentRequestBuilder.build()
+//
+//            if (requestPayment != null) {
+//                updateViewState(PaymentReceiveViewState.ProcessingRequest)
+//
+//                val postRequestPaymentDto = PostRequestPaymentDto(
+//                    requestPayment.amount,
+//                    requestPayment.memo,
+//                )
+//
+//                networkQueryLightning.postRequestPayment(postRequestPaymentDto).collect { loadResponse ->
+//                    @Exhaustive
+//                    when (loadResponse) {
+//                        is LoadResponse.Loading -> {}
+//                        is Response.Error -> {
+//                            submitSideEffect(
+//                                PaymentSideEffect.Notify(app.getString(R.string.failed_to_request_payment))
+//                            )
+//                            refreshViewState()
+//                        }
+//                        is Response.Success -> {
+//                            paymentReceiveNavigator.toQRCodeDetail(
+//                                loadResponse.value.invoice,
+//                                app.getString(R.string.payment_request),
+//                                app.getString(R.string.amount_n_sats, requestPayment.amount),
+//                                false
+//                            )
+//                            refreshViewState()
+//                            delay(100L)
+//                            updateAmount("")
+//                        }
+//                    }
+//                }
+//            } else {
+//                submitSideEffect(PaymentSideEffect.Notify("Failed to request payment"))
+//            }
+//        }
     }
 
     fun sendPaymentRequest() {
@@ -146,22 +146,25 @@ internal class PaymentReceiveViewModel @Inject constructor(
             val requestPayment = sendPaymentRequestBuilder.build()
 
             if (requestPayment != null) {
-                updateViewState(PaymentReceiveViewState.ProcessingRequest)
 
-                val response = messageRepository.sendPaymentRequest(requestPayment)
+                messageRepository.sendNewPaymentRequest(requestPayment)
 
-                @Exhaustive
-                when (response) {
-                    is Response.Error -> {
-                        submitSideEffect(
-                            PaymentSideEffect.Notify(app.getString(R.string.failed_to_request_payment))
-                        )
-                        refreshViewState()
-                    }
-                    is Response.Success -> {
-                        navigator.closeDetailScreen()
-                    }
-                }
+//                updateViewState(PaymentReceiveViewState.ProcessingRequest)
+//
+//                val response = messageRepository.sendPaymentRequest(requestPayment)
+//
+//                @Exhaustive
+//                when (response) {
+//                    is Response.Error -> {
+//                        submitSideEffect(
+//                            PaymentSideEffect.Notify(app.getString(R.string.failed_to_request_payment))
+//                        )
+//                        refreshViewState()
+//                    }
+//                    is Response.Success -> {
+//                        navigator.closeDetailScreen()
+//                    }
+//                }
             } else {
                 submitSideEffect(PaymentSideEffect.Notify("Failed to request payment"))
             }
