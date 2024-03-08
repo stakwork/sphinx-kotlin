@@ -410,7 +410,7 @@ class ConnectManagerImpl(
                     getCurrentUserState(),
                     ownerInfoStateFlow.value?.alias ?: "",
                     ownerInfoStateFlow.value?.picture ?: "",
-                    nnAmount.toULong(),
+                    convertSatsToMillisats(nnAmount),
                     isTribe
                 )
                 handleRunReturn(message, mqttClient!!)
@@ -448,7 +448,7 @@ class ConnectManagerImpl(
                     getCurrentUserState(),
                     ownerInfoStateFlow.value?.alias ?: "",
                     ownerInfoStateFlow.value?.picture ?: "",
-                    nnAmount.toULong(),
+                    convertSatsToMillisats(nnAmount),
                     isTribe
                 )
                 handleRunReturn(message, mqttClient!!)
@@ -477,7 +477,7 @@ class ConnectManagerImpl(
                     tribePubKey,
                     tribeRouteHint,
                     ownerInfoStateFlow.value?.alias ?: "",
-                    1.toULong(),
+                    1000.toULong(),
                     isPrivate
                 )
                 handleRunReturn(joinTribeMessage, mqttClient!!)
@@ -522,7 +522,7 @@ class ConnectManagerImpl(
                 now,
                 getCurrentUserState(),
                 mixerIp!!,
-                sats.toULong(),
+                convertSatsToMillisats(sats),
                 ownerInfoStateFlow.value?.alias ?: "",
                 null,
                 tribeServerPubKey
@@ -551,7 +551,7 @@ class ConnectManagerImpl(
                 ownerSeed!!,
                 now,
                 getCurrentUserState(),
-                amount.toULong(),
+                convertSatsToMillisats(amount),
                 memo
             )
             handleRunReturn(makeInvoice, mqttClient!!)
@@ -616,7 +616,7 @@ class ConnectManagerImpl(
                     muid,
                     contactPubKey,
                     yearFromNow!!,
-                    amount.toULong()
+                    convertSatsToMillisats(amount),
                 )
             } else {
                 if (metaData != null) {
@@ -688,8 +688,10 @@ class ConnectManagerImpl(
 
         // Set your balance
         rr.newBalance?.let { newBalance ->
-            notifyListeners {
-                onNewBalance(newBalance.toLong())
+            convertMillisatsToSats(newBalance)?.let { balance ->
+                notifyListeners {
+                    onNewBalance(balance)
+                }
             }
             Log.d("MQTT_MESSAGES", "===> BALANCE ${newBalance.toLong()}")
         }
@@ -1032,6 +1034,18 @@ class ConnectManagerImpl(
             } else {
                 reconnectAttempts = 0
             }
+        }
+    }
+
+    private fun convertSatsToMillisats(sats: Long): ULong {
+        return (sats * 1_000).toULong()
+    }
+
+    fun convertMillisatsToSats(millisats: ULong): Long? {
+        try {
+            return (millisats / 1_000uL).toLong()
+        } catch (e: Exception) {
+            return null
         }
     }
 
