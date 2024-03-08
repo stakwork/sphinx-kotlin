@@ -569,6 +569,23 @@ class ConnectManagerImpl(
         return null
     }
 
+    override fun processInvoicePayment(paymentRequest: String) {
+        val now = getTimestampInMilliseconds()
+
+        try {
+            val processInvoice = uniffi.sphinxrs.payInvoice(
+                ownerSeed!!,
+                now,
+                getCurrentUserState(),
+                paymentRequest,
+                null
+            )
+            handleRunReturn(processInvoice, mqttClient!!)
+        } catch (e: Exception) {
+            Log.e("MQTT_MESSAGES", "processInvoicePayment ${e.message}")
+        }
+    }
+
     override fun retrieveTribeMembersList(tribeServerPubKey: String, tribePubKey: String) {
         val now = getTimestampInMilliseconds()
 
@@ -724,7 +741,7 @@ class ConnectManagerImpl(
                         msg.type?.toInt() ?: 0,
                         msg.uuid.orEmpty(),
                         msg.index.orEmpty(),
-                        msg.msat?.toLong(),
+                        msg.msat?.let { convertMillisatsToSats(it) },
                         msg.timestamp?.toLong()
                     )
                 }

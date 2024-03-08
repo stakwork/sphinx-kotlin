@@ -108,6 +108,7 @@ import chat.sphinx.wrapper_common.dashboard.*
 import chat.sphinx.wrapper_common.feed.*
 import chat.sphinx.wrapper_common.invite.InviteStatus
 import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
+import chat.sphinx.wrapper_common.lightning.LightningPaymentRequest
 import chat.sphinx.wrapper_common.lightning.LightningRouteHint
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.lightning.ServerIp
@@ -542,6 +543,7 @@ abstract class SphinxRepository(
                     val originalUUID = message.originalUuid?.toMessageUUID()
                     val date = msgTimestamp?.let { DateTime(Date(it)) }
                     val isSent = (accountOwner.value?.alias?.value == contactInfo.alias)
+                    val paymentRequest = message.invoice?.toLightningPaymentRequestOrNull()
 
                     if (messageType is MessageType.Purchase.Processing) {
                         amount?.toSat()?.let { paidAmount ->
@@ -562,7 +564,8 @@ abstract class SphinxRepository(
                         originalUUID,
                         date,
                         isSent,
-                        amount?.toSat()
+                        amount?.toSat(),
+                        paymentRequest
                     )
                 }
             }
@@ -596,6 +599,7 @@ abstract class SphinxRepository(
                 originalUUID,
                 date,
                 true,
+                null,
                 null
             )
         }
@@ -735,7 +739,8 @@ abstract class SphinxRepository(
         originalUuid: MessageUUID?,
         date: DateTime?,
         isSent: Boolean,
-        amount: Sat?
+        amount: Sat?,
+        paymentRequest: LightningPaymentRequest?
     ) {
         val queries = coreDB.getSphinxDatabaseQueries()
         val contact = getContactByPubKey(LightningNodePubKey(msgSender.pubkey)).firstOrNull()
@@ -798,6 +803,8 @@ abstract class SphinxRepository(
                 sender = if (isSent) ContactId(0) else contact?.id ?: ContactId(chatId) ,
                 receiver = ContactId(0),
                 amount = existingMessage?.amount ?: amount ?: Sat(0L),
+                paymentRequest = existingMessage?.payment_request ?: paymentRequest,
+                paymentHash = existingMessage?.payment_hash,
                 date = date ?: DateTime.nowUTC().toDateTime(),
                 expirationDate = null,
                 messageContent = null,
@@ -4617,6 +4624,105 @@ abstract class SphinxRepository(
         return response ?: Response.Error(ResponseError("Failed to pay invoice"))
     }
 
+    override suspend fun payNewPaymentRequest(message: Message) {
+        applicationScope.launch(mainImmediate) {
+            val queries = coreDB.getSphinxDatabaseQueries()
+            val contact = getContactById(ContactId(message.chatId.value)).firstOrNull()
+
+            val currentProvisionalId: MessageId? = withContext(io) {
+                queries.messageGetLowestProvisionalMessageId().executeAsOneOrNull()
+            }
+            val provisionalId = MessageId((currentProvisionalId?.value ?: 0L) - 1)
+
+            message.paymentRequest?.value?.let {
+                connectManager.processInvoicePayment(it)
+            }
+
+            val newPayment = NewMessage(
+                id = provisionalId,
+                uuid = null,
+                chatId = message.chatId,
+                type = MessageType.Payment,
+                sender = accountOwner.value?.id ?: ContactId(0),
+                receiver = null,
+                amount = message.amount,
+                paymentHash = message.paymentHash,
+                paymentRequest = null,
+                date = DateTime.nowUTC().toDateTime(),
+                expirationDate = null,
+                messageContent = null,
+                status = MessageStatus.Confirmed,
+                seen = Seen.True,
+                senderAlias = null,
+                senderPic = null,
+                originalMUID = null,
+                replyUUID = null,
+                flagged = false.toFlagged(),
+                recipientAlias = null,
+                recipientPic = null,
+                person = null,
+                threadUUID = null,
+                errorMessage = null,
+                isPinned = false,
+                messageContentDecrypted = null,
+                messageDecryptionError = false,
+                messageDecryptionException = null,
+                messageMedia = null,
+                feedBoost = null,
+                callLinkMessage = null,
+                podcastClip = null,
+                giphyData = null,
+                reactions = null,
+                purchaseItems = null,
+                replyMessage = null,
+                thread = null
+            )
+
+            chatLock.withLock {
+                messageLock.withLock {
+                    withContext(io) {
+                        queries.transaction {
+                            upsertNewMessage(newPayment, queries, null)
+                        }
+                    }
+
+                    queries.transaction {
+                        updateChatNewLatestMessage(
+                            newPayment,
+                            message.chatId,
+                            latestMessageUpdatedTimeMap,
+                            queries
+                        )
+                    }
+                }
+            }
+
+            val newPaymentMessage = chat.sphinx.example.wrapper_mqtt.Message(
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                message.paymentRequest?.value
+            ).toJson(moshi)
+
+
+            if (contact != null) {
+                connectManager.sendMessage(
+                    newPaymentMessage,
+                    contact.nodePubKey?.value ?: "",
+                    provisionalId.value,
+                    MessageType.PAYMENT,
+                    message.amount.value,
+                    false
+                )
+            }
+        }
+    }
+
     override suspend fun sendNewPaymentRequest(requestPayment: SendPaymentRequest) {
         applicationScope.launch(mainImmediate) {
             val queries = coreDB.getSphinxDatabaseQueries()
@@ -4687,7 +4793,6 @@ abstract class SphinxRepository(
             chatLock.withLock {
                 messageLock.withLock {
                     withContext(io) {
-
                         queries.transaction {
                             upsertNewMessage(newPaymentRequest, queries, null)
                         }

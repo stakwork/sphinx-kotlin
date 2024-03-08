@@ -2301,20 +2301,22 @@ abstract class ChatViewModel<ARGS : NavArgs>(
         val sideEffect = ChatSideEffect.AlertConfirmPayInvoice {
             payInvoiceJob = viewModelScope.launch(mainImmediate) {
 
-                @Exhaustive
-                when (val response = messageRepository.payPaymentRequest(message)) {
-                    is Response.Error -> {
-                        submitSideEffect(ChatSideEffect.Notify(
-                            String.format(
-                                app.getString(R.string.error_payment_message),
-                                response.exception?.message ?: response.cause.message
-                            )
-                        ))
-                    }
-                    is Response.Success -> {
-                        delay(100L)
-                    }
-                }
+                messageRepository.payNewPaymentRequest(message)
+
+//                @Exhaustive
+//                when (val response = messageRepository.payPaymentRequest(message)) {
+//                    is Response.Error -> {
+//                        submitSideEffect(ChatSideEffect.Notify(
+//                            String.format(
+//                                app.getString(R.string.error_payment_message),
+//                                response.exception?.message ?: response.cause.message
+//                            )
+//                        ))
+//                    }
+//                    is Response.Success -> {
+//                        delay(100L)
+//                    }
+//                }
             }
         }
 

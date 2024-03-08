@@ -148,6 +148,7 @@ internal class PaymentReceiveViewModel @Inject constructor(
             if (requestPayment != null) {
 
                 messageRepository.sendNewPaymentRequest(requestPayment)
+                navigator.closeDetailScreen()
 
 //                updateViewState(PaymentReceiveViewState.ProcessingRequest)
 //
