@@ -49,6 +49,7 @@ import uniffi.sphinxrs.makeMediaTokenWithMeta
 import uniffi.sphinxrs.makeMediaTokenWithPrice
 import uniffi.sphinxrs.mnemonicFromEntropy
 import uniffi.sphinxrs.mnemonicToSeed
+import uniffi.sphinxrs.paymentHashFromInvoice
 import uniffi.sphinxrs.processInvite
 import uniffi.sphinxrs.rootSignMs
 import uniffi.sphinxrs.send
@@ -409,7 +410,7 @@ class ConnectManagerImpl(
                     getCurrentUserState(),
                     ownerInfoStateFlow.value?.alias ?: "",
                     ownerInfoStateFlow.value?.picture ?: "",
-                    nnAmount.toULong(),
+                    convertSatsToMillisats(nnAmount),
                     isTribe
                 )
                 handleRunReturn(message, mqttClient!!)
@@ -447,7 +448,7 @@ class ConnectManagerImpl(
                     getCurrentUserState(),
                     ownerInfoStateFlow.value?.alias ?: "",
                     ownerInfoStateFlow.value?.picture ?: "",
-                    nnAmount.toULong(),
+                    convertSatsToMillisats(nnAmount),
                     isTribe
                 )
                 handleRunReturn(message, mqttClient!!)
@@ -476,7 +477,7 @@ class ConnectManagerImpl(
                     tribePubKey,
                     tribeRouteHint,
                     ownerInfoStateFlow.value?.alias ?: "",
-                    1.toULong(),
+                    1000.toULong(),
                     isPrivate
                 )
                 handleRunReturn(joinTribeMessage, mqttClient!!)
@@ -488,7 +489,6 @@ class ConnectManagerImpl(
     }
 
     override fun createTribe(tribeServerPubKey: String, tribeJson: String) {
-
         val now = getTimestampInMilliseconds()
 
         try {
@@ -522,7 +522,7 @@ class ConnectManagerImpl(
                 now,
                 getCurrentUserState(),
                 mixerIp!!,
-                sats.toULong(),
+                convertSatsToMillisats(sats),
                 ownerInfoStateFlow.value?.alias ?: "",
                 null,
                 tribeServerPubKey
@@ -543,6 +543,48 @@ class ConnectManagerImpl(
         return null
     }
 
+    override fun createInvoice(amount: Long, memo: String): Pair<String, String>? {
+        val now = getTimestampInMilliseconds()
+
+        try {
+            val makeInvoice = uniffi.sphinxrs.makeInvoice(
+                ownerSeed!!,
+                now,
+                getCurrentUserState(),
+                convertSatsToMillisats(amount),
+                memo
+            )
+            handleRunReturn(makeInvoice, mqttClient!!)
+
+            val invoice = makeInvoice.invoice
+
+            if (invoice != null) {
+                val paymentHash = paymentHashFromInvoice(invoice)
+                return Pair(invoice, paymentHash)
+            }
+
+        } catch (e: Exception) {
+            Log.e("MQTT_MESSAGES", "makeInvoice ${e.message}")
+        }
+        return null
+    }
+
+    override fun processInvoicePayment(paymentRequest: String) {
+        val now = getTimestampInMilliseconds()
+
+        try {
+            val processInvoice = uniffi.sphinxrs.payInvoice(
+                ownerSeed!!,
+                now,
+                getCurrentUserState(),
+                paymentRequest,
+                null
+            )
+            handleRunReturn(processInvoice, mqttClient!!)
+        } catch (e: Exception) {
+            Log.e("MQTT_MESSAGES", "processInvoicePayment ${e.message}")
+        }
+    }
 
     override fun retrieveTribeMembersList(tribeServerPubKey: String, tribePubKey: String) {
         val now = getTimestampInMilliseconds()
@@ -591,7 +633,7 @@ class ConnectManagerImpl(
                     muid,
                     contactPubKey,
                     yearFromNow!!,
-                    amount.toULong()
+                    convertSatsToMillisats(amount),
                 )
             } else {
                 if (metaData != null) {
@@ -663,8 +705,10 @@ class ConnectManagerImpl(
 
         // Set your balance
         rr.newBalance?.let { newBalance ->
-            notifyListeners {
-                onNewBalance(newBalance.toLong())
+            convertMillisatsToSats(newBalance)?.let { balance ->
+                notifyListeners {
+                    onNewBalance(balance)
+                }
             }
             Log.d("MQTT_MESSAGES", "===> BALANCE ${newBalance.toLong()}")
         }
@@ -697,7 +741,7 @@ class ConnectManagerImpl(
                         msg.type?.toInt() ?: 0,
                         msg.uuid.orEmpty(),
                         msg.index.orEmpty(),
-                        msg.msat?.toLong(),
+                        msg.msat?.let { convertMillisatsToSats(it) },
                         msg.timestamp?.toLong()
                     )
                 }
@@ -1007,6 +1051,18 @@ class ConnectManagerImpl(
             } else {
                 reconnectAttempts = 0
             }
+        }
+    }
+
+    private fun convertSatsToMillisats(sats: Long): ULong {
+        return (sats * 1_000).toULong()
+    }
+
+    fun convertMillisatsToSats(millisats: ULong): Long? {
+        try {
+            return (millisats / 1_000uL).toLong()
+        } catch (e: Exception) {
+            return null
         }
     }
 

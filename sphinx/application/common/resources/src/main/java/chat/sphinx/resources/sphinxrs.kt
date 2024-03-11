@@ -1009,7 +1009,9 @@ data class RunReturn (
     var `inviterAlias`: String?, 
     var `initialTribe`: String?, 
     var `lspHost`: String?, 
-    var `invoice`: String?
+    var `invoice`: String?, 
+    var `route`: String?, 
+    var `node`: String?
 ) {
     
 }
@@ -1023,6 +1025,8 @@ public object FfiConverterTypeRunReturn: FfiConverterRustBuffer<RunReturn> {
             FfiConverterOptionalByteArray.read(buf),
             FfiConverterSequenceString.read(buf),
             FfiConverterOptionalULong.read(buf),
+            FfiConverterOptionalString.read(buf),
+            FfiConverterOptionalString.read(buf),
             FfiConverterOptionalString.read(buf),
             FfiConverterOptionalString.read(buf),
             FfiConverterOptionalString.read(buf),
@@ -1056,7 +1060,9 @@ public object FfiConverterTypeRunReturn: FfiConverterRustBuffer<RunReturn> {
             FfiConverterOptionalString.allocationSize(value.`inviterAlias`) +
             FfiConverterOptionalString.allocationSize(value.`initialTribe`) +
             FfiConverterOptionalString.allocationSize(value.`lspHost`) +
-            FfiConverterOptionalString.allocationSize(value.`invoice`)
+            FfiConverterOptionalString.allocationSize(value.`invoice`) +
+            FfiConverterOptionalString.allocationSize(value.`route`) +
+            FfiConverterOptionalString.allocationSize(value.`node`)
     )
 
     override fun write(value: RunReturn, buf: ByteBuffer) {
@@ -1078,6 +1084,8 @@ public object FfiConverterTypeRunReturn: FfiConverterRustBuffer<RunReturn> {
             FfiConverterOptionalString.write(value.`initialTribe`, buf)
             FfiConverterOptionalString.write(value.`lspHost`, buf)
             FfiConverterOptionalString.write(value.`invoice`, buf)
+            FfiConverterOptionalString.write(value.`route`, buf)
+            FfiConverterOptionalString.write(value.`node`, buf)
     }
 }
 

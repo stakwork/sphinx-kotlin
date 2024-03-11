@@ -108,11 +108,14 @@ import chat.sphinx.wrapper_common.dashboard.*
 import chat.sphinx.wrapper_common.feed.*
 import chat.sphinx.wrapper_common.invite.InviteStatus
 import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
+import chat.sphinx.wrapper_common.lightning.LightningPaymentRequest
 import chat.sphinx.wrapper_common.lightning.LightningRouteHint
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.lightning.ServerIp
 import chat.sphinx.wrapper_common.lightning.getScid
 import chat.sphinx.wrapper_common.lightning.toLightningNodePubKey
+import chat.sphinx.wrapper_common.lightning.toLightningPaymentHash
+import chat.sphinx.wrapper_common.lightning.toLightningPaymentRequestOrNull
 import chat.sphinx.wrapper_common.lightning.toLightningRouteHint
 import chat.sphinx.wrapper_common.lightning.toSat
 import chat.sphinx.wrapper_common.message.*
@@ -429,6 +432,7 @@ abstract class SphinxRepository(
                 null,
                 null,
                 null,
+                null,
                 null
             ).toJson(moshi)
 
@@ -539,6 +543,7 @@ abstract class SphinxRepository(
                     val originalUUID = message.originalUuid?.toMessageUUID()
                     val date = msgTimestamp?.let { DateTime(Date(it)) }
                     val isSent = (accountOwner.value?.alias?.value == contactInfo.alias)
+                    val paymentRequest = message.invoice?.toLightningPaymentRequestOrNull()
 
                     if (messageType is MessageType.Purchase.Processing) {
                         amount?.toSat()?.let { paidAmount ->
@@ -559,7 +564,8 @@ abstract class SphinxRepository(
                         originalUUID,
                         date,
                         isSent,
-                        amount?.toSat()
+                        amount?.toSat(),
+                        paymentRequest
                     )
                 }
             }
@@ -593,6 +599,7 @@ abstract class SphinxRepository(
                 originalUUID,
                 date,
                 true,
+                null,
                 null
             )
         }
@@ -732,7 +739,8 @@ abstract class SphinxRepository(
         originalUuid: MessageUUID?,
         date: DateTime?,
         isSent: Boolean,
-        amount: Sat?
+        amount: Sat?,
+        paymentRequest: LightningPaymentRequest?
     ) {
         val queries = coreDB.getSphinxDatabaseQueries()
         val contact = getContactByPubKey(LightningNodePubKey(msgSender.pubkey)).firstOrNull()
@@ -795,6 +803,8 @@ abstract class SphinxRepository(
                 sender = if (isSent) ContactId(0) else contact?.id ?: ContactId(chatId) ,
                 receiver = ContactId(0),
                 amount = existingMessage?.amount ?: amount ?: Sat(0L),
+                paymentRequest = existingMessage?.payment_request ?: paymentRequest,
+                paymentHash = existingMessage?.payment_hash,
                 date = date ?: DateTime.nowUTC().toDateTime(),
                 expirationDate = null,
                 messageContent = null,
@@ -883,7 +893,8 @@ abstract class SphinxRepository(
             attachmentInfo?.mediaType?.value,
             replyUUID?.value,
             threadUUID?.value,
-            memberPubKey?.value
+            memberPubKey?.value,
+            null
         ).toJson(moshi)
 
         provisionalId?.value?.let {
@@ -1099,6 +1110,7 @@ abstract class SphinxRepository(
                         null,
                         mediaMessage.media_token.value,
                         mediaKey,
+                        null,
                         null,
                         null,
                         null,
@@ -4053,6 +4065,7 @@ abstract class SphinxRepository(
                 null,
                 message.uuid?.value,
                 null,
+                null,
                 null
             ).toJson(moshi)
 
@@ -4191,6 +4204,7 @@ abstract class SphinxRepository(
                 mediaTokenValue,
                 null,
                 MediaType.IMAGE,
+                null,
                 null,
                 null,
                 null
@@ -4350,6 +4364,7 @@ abstract class SphinxRepository(
                 null,
                 null,
                 messageUUID.value,
+                null,
                 null,
                 null
             ).toJson(moshi)
@@ -4609,6 +4624,204 @@ abstract class SphinxRepository(
         return response ?: Response.Error(ResponseError("Failed to pay invoice"))
     }
 
+    override suspend fun payNewPaymentRequest(message: Message) {
+        applicationScope.launch(mainImmediate) {
+            val queries = coreDB.getSphinxDatabaseQueries()
+            val contact = getContactById(ContactId(message.chatId.value)).firstOrNull()
+
+            val currentProvisionalId: MessageId? = withContext(io) {
+                queries.messageGetLowestProvisionalMessageId().executeAsOneOrNull()
+            }
+            val provisionalId = MessageId((currentProvisionalId?.value ?: 0L) - 1)
+
+            message.paymentRequest?.value?.let {
+                connectManager.processInvoicePayment(it)
+            }
+
+            val newPayment = NewMessage(
+                id = provisionalId,
+                uuid = null,
+                chatId = message.chatId,
+                type = MessageType.Payment,
+                sender = accountOwner.value?.id ?: ContactId(0),
+                receiver = null,
+                amount = message.amount,
+                paymentHash = message.paymentHash,
+                paymentRequest = null,
+                date = DateTime.nowUTC().toDateTime(),
+                expirationDate = null,
+                messageContent = null,
+                status = MessageStatus.Confirmed,
+                seen = Seen.True,
+                senderAlias = null,
+                senderPic = null,
+                originalMUID = null,
+                replyUUID = null,
+                flagged = false.toFlagged(),
+                recipientAlias = null,
+                recipientPic = null,
+                person = null,
+                threadUUID = null,
+                errorMessage = null,
+                isPinned = false,
+                messageContentDecrypted = null,
+                messageDecryptionError = false,
+                messageDecryptionException = null,
+                messageMedia = null,
+                feedBoost = null,
+                callLinkMessage = null,
+                podcastClip = null,
+                giphyData = null,
+                reactions = null,
+                purchaseItems = null,
+                replyMessage = null,
+                thread = null
+            )
+
+            chatLock.withLock {
+                messageLock.withLock {
+                    withContext(io) {
+                        queries.transaction {
+                            upsertNewMessage(newPayment, queries, null)
+                        }
+                    }
+
+                    queries.transaction {
+                        updateChatNewLatestMessage(
+                            newPayment,
+                            message.chatId,
+                            latestMessageUpdatedTimeMap,
+                            queries
+                        )
+                    }
+                }
+            }
+
+            val newPaymentMessage = chat.sphinx.example.wrapper_mqtt.Message(
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                message.paymentRequest?.value
+            ).toJson(moshi)
+
+
+            if (contact != null) {
+                connectManager.sendMessage(
+                    newPaymentMessage,
+                    contact.nodePubKey?.value ?: "",
+                    provisionalId.value,
+                    MessageType.PAYMENT,
+                    message.amount.value,
+                    false
+                )
+            }
+        }
+    }
+
+    override suspend fun sendNewPaymentRequest(requestPayment: SendPaymentRequest) {
+        applicationScope.launch(mainImmediate) {
+            val queries = coreDB.getSphinxDatabaseQueries()
+            val chatId = requestPayment.chatId ?: return@launch
+            val contact = requestPayment.contactId?.value?.let { ContactId(it) }
+                ?.let { getContactById(it).firstOrNull() }
+
+
+            val currentProvisionalId: MessageId? = withContext(io) {
+                queries.messageGetLowestProvisionalMessageId().executeAsOneOrNull()
+            }
+            val provisionalId = MessageId((currentProvisionalId?.value ?: 0L) - 1)
+
+            val invoiceAndHash = connectManager.createInvoice(requestPayment.amount, requestPayment.memo ?: "")
+
+            val newPaymentRequest = NewMessage(
+                id = provisionalId,
+                uuid = null,
+                chatId = chatId,
+                type = MessageType.Invoice,
+                sender = accountOwner.value?.id ?: ContactId(0),
+                receiver = null,
+                amount = requestPayment.amount.toSat() ?: Sat(0),
+                paymentHash = invoiceAndHash?.second?.toLightningPaymentHash(),
+                paymentRequest = invoiceAndHash?.first?.toLightningPaymentRequestOrNull(),
+                date = DateTime.nowUTC().toDateTime(),
+                expirationDate = null,
+                messageContent = null,
+                status = MessageStatus.Confirmed,
+                seen = Seen.True,
+                senderAlias = null,
+                senderPic = null,
+                originalMUID = null,
+                replyUUID = null,
+                flagged = false.toFlagged(),
+                recipientAlias = null,
+                recipientPic = null,
+                person = null,
+                threadUUID = null,
+                errorMessage = null,
+                isPinned = false,
+                messageContentDecrypted = requestPayment.memo?.toMessageContentDecrypted(),
+                messageDecryptionError = false,
+                messageDecryptionException = null,
+                messageMedia = null,
+                feedBoost = null,
+                callLinkMessage = null,
+                podcastClip = null,
+                giphyData = null,
+                reactions = null,
+                purchaseItems = null,
+                replyMessage = null,
+                thread = null
+            )
+
+            val newPaymentRequestMessage = chat.sphinx.example.wrapper_mqtt.Message(
+                requestPayment.memo,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                invoiceAndHash?.first
+            ).toJson(moshi)
+
+            chatLock.withLock {
+                messageLock.withLock {
+                    withContext(io) {
+                        queries.transaction {
+                            upsertNewMessage(newPaymentRequest, queries, null)
+                        }
+                    }
+
+                    queries.transaction {
+                        updateChatNewLatestMessage(
+                            newPaymentRequest,
+                            chatId,
+                            latestMessageUpdatedTimeMap,
+                            queries
+                        )
+                    }
+                }
+            }
+
+            if (contact != null) {
+                connectManager.sendMessage(
+                    newPaymentRequestMessage,
+                    contact.nodePubKey?.value ?: "",
+                    provisionalId.value,
+                    MessageType.INVOICE,
+                    requestPayment.amount.toSat()?.value ?: 0,
+                    false
+                )
+            }
+        }
+    }
+
     override suspend fun payAttachment(message: Message) {
         applicationScope.launch(mainImmediate) {
             val queries = coreDB.getSphinxDatabaseQueries()
@@ -4685,6 +4898,7 @@ abstract class SphinxRepository(
                         null,
                         null,
                         mediaToken.value,
+                        null,
                         null,
                         null,
                         null,

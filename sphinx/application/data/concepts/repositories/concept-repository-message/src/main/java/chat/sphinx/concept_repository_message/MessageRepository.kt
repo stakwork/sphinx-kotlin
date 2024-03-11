@@ -10,6 +10,7 @@ import chat.sphinx.wrapper_common.DateTime
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.feed.FeedId
 import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
+import chat.sphinx.wrapper_common.lightning.LightningPaymentRequest
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.message.MessageUUID
@@ -94,6 +95,12 @@ interface MessageRepository {
 
     suspend fun payPaymentRequest(message: Message) : Response<Any, ResponseError>
 
+    suspend fun payNewPaymentRequest(message: Message)
+
+    suspend fun sendNewPaymentRequest(
+        requestPayment: SendPaymentRequest
+    )
+
     suspend fun boostMessage(
         chatId: ChatId,
         pricePerMessage: Sat,
@@ -124,7 +131,8 @@ interface MessageRepository {
         originalUuid: MessageUUID?,
         date: DateTime?,
         isSent: Boolean,
-        amount: Sat?
+        amount: Sat?,
+        paymentRequest: LightningPaymentRequest?
     )
 
     suspend fun deleteMqttMessage(messageUuid: MessageUUID)
