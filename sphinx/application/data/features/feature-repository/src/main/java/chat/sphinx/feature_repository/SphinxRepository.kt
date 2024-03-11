@@ -423,6 +423,8 @@ abstract class SphinxRepository(
                 queries.messageGetLowestProvisionalMessageId().executeAsOneOrNull()
             }
             val provisionalId = MessageId((currentProvisionalId?.value ?: 0L) - 1)
+            val isDeleteTribe = tribe.isTribeOwnedByAccount(accountOwner.value?.nodePubKey)
+            val messageType = if(isDeleteTribe) MessageType.TRIBE_DELETE else MessageType.GROUP_LEAVE
 
             val newMessage = chat.sphinx.example.wrapper_mqtt.Message(
                 "",
@@ -441,7 +443,7 @@ abstract class SphinxRepository(
                     newMessage,
                     pubKey,
                     provisionalId.value,
-                    MessageType.GROUP_LEAVE,
+                    messageType,
                     1L,
                     true
                 )
@@ -4729,7 +4731,6 @@ abstract class SphinxRepository(
             val chatId = requestPayment.chatId ?: return@launch
             val contact = requestPayment.contactId?.value?.let { ContactId(it) }
                 ?.let { getContactById(it).firstOrNull() }
-
 
             val currentProvisionalId: MessageId? = withContext(io) {
                 queries.messageGetLowestProvisionalMessageId().executeAsOneOrNull()

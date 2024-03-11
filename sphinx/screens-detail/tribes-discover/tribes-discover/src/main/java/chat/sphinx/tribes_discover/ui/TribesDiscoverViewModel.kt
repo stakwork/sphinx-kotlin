@@ -42,7 +42,7 @@ internal class TribesDiscoverViewModel @Inject constructor(
 {
 
     companion object {
-        private const val TRIBES_DEFAULT_SERVER_URL = "http://34.229.52.200:8801"
+        private const val TRIBES_DEFAULT_SERVER_URL = "34.229.52.200:8801"
     }
 
         val discoverTribesTagsViewStateContainer: ViewStateContainer<DiscoverTribesTagsViewState> by lazy {

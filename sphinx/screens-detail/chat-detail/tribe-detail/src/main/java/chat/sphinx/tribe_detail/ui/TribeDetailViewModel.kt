@@ -258,6 +258,7 @@ internal class TribeDetailViewModel @Inject constructor(
             submitSideEffect(
                 TribeDetailSideEffect.AlertConfirmDeleteTribe(chat) {
                     viewModelScope.launch(mainImmediate) {
+
                         chatRepository.exitAndDeleteTribe(chat)
                         navigator.goBackToDashboard()
 
