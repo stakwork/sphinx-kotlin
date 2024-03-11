@@ -4779,7 +4779,7 @@ abstract class SphinxRepository(
             )
 
             val newPaymentRequestMessage = chat.sphinx.example.wrapper_mqtt.Message(
-                null,
+                requestPayment.memo,
                 null,
                 null,
                 null,
