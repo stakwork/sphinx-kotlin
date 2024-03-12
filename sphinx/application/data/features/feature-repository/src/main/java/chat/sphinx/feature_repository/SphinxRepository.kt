@@ -4705,29 +4705,29 @@ abstract class SphinxRepository(
                 }
             }
 
-            val newPaymentMessage = chat.sphinx.example.wrapper_mqtt.Message(
-                null,
-                message.amount.value.toInt(),
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                message.paymentRequest?.value
-            ).toJson(moshi)
+//            val newPaymentMessage = chat.sphinx.example.wrapper_mqtt.Message(
+//                null,
+//                message.amount.value.toInt(),
+//                null,
+//                null,
+//                null,
+//                null,
+//                null,
+//                null,
+//                message.paymentRequest?.value
+//            ).toJson(moshi)
 
 
-            if (contact != null) {
-                connectManager.sendMessage(
-                    newPaymentMessage,
-                    contact.nodePubKey?.value ?: "",
-                    provisionalId.value,
-                    MessageType.PAYMENT,
-                    null,
-                    false
-                )
-            }
+//            if (contact != null) {
+//                connectManager.sendMessage(
+//                    newPaymentMessage,
+//                    contact.nodePubKey?.value ?: "",
+//                    provisionalId.value,
+//                    MessageType.PAYMENT,
+//                    null,
+//                    false
+//                )
+//            }
         }
     }
 
