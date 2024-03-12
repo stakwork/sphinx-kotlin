@@ -9,6 +9,7 @@ import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_common.DateTime
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.feed.FeedId
+import chat.sphinx.wrapper_common.lightning.Bolt11
 import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
 import chat.sphinx.wrapper_common.lightning.LightningPaymentRequest
 import chat.sphinx.wrapper_common.lightning.Sat
@@ -132,7 +133,8 @@ interface MessageRepository {
         date: DateTime?,
         isSent: Boolean,
         amount: Sat?,
-        paymentRequest: LightningPaymentRequest?
+        paymentRequest: LightningPaymentRequest?,
+        bolt11: Bolt11?
     )
 
     suspend fun deleteMqttMessage(messageUuid: MessageUUID)

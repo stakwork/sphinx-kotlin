@@ -65,7 +65,7 @@ internal class TribeDetailViewModel @Inject constructor(
 {
     companion object {
         const val TAG = "TribeDetailViewModel"
-        private const val TRIBES_DEFAULT_SERVER_URL = "http://34.229.52.200:8801"
+        private const val TRIBES_DEFAULT_SERVER_URL = "34.229.52.200:8801"
     }
 
     private val args: TribeDetailFragmentArgs by savedStateHandle.navArgs()
