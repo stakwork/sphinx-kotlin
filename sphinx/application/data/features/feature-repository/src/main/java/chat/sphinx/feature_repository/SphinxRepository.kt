@@ -107,6 +107,7 @@ import chat.sphinx.wrapper_common.contact.isTrue
 import chat.sphinx.wrapper_common.dashboard.*
 import chat.sphinx.wrapper_common.feed.*
 import chat.sphinx.wrapper_common.invite.InviteStatus
+import chat.sphinx.wrapper_common.lightning.Bolt11
 import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
 import chat.sphinx.wrapper_common.lightning.LightningPaymentRequest
 import chat.sphinx.wrapper_common.lightning.LightningRouteHint
@@ -423,6 +424,8 @@ abstract class SphinxRepository(
                 queries.messageGetLowestProvisionalMessageId().executeAsOneOrNull()
             }
             val provisionalId = MessageId((currentProvisionalId?.value ?: 0L) - 1)
+            val isDeleteTribe = tribe.isTribeOwnedByAccount(accountOwner.value?.nodePubKey)
+            val messageType = if(isDeleteTribe) MessageType.TRIBE_DELETE else MessageType.GROUP_LEAVE
 
             val newMessage = chat.sphinx.example.wrapper_mqtt.Message(
                 "",
@@ -441,7 +444,7 @@ abstract class SphinxRepository(
                     newMessage,
                     pubKey,
                     provisionalId.value,
-                    MessageType.GROUP_LEAVE,
+                    messageType,
                     1L,
                     true
                 )
@@ -543,7 +546,9 @@ abstract class SphinxRepository(
                     val originalUUID = message.originalUuid?.toMessageUUID()
                     val date = msgTimestamp?.let { DateTime(Date(it)) }
                     val isSent = (accountOwner.value?.alias?.value == contactInfo.alias)
+
                     val paymentRequest = message.invoice?.toLightningPaymentRequestOrNull()
+                    val bolt11 = paymentRequest?.let { Bolt11.decode(it) }
 
                     if (messageType is MessageType.Purchase.Processing) {
                         amount?.toSat()?.let { paidAmount ->
@@ -565,7 +570,8 @@ abstract class SphinxRepository(
                         date,
                         isSent,
                         amount?.toSat(),
-                        paymentRequest
+                        paymentRequest,
+                        bolt11
                     )
                 }
             }
@@ -599,6 +605,7 @@ abstract class SphinxRepository(
                 originalUUID,
                 date,
                 true,
+                null,
                 null,
                 null
             )
@@ -661,8 +668,10 @@ abstract class SphinxRepository(
     }
 
     override fun onTribeMembersList(tribeMembers: String) {
-        tribeMembers.toTribeMembersList(moshi)?.let { members ->
-            connectionManagerState.value = ConnectionManagerState.TribeMembersList(members)
+        applicationScope.launch {
+            tribeMembers.toTribeMembersList(moshi)?.let { members ->
+                connectionManagerState.value = ConnectionManagerState.TribeMembersList(members)
+            }
         }
     }
 
@@ -740,7 +749,8 @@ abstract class SphinxRepository(
         date: DateTime?,
         isSent: Boolean,
         amount: Sat?,
-        paymentRequest: LightningPaymentRequest?
+        paymentRequest: LightningPaymentRequest?,
+        bolt11: Bolt11?
     ) {
         val queries = coreDB.getSphinxDatabaseQueries()
         val contact = getContactByPubKey(LightningNodePubKey(msgSender.pubkey)).firstOrNull()
@@ -802,13 +812,18 @@ abstract class SphinxRepository(
                 type = msgType,
                 sender = if (isSent) ContactId(0) else contact?.id ?: ContactId(chatId) ,
                 receiver = ContactId(0),
-                amount = existingMessage?.amount ?: amount ?: Sat(0L),
+                amount = bolt11?.getSatsAmount() ?: existingMessage?.amount ?: amount ?: Sat(0L),
                 paymentRequest = existingMessage?.payment_request ?: paymentRequest,
                 paymentHash = existingMessage?.payment_hash,
                 date = date ?: DateTime.nowUTC().toDateTime(),
-                expirationDate = null,
+                expirationDate = bolt11?.getExpiryTime()?.toDateTime(),
                 messageContent = null,
-                status = if (isSent) MessageStatus.Confirmed else MessageStatus.Received,
+                status = when {
+                    isSent && existingMessage?.payment_request != null -> MessageStatus.Pending
+                    isSent && existingMessage?.payment_request == null -> MessageStatus.Confirmed
+                    !isSent && existingMessage?.payment_request != null -> MessageStatus.Pending
+                    else -> MessageStatus.Received
+                              },
                 seen = Seen.False,
                 senderAlias = msgSender.alias?.toSenderAlias(),
                 senderPic = msgSender.photo_url?.toPhotoUrl(),
@@ -836,17 +851,17 @@ abstract class SphinxRepository(
             )
 
             messageLock.withLock {
-                    queries.transaction {
-                        upsertNewMessage(newMessage, queries, null)
+                queries.transaction {
+                    upsertNewMessage(newMessage, queries, null)
 
-                        updateChatNewLatestMessage(
-                            newMessage,
-                            ChatId(chatId),
-                            latestMessageUpdatedTimeMap,
-                            queries
-                        )
-                    }
+                    updateChatNewLatestMessage(
+                        newMessage,
+                        ChatId(chatId),
+                        latestMessageUpdatedTimeMap,
+                        queries
+                    )
                 }
+            }
 
             chatLock.withLock {
                 queries.chatUpdateSeen(Seen.False, ChatId(chatId))
@@ -4697,29 +4712,29 @@ abstract class SphinxRepository(
                 }
             }
 
-            val newPaymentMessage = chat.sphinx.example.wrapper_mqtt.Message(
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                message.paymentRequest?.value
-            ).toJson(moshi)
+//            val newPaymentMessage = chat.sphinx.example.wrapper_mqtt.Message(
+//                null,
+//                message.amount.value.toInt(),
+//                null,
+//                null,
+//                null,
+//                null,
+//                null,
+//                null,
+//                message.paymentRequest?.value
+//            ).toJson(moshi)
 
 
-            if (contact != null) {
-                connectManager.sendMessage(
-                    newPaymentMessage,
-                    contact.nodePubKey?.value ?: "",
-                    provisionalId.value,
-                    MessageType.PAYMENT,
-                    message.amount.value,
-                    false
-                )
-            }
+//            if (contact != null) {
+//                connectManager.sendMessage(
+//                    newPaymentMessage,
+//                    contact.nodePubKey?.value ?: "",
+//                    provisionalId.value,
+//                    MessageType.PAYMENT,
+//                    null,
+//                    false
+//                )
+//            }
         }
     }
 
@@ -4729,7 +4744,6 @@ abstract class SphinxRepository(
             val chatId = requestPayment.chatId ?: return@launch
             val contact = requestPayment.contactId?.value?.let { ContactId(it) }
                 ?.let { getContactById(it).firstOrNull() }
-
 
             val currentProvisionalId: MessageId? = withContext(io) {
                 queries.messageGetLowestProvisionalMessageId().executeAsOneOrNull()
@@ -4751,7 +4765,7 @@ abstract class SphinxRepository(
                 date = DateTime.nowUTC().toDateTime(),
                 expirationDate = null,
                 messageContent = null,
-                status = MessageStatus.Confirmed,
+                status = MessageStatus.Pending,
                 seen = Seen.True,
                 senderAlias = null,
                 senderPic = null,
@@ -4815,7 +4829,7 @@ abstract class SphinxRepository(
                     contact.nodePubKey?.value ?: "",
                     provisionalId.value,
                     MessageType.INVOICE,
-                    requestPayment.amount.toSat()?.value ?: 0,
+                     null,
                     false
                 )
             }

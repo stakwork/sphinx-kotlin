@@ -325,7 +325,6 @@ class ConnectManagerImpl(
     }
 
     private fun subscribeOwnerMQTT() {
-
         try {
             mqttClient?.let { client ->
                 // Network setup and handling

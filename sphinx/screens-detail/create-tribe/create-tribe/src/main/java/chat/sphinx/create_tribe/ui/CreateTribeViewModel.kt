@@ -33,6 +33,7 @@ import kotlinx.coroutines.flow.*
 import io.matthewnelson.concept_media_cache.MediaCacheHandler
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.system.exitProcess
 
 internal inline val CreateTribeFragmentArgs.chatId: ChatId?
     get() = if (argChatId == ChatId.NULL_CHAT_ID.toLong()) {
@@ -160,18 +161,18 @@ internal class CreateTribeViewModel @Inject constructor(
 
                                 val existingTribe = CreateTribeViewState.ExistingTribe(
                                     tribeInfo.name,
+                                    tribeInfo.description ?: "",
+                                    tribeInfo.img,
+                                    tribeInfo.tags,
+                                    tribeInfo.price_to_join.toString(),
+                                    tribeInfo.price_per_message.toString(),
+                                    tribeInfo.escrow_amount.toString(),
+                                    tribeInfo.escrow_millis.toString(),
                                     "",
                                     null,
-                                    arrayOf(),
-                                    "1",
-                                    "0",
-                                    "0",
-                                "0",
-                                null,
                                     null,
                                     null,
-                                    null,
-                                    null,
+                                    tribeInfo.private,
                                 )
                                 updateViewState(existingTribe)
                             }
