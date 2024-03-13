@@ -818,7 +818,12 @@ abstract class SphinxRepository(
                 date = date ?: DateTime.nowUTC().toDateTime(),
                 expirationDate = bolt11?.getExpiryTime()?.toDateTime(),
                 messageContent = null,
-                status = if (isSent) MessageStatus.Confirmed else MessageStatus.Received,
+                status = when {
+                    isSent && existingMessage?.payment_request != null -> MessageStatus.Pending
+                    isSent && existingMessage?.payment_request == null -> MessageStatus.Confirmed
+                    !isSent && existingMessage?.payment_request != null -> MessageStatus.Pending
+                    else -> MessageStatus.Received
+                              },
                 seen = Seen.False,
                 senderAlias = msgSender.alias?.toSenderAlias(),
                 senderPic = msgSender.photo_url?.toPhotoUrl(),
@@ -4760,7 +4765,7 @@ abstract class SphinxRepository(
                 date = DateTime.nowUTC().toDateTime(),
                 expirationDate = null,
                 messageContent = null,
-                status = MessageStatus.Confirmed,
+                status = MessageStatus.Pending,
                 seen = Seen.True,
                 senderAlias = null,
                 senderPic = null,
