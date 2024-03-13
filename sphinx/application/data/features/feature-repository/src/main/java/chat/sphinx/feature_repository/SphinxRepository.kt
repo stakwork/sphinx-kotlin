@@ -668,8 +668,10 @@ abstract class SphinxRepository(
     }
 
     override fun onTribeMembersList(tribeMembers: String) {
-        tribeMembers.toTribeMembersList(moshi)?.let { members ->
-            connectionManagerState.value = ConnectionManagerState.TribeMembersList(members)
+        applicationScope.launch {
+            tribeMembers.toTribeMembersList(moshi)?.let { members ->
+                connectionManagerState.value = ConnectionManagerState.TribeMembersList(members)
+            }
         }
     }
 

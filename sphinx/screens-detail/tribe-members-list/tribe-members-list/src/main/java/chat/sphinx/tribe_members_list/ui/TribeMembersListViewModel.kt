@@ -155,21 +155,23 @@ internal class TribeMembersListViewModel @Inject constructor(
     }
 
     private suspend fun fetchTribeMembers(){
-        connectManagerRepository.connectionManagerState.collect {
-            if (it is ConnectionManagerState.TribeMembersList) {
-                updateViewState(
-                    TribeMembersListViewState.ListMode(
+        connectManagerRepository.connectionManagerState.collect { connectionState ->
+            when (connectionState) {
+                is ConnectionManagerState.TribeMembersList -> {
+
+                    val tribeMembers = TribeMembersListViewState.ListMode(
                         processMembers(
-                            it.tribeMembers,
+                            connectionState.tribeMembers,
                             getOwner()
                         ),
                         false,
                         true
                     )
-                )
+
+                    updateViewState(tribeMembers)
+                }
             }
         }
-
     }
 
     private suspend fun getOwner(): Contact {
