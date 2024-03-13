@@ -208,6 +208,7 @@ sealed class LayoutState private constructor() {
 
             data class Message(
                 val text: String?,
+                val highlightedTexts: List<String>,
                 val decryptionError: Boolean,
                 val isThread: Boolean
             ): ContainerThird()

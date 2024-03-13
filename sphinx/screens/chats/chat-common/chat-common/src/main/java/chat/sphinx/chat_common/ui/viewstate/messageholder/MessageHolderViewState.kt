@@ -228,6 +228,7 @@ internal sealed class MessageHolderViewState(
                 if (text.isNotEmpty()) {
                     LayoutState.Bubble.ContainerThird.Message(
                         text = text,
+                        highlightedTexts = emptyList(),
                         decryptionError = false,
                         isThread = isThread
                     )
@@ -238,6 +239,7 @@ internal sealed class MessageHolderViewState(
                 if (decryptionError) {
                     LayoutState.Bubble.ContainerThird.Message(
                         text = null,
+                        highlightedTexts = emptyList(),
                         decryptionError = true,
                         isThread = isThread
                     )

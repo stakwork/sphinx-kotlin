@@ -4,6 +4,8 @@ import android.app.Application
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.util.Range
+import androidx.annotation.IntRange
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import app.cash.exhaustive.Exhaustive
@@ -79,6 +81,7 @@ import kotlinx.coroutines.flow.*
 import org.jitsi.meet.sdk.JitsiMeetActivity
 import org.jitsi.meet.sdk.JitsiMeetConferenceOptions
 import org.jitsi.meet.sdk.JitsiMeetUserInfo
+import java.util.Locale
 import javax.inject.Inject
 
 
@@ -194,6 +197,8 @@ internal class DashboardViewModel @Inject constructor(
     }
 
     fun toggleHideBalanceState(){
+        val results = "`test` hello and now? `test and now` and now `hello\n and now`".highlightedTexts()
+
         viewModelScope.launch(mainImmediate) {
             val newState = if(_hideBalanceStateFlow.value == HideBalance.DISABLED){
                 HideBalance.ENABLED
@@ -1328,5 +1333,33 @@ internal class DashboardViewModel @Inject constructor(
     fun sendAppLog(appLog: String) {
         actionsRepository.setAppLog(appLog)
     }
+}
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun String.highlightedTexts(): List<Pair<String, IntRange>> {
+    val matcher = "`([^`]*)`".toRegex()
+    val ranges = matcher.findAll(this).map{ it.range }.toList()
+
+    val adaptedText = this.replace("`", "")
+    var matches: MutableList<Pair<String, IntRange>> = mutableListOf()
+
+    ranges.forEachIndexed { index, range ->
+        val subtraction = index * 2
+
+        val adaptedRange = IntRange(
+            from = (range.first - subtraction).toLong(),
+            to = (range.last - subtraction - 1).toLong()
+        )
+
+        val rangeString = adaptedText.substring(adaptedRange.from.toInt(), adaptedRange.to.toInt())
+
+        matches.add(
+            Pair(rangeString, adaptedRange)
+        )
+    }
+
+    println(matches)
+
+    return matches
 }
 

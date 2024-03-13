@@ -929,6 +929,7 @@ abstract class ChatViewModel<ARGS : NavArgs>(
                             text?.let { nnText ->
                                 messageLayoutState = LayoutState.Bubble.ContainerThird.Message(
                                     text = nnText,
+                                    highlightedTexts = emptyList(),
                                     decryptionError = false,
                                     isThread = false
                                 )
