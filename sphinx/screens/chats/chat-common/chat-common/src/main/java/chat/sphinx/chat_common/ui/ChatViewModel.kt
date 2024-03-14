@@ -16,6 +16,7 @@ import android.provider.OpenableColumns
 import android.util.Log
 import android.webkit.MimeTypeMap
 import androidx.annotation.CallSuper
+import androidx.annotation.IntRange
 import androidx.core.view.inputmethod.InputConnectionCompat
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.SavedStateHandle
@@ -46,6 +47,8 @@ import chat.sphinx.chat_common.util.AudioPlayerController
 import chat.sphinx.chat_common.util.AudioPlayerControllerImpl
 import chat.sphinx.chat_common.util.AudioRecorderController
 import chat.sphinx.chat_common.util.SphinxLinkify
+import chat.sphinx.chat_common.util.highlightedTexts
+import chat.sphinx.chat_common.util.replacingHighlightedDelimiters
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.concept_link_preview.LinkPreviewHandler
 import chat.sphinx.concept_link_preview.model.TribePreviewName
@@ -567,7 +570,6 @@ abstract class ChatViewModel<ARGS : NavArgs>(
                     newList.add(
                         MessageHolderViewState.Sent(
                             message,
-
                             chat,
                             tribeAdmin,
                             background = when {
@@ -928,8 +930,8 @@ abstract class ChatViewModel<ARGS : NavArgs>(
 
                             text?.let { nnText ->
                                 messageLayoutState = LayoutState.Bubble.ContainerThird.Message(
-                                    text = nnText,
-                                    highlightedTexts = emptyList(),
+                                    text = nnText.replacingHighlightedDelimiters(),
+                                    highlightedTexts = nnText.highlightedTexts(),
                                     decryptionError = false,
                                     isThread = false
                                 )

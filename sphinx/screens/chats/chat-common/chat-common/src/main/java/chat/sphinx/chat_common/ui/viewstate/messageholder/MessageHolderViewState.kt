@@ -8,6 +8,8 @@ import chat.sphinx.chat_common.model.MessageLinkPreview
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
 import chat.sphinx.chat_common.ui.viewstate.selected.MenuItemState
 import chat.sphinx.chat_common.util.SphinxLinkify
+import chat.sphinx.chat_common.util.highlightedTexts
+import chat.sphinx.chat_common.util.replacingHighlightedDelimiters
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_chat.isConversation
 import chat.sphinx.wrapper_chat.isTribe
@@ -227,8 +229,8 @@ internal sealed class MessageHolderViewState(
             message.retrieveTextToShow()?.let { text ->
                 if (text.isNotEmpty()) {
                     LayoutState.Bubble.ContainerThird.Message(
-                        text = text,
-                        highlightedTexts = emptyList(),
+                        text = text.replacingHighlightedDelimiters(),
+                        highlightedTexts = text.highlightedTexts(),
                         decryptionError = false,
                         isThread = isThread
                     )

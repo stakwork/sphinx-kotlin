@@ -4,8 +4,6 @@ import android.app.Application
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.util.Range
-import androidx.annotation.IntRange
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import app.cash.exhaustive.Exhaustive
@@ -39,8 +37,14 @@ import chat.sphinx.dashboard.R
 import chat.sphinx.dashboard.navigation.DashboardBottomNavBarNavigator
 import chat.sphinx.dashboard.navigation.DashboardNavDrawerNavigator
 import chat.sphinx.dashboard.navigation.DashboardNavigator
-import chat.sphinx.dashboard.ui.viewstates.*
-import chat.sphinx.kotlin_response.*
+import chat.sphinx.dashboard.ui.viewstates.ChatListFooterButtonsViewState
+import chat.sphinx.dashboard.ui.viewstates.DashboardMotionViewState
+import chat.sphinx.dashboard.ui.viewstates.DashboardTabsViewState
+import chat.sphinx.dashboard.ui.viewstates.DeepLinkPopupViewState
+import chat.sphinx.kotlin_response.LoadResponse
+import chat.sphinx.kotlin_response.Response
+import chat.sphinx.kotlin_response.ResponseError
+import chat.sphinx.kotlin_response.exception
 import chat.sphinx.logger.SphinxLogger
 import chat.sphinx.menu_bottom.ui.MenuBottomViewState
 import chat.sphinx.menu_bottom_scanner.ScannerMenuHandler
@@ -50,22 +54,62 @@ import chat.sphinx.scanner_view_model_coordinator.request.ScannerRequest
 import chat.sphinx.scanner_view_model_coordinator.response.ScannerResponse
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_chat.isConversation
-import chat.sphinx.wrapper_common.*
+import chat.sphinx.wrapper_common.CreateInvoiceLink
+import chat.sphinx.wrapper_common.ExternalAuthorizeLink
+import chat.sphinx.wrapper_common.ExternalRequestLink
+import chat.sphinx.wrapper_common.FeedRecommendationsToggle
+import chat.sphinx.wrapper_common.HideBalance
+import chat.sphinx.wrapper_common.PeopleConnectLink
+import chat.sphinx.wrapper_common.RedeemSatsLink
+import chat.sphinx.wrapper_common.StakworkAuthorizeLink
 import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.chat.PushNotificationLink
 import chat.sphinx.wrapper_common.chat.toPushNotificationLink
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.RestoreProgressViewState
 import chat.sphinx.wrapper_common.dashboard.toChatId
-import chat.sphinx.wrapper_common.feed.*
-import chat.sphinx.wrapper_common.lightning.*
+import chat.sphinx.wrapper_common.feed.FeedItemLink
+import chat.sphinx.wrapper_common.feed.toFeedItemLink
+import chat.sphinx.wrapper_common.isValidExternalAuthorizeLink
+import chat.sphinx.wrapper_common.isValidExternalRequestLink
+import chat.sphinx.wrapper_common.isValidPeopleConnectLink
+import chat.sphinx.wrapper_common.lightning.Bolt11
+import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
+import chat.sphinx.wrapper_common.lightning.LightningPaymentRequest
+import chat.sphinx.wrapper_common.lightning.LightningRouteHint
+import chat.sphinx.wrapper_common.lightning.Sat
+import chat.sphinx.wrapper_common.lightning.getPubKey
+import chat.sphinx.wrapper_common.lightning.getRouteHint
+import chat.sphinx.wrapper_common.lightning.isValidLightningNodeLink
+import chat.sphinx.wrapper_common.lightning.isValidLightningNodePubKey
+import chat.sphinx.wrapper_common.lightning.isValidLightningPaymentRequest
+import chat.sphinx.wrapper_common.lightning.isValidVirtualNodeAddress
+import chat.sphinx.wrapper_common.lightning.toLightningNodePubKey
+import chat.sphinx.wrapper_common.lightning.toLightningPaymentRequestOrNull
+import chat.sphinx.wrapper_common.lightning.toLightningRouteHint
+import chat.sphinx.wrapper_common.lightning.toSat
+import chat.sphinx.wrapper_common.lightning.toVirtualLightningNodeAddress
 import chat.sphinx.wrapper_common.message.SphinxCallLink
 import chat.sphinx.wrapper_common.message.toSphinxCallLink
+import chat.sphinx.wrapper_common.toCreateInvoiceLink
+import chat.sphinx.wrapper_common.toExternalAuthorizeLink
+import chat.sphinx.wrapper_common.toExternalRequestLink
+import chat.sphinx.wrapper_common.toPeopleConnectLink
+import chat.sphinx.wrapper_common.toPhotoUrl
+import chat.sphinx.wrapper_common.toRedeemSatsLink
+import chat.sphinx.wrapper_common.toStakworkAuthorizeLink
 import chat.sphinx.wrapper_common.tribe.TribeJoinLink
 import chat.sphinx.wrapper_common.tribe.isValidTribeJoinLink
 import chat.sphinx.wrapper_common.tribe.toTribeJoinLink
-import chat.sphinx.wrapper_contact.*
-import chat.sphinx.wrapper_feed.*
+import chat.sphinx.wrapper_contact.Contact
+import chat.sphinx.wrapper_contact.ContactAlias
+import chat.sphinx.wrapper_contact.avatarUrl
+import chat.sphinx.wrapper_contact.toContactAlias
+import chat.sphinx.wrapper_contact.toContactKey
+import chat.sphinx.wrapper_feed.Feed
+import chat.sphinx.wrapper_feed.isNewsletter
+import chat.sphinx.wrapper_feed.isPodcast
+import chat.sphinx.wrapper_feed.isVideo
 import chat.sphinx.wrapper_lightning.NodeBalance
 import chat.sphinx.wrapper_relay.RelayUrl
 import com.squareup.moshi.Moshi
@@ -76,12 +120,17 @@ import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.build_config.BuildConfigVersionCode
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
-import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.jitsi.meet.sdk.JitsiMeetActivity
 import org.jitsi.meet.sdk.JitsiMeetConferenceOptions
 import org.jitsi.meet.sdk.JitsiMeetUserInfo
-import java.util.Locale
 import javax.inject.Inject
 
 
@@ -197,8 +246,6 @@ internal class DashboardViewModel @Inject constructor(
     }
 
     fun toggleHideBalanceState(){
-        val results = "`test` hello and now? `test and now` and now `hello\n and now`".highlightedTexts()
-
         viewModelScope.launch(mainImmediate) {
             val newState = if(_hideBalanceStateFlow.value == HideBalance.DISABLED){
                 HideBalance.ENABLED
@@ -1333,33 +1380,5 @@ internal class DashboardViewModel @Inject constructor(
     fun sendAppLog(appLog: String) {
         actionsRepository.setAppLog(appLog)
     }
-}
-
-@Suppress("NOTHING_TO_INLINE")
-inline fun String.highlightedTexts(): List<Pair<String, IntRange>> {
-    val matcher = "`([^`]*)`".toRegex()
-    val ranges = matcher.findAll(this).map{ it.range }.toList()
-
-    val adaptedText = this.replace("`", "")
-    var matches: MutableList<Pair<String, IntRange>> = mutableListOf()
-
-    ranges.forEachIndexed { index, range ->
-        val subtraction = index * 2
-
-        val adaptedRange = IntRange(
-            from = (range.first - subtraction).toLong(),
-            to = (range.last - subtraction - 1).toLong()
-        )
-
-        val rangeString = adaptedText.substring(adaptedRange.from.toInt(), adaptedRange.to.toInt())
-
-        matches.add(
-            Pair(rangeString, adaptedRange)
-        )
-    }
-
-    println(matches)
-
-    return matches
 }
 
