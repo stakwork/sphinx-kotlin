@@ -326,7 +326,8 @@ abstract class SphinxRepository(
         tribePubKey: String,
         tribeRouteHint: String,
         tribeName: String,
-        isPrivate: Boolean,
+        tribePicture: String?,
+        isPrivate: Boolean
     ) {
         connectManager.joinToTribe(tribeHost, tribePubKey, tribeRouteHint, isPrivate)
 
@@ -341,7 +342,7 @@ abstract class SphinxRepository(
                 id = ChatId(tribeId),
                 uuid = ChatUUID(tribePubKey),
                 name = ChatName( tribeName ?: "unknown"),
-                photoUrl = null,
+                photoUrl = tribePicture?.toPhotoUrl(),
                 type = ChatType.Tribe,
                 status = ChatStatus.Approved,
                 contactIds = listOf(ContactId(0), ContactId(tribeId)),

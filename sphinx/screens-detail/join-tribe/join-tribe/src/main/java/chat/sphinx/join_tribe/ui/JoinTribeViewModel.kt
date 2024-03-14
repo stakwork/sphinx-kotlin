@@ -199,6 +199,7 @@ internal class JoinTribeViewModel @Inject constructor(
                     tribeInfo.pubkey,
                     tribeInfo.route_hint,
                     tribeInfo.name,
+                    tribeInfo.img,
                     tribeInfo.private ?: false,
 
                 )

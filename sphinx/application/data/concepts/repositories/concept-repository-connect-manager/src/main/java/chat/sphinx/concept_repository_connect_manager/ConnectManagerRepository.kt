@@ -22,6 +22,7 @@ interface ConnectManagerRepository {
         tribePubKey: String,
         tribeRouteHint: String,
         tribeName: String,
+        tribePicture: String?,
         isPrivate: Boolean
     )
 
