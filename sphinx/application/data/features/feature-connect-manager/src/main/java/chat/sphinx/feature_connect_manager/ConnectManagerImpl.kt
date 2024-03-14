@@ -572,12 +572,13 @@ class ConnectManagerImpl(
         val now = getTimestampInMilliseconds()
 
         try {
-            val processInvoice = uniffi.sphinxrs.payInvoice(
+            val processInvoice = uniffi.sphinxrs.payContactInvoice(
                 ownerSeed!!,
                 now,
                 getCurrentUserState(),
                 paymentRequest,
-                null
+                ownerInfoStateFlow.value?.alias ?: "",
+                ownerInfoStateFlow.value?.picture ?: ""
             )
             handleRunReturn(processInvoice, mqttClient!!)
         } catch (e: Exception) {

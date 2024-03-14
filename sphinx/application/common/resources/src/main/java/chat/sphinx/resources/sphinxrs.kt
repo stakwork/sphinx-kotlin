@@ -450,6 +450,8 @@ internal interface _UniFFILib : Library {
     ): RustBuffer.ByValue
     fun uniffi_sphinxrs_fn_func_pay_invoice(`seed`: RustBuffer.ByValue,`uniqueTime`: RustBuffer.ByValue,`state`: RustBuffer.ByValue,`bolt11`: RustBuffer.ByValue,`overpayMsat`: RustBuffer.ByValue,_uniffi_out_err: RustCallStatus, 
     ): RustBuffer.ByValue
+    fun uniffi_sphinxrs_fn_func_pay_contact_invoice(`seed`: RustBuffer.ByValue,`uniqueTime`: RustBuffer.ByValue,`state`: RustBuffer.ByValue,`bolt11`: RustBuffer.ByValue,`myAlias`: RustBuffer.ByValue,`myImg`: RustBuffer.ByValue,_uniffi_out_err: RustCallStatus, 
+    ): RustBuffer.ByValue
     fun uniffi_sphinxrs_fn_func_payment_hash_from_invoice(`bolt11`: RustBuffer.ByValue,_uniffi_out_err: RustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_sphinxrs_fn_func_parse_invoice(`invoiceJson`: RustBuffer.ByValue,_uniffi_out_err: RustCallStatus, 
@@ -575,6 +577,8 @@ internal interface _UniFFILib : Library {
     fun uniffi_sphinxrs_checksum_func_make_invoice(
     ): Short
     fun uniffi_sphinxrs_checksum_func_pay_invoice(
+    ): Short
+    fun uniffi_sphinxrs_checksum_func_pay_contact_invoice(
     ): Short
     fun uniffi_sphinxrs_checksum_func_payment_hash_from_invoice(
     ): Short
@@ -752,6 +756,9 @@ private fun uniffiCheckApiChecksums(lib: _UniFFILib) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_sphinxrs_checksum_func_pay_invoice() != 40951.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_sphinxrs_checksum_func_pay_contact_invoice() != 38258.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_sphinxrs_checksum_func_payment_hash_from_invoice() != 3194.toShort()) {
@@ -2457,6 +2464,15 @@ fun `payInvoice`(`seed`: String, `uniqueTime`: String, `state`: ByteArray, `bolt
     return FfiConverterTypeRunReturn.lift(
     rustCallWithError(SphinxException) { _status ->
     _UniFFILib.INSTANCE.uniffi_sphinxrs_fn_func_pay_invoice(FfiConverterString.lower(`seed`),FfiConverterString.lower(`uniqueTime`),FfiConverterByteArray.lower(`state`),FfiConverterString.lower(`bolt11`),FfiConverterOptionalULong.lower(`overpayMsat`),_status)
+})
+}
+
+@Throws(SphinxException::class)
+
+fun `payContactInvoice`(`seed`: String, `uniqueTime`: String, `state`: ByteArray, `bolt11`: String, `myAlias`: String, `myImg`: String): RunReturn {
+    return FfiConverterTypeRunReturn.lift(
+    rustCallWithError(SphinxException) { _status ->
+    _UniFFILib.INSTANCE.uniffi_sphinxrs_fn_func_pay_contact_invoice(FfiConverterString.lower(`seed`),FfiConverterString.lower(`uniqueTime`),FfiConverterByteArray.lower(`state`),FfiConverterString.lower(`bolt11`),FfiConverterString.lower(`myAlias`),FfiConverterString.lower(`myImg`),_status)
 })
 }
 

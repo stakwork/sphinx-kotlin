@@ -70,17 +70,13 @@ internal class CameraFragment: SideEffectDetailFragment<
     @Volatile
     private var rotationProvider: RotationProvider? = null
     private var lastRotation: Int? = null
-
     @SuppressLint("RestrictedApi")
-    private val rotationListener = { rotation: Int ->
+    private val rotationListener = { rotation: Int  ->
         lastRotation = rotation
-        if (::imageCapture.isInitialized) {
-            imageCapture.targetRotation = rotation
-        }
-        if (::videoCapture.isInitialized) {
-            videoCapture.targetRotation = rotation
-        }
+        imageCapture.targetRotation = rotation
+        videoCapture.targetRotation = rotation
     }
+
     private lateinit var imageCapture: ImageCapture
     private lateinit var videoCapture: VideoCapture<Recorder>
 
@@ -404,12 +400,12 @@ internal class CameraFragment: SideEffectDetailFragment<
 
         // configure Recorder and Start recording to the mediaStoreOutput.
         activeRecording = videoCapture.output.prepareRecording(requireActivity(), fileOutputOptions)
-                .withEventListener(
-                    mainThreadExecutor,
-                    captureListener
-                )
-                .withAudioEnabled()
-                .start()
+            .withEventListener(
+                mainThreadExecutor,
+                captureListener
+            )
+            .withAudioEnabled()
+            .start()
     }
 
     override suspend fun onSideEffectCollect(sideEffect: CameraSideEffect) {
@@ -522,7 +518,7 @@ internal class CameraFragment: SideEffectDetailFragment<
                             }
                             is CapturePreviewViewState.None -> {
                                 root.gone
-                                
+
                                 imageViewCameraImagePreview.setImageDrawable(null)
 
                                 videoViewCameraVideoPreview.stopPlayback()
