@@ -1,10 +1,12 @@
 package chat.sphinx.threads.adapter
 
 import android.graphics.Color
+import android.os.Build
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.ImageView
+import androidx.annotation.RequiresApi
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
@@ -18,6 +20,7 @@ import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.concept_image_loader.OnImageLoadListener
 import chat.sphinx.concept_image_loader.Transformation
 import chat.sphinx.concept_user_colors_helper.UserColorsHelper
+import chat.sphinx.highlighting_tool.SphinxHighlightingTool
 import chat.sphinx.resources.databinding.LayoutChatImageSmallInitialHolderBinding
 import chat.sphinx.resources.getRandomHexCode
 import chat.sphinx.resources.getString
@@ -178,11 +181,11 @@ internal class ThreadsAdapter(
 
         init {
             binding.root.setOnClickListener {
-                    item?.let { threadItem ->
-                        viewModel.navigateToThreadDetail(threadItem.uuid)
-                    }
+                item?.let { threadItem ->
+                    viewModel.navigateToThreadDetail(threadItem.uuid)
                 }
             }
+        }
 
         fun bind(position: Int) {
             binding.apply {
@@ -196,11 +199,18 @@ internal class ThreadsAdapter(
                 // General Info
                 textViewContactHeaderName.text = threadItem.aliasAndColorKey.first?.value
                 textViewThreadDate.text = threadItem.date
-                textViewThreadMessageContent.text = threadItem.message
                 textViewRepliesQuantity.text = threadItem.repliesAmount
                 textViewThreadTime.text = threadItem.lastReplyDate
 
+                textViewThreadMessageContent.text = threadItem.message
                 textViewThreadMessageContent.goneIfFalse(threadItem.message.isNotEmpty())
+
+                SphinxHighlightingTool.addHighlights(
+                    textViewThreadMessageContent,
+                    threadItem.highlightedTexts,
+                    textViewThreadMessageContent.resources,
+                    textViewThreadMessageContent.context
+                )
 
                 // User Profile Picture
                 layoutLayoutChatImageSmallInitialHolder.apply {

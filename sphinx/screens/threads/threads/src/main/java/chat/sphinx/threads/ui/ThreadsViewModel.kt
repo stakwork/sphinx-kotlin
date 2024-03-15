@@ -10,6 +10,8 @@ import chat.sphinx.chat_common.ui.viewstate.messageholder.ReplyUserHolder
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_message.MessageRepository
+import chat.sphinx.highlighting_tool.highlightedTexts
+import chat.sphinx.highlighting_tool.replacingHighlightedDelimiters
 import chat.sphinx.threads.R
 import chat.sphinx.threads.model.FileAttachment
 import chat.sphinx.threads.model.ThreadItem
@@ -146,7 +148,9 @@ internal class ThreadsViewModel @Inject constructor(
 
     private suspend fun generateThreadItemsList(messages: List<Message>): List<ThreadItem> {
         // Group messages by their ThreadUUID
-        val groupedMessagesByThread = messages.groupBy { it.threadUUID }
+        val groupedMessagesByThread = messages.groupBy { it.threadUUID }.filter {
+            it.value.size > 1
+        }
 
         // Fetch the header messages based on the message UUIDs
         val headerMessages = messageRepository.getAllMessagesByUUID(groupedMessagesByThread.keys.mapNotNull { it?.value?.toMessageUUID() })
@@ -240,12 +244,14 @@ internal class ThreadsViewModel @Inject constructor(
             }
         }
 
+        val threadMessage = originalMessage?.messageContentDecrypted?.value ?: ""
 
         return ThreadItem(
             aliasAndColorKey = senderInfo,
             photoUrl = senderPhotoUrl,
             date = originalMessage?.date?.chatTimeFormat() ?: "",
-            message = originalMessage?.messageContentDecrypted?.value ?: "",
+            message = threadMessage.replacingHighlightedDelimiters(),
+            highlightedTexts = threadMessage.highlightedTexts(),
             usersReplies = createReplyUserHolders(repliesList, chat, owner),
             usersCount = repliesList?.size ?: 0,
             repliesAmount = String.format(app.getString(R.string.replies_amount), messagesForThread?.drop(1)?.size?.toString() ?: "0"),
