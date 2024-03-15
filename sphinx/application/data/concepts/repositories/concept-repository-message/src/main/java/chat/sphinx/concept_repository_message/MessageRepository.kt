@@ -121,6 +121,7 @@ interface MessageRepository {
         messageUuid: MessageUUID?,
         memberPubKey: LightningNodePubKey?,
         type: MessageType.GroupAction,
+        alias: SenderAlias?,
     )
 
     suspend fun upsertMqttMessage(

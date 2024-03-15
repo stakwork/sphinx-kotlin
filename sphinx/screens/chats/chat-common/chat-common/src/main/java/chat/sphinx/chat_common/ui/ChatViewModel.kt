@@ -2126,6 +2126,7 @@ abstract class ChatViewModel<ARGS : NavArgs>(
         chatId: ChatId,
         messageUuid: MessageUUID,
         type: MessageType.GroupAction,
+        senderAlias: SenderAlias?
     ) {
     }
 

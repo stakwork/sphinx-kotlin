@@ -808,6 +808,19 @@ abstract class SphinxRepository(
                 queries.messageDeleteByUUID(msgUuid)
             }
 
+            val senderAlias = if (msgType == MessageType.GroupAction.MemberApprove ||
+                msgType == MessageType.GroupAction.MemberReject) {
+                existingMessage?.sender_alias
+            } else msgSender.alias?.toSenderAlias()
+
+            val status = when {
+                isSent && existingMessage?.payment_request != null -> MessageStatus.Pending
+                isSent && existingMessage?.payment_request == null -> MessageStatus.Confirmed
+                !isSent && existingMessage?.payment_request != null -> MessageStatus.Pending
+                else -> MessageStatus.Received
+            }
+
+
             val newMessage = NewMessage(
                 id = msgIndex,
                 uuid = msgUuid,
@@ -821,14 +834,9 @@ abstract class SphinxRepository(
                 date = date ?: DateTime.nowUTC().toDateTime(),
                 expirationDate = bolt11?.getExpiryTime()?.toDateTime(),
                 messageContent = null,
-                status = when {
-                    isSent && existingMessage?.payment_request != null -> MessageStatus.Pending
-                    isSent && existingMessage?.payment_request == null -> MessageStatus.Confirmed
-                    !isSent && existingMessage?.payment_request != null -> MessageStatus.Pending
-                    else -> MessageStatus.Received
-                              },
+                status = status,
                 seen = Seen.False,
-                senderAlias = msgSender.alias?.toSenderAlias(),
+                senderAlias = senderAlias,
                 senderPic = msgSender.photo_url?.toPhotoUrl(),
                 originalMUID = null,
                 replyUUID = existingMessage?.reply_uuid ?: msg.replyUuid?.toReplyUUID(),
@@ -3601,7 +3609,7 @@ abstract class SphinxRepository(
                             queries.messageUpsert(
                                 MessageStatus.Pending,
                                 Seen.True,
-                                chatDbo.myAlias?.value?.toSenderAlias(),
+                                sendMessage.senderAlias ?: chatDbo.myAlias?.value?.toSenderAlias(),
                                 chatDbo.myPhotoUrl,
                                 null,
                                 replyUUID,
@@ -7033,7 +7041,8 @@ abstract class SphinxRepository(
         chatId: ChatId,
         messageUuid: MessageUUID?,
         memberPubKey: LightningNodePubKey?,
-        type: MessageType.GroupAction
+        type: MessageType.GroupAction,
+        alias: SenderAlias?
     ) {
         val messageBuilder = SendMessage.Builder()
         messageBuilder.setChatId(chatId)
@@ -7047,6 +7056,10 @@ abstract class SphinxRepository(
         // Kick Member
         memberPubKey?.let { nnContactKey ->
             messageBuilder.setMemberPubKey(nnContactKey)
+        }
+
+        alias?.let { senderAlias ->
+            messageBuilder.setSenderAlias(senderAlias)
         }
 
         sendMessage(messageBuilder.build().first)
