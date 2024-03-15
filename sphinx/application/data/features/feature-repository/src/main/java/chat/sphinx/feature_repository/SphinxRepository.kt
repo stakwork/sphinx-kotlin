@@ -334,8 +334,9 @@ abstract class SphinxRepository(
         applicationScope.launch {
             val queries = coreDB.getSphinxDatabaseQueries()
 
-            val tribeId = queries.chatGetMaxTribeId().executeAsOneOrNull()?.let { it.MAX?.minus(1)  }
-                ?: (Long.MAX_VALUE - 1)
+            // TribeId is set from LONG.MAX_VALUE and decremented by 1 for each new tribe
+            val tribeId = queries.chatGetLastTribeId().executeAsOneOrNull()?.let { it.MIN?.minus(1) }
+                ?: (Long.MAX_VALUE)
             val now: String = DateTime.nowUTC()
 
             val newTribe = Chat(
@@ -618,8 +619,9 @@ abstract class SphinxRepository(
             val queries = coreDB.getSphinxDatabaseQueries()
             val newCreateTribe = newTribe.toNewCreateTribe(moshi)
 
-            val tribeId = queries.chatGetMaxTribeId().executeAsOneOrNull()?.let { it.MAX?.minus(1) }
-                ?: (Long.MAX_VALUE - 1)
+            // TribeId is set from LONG.MAX_VALUE and decremented by 1 for each new tribe
+            val tribeId = queries.chatGetLastTribeId().executeAsOneOrNull()?.let { it.MIN?.minus(1) }
+                ?: (Long.MAX_VALUE)
             val now: String = DateTime.nowUTC()
 
             newCreateTribe.pubkey?.let { tribePubKey ->
