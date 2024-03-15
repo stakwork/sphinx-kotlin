@@ -105,6 +105,8 @@
     <color name="storageBarYellow">#FAE676</color>
     <color name="storageBarBackground">#222E3A</color>
 
+    <color name="highlightedTextBackground">#26FFFFFF</color>
+
     <!-- Random users colors-->
     <color name="randomColor1">#7077FF</color>
     <color name="randomColor2">#DBD23C</color>

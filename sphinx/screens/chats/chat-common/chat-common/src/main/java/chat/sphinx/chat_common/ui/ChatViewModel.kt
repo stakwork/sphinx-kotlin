@@ -46,6 +46,8 @@ import chat.sphinx.chat_common.util.AudioPlayerController
 import chat.sphinx.chat_common.util.AudioPlayerControllerImpl
 import chat.sphinx.chat_common.util.AudioRecorderController
 import chat.sphinx.chat_common.util.SphinxLinkify
+import chat.sphinx.highlighting_tool.highlightedTexts
+import chat.sphinx.highlighting_tool.replacingHighlightedDelimiters
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.concept_link_preview.LinkPreviewHandler
 import chat.sphinx.concept_link_preview.model.TribePreviewName
@@ -381,6 +383,8 @@ abstract class ChatViewModel<ARGS : NavArgs>(
         val groupingMinutesLimit = 5.0
         var date = groupingDate ?: message.date
 
+        val isPreviousMessageThreadHeader = (previousMessage?.uuid?.value == getThreadUUID()?.value && previousMessage?.type?.isGroupAction() == false)
+
         val shouldAvoidGroupingWithPrevious =
             (previousMessage?.shouldAvoidGrouping() ?: true) || message.shouldAvoidGrouping()
         val isGroupedBySenderWithPrevious =
@@ -389,7 +393,7 @@ abstract class ChatViewModel<ARGS : NavArgs>(
             message.date.getMinutesDifferenceWithDateTime(date) < groupingMinutesLimit
 
         val groupedWithPrevious =
-            (!shouldAvoidGroupingWithPrevious && isGroupedBySenderWithPrevious && isGroupedByDateWithPrevious)
+            (!shouldAvoidGroupingWithPrevious && isGroupedBySenderWithPrevious && isGroupedByDateWithPrevious && !isPreviousMessageThreadHeader)
 
         date = if (groupedWithPrevious) date else message.date
 
@@ -475,8 +479,6 @@ abstract class ChatViewModel<ARGS : NavArgs>(
                     openSentPaidInvoicesCount > 0,
                     openReceivedPaidInvoicesCount > 0
                 )
-
-                val isOwner: Boolean = message.sender == owner.id
 
                 val isThreadHeaderMessage = (message.uuid?.value == getThreadUUID()?.value && index == 0 && !message.type.isGroupAction())
 
@@ -567,7 +569,6 @@ abstract class ChatViewModel<ARGS : NavArgs>(
                     newList.add(
                         MessageHolderViewState.Sent(
                             message,
-
                             chat,
                             tribeAdmin,
                             background = when {
@@ -928,7 +929,8 @@ abstract class ChatViewModel<ARGS : NavArgs>(
 
                             text?.let { nnText ->
                                 messageLayoutState = LayoutState.Bubble.ContainerThird.Message(
-                                    text = nnText,
+                                    text = nnText.replacingHighlightedDelimiters(),
+                                    highlightedTexts = nnText.highlightedTexts(),
                                     decryptionError = false,
                                     isThread = false
                                 )
@@ -1505,6 +1507,7 @@ abstract class ChatViewModel<ARGS : NavArgs>(
                     viewState.messageSenderInfo(viewState.message!!),
                     viewState.timestamp,
                     viewState.bubbleMessage?.text,
+                    viewState.bubbleMessage?.highlightedTexts,
                     viewState.bubbleImageAttachment,
                     viewState.bubbleVideoAttachment,
                     viewState.bubbleFileAttachment,

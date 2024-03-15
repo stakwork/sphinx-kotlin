@@ -1,5 +1,8 @@
 # ChangeLog
 
+# Version 1.0.0-beta21 (2024-03-15)
+- Adds ability to highlight text in chat messages using backtick
+
 # Version 1.0.0-beta20 (2024-03-07)
 - Adds Japanese localization
 - Adds Chinese localization

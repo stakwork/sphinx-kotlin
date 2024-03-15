@@ -28,6 +28,7 @@ import chat.sphinx.chat_common.ui.viewstate.selected.SelectedMessageViewState
 import chat.sphinx.chat_common.util.*
 import chat.sphinx.concept_image_loader.*
 import chat.sphinx.concept_user_colors_helper.UserColorsHelper
+import chat.sphinx.highlighting_tool.SphinxHighlightingTool
 import chat.sphinx.resources.getRandomHexCode
 import chat.sphinx.resources.getString
 import chat.sphinx.resources.setBackgroundRandomColor
@@ -40,6 +41,7 @@ import chat.sphinx.wrapper_contact.ContactAlias
 import chat.sphinx.wrapper_message.Message
 import chat.sphinx.wrapper_message.MessageType
 import chat.sphinx.wrapper_view.Px
+import com.giphy.sdk.analytics.GiphyPingbacks.context
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.visible
@@ -775,8 +777,16 @@ internal class MessageListAdapter<ARGS : NavArgs>(
 
                 textViewContactMessageHeaderName.text = senderInfo?.second?.value ?: ""
                 textViewThreadDate.text = threadHeader.timestamp
+
                 textViewThreadMessageContent.text = threadHeader.bubbleMessage?.text ?: ""
                 textViewThreadMessageContent.goneIfFalse(threadHeader.bubbleMessage?.text?.isNotEmpty() == true)
+
+                SphinxHighlightingTool.addHighlights(
+                    textViewThreadMessageContent,
+                    threadHeader.bubbleMessage?.highlightedTexts ?: emptyList(),
+                    textViewThreadMessageContent.resources,
+                    textViewThreadMessageContent.context
+                )
 
                 textViewThreadDate.post(Runnable {
                     val linesCount: Int = textViewThreadDate.lineCount
