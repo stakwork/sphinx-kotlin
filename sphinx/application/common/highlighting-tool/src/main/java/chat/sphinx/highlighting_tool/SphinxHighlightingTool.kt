@@ -1,4 +1,4 @@
-package chat.sphinx.chat_common.util
+package chat.sphinx.highlighting_tool
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -6,30 +6,13 @@ import android.content.res.Resources
 import android.os.Build
 import android.text.Spannable
 import android.text.SpannableString
-import android.text.Spanned
-import android.text.method.LinkMovementMethod
 import android.text.style.BackgroundColorSpan
 import android.text.style.TypefaceSpan
-import android.text.style.URLSpan
-import android.text.util.Linkify
-import android.text.util.Linkify.MatchFilter
-import android.text.util.Linkify.TransformFilter
 import android.widget.TextView
-import androidx.annotation.ColorInt
-import androidx.annotation.IntDef
 import androidx.annotation.IntRange
 import androidx.annotation.RequiresApi
-import androidx.annotation.RestrictTo
 import androidx.core.content.res.ResourcesCompat
-import androidx.core.util.PatternsCompat
-import chat.sphinx.chat_common.R
-import chat.sphinx.wrapper_common.feed.FeedItemLink
-import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
-import chat.sphinx.wrapper_common.lightning.VirtualLightningNodeAddress
-import chat.sphinx.wrapper_common.tribe.TribeJoinLink
 import java.util.*
-import java.util.regex.Matcher
-import java.util.regex.Pattern
 
 
 /**
@@ -49,7 +32,6 @@ object SphinxHighlightingTool {
      *
      * @return True if at least one link is found and applied.
      */
-    @RequiresApi(Build.VERSION_CODES.P)
     fun addHighlights(
         text: TextView,
         highlightedTexts: List<Pair<String, IntRange>>,
@@ -62,12 +44,14 @@ object SphinxHighlightingTool {
             if (t is Spannable) {
                 for (highlightedText in highlightedTexts) {
                     ResourcesCompat.getFont(context, R.font.roboto_light)?.let { typeface ->
-                        t.setSpan(
-                            TypefaceSpan(typeface),
-                            highlightedText.second.from.toInt(),
-                            highlightedText.second.to.toInt(),
-                            Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-                        )
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                            t.setSpan(
+                                TypefaceSpan(typeface),
+                                highlightedText.second.from.toInt(),
+                                highlightedText.second.to.toInt(),
+                                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                            )
+                        }
                     }
 
                     t.setSpan(
@@ -84,12 +68,14 @@ object SphinxHighlightingTool {
 
                 for (highlightedText in highlightedTexts) {
                     ResourcesCompat.getFont(context, R.font.roboto_light)?.let { typeface ->
-                        spannable.setSpan(
-                            TypefaceSpan(typeface),
-                            highlightedText.second.from.toInt(),
-                            highlightedText.second.to.toInt(),
-                            Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-                        )
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                            spannable.setSpan(
+                                TypefaceSpan(typeface),
+                                highlightedText.second.from.toInt(),
+                                highlightedText.second.to.toInt(),
+                                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                            )
+                        }
                     }
 
                     spannable.setSpan(

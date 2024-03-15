@@ -3,13 +3,12 @@ package chat.sphinx.chat_common.ui.viewstate.messageholder
 import android.graphics.pdf.PdfRenderer
 import android.os.ParcelFileDescriptor
 import android.os.ParcelFileDescriptor.MODE_READ_ONLY
-import android.util.Log
 import chat.sphinx.chat_common.model.MessageLinkPreview
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
 import chat.sphinx.chat_common.ui.viewstate.selected.MenuItemState
 import chat.sphinx.chat_common.util.SphinxLinkify
-import chat.sphinx.chat_common.util.highlightedTexts
-import chat.sphinx.chat_common.util.replacingHighlightedDelimiters
+import chat.sphinx.highlighting_tool.highlightedTexts
+import chat.sphinx.highlighting_tool.replacingHighlightedDelimiters
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_chat.isConversation
 import chat.sphinx.wrapper_chat.isTribe

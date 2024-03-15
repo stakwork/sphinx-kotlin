@@ -16,7 +16,6 @@ import android.provider.OpenableColumns
 import android.util.Log
 import android.webkit.MimeTypeMap
 import androidx.annotation.CallSuper
-import androidx.annotation.IntRange
 import androidx.core.view.inputmethod.InputConnectionCompat
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.SavedStateHandle
@@ -47,8 +46,8 @@ import chat.sphinx.chat_common.util.AudioPlayerController
 import chat.sphinx.chat_common.util.AudioPlayerControllerImpl
 import chat.sphinx.chat_common.util.AudioRecorderController
 import chat.sphinx.chat_common.util.SphinxLinkify
-import chat.sphinx.chat_common.util.highlightedTexts
-import chat.sphinx.chat_common.util.replacingHighlightedDelimiters
+import chat.sphinx.highlighting_tool.highlightedTexts
+import chat.sphinx.highlighting_tool.replacingHighlightedDelimiters
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.concept_link_preview.LinkPreviewHandler
 import chat.sphinx.concept_link_preview.model.TribePreviewName
@@ -384,6 +383,8 @@ abstract class ChatViewModel<ARGS : NavArgs>(
         val groupingMinutesLimit = 5.0
         var date = groupingDate ?: message.date
 
+        val isPreviousMessageThreadHeader = (previousMessage?.uuid?.value == getThreadUUID()?.value && previousMessage?.type?.isGroupAction() == false)
+
         val shouldAvoidGroupingWithPrevious =
             (previousMessage?.shouldAvoidGrouping() ?: true) || message.shouldAvoidGrouping()
         val isGroupedBySenderWithPrevious =
@@ -392,7 +393,7 @@ abstract class ChatViewModel<ARGS : NavArgs>(
             message.date.getMinutesDifferenceWithDateTime(date) < groupingMinutesLimit
 
         val groupedWithPrevious =
-            (!shouldAvoidGroupingWithPrevious && isGroupedBySenderWithPrevious && isGroupedByDateWithPrevious)
+            (!shouldAvoidGroupingWithPrevious && isGroupedBySenderWithPrevious && isGroupedByDateWithPrevious && !isPreviousMessageThreadHeader)
 
         date = if (groupedWithPrevious) date else message.date
 
@@ -478,8 +479,6 @@ abstract class ChatViewModel<ARGS : NavArgs>(
                     openSentPaidInvoicesCount > 0,
                     openReceivedPaidInvoicesCount > 0
                 )
-
-                val isOwner: Boolean = message.sender == owner.id
 
                 val isThreadHeaderMessage = (message.uuid?.value == getThreadUUID()?.value && index == 0 && !message.type.isGroupAction())
 
@@ -1508,6 +1507,7 @@ abstract class ChatViewModel<ARGS : NavArgs>(
                     viewState.messageSenderInfo(viewState.message!!),
                     viewState.timestamp,
                     viewState.bubbleMessage?.text,
+                    viewState.bubbleMessage?.highlightedTexts,
                     viewState.bubbleImageAttachment,
                     viewState.bubbleVideoAttachment,
                     viewState.bubbleFileAttachment,

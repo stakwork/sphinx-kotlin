@@ -29,7 +29,7 @@ import chat.sphinx.chat_common.model.UnspecifiedUrl
 import chat.sphinx.chat_common.ui.viewstate.audio.AudioMessageState
 import chat.sphinx.chat_common.ui.viewstate.audio.AudioPlayState
 import chat.sphinx.chat_common.util.AudioPlayerController
-import chat.sphinx.chat_common.util.SphinxHighlightingTool
+import chat.sphinx.highlighting_tool.SphinxHighlightingTool
 import chat.sphinx.chat_common.util.SphinxLinkify
 import chat.sphinx.chat_common.util.SphinxUrlSpan
 import chat.sphinx.chat_common.util.VideoThumbnailUtil
@@ -1131,7 +1131,6 @@ internal inline fun LayoutMessageHolderBinding.setBubbleThreadLayout(
 
 }
 
-@RequiresApi(Build.VERSION_CODES.P)
 @MainThread
 @Suppress("NOTHING_TO_INLINE")
 internal inline fun LayoutMessageHolderBinding.setBubbleMessageLayout(
