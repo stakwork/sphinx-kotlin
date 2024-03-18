@@ -16,7 +16,8 @@ data class Msg(
     val threadUuid: String?,
     val originalUuid: String?,
     val date: Long?,
-    val invoice: String?
+    val invoice: String?,
+    val paymentHash: String?
 ) {
     companion object {
         @Throws(JsonDataException::class, IllegalArgumentException::class)

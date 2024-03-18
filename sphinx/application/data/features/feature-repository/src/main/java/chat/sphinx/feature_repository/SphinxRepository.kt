@@ -821,7 +821,6 @@ abstract class SphinxRepository(
                 else -> MessageStatus.Received
             }
 
-
             val newMessage = NewMessage(
                 id = msgIndex,
                 uuid = msgUuid,
@@ -831,7 +830,7 @@ abstract class SphinxRepository(
                 receiver = ContactId(0),
                 amount = bolt11?.getSatsAmount() ?: existingMessage?.amount ?: amount ?: Sat(0L),
                 paymentRequest = existingMessage?.payment_request ?: paymentRequest,
-                paymentHash = existingMessage?.payment_hash,
+                paymentHash = existingMessage?.payment_hash ?: msg.paymentHash?.toLightningPaymentHash(),
                 date = date ?: DateTime.nowUTC().toDateTime(),
                 expirationDate = bolt11?.getExpiryTime()?.toDateTime(),
                 messageContent = null,
@@ -4779,8 +4778,8 @@ abstract class SphinxRepository(
                 messageContent = null,
                 status = MessageStatus.Pending,
                 seen = Seen.True,
-                senderAlias = null,
-                senderPic = null,
+                senderAlias = accountOwner.value?.alias?.value?.toSenderAlias(),
+                senderPic = accountOwner.value?.photoUrl,
                 originalMUID = null,
                 replyUUID = null,
                 flagged = false.toFlagged(),
