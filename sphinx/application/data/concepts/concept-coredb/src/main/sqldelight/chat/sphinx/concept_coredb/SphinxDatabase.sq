@@ -155,9 +155,10 @@ CREATE TABLE chatDbo(
     pin_message                 TEXT            AS MessageUUID DEFAULT NULL
 );
 
-chatUpdateSatusById:
+chatUpdateNameAndStatus:
 UPDATE chatDbo
-SET status = :status
+SET name = :name,
+    status = :status
 WHERE id = ?;
 
 chatUpdateLatestMessage:

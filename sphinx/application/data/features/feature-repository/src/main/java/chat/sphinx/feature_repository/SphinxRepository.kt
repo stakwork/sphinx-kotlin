@@ -509,7 +509,8 @@ abstract class SphinxRepository(
                     )
 
                 queries.inviteUpdateStatus(InviteStatus.Complete, invite.id)
-                queries.chatUpdateSatusById(ChatStatus.Approved, ChatId(contactId.value))
+                queries.chatUpdateNameAndStatus(ChatName(contact.contactAlias?.value ?: ""),ChatStatus.Approved, ChatId(contactId.value))
+                queries.dashboardUpdateConversation(contact.contactAlias?.value, contact.photoUrl, contactId)
 
             } else { }
         }
@@ -878,7 +879,7 @@ abstract class SphinxRepository(
                 queries.chatUpdateSeen(Seen.False, ChatId(chatId))
             }
 
-            if ((contact?.photoUrl?.value ?: "") != msgSender.photo_url) {
+            if (contact?.photoUrl?.value != msgSender.photo_url) {
 
                 contact?.id?.let { contactId ->
                     contactLock.withLock {
