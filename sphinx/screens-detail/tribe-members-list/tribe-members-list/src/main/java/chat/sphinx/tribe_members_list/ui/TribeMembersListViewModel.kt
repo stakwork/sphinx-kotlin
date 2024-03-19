@@ -269,7 +269,8 @@ internal class TribeMembersListViewModel @Inject constructor(
                     message.chatId,
                     messageUuid,
                     null,
-                    type
+                    type,
+                    alias
                 )
             }
         }
@@ -306,7 +307,8 @@ internal class TribeMembersListViewModel @Inject constructor(
                 ChatId(args.argChatId),
                 null,
                 memberPubKey,
-                MessageType.GroupAction.Kick
+                MessageType.GroupAction.Kick,
+                null
             )
         }
     }

@@ -155,9 +155,10 @@ CREATE TABLE chatDbo(
     pin_message                 TEXT            AS MessageUUID DEFAULT NULL
 );
 
-chatUpdateSatusById:
+chatUpdateNameAndStatus:
 UPDATE chatDbo
-SET status = :status
+SET name = :name,
+    status = :status
 WHERE id = ?;
 
 chatUpdateLatestMessage:
@@ -219,8 +220,10 @@ FROM chatDbo
 WHERE type = 0 AND contact_ids = ?
 LIMIT 1;
 
-chatGetMaxTribeId:
-SELECT MAX(id) FROM chatDbo WHERE type = 2;
+chatGetLastTribeId:
+SELECT MIN(id) FROM chatDbo
+WHERE type = 2
+AND id > 10000;
 
 chatUpsert {
     UPDATE chatDbo

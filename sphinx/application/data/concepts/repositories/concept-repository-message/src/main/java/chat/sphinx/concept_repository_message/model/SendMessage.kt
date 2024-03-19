@@ -8,6 +8,7 @@ import chat.sphinx.wrapper_message.GiphyData
 import chat.sphinx.wrapper_message.MessageType
 import chat.sphinx.wrapper_message.PodcastClip
 import chat.sphinx.wrapper_message.ReplyUUID
+import chat.sphinx.wrapper_message.SenderAlias
 import chat.sphinx.wrapper_message.ThreadUUID
 import chat.sphinx.wrapper_message_media.isSphinxText
 import java.io.File
@@ -28,7 +29,8 @@ class SendMessage private constructor(
     val paidMessagePrice: Sat?,
     val priceToMeet: Sat?,
     val threadUUID: ThreadUUID?,
-    val memberPubKey: LightningNodePubKey?
+    val memberPubKey: LightningNodePubKey?,
+    val senderAlias: SenderAlias?
 ) {
 
     class Builder {
@@ -47,7 +49,8 @@ class SendMessage private constructor(
         private var paidMessagePrice: Sat?                = null
         private var priceToMeet: Sat?                     = null
         private var threadUUID: ThreadUUID?               = null
-        private var memberPubKey: LightningNodePubKey?      = null
+        private var memberPubKey: LightningNodePubKey?    = null
+        private var senderAlias: SenderAlias?             = null
 
         enum class ValidationError {
             EMPTY_PRICE, EMPTY_DESTINATION, EMPTY_CONTENT
@@ -70,6 +73,7 @@ class SendMessage private constructor(
             priceToMeet = null
             threadUUID = null
             memberPubKey = null
+            senderAlias = null
         }
 
         @Synchronized
@@ -216,6 +220,12 @@ class SendMessage private constructor(
         }
 
         @Synchronized
+        fun setSenderAlias(senderAlias: SenderAlias): Builder {
+            this.senderAlias = senderAlias
+            return this
+        }
+
+        @Synchronized
         fun build(): Pair<SendMessage?, ValidationError?> {
             val isValid = isValid()
 
@@ -239,7 +249,8 @@ class SendMessage private constructor(
                         paidMessagePrice,
                         priceToMeet,
                         threadUUID,
-                        memberPubKey
+                        memberPubKey,
+                        senderAlias
                     ), null
                 )
             }

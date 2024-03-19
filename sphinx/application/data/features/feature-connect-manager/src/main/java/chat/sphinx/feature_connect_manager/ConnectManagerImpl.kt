@@ -572,16 +572,26 @@ class ConnectManagerImpl(
         val now = getTimestampInMilliseconds()
 
         try {
-            val processInvoice = uniffi.sphinxrs.payInvoice(
+            val processInvoice = uniffi.sphinxrs.payContactInvoice(
                 ownerSeed!!,
                 now,
                 getCurrentUserState(),
                 paymentRequest,
-                null
+                ownerInfoStateFlow.value?.alias ?: "",
+                ownerInfoStateFlow.value?.picture ?: "",
+                false // not implemented on tribes yet
             )
             handleRunReturn(processInvoice, mqttClient!!)
         } catch (e: Exception) {
             Log.e("MQTT_MESSAGES", "processInvoicePayment ${e.message}")
+        }
+    }
+
+    override fun retrievePaymentHash(paymentRequest: String): String? {
+        return try {
+            paymentHashFromInvoice(paymentRequest)
+        } catch (e: Exception) {
+            null
         }
     }
 

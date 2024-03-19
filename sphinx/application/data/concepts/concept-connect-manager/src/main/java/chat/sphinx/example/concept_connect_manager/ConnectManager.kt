@@ -56,9 +56,9 @@ abstract class ConnectManager {
         memo: String
     ): Pair<String, String>? // invoice, paymentHash
 
-    abstract fun processInvoicePayment(
-        paymentRequest: String
-    )
+    abstract fun processInvoicePayment(paymentRequest: String)
+
+    abstract fun retrievePaymentHash(paymentRequest: String): String?
 
     abstract fun retrieveTribeMembersList(
         tribeServerPubKey: String,

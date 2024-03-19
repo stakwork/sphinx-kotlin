@@ -331,6 +331,7 @@ class ChatTribeViewModel @Inject constructor(
         chatId: ChatId,
         messageUuid: MessageUUID,
         type: MessageType.GroupAction,
+        senderAlias: SenderAlias?,
     ) {
         viewModelScope.launch(mainImmediate) {
             val errorMessage = if (type.isMemberApprove()) {
@@ -340,7 +341,7 @@ class ChatTribeViewModel @Inject constructor(
             }
 
             if (type.isMemberApprove() || type.isMemberReject()) {
-                messageRepository.processMemberRequest(chatId, messageUuid, null, type)
+                messageRepository.processMemberRequest(chatId, messageUuid, null, type, senderAlias)
 //                when () {
 //                    is LoadResponse.Loading -> {}
 //                    is Response.Success -> {}

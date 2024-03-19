@@ -38,6 +38,7 @@ import chat.sphinx.wrapper_common.util.getInitials
 import chat.sphinx.wrapper_contact.ContactAlias
 import chat.sphinx.wrapper_message.Message
 import chat.sphinx.wrapper_message.MessageType
+import chat.sphinx.wrapper_message.SenderAlias
 import chat.sphinx.wrapper_view.Px
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
@@ -547,7 +548,8 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                                 processMemberRequest(
                                     nnMessage.chatId,
                                     messageUuid,
-                                    MessageType.GroupAction.MemberApprove
+                                    MessageType.GroupAction.MemberApprove,
+                                    nnMessage.senderAlias
                                 )
                             }
                             if (nnMessage.type is MessageType.GroupAction.MemberRequest) { }
@@ -563,7 +565,8 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                                     processMemberRequest(
                                         nnMessage.chatId,
                                         messageUuid,
-                                        MessageType.GroupAction.MemberReject
+                                        MessageType.GroupAction.MemberReject,
+                                        nnMessage.senderAlias
                                     )
                                 }
                             }
@@ -585,7 +588,7 @@ internal class MessageListAdapter<ARGS : NavArgs>(
             }
         }
 
-        private fun processMemberRequest(chatId: ChatId, messageUuid: MessageUUID, type: MessageType.GroupAction) {
+        private fun processMemberRequest(chatId: ChatId, messageUuid: MessageUUID, type: MessageType.GroupAction, senderAlias: SenderAlias?) {
             onStopSupervisor.scope.launch(viewModel.mainImmediate) {
                 binding.includeMessageTypeGroupActionHolder.includeMessageTypeGroupActionJoinRequest.apply {
                     layoutConstraintGroupActionJoinRequestProgressBarContainer.visible
@@ -593,7 +596,8 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                     viewModel.processMemberRequest(
                         chatId,
                         messageUuid,
-                        type
+                        type,
+                        senderAlias
                     )
 
                     layoutConstraintGroupActionJoinRequestProgressBarContainer.gone

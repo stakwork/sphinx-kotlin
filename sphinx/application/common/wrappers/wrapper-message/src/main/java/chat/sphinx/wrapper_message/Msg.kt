@@ -8,7 +8,7 @@ import java.lang.IllegalArgumentException
 @JsonClass(generateAdapter = true)
 data class Msg(
     val content: String?,
-    val amount: Int?,
+    val amount: Long?,
     val mediaToken: String?,
     val mediaKey: String?,
     val mediaType: String?,
@@ -16,7 +16,8 @@ data class Msg(
     val threadUuid: String?,
     val originalUuid: String?,
     val date: Long?,
-    val invoice: String?
+    val invoice: String?,
+    val paymentHash: String?
 ) {
     companion object {
         @Throws(JsonDataException::class, IllegalArgumentException::class)
