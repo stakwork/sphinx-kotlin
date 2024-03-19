@@ -36,6 +36,16 @@ inline fun Sat.asFormattedString(separator: Char = ' ', appendUnit: Boolean = fa
             if (appendUnit) " $unit" else ""
         )
 
+@Suppress("NOTHING_TO_INLINE")
+inline fun Long.milliSatsToSats(): Sat? {
+    return try {
+        (this / 1000).toSat()
+    } catch (e: Exception) {
+        null
+    }
+
+}
+
 @JvmInline
 value class Sat(val value: Long) {
     init {

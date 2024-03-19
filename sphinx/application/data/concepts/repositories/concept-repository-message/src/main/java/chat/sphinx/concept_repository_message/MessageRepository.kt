@@ -11,6 +11,7 @@ import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.feed.FeedId
 import chat.sphinx.wrapper_common.lightning.Bolt11
 import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
+import chat.sphinx.wrapper_common.lightning.LightningPaymentHash
 import chat.sphinx.wrapper_common.lightning.LightningPaymentRequest
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.message.MessageId
@@ -135,6 +136,7 @@ interface MessageRepository {
         isSent: Boolean,
         amount: Sat?,
         paymentRequest: LightningPaymentRequest?,
+        paymentHash: LightningPaymentHash?,
         bolt11: Bolt11?
     )
 

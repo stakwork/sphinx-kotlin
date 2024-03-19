@@ -578,11 +578,20 @@ class ConnectManagerImpl(
                 getCurrentUserState(),
                 paymentRequest,
                 ownerInfoStateFlow.value?.alias ?: "",
-                ownerInfoStateFlow.value?.picture ?: ""
+                ownerInfoStateFlow.value?.picture ?: "",
+                false // not implemented on tribes yet
             )
             handleRunReturn(processInvoice, mqttClient!!)
         } catch (e: Exception) {
             Log.e("MQTT_MESSAGES", "processInvoicePayment ${e.message}")
+        }
+    }
+
+    override fun retrievePaymentHash(paymentRequest: String): String? {
+        return try {
+            paymentHashFromInvoice(paymentRequest)
+        } catch (e: Exception) {
+            null
         }
     }
 

@@ -109,11 +109,13 @@ import chat.sphinx.wrapper_common.feed.*
 import chat.sphinx.wrapper_common.invite.InviteStatus
 import chat.sphinx.wrapper_common.lightning.Bolt11
 import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
+import chat.sphinx.wrapper_common.lightning.LightningPaymentHash
 import chat.sphinx.wrapper_common.lightning.LightningPaymentRequest
 import chat.sphinx.wrapper_common.lightning.LightningRouteHint
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.lightning.ServerIp
 import chat.sphinx.wrapper_common.lightning.getScid
+import chat.sphinx.wrapper_common.lightning.milliSatsToSats
 import chat.sphinx.wrapper_common.lightning.toLightningNodePubKey
 import chat.sphinx.wrapper_common.lightning.toLightningPaymentHash
 import chat.sphinx.wrapper_common.lightning.toLightningPaymentRequestOrNull
@@ -549,9 +551,13 @@ abstract class SphinxRepository(
                     val originalUUID = message.originalUuid?.toMessageUUID()
                     val date = msgTimestamp?.let { DateTime(Date(it)) }
                     val isSent = (accountOwner.value?.alias?.value == contactInfo.alias)
+                    val msgAmount = message.amount?.milliSatsToSats()
 
                     val paymentRequest = message.invoice?.toLightningPaymentRequestOrNull()
                     val bolt11 = paymentRequest?.let { Bolt11.decode(it) }
+                    val paymentHash = paymentRequest?.let {
+                        connectManager.retrievePaymentHash(it.value)?.toLightningPaymentHash()
+                    }
 
                     if (messageType is MessageType.Purchase.Processing) {
                         amount?.toSat()?.let { paidAmount ->
@@ -572,8 +578,9 @@ abstract class SphinxRepository(
                         originalUUID,
                         date,
                         isSent,
-                        amount?.toSat(),
+                        amount?.toSat() ?: msgAmount,
                         paymentRequest,
+                        paymentHash,
                         bolt11
                     )
                 }
@@ -598,6 +605,7 @@ abstract class SphinxRepository(
             val messageId = MessageId(msgIndex.toLong())
             val originalUUID = message.originalUuid?.toMessageUUID()
             val date = msgTimestamp?.let { DateTime(Date(it)) }
+            val amount = message.amount?.milliSatsToSats()
 
             upsertMqttMessage(
                 message,
@@ -608,6 +616,7 @@ abstract class SphinxRepository(
                 originalUUID,
                 date,
                 true,
+                amount,
                 null,
                 null,
                 null
@@ -754,6 +763,7 @@ abstract class SphinxRepository(
         isSent: Boolean,
         amount: Sat?,
         paymentRequest: LightningPaymentRequest?,
+        paymentHash: LightningPaymentHash?,
         bolt11: Bolt11?
     ) {
         val queries = coreDB.getSphinxDatabaseQueries()
@@ -830,7 +840,7 @@ abstract class SphinxRepository(
                 receiver = ContactId(0),
                 amount = bolt11?.getSatsAmount() ?: existingMessage?.amount ?: amount ?: Sat(0L),
                 paymentRequest = existingMessage?.payment_request ?: paymentRequest,
-                paymentHash = existingMessage?.payment_hash ?: msg.paymentHash?.toLightningPaymentHash(),
+                paymentHash = existingMessage?.payment_hash ?: msg.paymentHash?.toLightningPaymentHash() ?: paymentHash,
                 date = date ?: DateTime.nowUTC().toDateTime(),
                 expirationDate = bolt11?.getExpiryTime()?.toDateTime(),
                 messageContent = null,
@@ -885,6 +895,12 @@ abstract class SphinxRepository(
                         queries.contactUpdatePhotoUrl(msgSender.photo_url?.toPhotoUrl(), contactId)
                     }
                 }
+            }
+
+            if (msgType is MessageType.Payment) {
+                queries.messageUpdateInvoiceAsPaidByPaymentHash(
+                    msg.paymentHash?.toLightningPaymentHash()
+                )
             }
         }
     }
@@ -4664,64 +4680,64 @@ abstract class SphinxRepository(
                 connectManager.processInvoicePayment(it)
             }
 
-            val newPayment = NewMessage(
-                id = provisionalId,
-                uuid = null,
-                chatId = message.chatId,
-                type = MessageType.Payment,
-                sender = accountOwner.value?.id ?: ContactId(0),
-                receiver = null,
-                amount = message.amount,
-                paymentHash = message.paymentHash,
-                paymentRequest = null,
-                date = DateTime.nowUTC().toDateTime(),
-                expirationDate = null,
-                messageContent = null,
-                status = MessageStatus.Confirmed,
-                seen = Seen.True,
-                senderAlias = null,
-                senderPic = null,
-                originalMUID = null,
-                replyUUID = null,
-                flagged = false.toFlagged(),
-                recipientAlias = null,
-                recipientPic = null,
-                person = null,
-                threadUUID = null,
-                errorMessage = null,
-                isPinned = false,
-                messageContentDecrypted = null,
-                messageDecryptionError = false,
-                messageDecryptionException = null,
-                messageMedia = null,
-                feedBoost = null,
-                callLinkMessage = null,
-                podcastClip = null,
-                giphyData = null,
-                reactions = null,
-                purchaseItems = null,
-                replyMessage = null,
-                thread = null
-            )
+//            val newPayment = NewMessage(
+//                id = provisionalId,
+//                uuid = null,
+//                chatId = message.chatId,
+//                type = MessageType.Payment,
+//                sender = accountOwner.value?.id ?: ContactId(0),
+//                receiver = null,
+//                amount = message.amount,
+//                paymentHash = message.paymentHash,
+//                paymentRequest = null,
+//                date = DateTime.nowUTC().toDateTime(),
+//                expirationDate = null,
+//                messageContent = null,
+//                status = MessageStatus.Confirmed,
+//                seen = Seen.True,
+//                senderAlias = null,
+//                senderPic = null,
+//                originalMUID = null,
+//                replyUUID = null,
+//                flagged = false.toFlagged(),
+//                recipientAlias = null,
+//                recipientPic = null,
+//                person = null,
+//                threadUUID = null,
+//                errorMessage = null,
+//                isPinned = false,
+//                messageContentDecrypted = null,
+//                messageDecryptionError = false,
+//                messageDecryptionException = null,
+//                messageMedia = null,
+//                feedBoost = null,
+//                callLinkMessage = null,
+//                podcastClip = null,
+//                giphyData = null,
+//                reactions = null,
+//                purchaseItems = null,
+//                replyMessage = null,
+//                thread = null
+//            )
 
-            chatLock.withLock {
-                messageLock.withLock {
-                    withContext(io) {
-                        queries.transaction {
-                            upsertNewMessage(newPayment, queries, null)
-                        }
-                    }
-
-                    queries.transaction {
-                        updateChatNewLatestMessage(
-                            newPayment,
-                            message.chatId,
-                            latestMessageUpdatedTimeMap,
-                            queries
-                        )
-                    }
-                }
-            }
+//            chatLock.withLock {
+//                messageLock.withLock {
+//                    withContext(io) {
+//                        queries.transaction {
+//                            upsertNewMessage(newPayment, queries, null)
+//                        }
+//                    }
+//
+//                    queries.transaction {
+//                        updateChatNewLatestMessage(
+//                            newPayment,
+//                            message.chatId,
+//                            latestMessageUpdatedTimeMap,
+//                            queries
+//                        )
+//                    }
+//                }
+//            }
 
 //            val newPaymentMessage = chat.sphinx.example.wrapper_mqtt.Message(
 //                null,

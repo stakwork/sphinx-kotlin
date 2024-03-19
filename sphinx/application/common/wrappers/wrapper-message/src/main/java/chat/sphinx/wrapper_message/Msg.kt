@@ -8,7 +8,7 @@ import java.lang.IllegalArgumentException
 @JsonClass(generateAdapter = true)
 data class Msg(
     val content: String?,
-    val amount: Int?,
+    val amount: Long?,
     val mediaToken: String?,
     val mediaKey: String?,
     val mediaType: String?,
