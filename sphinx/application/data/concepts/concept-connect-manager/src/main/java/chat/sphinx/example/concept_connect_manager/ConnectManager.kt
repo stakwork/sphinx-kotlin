@@ -119,7 +119,7 @@ interface ConnectManagerListener {
     fun onNewBalance(balance: Long)
 
     fun onNetworkStatusChange(isConnected: Boolean)
-
+    fun listenToOwnerCreation(callback: () -> Unit)
     fun onNewInviteCreated(inviteString: String)
 
 }

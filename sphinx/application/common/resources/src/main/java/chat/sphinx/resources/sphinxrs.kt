@@ -1012,6 +1012,7 @@ data class Msg (
     var `message`: String?, 
     var `type`: UByte?, 
     var `uuid`: String?, 
+    var `tag`: String?, 
     var `index`: String?, 
     var `sender`: String?, 
     var `msat`: ULong?, 
@@ -1029,6 +1030,7 @@ public object FfiConverterTypeMsg: FfiConverterRustBuffer<Msg> {
             FfiConverterOptionalString.read(buf),
             FfiConverterOptionalString.read(buf),
             FfiConverterOptionalString.read(buf),
+            FfiConverterOptionalString.read(buf),
             FfiConverterOptionalULong.read(buf),
             FfiConverterOptionalULong.read(buf),
             FfiConverterOptionalString.read(buf),
@@ -1039,6 +1041,7 @@ public object FfiConverterTypeMsg: FfiConverterRustBuffer<Msg> {
             FfiConverterOptionalString.allocationSize(value.`message`) +
             FfiConverterOptionalUByte.allocationSize(value.`type`) +
             FfiConverterOptionalString.allocationSize(value.`uuid`) +
+            FfiConverterOptionalString.allocationSize(value.`tag`) +
             FfiConverterOptionalString.allocationSize(value.`index`) +
             FfiConverterOptionalString.allocationSize(value.`sender`) +
             FfiConverterOptionalULong.allocationSize(value.`msat`) +
@@ -1050,6 +1053,7 @@ public object FfiConverterTypeMsg: FfiConverterRustBuffer<Msg> {
             FfiConverterOptionalString.write(value.`message`, buf)
             FfiConverterOptionalUByte.write(value.`type`, buf)
             FfiConverterOptionalString.write(value.`uuid`, buf)
+            FfiConverterOptionalString.write(value.`tag`, buf)
             FfiConverterOptionalString.write(value.`index`, buf)
             FfiConverterOptionalString.write(value.`sender`, buf)
             FfiConverterOptionalULong.write(value.`msat`, buf)

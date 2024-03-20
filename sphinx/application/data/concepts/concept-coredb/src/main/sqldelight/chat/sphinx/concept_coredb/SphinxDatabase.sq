@@ -411,6 +411,12 @@ FROM contactDbo
 ORDER BY id DESC
 LIMIT 1;
 
+contactCheckOwnerRouteHint:
+SELECT * FROM contactDbo
+WHERE owner = 1
+AND route_hint IS NOT NULL
+AND route_hint != '';
+
 contactUpsert {
     UPDATE contactDbo
     SET route_hint = :route_hint,

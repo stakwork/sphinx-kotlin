@@ -37,6 +37,7 @@ import uniffi.sphinxrs.RunReturn
 import uniffi.sphinxrs.addContact
 import uniffi.sphinxrs.codeFromInvite
 import uniffi.sphinxrs.fetchMsgs
+import uniffi.sphinxrs.fetchMsgsBatchOkkey
 import uniffi.sphinxrs.getSubscriptionTopic
 import uniffi.sphinxrs.getTribeManagementTopic
 import uniffi.sphinxrs.handle
@@ -295,25 +296,19 @@ class ConnectManagerImpl(
                 override fun messageArrived(topic: String?, message: MqttMessage?) {
                     // Handle incoming messages here
                     Log.d("MQTT_MESSAGES", "messageArrived: $message")
+                    Log.d("MQTT_MESSAGES", "toppicArrived: $topic")
 
-                    if (topic != null && message?.payload != null) {
+                    if (topic?.contains("/ping") == true) {
 
-
-                        val runReturn = handle(
-                            topic,
-                            message.payload,
-                            ownerSeed ?: "",
-                            getTimestampInMilliseconds(),
-                            getCurrentUserState(),
-                            ownerInfoStateFlow.value?.alias ?: "",
-                            ownerInfoStateFlow.value?.picture ?: ""
-                        )
-
-                        mqttClient?.let { client ->
-                            handleRunReturn(runReturn, client)
+                        notifyListeners {
+                            listenToOwnerCreation {
+                                Log.d("MQTT_MESSAGES", "OWNER EXIST!!!!!!!!!")
+//                                handleMessageArrived(topic, message)
+                            }
                         }
 
-                        Log.d("MQTT_MESSAGES", " this is handle ${runReturn}")
+                    } else {
+                        handleMessageArrived(topic, message)
                     }
                 }
 
@@ -329,6 +324,28 @@ class ConnectManagerImpl(
                 onNetworkStatusChange(false)
             }
         }
+    }
+
+    private fun handleMessageArrived(topic: String?, message: MqttMessage?) {
+        if (topic != null && message?.payload != null) {
+
+            val runReturn = handle(
+                topic,
+                message.payload,
+                ownerSeed ?: "",
+                getTimestampInMilliseconds(),
+                getCurrentUserState(),
+                ownerInfoStateFlow.value?.alias ?: "",
+                ownerInfoStateFlow.value?.picture ?: ""
+            )
+
+            mqttClient?.let { client ->
+                handleRunReturn(runReturn, client)
+            }
+
+            Log.d("MQTT_MESSAGES", " this is handle ${runReturn}")
+        }
+
     }
 
     private fun subscribeOwnerMQTT() {
@@ -368,21 +385,35 @@ class ConnectManagerImpl(
                 )
                 handleRunReturn(setUp, client)
 
-                val fetchMessages = fetchMsgs(
-                    ownerSeed!!,
-                    getTimestampInMilliseconds(),
-                    getCurrentUserState(),
-                    ownerInfoStateFlow.value?.messageLastIndex?.plus(1)?.toULong() ?: 0.toULong(),
-                    100.toUInt()
-                )
+//                if (mnemonicWords != null) {
 
-                handleRunReturn(fetchMessages, client)
-
-                if (inviterContact != null) {
-                    createContact(inviterContact!!)
-                    inviterContact = null
+//                    val fetchMsgBatch = fetchMsgsBatchOkkey(
+//                        ownerSeed!!,
+//                        getTimestampInMilliseconds(),
+//                        getCurrentUserState(),
+//                        0.toULong(),
+//                        50.toUInt(),
+//                        false,
+//                        true
+//                    )
+//                    handleRunReturn(fetchMsgBatch, mqttClient!!)
                 }
-            }
+
+//                val fetchMessages = fetchMsgs(
+//                    ownerSeed!!,
+//                    getTimestampInMilliseconds(),
+//                    getCurrentUserState(),
+//                    ownerInfoStateFlow.value?.messageLastIndex?.plus(1)?.toULong() ?: 0.toULong(),
+//                    100.toUInt()
+//                )
+//
+//                handleRunReturn(fetchMessages, client)
+//
+//                if (inviterContact != null) {
+//                    createContact(inviterContact!!)
+//                    inviterContact = null
+//                }
+//            }
         } catch (e: Exception) {
             Log.e("MQTT_MESSAGES", "${e.message}")
         }

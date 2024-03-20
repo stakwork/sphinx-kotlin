@@ -736,6 +736,22 @@ abstract class SphinxRepository(
         }
     }
 
+    override fun listenToOwnerCreation(callback: () -> Unit) {
+        applicationScope.launch {
+            accountOwner.filter { contact ->
+                contact != null && !contact.routeHint?.value.isNullOrEmpty()
+            }
+                .map { true }
+                .first()
+
+            withContext(dispatchers.mainImmediate) {
+                delay(1000L)
+                callback.invoke()
+            }
+        }
+    }
+
+
     override fun onNewInviteCreated(inviteString: String) {
         // Create the invite and save it to the database. inviteDbo.
         connectionManagerState.value = ConnectionManagerState.NewInviteCode(inviteString)
