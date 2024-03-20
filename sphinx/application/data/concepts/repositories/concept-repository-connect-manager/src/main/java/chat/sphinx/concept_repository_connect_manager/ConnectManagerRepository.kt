@@ -16,6 +16,7 @@ interface ConnectManagerRepository {
     fun singChallenge(challenge: String)
     fun createInvite(nickname: String, welcomeMessage: String, sats: Long, tribeServerPubKey: String?)
     fun setInviteCode(inviteString: String)
+    fun setMnemonicWords(words: List<String>?)
 
     fun joinTribe(
         tribeHost: String,

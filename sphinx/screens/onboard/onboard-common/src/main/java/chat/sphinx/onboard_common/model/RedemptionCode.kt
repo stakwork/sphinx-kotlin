@@ -70,6 +70,11 @@ sealed class RedemptionCode {
                 return NewInvite(code.trim())
             }
 
+            val words = code.trim().split("\\s+".toRegex())
+            if (words.size == 12 && words.all { it.matches("[a-zA-Z]+".toRegex()) }) {
+                return MnemonicRestoration(words)
+            }
+
             return null
         }
     }
@@ -215,5 +220,9 @@ sealed class RedemptionCode {
                 NewInvite(code)
         }
     }
+
+    data class MnemonicRestoration(
+        val mnemonic: List<String>,
+    ) : RedemptionCode()
 
 }

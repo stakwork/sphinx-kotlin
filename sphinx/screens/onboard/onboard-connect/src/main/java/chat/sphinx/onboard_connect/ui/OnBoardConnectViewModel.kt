@@ -145,6 +145,10 @@ internal class OnBoardConnectViewModel @Inject constructor(
                 redemptionCode is RedemptionCode.AccountRestoration) {
                 isValid = true
             }
+            if (redemptionCode != null &&
+                redemptionCode is RedemptionCode.MnemonicRestoration) {
+                isValid = true
+            }
         }
 
         submitButtonViewStateContainer.updateViewState(
@@ -214,6 +218,11 @@ internal class OnBoardConnectViewModel @Inject constructor(
                     connectManagerRepository.setInviteCode(code)
                     presentLoginModal()
                 }
+
+                if (redemptionCode is RedemptionCode.MnemonicRestoration) {
+                    connectManagerRepository.setMnemonicWords(redemptionCode.mnemonic)
+                    presentLoginModal()
+                }
             }
         } else {
             viewModelScope.launch(mainImmediate) {
@@ -259,7 +268,6 @@ internal class OnBoardConnectViewModel @Inject constructor(
             }
         }
     }
-
 
     fun setSignerManager(signerManager: SignerManager) {
         signerManager.setWalletDataHandler(walletDataHandler)

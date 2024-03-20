@@ -11,6 +11,8 @@ abstract class ConnectManager {
 
     abstract fun createAccount(lspIp: String)
     abstract fun setInviteCode(inviteString: String)
+    abstract fun setMnemonicWords(words: List<String>?)
+
     abstract fun createContact(contact: NewContact)
     abstract fun initializeMqttAndSubscribe(
         serverUri: String,

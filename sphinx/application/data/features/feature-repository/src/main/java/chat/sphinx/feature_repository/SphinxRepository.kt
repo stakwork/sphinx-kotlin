@@ -416,6 +416,10 @@ abstract class SphinxRepository(
         connectManager.setInviteCode(inviteString)
     }
 
+    override fun setMnemonicWords(words: List<String>?) {
+        connectManager.setMnemonicWords(words)
+    }
+
     override fun getTribeMembers(tribeServerPubKey: String, tribePubKey: String) {
         connectManager.retrieveTribeMembersList(tribeServerPubKey, tribePubKey)
     }

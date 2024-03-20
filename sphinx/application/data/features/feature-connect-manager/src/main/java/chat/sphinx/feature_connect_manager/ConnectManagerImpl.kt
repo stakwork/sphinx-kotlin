@@ -73,17 +73,15 @@ class ConnectManagerImpl(
     private val network = "regtest"
     private var ownerSeed: String? = null
     private var inviteCode: String? = null
+    private var mnemonicWords: List<String>? = null
     private var inviterContact: NewContact? = null
     private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
-
 
     private val _ownerInfoStateFlow: MutableStateFlow<OwnerInfo?> by lazy {
         MutableStateFlow(null)
     }
-
     override val ownerInfoStateFlow: StateFlow<OwnerInfo?>
         get() = _ownerInfoStateFlow.asStateFlow()
-
 
     // Key Generation and Management
     override fun createAccount(lspIp: String) {
@@ -116,23 +114,31 @@ class ConnectManagerImpl(
         this.inviteCode = inviteString
     }
 
+    override fun setMnemonicWords(words: List<String>?) {
+        this.mnemonicWords = words
+    }
 
     @OptIn(ExperimentalUnsignedTypes::class)
     private fun generateMnemonic(): Pair<String?, WalletMnemonic?> {
         var seed: String? = null
 
-        walletMnemonic = try {
-            val randomBytes = generateRandomBytes(16)
-            val randomBytesString =
-                randomBytes.joinToString("") { it.toString(16).padStart(2, '0') }
-            val words = mnemonicFromEntropy(randomBytesString)
+        // Check if is account restoration
+        val mnemonic = if (!mnemonicWords.isNullOrEmpty()) {
+            mnemonicWords!!.joinToString(" ").toWalletMnemonic()
+        } else {
+            try {
+                val randomBytes = generateRandomBytes(16)
+                val randomBytesString =
+                    randomBytes.joinToString("") { it.toString(16).padStart(2, '0') }
+                val words = mnemonicFromEntropy(randomBytesString)
 
-            words.toWalletMnemonic()
-        } catch (e: Exception) {
-            null
+                words.toWalletMnemonic()
+            } catch (e: Exception) {
+                null
+            }
         }
 
-        walletMnemonic?.value?.let { words ->
+        mnemonic?.value?.let { words ->
             try {
                 seed = mnemonicToSeed(words)
 
@@ -143,7 +149,7 @@ class ConnectManagerImpl(
             } catch (e: Exception) {}
         }
 
-        return Pair(seed, walletMnemonic)
+        return Pair(seed, mnemonic)
     }
 
     private fun generateXPub(seed: String, time: String, network: String): String? {
@@ -291,6 +297,7 @@ class ConnectManagerImpl(
                     Log.d("MQTT_MESSAGES", "messageArrived: $message")
 
                     if (topic != null && message?.payload != null) {
+
 
                         val runReturn = handle(
                             topic,
