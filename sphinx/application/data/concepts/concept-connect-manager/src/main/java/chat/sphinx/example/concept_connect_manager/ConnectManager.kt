@@ -12,7 +12,6 @@ abstract class ConnectManager {
     abstract fun createAccount(lspIp: String)
     abstract fun setInviteCode(inviteString: String)
     abstract fun setMnemonicWords(words: List<String>?)
-
     abstract fun createContact(contact: NewContact)
     abstract fun initializeMqttAndSubscribe(
         serverUri: String,
@@ -79,6 +78,8 @@ abstract class ConnectManager {
     abstract fun addListener(listener: ConnectManagerListener): Boolean
     abstract fun removeListener(listener: ConnectManagerListener): Boolean
     abstract fun processChallengeSignature(challenge: String)
+
+    abstract fun fetchContactsOnRestoreAccount()
 }
 
 interface ConnectManagerListener {

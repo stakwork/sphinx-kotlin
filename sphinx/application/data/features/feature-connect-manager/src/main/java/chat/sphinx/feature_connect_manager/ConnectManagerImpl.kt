@@ -117,6 +117,7 @@ class ConnectManagerImpl(
         this.mnemonicWords = words
     }
 
+
     @OptIn(ExperimentalUnsignedTypes::class)
     private fun generateMnemonic(): Pair<String?, WalletMnemonic?> {
         var seed: String? = null
@@ -646,6 +647,23 @@ class ConnectManagerImpl(
         }
         catch (e: Exception) {
             Log.e("MQTT_MESSAGES", "tribeMembers ${e.message}")
+        }
+    }
+
+    override fun fetchContactsOnRestoreAccount() {
+        try {
+            val fetchContacts = uniffi.sphinxrs.fetchMsgsBatchOkkey(
+                ownerSeed!!,
+                getTimestampInMilliseconds(),
+                getCurrentUserState(),
+                0.toULong(),
+                50.toUInt(),
+                false,
+                true
+            )
+            handleRunReturn(fetchContacts, mqttClient!!)
+        } catch (e: Exception) {
+            Log.e("MQTT_MESSAGES", "fetchContactsOnRestoreAccount ${e.message}")
         }
     }
 

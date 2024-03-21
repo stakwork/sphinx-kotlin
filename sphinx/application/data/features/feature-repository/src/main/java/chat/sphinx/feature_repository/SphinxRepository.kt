@@ -281,6 +281,11 @@ abstract class SphinxRepository(
                 createOwner(okKey, routeHint, scid)
 
                 connectionManagerState.value = ConnectionManagerState.OwnerRegistered(isRestoreAccount)
+
+                if (isRestoreAccount) {
+                    delay(2000L)
+                    connectManager.fetchContactsOnRestoreAccount()
+                }
             }
         }
     }
