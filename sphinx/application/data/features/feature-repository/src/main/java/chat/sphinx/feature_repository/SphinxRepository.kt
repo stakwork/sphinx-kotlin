@@ -285,6 +285,8 @@ abstract class SphinxRepository(
                 if (isRestoreAccount) {
                     delay(2000L)
                     connectManager.fetchContactsOnRestoreAccount()
+                    delay(10000L)
+                    connectManager.fetchMessagesOnRestoreAccount()
                 }
             }
         }

@@ -662,8 +662,26 @@ class ConnectManagerImpl(
                 true
             )
             handleRunReturn(fetchContacts, mqttClient!!)
-        } catch (e: Exception) {
+        }
+        catch (e: Exception) {
             Log.e("MQTT_MESSAGES", "fetchContactsOnRestoreAccount ${e.message}")
+        }
+    }
+
+    override fun fetchMessagesOnRestoreAccount() {
+        try {
+            val fetchMessages = uniffi.sphinxrs.fetchMsgsBatch(
+                ownerSeed!!,
+                getTimestampInMilliseconds(),
+                getCurrentUserState(),
+                0.toULong(),
+                50.toUInt(),
+                false,
+                true
+            )
+            handleRunReturn(fetchMessages, mqttClient!!)
+        } catch (e: Exception) {
+            Log.e("MQTT_MESSAGES", "fetchMessagesOnRestoreAccount ${e.message}")
         }
     }
 

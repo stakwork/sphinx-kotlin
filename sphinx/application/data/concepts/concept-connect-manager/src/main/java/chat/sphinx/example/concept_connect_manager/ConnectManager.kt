@@ -80,6 +80,8 @@ abstract class ConnectManager {
     abstract fun processChallengeSignature(challenge: String)
 
     abstract fun fetchContactsOnRestoreAccount()
+
+    abstract fun fetchMessagesOnRestoreAccount()
 }
 
 interface ConnectManagerListener {
