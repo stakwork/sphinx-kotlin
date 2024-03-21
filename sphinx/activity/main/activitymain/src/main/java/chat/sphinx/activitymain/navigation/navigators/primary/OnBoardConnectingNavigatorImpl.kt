@@ -31,6 +31,15 @@ internal class OnBoardConnectingNavigatorImpl @Inject constructor(
         )
     }
 
+    override suspend fun toDashboardScreen() {
+        navigationDriver.submitNavigationRequest(
+            ToDashboardScreen(
+                popUpToId = R.id.main_primary_nav_graph,
+                updateBackgroundLoginTime = true
+            )
+        )
+    }
+
     override suspend fun toOnBoardMessageScreen(onBoardStep1: OnBoardStep.Step1_WelcomeMessage) {
         navigationDriver.submitNavigationRequest(
             ToOnBoardScreen(popUpToId = R.id.main_primary_nav_graph, onBoardStep = onBoardStep1)

@@ -36,8 +36,6 @@ import org.json.JSONObject
 import uniffi.sphinxrs.RunReturn
 import uniffi.sphinxrs.addContact
 import uniffi.sphinxrs.codeFromInvite
-import uniffi.sphinxrs.fetchMsgs
-import uniffi.sphinxrs.fetchMsgsBatchOkkey
 import uniffi.sphinxrs.getSubscriptionTopic
 import uniffi.sphinxrs.getTribeManagementTopic
 import uniffi.sphinxrs.handle
@@ -303,7 +301,7 @@ class ConnectManagerImpl(
                         notifyListeners {
                             listenToOwnerCreation {
                                 Log.d("MQTT_MESSAGES", "OWNER EXIST!!!!!!!!!")
-//                                handleMessageArrived(topic, message)
+                                handleMessageArrived(topic, message)
                             }
                         }
 
@@ -816,10 +814,11 @@ class ConnectManagerImpl(
             val parts = myContactInfo.split("_", limit = 2)
             val okKey = parts.getOrNull(0)
             val routeHint = parts.getOrNull(1)
+            val isRestoreAccount = mnemonicWords != null
 
             if (okKey != null && routeHint != null) {
                 notifyListeners {
-                    onOwnerRegistered(okKey, routeHint)
+                    onOwnerRegistered(okKey, routeHint, isRestoreAccount)
                 }
             }
             Log.d("MQTT_MESSAGES", "=> my_contact_info $myContactInfo")

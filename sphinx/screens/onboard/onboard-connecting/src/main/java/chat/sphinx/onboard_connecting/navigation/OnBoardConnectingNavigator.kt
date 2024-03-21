@@ -13,6 +13,8 @@ abstract class OnBoardConnectingNavigator(
     abstract suspend fun toOnBoardConnectedScreen()
     abstract suspend fun toOnBoardNameScreen()
 
+    abstract suspend fun toDashboardScreen()
+
     abstract suspend fun toOnBoardMessageScreen(onBoardStep1: OnBoardStep.Step1_WelcomeMessage)
 
     suspend fun popBackStack() {

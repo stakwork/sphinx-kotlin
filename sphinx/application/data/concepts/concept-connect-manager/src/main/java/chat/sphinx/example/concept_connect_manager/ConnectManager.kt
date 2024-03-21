@@ -84,7 +84,7 @@ abstract class ConnectManager {
 interface ConnectManagerListener {
 
     fun onMnemonicWords(words: String)
-    fun onOwnerRegistered(okKey: String, routeHint: String)
+    fun onOwnerRegistered(okKey: String, routeHint: String, isRestoreAccount: Boolean)
     fun onMessageReceived(
         msg: String,
         msgSender: String,

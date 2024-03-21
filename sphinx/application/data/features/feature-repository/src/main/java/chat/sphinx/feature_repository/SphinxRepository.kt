@@ -273,13 +273,14 @@ abstract class SphinxRepository(
         connectionManagerState.value = ConnectionManagerState.MnemonicWords(words)
     }
 
-    override fun onOwnerRegistered(okKey: String, routeHint: String) {
+    override fun onOwnerRegistered(okKey: String, routeHint: String, isRestoreAccount: Boolean) {
         applicationScope.launch(mainImmediate) {
             val scid = routeHint.toLightningRouteHint()?.getScid()
 
             if (scid != null && accountOwner.value?.nodePubKey == null) {
                 createOwner(okKey, routeHint, scid)
-                connectionManagerState.value = ConnectionManagerState.OwnerRegistered
+
+                connectionManagerState.value = ConnectionManagerState.OwnerRegistered(isRestoreAccount)
             }
         }
     }

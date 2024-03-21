@@ -682,7 +682,11 @@ internal class OnBoardConnectingViewModel @Inject constructor(
                         submitSideEffect(OnBoardConnectingSideEffect.ShowMnemonicToUser(connectionState.words) {})
                     }
                     is ConnectionManagerState.OwnerRegistered -> {
-                        navigator.toOnBoardNameScreen()
+                        if (connectionState.isRestoreAccount) {
+                            navigator.toDashboardScreen()
+                        } else {
+                            navigator.toOnBoardNameScreen()
+                        }
                     }
                     is ConnectionManagerState.UserState -> {
                         storeUserState(connectionState.userState)

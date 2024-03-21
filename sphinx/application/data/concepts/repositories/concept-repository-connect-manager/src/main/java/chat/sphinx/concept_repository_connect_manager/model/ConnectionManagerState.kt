@@ -1,11 +1,10 @@
 package chat.sphinx.concept_repository_connect_manager.model
 
-import chat.sphinx.example.wrapper_mqtt.TribeMember
 import chat.sphinx.example.wrapper_mqtt.TribeMembersResponse
 
 sealed class ConnectionManagerState {
 
-    object OwnerRegistered: ConnectionManagerState()
+    data class OwnerRegistered(val isRestoreAccount: Boolean) : ConnectionManagerState()
     data class MnemonicWords(val words: String): ConnectionManagerState()
     data class UserState(val userState: String): ConnectionManagerState()
 
