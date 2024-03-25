@@ -480,6 +480,8 @@ internal interface _UniFFILib : Library {
     ): RustBuffer.ByValue
     fun uniffi_sphinxrs_fn_func_set_push_token(`seed`: RustBuffer.ByValue,`uniqueTime`: RustBuffer.ByValue,`state`: RustBuffer.ByValue,`pushToken`: RustBuffer.ByValue,_uniffi_out_err: RustCallStatus, 
     ): RustBuffer.ByValue
+    fun uniffi_sphinxrs_fn_func_get_msgs_counts(`seed`: RustBuffer.ByValue,`uniqueTime`: RustBuffer.ByValue,`state`: RustBuffer.ByValue,_uniffi_out_err: RustCallStatus, 
+    ): RustBuffer.ByValue
     fun uniffi_sphinxrs_fn_func_fetch_msgs_batch(`seed`: RustBuffer.ByValue,`uniqueTime`: RustBuffer.ByValue,`state`: RustBuffer.ByValue,`lastMsgIdx`: Long,`limit`: RustBuffer.ByValue,`reverse`: RustBuffer.ByValue,`isRestore`: RustBuffer.ByValue,_uniffi_out_err: RustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_sphinxrs_fn_func_fetch_msgs_batch_okkey(`seed`: RustBuffer.ByValue,`uniqueTime`: RustBuffer.ByValue,`state`: RustBuffer.ByValue,`lastMsgIdx`: Long,`limit`: RustBuffer.ByValue,`reverse`: RustBuffer.ByValue,`isRestore`: RustBuffer.ByValue,_uniffi_out_err: RustCallStatus, 
@@ -609,6 +611,8 @@ internal interface _UniFFILib : Library {
     fun uniffi_sphinxrs_checksum_func_get_mutes(
     ): Short
     fun uniffi_sphinxrs_checksum_func_set_push_token(
+    ): Short
+    fun uniffi_sphinxrs_checksum_func_get_msgs_counts(
     ): Short
     fun uniffi_sphinxrs_checksum_func_fetch_msgs_batch(
     ): Short
@@ -805,6 +809,9 @@ private fun uniffiCheckApiChecksums(lib: _UniFFILib) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_sphinxrs_checksum_func_set_push_token() != 7668.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_sphinxrs_checksum_func_get_msgs_counts() != 29743.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_sphinxrs_checksum_func_fetch_msgs_batch() != 65179.toShort()) {
@@ -1074,6 +1081,8 @@ public object FfiConverterTypeMsg: FfiConverterRustBuffer<Msg> {
 
 data class RunReturn (
     var `msgs`: List<Msg>, 
+    var `msgsTotal`: ULong?, 
+    var `msgsCounts`: String?, 
     var `topics`: List<String>, 
     var `payloads`: List<ByteArray>, 
     var `stateMp`: ByteArray?, 
@@ -1103,6 +1112,8 @@ public object FfiConverterTypeRunReturn: FfiConverterRustBuffer<RunReturn> {
     override fun read(buf: ByteBuffer): RunReturn {
         return RunReturn(
             FfiConverterSequenceTypeMsg.read(buf),
+            FfiConverterOptionalULong.read(buf),
+            FfiConverterOptionalString.read(buf),
             FfiConverterSequenceString.read(buf),
             FfiConverterSequenceByteArray.read(buf),
             FfiConverterOptionalByteArray.read(buf),
@@ -1129,6 +1140,8 @@ public object FfiConverterTypeRunReturn: FfiConverterRustBuffer<RunReturn> {
 
     override fun allocationSize(value: RunReturn) = (
             FfiConverterSequenceTypeMsg.allocationSize(value.`msgs`) +
+            FfiConverterOptionalULong.allocationSize(value.`msgsTotal`) +
+            FfiConverterOptionalString.allocationSize(value.`msgsCounts`) +
             FfiConverterSequenceString.allocationSize(value.`topics`) +
             FfiConverterSequenceByteArray.allocationSize(value.`payloads`) +
             FfiConverterOptionalByteArray.allocationSize(value.`stateMp`) +
@@ -1154,6 +1167,8 @@ public object FfiConverterTypeRunReturn: FfiConverterRustBuffer<RunReturn> {
 
     override fun write(value: RunReturn, buf: ByteBuffer) {
             FfiConverterSequenceTypeMsg.write(value.`msgs`, buf)
+            FfiConverterOptionalULong.write(value.`msgsTotal`, buf)
+            FfiConverterOptionalString.write(value.`msgsCounts`, buf)
             FfiConverterSequenceString.write(value.`topics`, buf)
             FfiConverterSequenceByteArray.write(value.`payloads`, buf)
             FfiConverterOptionalByteArray.write(value.`stateMp`, buf)
@@ -2610,6 +2625,15 @@ fun `setPushToken`(`seed`: String, `uniqueTime`: String, `state`: ByteArray, `pu
     return FfiConverterTypeRunReturn.lift(
     rustCallWithError(SphinxException) { _status ->
     _UniFFILib.INSTANCE.uniffi_sphinxrs_fn_func_set_push_token(FfiConverterString.lower(`seed`),FfiConverterString.lower(`uniqueTime`),FfiConverterByteArray.lower(`state`),FfiConverterString.lower(`pushToken`),_status)
+})
+}
+
+@Throws(SphinxException::class)
+
+fun `getMsgsCounts`(`seed`: String, `uniqueTime`: String, `state`: ByteArray): RunReturn {
+    return FfiConverterTypeRunReturn.lift(
+    rustCallWithError(SphinxException) { _status ->
+    _UniFFILib.INSTANCE.uniffi_sphinxrs_fn_func_get_msgs_counts(FfiConverterString.lower(`seed`),FfiConverterString.lower(`uniqueTime`),FfiConverterByteArray.lower(`state`),_status)
 })
 }
 
