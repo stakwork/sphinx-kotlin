@@ -581,6 +581,13 @@ abstract class SphinxRepository(
                         }
                     }
 
+                    if (!contactInfo.host.isNullOrEmpty() &&
+                        messageType.isGroupJoin() ||
+                        messageType.isMemberApprove()
+                    ) {
+                        joinTribeOnRestoreAccount(contactInfo)
+                    }
+
                     upsertMqttMessage(
                         message,
                         contactInfo,
@@ -610,7 +617,7 @@ abstract class SphinxRepository(
     ) {
         applicationScope.launch(io) {
             val message = msg.toMsg(moshi)
-            val msgSender = MsgSender(contactPubKey, null, null, null, true, null)
+            val msgSender = MsgSender(contactPubKey, null, null, null, true, null, null)
 
             val messageType = msgType.toMessageType()
             val messageUUID = msgUUID.toMessageUUID() ?: return@launch
@@ -976,6 +983,65 @@ abstract class SphinxRepository(
                 amount?.value,
                 isTribe
             )
+        }
+    }
+
+    private suspend fun joinTribeOnRestoreAccount(contactInfo: MsgSender) {
+        networkQueryChat.getTribeInfo(ChatHost(contactInfo.host!!), LightningNodePubKey(contactInfo.pubkey)).collect { loadResponse ->
+            when (loadResponse) {
+                is LoadResponse.Loading -> {}
+                is Response.Error -> {
+                }
+                is Response.Success -> {
+                    val queries = coreDB.getSphinxDatabaseQueries()
+
+                    // TribeId is set from LONG.MAX_VALUE and decremented by 1 for each new tribe
+                    val tribeId = queries.chatGetLastTribeId().executeAsOneOrNull()?.let { it.MIN?.minus(1) }
+                        ?: (Long.MAX_VALUE)
+                    val now: String = DateTime.nowUTC()
+
+                    val newTribe = Chat(
+                        id = ChatId(tribeId),
+                        uuid = ChatUUID(contactInfo.pubkey),
+                        name = ChatName( loadResponse.value.name ?: "unknown"),
+                        photoUrl = loadResponse.value.img?.toPhotoUrl(),
+                        type = ChatType.Tribe,
+                        status = ChatStatus.Approved,
+                        contactIds = listOf(ContactId(0), ContactId(tribeId)),
+                        isMuted = ChatMuted.False,
+                        createdAt = now.toDateTime(),
+                        groupKey = null,
+                        host = ChatHost(contactInfo.host!!),
+                        pricePerMessage = loadResponse.value.price_per_message.toSat(),
+                        escrowAmount = loadResponse.value.escrow_amount.toSat(),
+                        unlisted = ChatUnlisted.False,
+                        privateTribe = ChatPrivate.False,
+                        ownerPubKey = LightningNodePubKey(contactInfo.pubkey),
+                        seen = Seen.False,
+                        metaData = null,
+                        myPhotoUrl = null,
+                        myAlias = null,
+                        pendingContactIds = emptyList(),
+                        latestMessageId = null,
+                        contentSeenAt = null,
+                        pinedMessage = null,
+                        notify = NotificationLevel.SeeAll
+                    )
+
+                    chatLock.withLock {
+                        queries.transaction {
+                            upsertNewChat(
+                                newTribe,
+                                moshi,
+                                SynchronizedMap<ChatId, Seen>(),
+                                queries,
+                                null,
+                                accountOwner.value?.nodePubKey
+                            )
+                        }
+                    }
+                }
+            }
         }
     }
 
