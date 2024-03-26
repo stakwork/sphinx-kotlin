@@ -685,6 +685,23 @@ class ConnectManagerImpl(
         }
     }
 
+    override fun fetchFirstMessagesPerKey() {
+        try {
+            val fetchFirstMsg = uniffi.sphinxrs.fetchFirstMsgsPerKey(
+                ownerSeed!!,
+                getTimestampInMilliseconds(),
+                getCurrentUserState(),
+                0.toULong(),
+                50.toUInt(),
+                false,
+                true
+            )
+            handleRunReturn(fetchFirstMsg, mqttClient!!)
+        } catch (e: Exception) {
+            Log.e("MQTT_MESSAGES", "fetchFirstMessagesPerKey ${e.message}")
+        }
+    }
+
     override fun generateMediaToken(
         contactPubKey: String,
         muid: String,
