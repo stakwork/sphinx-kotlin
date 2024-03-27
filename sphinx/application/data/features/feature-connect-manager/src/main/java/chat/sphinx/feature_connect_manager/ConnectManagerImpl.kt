@@ -386,16 +386,20 @@ class ConnectManagerImpl(
                 )
                 handleRunReturn(setUp, client)
 
-                val fetchMessages = fetchMsgs(
-                    ownerSeed!!,
-                    getTimestampInMilliseconds(),
-                    getCurrentUserState(),
-                    ownerInfoStateFlow.value?.messageLastIndex?.plus(1)?.toULong() ?: 0.toULong(),
-                    100.toUInt()
-                )
-                handleRunReturn(fetchMessages, mqttClient!!)
+                if (mnemonicWords?.isEmpty() == true) {
 
-                getReadMessages()
+                    val fetchMessages = fetchMsgs(
+                        ownerSeed!!,
+                        getTimestampInMilliseconds(),
+                        getCurrentUserState(),
+                        ownerInfoStateFlow.value?.messageLastIndex?.plus(1)?.toULong()
+                            ?: 0.toULong(),
+                        100.toUInt()
+                    )
+                    handleRunReturn(fetchMessages, mqttClient!!)
+
+                    getReadMessages()
+                }
 
                 if (inviterContact != null) {
                     createContact(inviterContact!!)
