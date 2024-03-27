@@ -1031,7 +1031,8 @@ data class Msg (
     var `sender`: String?, 
     var `msat`: ULong?, 
     var `timestamp`: ULong?, 
-    var `sentTo`: String?
+    var `sentTo`: String?, 
+    var `fromMe`: Boolean?
 ) {
     
 }
@@ -1048,6 +1049,7 @@ public object FfiConverterTypeMsg: FfiConverterRustBuffer<Msg> {
             FfiConverterOptionalULong.read(buf),
             FfiConverterOptionalULong.read(buf),
             FfiConverterOptionalString.read(buf),
+            FfiConverterOptionalBoolean.read(buf),
         )
     }
 
@@ -1060,7 +1062,8 @@ public object FfiConverterTypeMsg: FfiConverterRustBuffer<Msg> {
             FfiConverterOptionalString.allocationSize(value.`sender`) +
             FfiConverterOptionalULong.allocationSize(value.`msat`) +
             FfiConverterOptionalULong.allocationSize(value.`timestamp`) +
-            FfiConverterOptionalString.allocationSize(value.`sentTo`)
+            FfiConverterOptionalString.allocationSize(value.`sentTo`) +
+            FfiConverterOptionalBoolean.allocationSize(value.`fromMe`)
     )
 
     override fun write(value: Msg, buf: ByteBuffer) {
@@ -1073,6 +1076,7 @@ public object FfiConverterTypeMsg: FfiConverterRustBuffer<Msg> {
             FfiConverterOptionalULong.write(value.`msat`, buf)
             FfiConverterOptionalULong.write(value.`timestamp`, buf)
             FfiConverterOptionalString.write(value.`sentTo`, buf)
+            FfiConverterOptionalBoolean.write(value.`fromMe`, buf)
     }
 }
 
