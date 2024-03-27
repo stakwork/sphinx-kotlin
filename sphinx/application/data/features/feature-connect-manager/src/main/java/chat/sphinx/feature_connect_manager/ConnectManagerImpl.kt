@@ -36,6 +36,8 @@ import org.json.JSONObject
 import uniffi.sphinxrs.RunReturn
 import uniffi.sphinxrs.addContact
 import uniffi.sphinxrs.codeFromInvite
+import uniffi.sphinxrs.fetchMsgs
+import uniffi.sphinxrs.getReads
 import uniffi.sphinxrs.getSubscriptionTopic
 import uniffi.sphinxrs.getTribeManagementTopic
 import uniffi.sphinxrs.handle
@@ -50,6 +52,7 @@ import uniffi.sphinxrs.mnemonicFromEntropy
 import uniffi.sphinxrs.mnemonicToSeed
 import uniffi.sphinxrs.paymentHashFromInvoice
 import uniffi.sphinxrs.processInvite
+import uniffi.sphinxrs.read
 import uniffi.sphinxrs.rootSignMs
 import uniffi.sphinxrs.send
 import uniffi.sphinxrs.setBlockheight
@@ -344,7 +347,6 @@ class ConnectManagerImpl(
 
             Log.d("MQTT_MESSAGES", " this is handle ${runReturn}")
         }
-
     }
 
     private fun subscribeOwnerMQTT() {
@@ -384,35 +386,22 @@ class ConnectManagerImpl(
                 )
                 handleRunReturn(setUp, client)
 
-//                if (mnemonicWords != null) {
+                val fetchMessages = fetchMsgs(
+                    ownerSeed!!,
+                    getTimestampInMilliseconds(),
+                    getCurrentUserState(),
+                    ownerInfoStateFlow.value?.messageLastIndex?.plus(1)?.toULong() ?: 0.toULong(),
+                    100.toUInt()
+                )
+                handleRunReturn(fetchMessages, mqttClient!!)
 
-//                    val fetchMsgBatch = fetchMsgsBatchOkkey(
-//                        ownerSeed!!,
-//                        getTimestampInMilliseconds(),
-//                        getCurrentUserState(),
-//                        0.toULong(),
-//                        50.toUInt(),
-//                        false,
-//                        true
-//                    )
-//                    handleRunReturn(fetchMsgBatch, mqttClient!!)
+                getReadMessages()
+
+                if (inviterContact != null) {
+                    createContact(inviterContact!!)
+                    inviterContact = null
                 }
-
-//                val fetchMessages = fetchMsgs(
-//                    ownerSeed!!,
-//                    getTimestampInMilliseconds(),
-//                    getCurrentUserState(),
-//                    ownerInfoStateFlow.value?.messageLastIndex?.plus(1)?.toULong() ?: 0.toULong(),
-//                    100.toUInt()
-//                )
-//
-//                handleRunReturn(fetchMessages, client)
-//
-//                if (inviterContact != null) {
-//                    createContact(inviterContact!!)
-//                    inviterContact = null
-//                }
-//            }
+            }
         } catch (e: Exception) {
             Log.e("MQTT_MESSAGES", "${e.message}")
         }
@@ -763,6 +752,34 @@ class ConnectManagerImpl(
         }
     }
 
+    override fun readMessage(contactPubKey: String, messageIndex: Long) {
+        try {
+            val readMessage = read(
+                ownerSeed!!,
+                getTimestampInMilliseconds(),
+                getCurrentUserState(),
+                contactPubKey,
+                messageIndex.toULong()
+            )
+            handleRunReturn(readMessage, mqttClient!!)
+        } catch (e: Exception) {
+            Log.e("MQTT_MESSAGES", "readMessage ${e.message}")
+        }
+    }
+
+    override fun getReadMessages() {
+        try {
+            val readMessages = getReads(
+                ownerSeed!!,
+                getTimestampInMilliseconds(),
+                getCurrentUserState()
+            )
+            handleRunReturn(readMessages, mqttClient!!)
+        } catch (e: Exception) {
+            Log.e("MQTT_MESSAGES", "getReadMessages ${e.message}")
+        }
+    }
+
     private fun publishTopicsSequentially(topics: Array<String>, messages: Array<String>?, index: Int) {
         if (index < topics.size) {
             val topic = topics[index]
@@ -910,9 +927,15 @@ class ConnectManagerImpl(
             Log.d("MQTT_MESSAGES", "=> inviterInfo $inviterInfo")
         }
 
+        rr.lastRead?.let { lastRead ->
+            notifyListeners {
+                onLastReadMessages(lastRead)
+            }
+            Log.d("MQTT_MESSAGES", "=> lastRead $lastRead")
+        }
+
         rr.initialTribe?.let { initialTribe ->
             // Call joinTribe with the url that comes on initialTribe
-
             Log.d("MQTT_MESSAGES", "=> initialTribe $initialTribe")
         }
 

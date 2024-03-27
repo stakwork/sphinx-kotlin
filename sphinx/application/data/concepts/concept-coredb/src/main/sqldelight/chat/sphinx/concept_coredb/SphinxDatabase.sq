@@ -214,6 +214,11 @@ SELECT *
 FROM chatDbo
 WHERE uuid = ?;
 
+chatGetAllByUUIDS:
+SELECT *
+FROM chatDbo
+WHERE uuid IN :uuid;
+
 chatGetConversationForContact:
 SELECT *
 FROM chatDbo
@@ -397,6 +402,11 @@ FROM contactDbo
 WHERE node_pub_key = ?
 ORDER BY id
 LIMIT 1;
+
+contactGetAllByPubKeys:
+SELECT *
+FROM contactDbo
+WHERE node_pub_key IN :node_pub_key;
 
 contactGetOwner:
 SELECT *
@@ -793,6 +803,15 @@ LIMIT 1;
 messageGetMaxId:
 SELECT MAX(id) FROM messageDbo;
 
+messageGetMaxIdByChatId:
+SELECT *
+FROM messageDbo
+WHERE id = (
+    SELECT MAX(id)
+    FROM messageDbo
+    WHERE chat_id = ?
+);
+
 messageGetIdByUUID:
 SELECT id
 FROM messageDbo
@@ -933,6 +952,12 @@ messageUpdateUUIDByUUID:
 UPDATE messageDbo
 SET uuid = :newUuid
 WHERE uuid = ?;
+
+messageUpdateSeenByChatIdAndId:
+UPDATE messageDbo
+SET seen = 1
+WHERE chat_id = ?
+AND id <= ?;
 
 messageUpsert {
     UPDATE messageDbo

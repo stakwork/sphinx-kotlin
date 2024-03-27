@@ -69,6 +69,7 @@ import chat.sphinx.conceptcoredb.*
 import chat.sphinx.example.concept_connect_manager.ConnectManager
 import chat.sphinx.example.concept_connect_manager.ConnectManagerListener
 import chat.sphinx.example.concept_connect_manager.model.OwnerInfo
+import chat.sphinx.example.wrapper_mqtt.LastReadMessages.Companion.toLastReadMessages
 import chat.sphinx.example.wrapper_mqtt.NewCreateTribe.Companion.toNewCreateTribe
 import chat.sphinx.example.wrapper_mqtt.TribeMembersResponse.Companion.toTribeMembersList
 import chat.sphinx.example.wrapper_mqtt.toLspChannelInfo
@@ -102,6 +103,7 @@ import chat.sphinx.wrapper_action_track.toActionTrackUploaded
 import chat.sphinx.wrapper_chat.*
 import chat.sphinx.wrapper_common.*
 import chat.sphinx.wrapper_common.chat.ChatUUID
+import chat.sphinx.wrapper_common.chat.toChatUUID
 import chat.sphinx.wrapper_common.contact.Blocked
 import chat.sphinx.wrapper_common.contact.isTrue
 import chat.sphinx.wrapper_common.dashboard.*
@@ -786,6 +788,47 @@ abstract class SphinxRepository(
                     serverPubKey
                 )
             )
+        }
+    }
+
+    override fun onLastReadMessages(lastReadMessages: String) {
+        applicationScope.launch {
+            val queries = coreDB.getSphinxDatabaseQueries()
+            val lastReadMessagesMap = lastReadMessages.toLastReadMessages(moshi)
+            val pubKeys = lastReadMessagesMap?.values?.keys
+
+            val contactPubkey = pubKeys?.map { it.toLightningNodePubKey() }
+            val tribePubKey = pubKeys?.map { it.toChatUUID() }
+
+            val contacts = contactPubkey?.filterNotNull()?.let { queries.contactGetAllByPubKeys(it).executeAsList() }
+            val tribes = tribePubKey?.filterNotNull()?.let { queries.chatGetAllByUUIDS(it).executeAsList() }
+
+            // Create a new map for mapping chatId to lastMsgIndex
+            val chatIdToLastMsgIndexMap = mutableMapOf<ChatId, MessageId>()
+
+            contacts?.forEach { contact ->
+                val lastMsgIndex = lastReadMessagesMap.values?.get(contact.node_pub_key?.value)
+                if (lastMsgIndex != null) {
+                    chatIdToLastMsgIndexMap[ChatId(contact.id.value)] = MessageId(lastMsgIndex)
+                }
+            }
+
+            tribes?.forEach { tribe ->
+                val lastMsgIndex = lastReadMessagesMap.values?.get(tribe.uuid.value)
+                if (lastMsgIndex != null) {
+                    chatIdToLastMsgIndexMap[tribe.id] = MessageId(lastMsgIndex)
+                }
+            }
+
+            chatLock.withLock {
+                messageLock.withLock {
+                    queries.transaction {
+                        chatIdToLastMsgIndexMap.forEach { (chatId, lastMsgIndex) ->
+                            queries.messageUpdateSeenByChatIdAndId(chatId, lastMsgIndex)
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -3555,6 +3598,18 @@ abstract class SphinxRepository(
                 queries.transaction {
                     queries.updateSeen(chatId)
                 }
+            }
+        }
+
+        val message = queries.messageGetMaxIdByChatId(chatId).executeAsOneOrNull()
+        val contact = queries.contactGetById(ContactId(chatId.value)).executeAsOneOrNull()
+        val chat = queries.chatGetById(chatId).executeAsOneOrNull()
+
+        if (message != null) {
+            if (contact != null) {
+                connectManager.readMessage(contact.node_pub_key?.value!!, message.id.value)
+            } else {
+                connectManager.readMessage(chat?.uuid?.value!!, message.id.value)
             }
         }
 

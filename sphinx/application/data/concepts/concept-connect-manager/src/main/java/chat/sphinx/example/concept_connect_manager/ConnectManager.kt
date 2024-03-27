@@ -74,6 +74,13 @@ abstract class ConnectManager {
         amount: Long?
     ): String?
 
+    abstract fun readMessage(
+        contactPubKey: String,
+        messageIndex: Long
+    )
+
+    abstract fun getReadMessages()
+
     abstract fun retrieveLspIp(): String?
     abstract fun addListener(listener: ConnectManagerListener): Boolean
     abstract fun removeListener(listener: ConnectManagerListener): Boolean
@@ -123,6 +130,9 @@ interface ConnectManagerListener {
     fun onNetworkStatusChange(isConnected: Boolean)
     fun listenToOwnerCreation(callback: () -> Unit)
     fun onNewInviteCreated(inviteString: String)
+
+    fun onLastReadMessages(lastReadMessages: String)
+
 
 }
 
