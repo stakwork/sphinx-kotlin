@@ -13,6 +13,12 @@ inline fun FeedId.youtubeVideoId(): String =
     value.replace("yt:video:","")
 
 @Suppress("NOTHING_TO_INLINE")
+inline fun FeedId.toYoutubeUrl(): String {
+    val videoId = this.youtubeVideoId()
+    return "https://www.youtube.com/watch?v=$videoId"
+}
+
+@Suppress("NOTHING_TO_INLINE")
 inline fun FeedId.youtubeFeedIds(): List<FeedId> =
     listOf(
         this,
