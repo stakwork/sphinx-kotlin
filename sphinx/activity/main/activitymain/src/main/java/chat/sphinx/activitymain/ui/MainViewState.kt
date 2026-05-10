@@ -27,4 +27,52 @@ sealed class MainViewState: MotionLayoutViewState<MainViewState>() {
 
         override fun restoreMotionScene(motionLayout: MotionLayout) {}
     }
+
+    object PodcastPlayerDetailScreenActive: MainViewState() {
+        override val startSetId: Int
+            get() = R.id.motion_scene_main_podcast_player_minimized
+        override val endSetId: Int
+            get() = R.id.motion_scene_main_set2
+
+        override fun transitionToEndSet(motionLayout: MotionLayout) {
+            motionLayout.setTransition(R.id.transition_main_podcast_player_minimized_to_set2)
+            motionLayout.setProgress(0F, 0F)
+            motionLayout.transitionToEnd()
+        }
+
+        override fun restoreMotionScene(motionLayout: MotionLayout) {
+            motionLayout.setTransition(R.id.transition_main_podcast_player_minimized_to_set2)
+            motionLayout.setProgress(1F, 1F)
+        }
+    }
+
+    object PodcastPlayerDetailScreenInactive: MainViewState() {
+        override val startSetId: Int
+            get() = R.id.motion_scene_main_set2
+        override val endSetId: Int
+            get() = R.id.motion_scene_main_podcast_player_minimized
+
+        override fun transitionToEndSet(motionLayout: MotionLayout) {
+            motionLayout.setTransition(R.id.transition_main_set2_to_podcast_player_minimized)
+            motionLayout.setProgress(0F, 0F)
+            motionLayout.transitionToEnd()
+        }
+
+        override fun restoreMotionScene(motionLayout: MotionLayout) {}
+    }
+
+    object PodcastPlayerDetailScreenHidden: MainViewState() {
+        override val startSetId: Int
+            get() = R.id.motion_scene_main_podcast_player_minimized
+        override val endSetId: Int
+            get() = R.id.motion_scene_main_set1
+
+        override fun transitionToEndSet(motionLayout: MotionLayout) {
+            motionLayout.setTransition(R.id.transition_main_podcast_player_minimized_to_set1)
+            motionLayout.setProgress(0F, 0F)
+            motionLayout.transitionToEnd()
+        }
+
+        override fun restoreMotionScene(motionLayout: MotionLayout) {}
+    }
 }

@@ -165,6 +165,39 @@
     </ConstraintSet>
 
 
+    <!--
+           Set 3: Podcast Player minimized to the dashboard player bar
+    -->
+    <ConstraintSet
+        android:id="@+id/motion_scene_main_podcast_player_minimized"
+        app:deriveConstraintsFrom="@+id/motion_scene_main_set1">
+
+        <Constraint android:id="@+id/nav_host_fragment_detail">
+            <Layout
+                android:layout_width="0dp"
+                android:layout_height="@dimen/player_bar_height"
+                android:layout_marginBottom="@dimen/default_bottom_bar_height"
+                app:layout_constraintBottom_toTopOf="@+id/layout_constraint_main_navigation_bar"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
+            <PropertySet
+                android:alpha="0" />
+        </Constraint>
+
+        <Constraint android:id="@+id/space_detail_swipe_target">
+            <Layout
+                android:layout_width="0dp"
+                android:layout_height="20dp"
+                android:layout_marginStart="@dimen/detail_header_nav_button_width"
+                android:layout_marginEnd="@dimen/detail_header_exit_button_width"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/nav_host_fragment_detail" />
+        </Constraint>
+
+    </ConstraintSet>
+
+
     <!-- ////////////////////////////////////////////////////////////////////////////////-->
     <!-- ////////////////////////////////////////////////////////////////////////////////-->
     <!-- ////////////////////////////// Transitions /////////////////////////////////////-->
@@ -191,5 +224,34 @@
             app:touchRegionId="@id/space_detail_swipe_target" />
 
     </Transition>
+
+    <Transition
+        android:id="@+id/transition_main_podcast_player_minimized_to_set2"
+        app:constraintSetEnd="@+id/motion_scene_main_set2"
+        app:constraintSetStart="@+id/motion_scene_main_podcast_player_minimized"
+        app:duration="400"
+        app:motionInterpolator="cubic(0.41,0.39,0,1)">
+
+        <OnSwipe
+            app:dragDirection="dragUp"
+            app:touchAnchorId="@id/space_detail_swipe_target"
+            app:touchAnchorSide="bottom"
+            app:touchRegionId="@id/space_detail_swipe_target" />
+
+    </Transition>
+
+    <Transition
+        android:id="@+id/transition_main_set2_to_podcast_player_minimized"
+        app:constraintSetEnd="@+id/motion_scene_main_podcast_player_minimized"
+        app:constraintSetStart="@+id/motion_scene_main_set2"
+        app:duration="325"
+        app:motionInterpolator="cubic(0.4,0,0.2,1)" />
+
+    <Transition
+        android:id="@+id/transition_main_podcast_player_minimized_to_set1"
+        app:constraintSetEnd="@+id/motion_scene_main_set1"
+        app:constraintSetStart="@+id/motion_scene_main_podcast_player_minimized"
+        app:duration="90"
+        app:motionInterpolator="linear" />
 
 </MotionScene>

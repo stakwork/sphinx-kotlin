@@ -67,6 +67,10 @@ class MainActivity: MotionLayoutNavigationActivity<
     override val navigationViewModel: MainViewModel
         get() = viewModel
 
+    private var currentDetailScreenIsPodcastPlayer = false
+    private var podcastPlayerDismissalPending = false
+    private var finishingPodcastPlayerDismissal = false
+
     companion object {
         private var statusBarInsets: InsetPadding? = null
         private var navigationBarInsets: InsetPadding? = null
@@ -151,14 +155,42 @@ class MainActivity: MotionLayoutNavigationActivity<
                 .navigationRequestSharedFlow
                 .collect { request ->
                     if (
+                        request.first is PopBackStack &&
+                        currentDetailScreenIsPodcastPlayer &&
+                        !podcastPlayerDismissalPending &&
+                        !finishingPodcastPlayerDismissal
+                    ) {
+                        podcastPlayerDismissalPending = true
+                        viewModel.updateViewState(MainViewState.PodcastPlayerDetailScreenInactive)
+                        return@collect
+                    }
+
+                    val wasPodcastPlayerDetail = currentDetailScreenIsPodcastPlayer
+
+                    if (
                         viewModel
                             .detailDriver
                             .executeNavigationRequest(detailNavController, request)
                     ) {
                         if (detailNavController.previousBackStackEntry == null) {
-                            viewModel.updateViewState(MainViewState.DetailScreenInactive)
+                            currentDetailScreenIsPodcastPlayer = false
+                            viewModel.updateViewState(
+                                if (finishingPodcastPlayerDismissal || wasPodcastPlayerDetail) {
+                                    finishingPodcastPlayerDismissal = false
+                                    MainViewState.PodcastPlayerDetailScreenHidden
+                                } else {
+                                    MainViewState.DetailScreenInactive
+                                }
+                            )
                         } else {
-                            viewModel.updateViewState(MainViewState.DetailScreenActive)
+                            currentDetailScreenIsPodcastPlayer = isPodcastPlayerDetailScreen()
+                            viewModel.updateViewState(
+                                if (currentDetailScreenIsPodcastPlayer) {
+                                    MainViewState.PodcastPlayerDetailScreenActive
+                                } else {
+                                    MainViewState.DetailScreenActive
+                                }
+                            )
                         }
                     }
                 }
@@ -237,6 +269,15 @@ class MainActivity: MotionLayoutNavigationActivity<
             is MainViewState.DetailScreenInactive -> {
                 binding.layoutMotionMain.setTransitionDuration(250)
             }
+            is MainViewState.PodcastPlayerDetailScreenActive -> {
+                binding.layoutMotionMain.setTransitionDuration(400)
+            }
+            is MainViewState.PodcastPlayerDetailScreenInactive -> {
+                binding.layoutMotionMain.setTransitionDuration(325)
+            }
+            is MainViewState.PodcastPlayerDetailScreenHidden -> {
+                binding.layoutMotionMain.setTransitionDuration(90)
+            }
         }
         viewState.transitionToEndSet(binding.layoutMotionMain)
     }
@@ -257,15 +298,34 @@ class MainActivity: MotionLayoutNavigationActivity<
     // To Handle swipe behaviour
     override fun onTransitionCompleted(motionLayout: MotionLayout?, currentId: Int) {
         transitionInProgress = false
-        if (
-            currentId == MainViewState.DetailScreenInactive.endSetId &&
-            detailNavController.previousBackStackEntry != null
-        ) {
-            lifecycleScope.launch {
-                viewModel.detailDriver.submitNavigationRequest(
-                    PopBackStack(R.id.navigation_detail_blank_fragment)
-                )
+
+        when {
+            currentId == MainViewState.PodcastPlayerDetailScreenInactive.endSetId &&
+                    currentDetailScreenIsPodcastPlayer -> {
+                finishPodcastPlayerDismissal()
             }
+            currentId == MainViewState.DetailScreenInactive.endSetId &&
+                    detailNavController.previousBackStackEntry != null -> {
+                lifecycleScope.launch {
+                    viewModel.detailDriver.submitNavigationRequest(
+                        PopBackStack(R.id.navigation_detail_blank_fragment)
+                    )
+                }
+            }
+        }
+    }
+
+    private fun isPodcastPlayerDetailScreen(): Boolean =
+        detailNavController.currentDestination?.id == R.id.navigation_podcast_player_fragment
+
+    private fun finishPodcastPlayerDismissal() {
+        podcastPlayerDismissalPending = false
+        finishingPodcastPlayerDismissal = true
+
+        lifecycleScope.launch {
+            viewModel.detailDriver.submitNavigationRequest(
+                PopBackStack(R.id.navigation_detail_blank_fragment)
+            )
         }
     }
 
@@ -337,4 +397,3 @@ class MainActivity: MotionLayoutNavigationActivity<
         }
     }
 }
-
