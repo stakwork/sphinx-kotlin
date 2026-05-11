@@ -1001,8 +1001,6 @@ abstract class ChatViewModel<ARGS : NavArgs>(
         messagesLoadJob = viewModelScope.launch(mainImmediate) {
             if (isThreadChat()) {
                 messageRepository.getAllMessagesToShowByChatId(getChat().id, 0, getThreadUUID()).distinctUntilChanged().collect { messages ->
-                    delay(200)
-
                     val originalMessage = messageRepository.getMessageByUUID(MessageUUID(getThreadUUID()?.value!!)).firstOrNull()
                     val completeThread = listOf(originalMessage) + messages.reversed()
                     val list = getMessageHolderViewStateList(completeThread.filterNotNull()).toList()
@@ -1015,13 +1013,9 @@ abstract class ChatViewModel<ARGS : NavArgs>(
                 }
             } else {
                 messageRepository.getAllMessagesToShowByChatId(getChat().id, 100).firstOrNull()?.let { messages ->
-                    delay(200)
-
                     messageHolderViewStateFlow.value = getMessageHolderViewStateList(messages).toList()
                     shimmerViewState.updateViewState(ShimmerViewState.Off)
                 }
-
-                delay(1000L)
 
                 messageRepository.getAllMessagesToShowByChatId(getChat().id, 1000).distinctUntilChanged().collect { messages ->
                     messageHolderViewStateFlow.value = getMessageHolderViewStateList(messages).toList()
@@ -2460,5 +2454,4 @@ inline fun Bitmap.toInputStream(): InputStream? {
     val imageInByte: ByteArray = stream.toByteArray()
     return ByteArrayInputStream(imageInByte)
 }
-
 

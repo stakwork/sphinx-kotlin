@@ -40,9 +40,11 @@ interface RepositoryDashboard {
     val getAllNotBlockedContacts: Flow<List<Contact>>
     val getAllInvites: Flow<List<Invite>>
     fun getContactById(contactId: ContactId): Flow<Contact?>
+    suspend fun getAllContactsByIds(contactIds: List<ContactId>): List<Contact>
     var updatedContactIds: MutableList<ContactId>
 
     fun getMessageById(messageId: MessageId): Flow<Message?>
+    fun getMessagesByIds(messageIds: List<MessageId>): Flow<List<Message?>>
     fun getInviteById(inviteId: InviteId): Flow<Invite?>
 
     suspend fun payForInvite(invite: Invite)

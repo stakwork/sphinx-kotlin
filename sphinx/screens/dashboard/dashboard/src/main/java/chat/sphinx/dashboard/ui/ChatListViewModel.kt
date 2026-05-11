@@ -20,6 +20,8 @@ import chat.sphinx.wrapper_chat.ChatType
 import chat.sphinx.wrapper_chat.isConversation
 import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.dashboard.ContactId
+import chat.sphinx.wrapper_common.dashboard.InviteId
+import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.tribe.TribeJoinLink
 import chat.sphinx.wrapper_common.tribe.toTribeJoinLink
 import chat.sphinx.wrapper_contact.*
@@ -116,7 +118,7 @@ internal class ChatListViewModel @Inject constructor(
         viewModelScope.launch(mainImmediate) {
             delay(25L)
 
-            var allChats = when (args.argChatListType) {
+            val allChats = when (args.argChatListType) {
                 ChatType.CONVERSATION -> {
                     repositoryDashboard.getAllContactChats.distinctUntilChanged()
                 }
@@ -132,19 +134,31 @@ internal class ChatListViewModel @Inject constructor(
                 collectionLock.withLock {
                     chatsCollectionInitialized = true
                     val newList = ArrayList<DashboardChat>(chats.size)
-                    val contactsAdded = mutableListOf<ContactId>()
+                    val contactsAdded = mutableSetOf<ContactId>()
+                    val latestMessagesById = getLatestMessagesById(chats)
+                    val contactsById = getContactsById(
+                        chats.mapNotNull { chat ->
+                            if (chat.type.isConversation()) {
+                                chat.contactIds.lastOrNull()
+                            } else {
+                                null
+                            }
+                        }
+                    )
+                    val invitesById = if (contactsCollectionInitialized) {
+                        getInvitesById()
+                    } else {
+                        emptyMap()
+                    }
 
                     withContext(default) {
                         for (chat in chats) {
-                            val message: Message? = chat.latestMessageId?.let {
-                                repositoryDashboard.getMessageById(it).firstOrNull()
-                            }
+                            val message: Message? = chat.latestMessageId?.let(latestMessagesById::get)
 
                             if (chat.type.isConversation()) {
                                 val contactId: ContactId = chat.contactIds.lastOrNull() ?: continue
 
-                                val contact: Contact = repositoryDashboard.getContactById(contactId)
-                                    .firstOrNull() ?: continue
+                                val contact: Contact = contactsById[contactId] ?: continue
 
                                 if (!contact.isBlocked()) {
                                     contactsAdded.add(contactId)
@@ -178,13 +192,7 @@ internal class ChatListViewModel @Inject constructor(
 
                                 if (!contactsAdded.contains(contact.id)) {
                                     if (contact.isInviteContact()) {
-                                        var contactInvite: Invite? = null
-
-                                        contact.inviteId?.let { inviteId ->
-                                            contactInvite = withContext(io) {
-                                                repositoryDashboard.getInviteById(inviteId).firstOrNull()
-                                            }
-                                        }
+                                        val contactInvite = contact.inviteId?.let(invitesById::get)
                                         if (contactInvite != null) {
                                             newList.add(
                                                 DashboardChat.Inactive.Invite(contact, contactInvite)
@@ -259,7 +267,7 @@ internal class ChatListViewModel @Inject constructor(
             }
 
             val newList = ArrayList<Contact>(contacts.size)
-            val contactIds = ArrayList<ContactId>(contacts.size)
+            val contactIds = mutableSetOf<ContactId>()
 
             withContext(default) {
                 for (contact in contacts) {
@@ -280,9 +288,20 @@ internal class ChatListViewModel @Inject constructor(
                 return@withLock
             }
 
+            val invitesById = getInvitesById()
+            val conversations = withContext(io) {
+                repositoryDashboard.getAllContactChats.firstOrNull().orEmpty()
+            }
+            val conversationsByContactId = conversations.mapNotNull { chat ->
+                chat.contactIds.lastOrNull()?.let { contactId ->
+                    contactId to chat
+                }
+            }.toMap()
+            val latestMessagesById = getLatestMessagesById(conversations)
+
             withContext(default) {
                 val currentChats = currentChatViewState.originalList.toMutableList()
-                val chatContactIds = mutableListOf<ContactId>()
+                val chatContactIds = mutableSetOf<ContactId>()
 
                 var updateChatViewState = false
                 for (chat in currentChatViewState.originalList) {
@@ -330,13 +349,7 @@ internal class ChatListViewModel @Inject constructor(
                         updateChatViewState = true
 
                         if (contact.isInviteContact()) {
-                            var contactInvite: Invite? = null
-
-                            contact.inviteId?.let { inviteId ->
-                                contactInvite = withContext(io) {
-                                    repositoryDashboard.getInviteById(inviteId).firstOrNull()
-                                }
-                            }
+                            val contactInvite = contact.inviteId?.let(invitesById::get)
                             if (contactInvite != null) {
                                 currentChats.add(
                                     DashboardChat.Inactive.Invite(contact, contactInvite)
@@ -362,10 +375,8 @@ internal class ChatListViewModel @Inject constructor(
 
                         if (updatedContactChat is DashboardChat.Inactive.Conversation) {
                             //Contact unblocked
-                            repositoryDashboard.getConversationByContactId(contact.id).firstOrNull()?.let { contactChat ->
-                                val message: Message? = contactChat.latestMessageId?.let {
-                                    repositoryDashboard.getMessageById(it).firstOrNull()
-                                }
+                            conversationsByContactId[contact.id]?.let { contactChat ->
+                                val message: Message? = contactChat.latestMessageId?.let(latestMessagesById::get)
 
                                 updatedContactChat = DashboardChat.Active.Conversation(
                                     contactChat,
@@ -387,6 +398,41 @@ internal class ChatListViewModel @Inject constructor(
             }
         }
     }
+
+    private suspend fun getLatestMessagesById(chats: Collection<Chat>): Map<MessageId, Message> {
+        val messageIds = chats.mapNotNull { it.latestMessageId }.distinct()
+        if (messageIds.isEmpty()) {
+            return emptyMap()
+        }
+
+        return withContext(io) {
+            repositoryDashboard.getMessagesByIds(messageIds)
+                .firstOrNull()
+                .orEmpty()
+                .filterNotNull()
+                .associateBy { it.id }
+        }
+    }
+
+    private suspend fun getContactsById(contactIds: Collection<ContactId>): Map<ContactId, Contact> {
+        val uniqueContactIds = contactIds.distinct()
+        if (uniqueContactIds.isEmpty()) {
+            return emptyMap()
+        }
+
+        return withContext(io) {
+            repositoryDashboard.getAllContactsByIds(uniqueContactIds)
+                .associateBy { it.id }
+        }
+    }
+
+    private suspend fun getInvitesById(): Map<InviteId, Invite> =
+        withContext(io) {
+            repositoryDashboard.getAllInvites
+                .firstOrNull()
+                .orEmpty()
+                .associateBy { it.id }
+        }
 
     suspend fun payForInvite(invite: Invite) {
         getAccountBalance().firstOrNull()?.let { balance ->
