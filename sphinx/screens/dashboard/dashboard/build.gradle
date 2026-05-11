@@ -26,6 +26,11 @@ android {
             minifyEnabled false
         }
     }
+    testOptions {
+        unitTests {
+            includeAndroidResources = true
+        }
+    }
     namespace 'chat.sphinx.dashboard'
 }
 
@@ -82,6 +87,8 @@ dependencies {
     kapt kaptDeps.google.hilt
 
     testImplementation testDeps.junit
+    testImplementation testDeps.androidx.core
+    testImplementation testDeps.robolectric
 
     androidTestImplementation testDeps.androidx.core
     androidTestImplementation testDeps.androidx.espresso
