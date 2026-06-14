@@ -22,11 +22,13 @@ import chat.sphinx.activitymain.ui.MainViewState
 import chat.sphinx.activitymain.ui.MotionLayoutNavigationActivity
 import chat.sphinx.insetter_activity.InsetPadding
 import chat.sphinx.insetter_activity.InsetterActivity
+import chat.sphinx.notification.SphinxNotificationManager
 import dagger.hilt.android.AndroidEntryPoint
 import dev.chrisbanes.insetter.applyInsetter
 import io.matthewnelson.android_feature_navigation.requests.PopBackStack
 import io.matthewnelson.android_feature_viewmodel.updateViewState
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 import chat.sphinx.resources.R as R_common
 
 
@@ -40,6 +42,9 @@ class MainActivity: MotionLayoutNavigationActivity<
         >(R.layout.activity_main), InsetterActivity
 {
     override val binding: ActivityMainBinding by viewBinding(ActivityMainBinding::bind)
+
+    @Inject
+    lateinit var sphinxNotificationManager: SphinxNotificationManager
 
     private var sessionDepth = 0
 
@@ -71,6 +76,7 @@ class MainActivity: MotionLayoutNavigationActivity<
         private var statusBarInsets: InsetPadding? = null
         private var navigationBarInsets: InsetPadding? = null
         private var keyboardInsets: InsetPadding? = null
+        private const val EXTRA_CHAT_ID = "chat_id"
 
         var isActive = false
     }
@@ -124,9 +130,7 @@ class MainActivity: MotionLayoutNavigationActivity<
         askNotificationPermission()
         addWindowInsetChangeListener()
 
-        intent.extras?.getString("chat_id")?.toLongOrNull()?.let { chatId ->
-            handlePushNotification(chatId)
-        }
+        handlePushNotificationIntent(intent)
     }
 
     override fun onStart() {
@@ -195,6 +199,8 @@ class MainActivity: MotionLayoutNavigationActivity<
             handleDeepLink(deepLink)
         }
 
+        handlePushNotificationIntent(intent)
+
         setIntent(intent)
     }
 
@@ -226,6 +232,30 @@ class MainActivity: MotionLayoutNavigationActivity<
     private fun handlePushNotification(chatId: Long) {
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.handlePushNotification(chatId)
+        }
+    }
+
+    private fun handlePushNotificationIntent(intent: Intent) {
+        if (!intent.hasExtra(EXTRA_CHAT_ID)) {
+            return
+        }
+
+        sphinxNotificationManager.clearAllNotifications()
+
+        val chatId = intent.getPushNotificationChatId()
+        intent.removeExtra(EXTRA_CHAT_ID)
+
+        chatId?.let { handlePushNotification(it) }
+    }
+
+    private fun Intent.getPushNotificationChatId(): Long? {
+        val extras = extras ?: return null
+
+        return when (val chatId = extras.get(EXTRA_CHAT_ID)) {
+            is String -> chatId.toLongOrNull()
+            is Long -> chatId
+            is Int -> chatId.toLong()
+            else -> null
         }
     }
 
@@ -337,4 +367,3 @@ class MainActivity: MotionLayoutNavigationActivity<
         }
     }
 }
-
