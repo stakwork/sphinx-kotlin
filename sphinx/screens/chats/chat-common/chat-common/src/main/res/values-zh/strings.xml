@@ -147,7 +147,7 @@
     <string name="attachments_menu_cancel">取消</string>
     <string name="camera_attachment_option">相機</string>
     <string name="library_attachment_option">圖庫</string>
-    <string name="gif_attachment_option">Gif</string>
+    <string name="gif_attachment_option">GIF</string>
     <string name="file_attachment_option">檔案</string>
     <string name="paid_message_attachment_option">付費訊息</string>
     <string name="request_attachment_option">請求</string>
