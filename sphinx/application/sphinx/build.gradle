@@ -18,7 +18,7 @@ android {
         versionCode VERSION_CODE.toInteger()
         versionName VERSION_NAME
 
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner "chat.sphinx.HiltTestRunner"
         testInstrumentationRunnerArguments disableAnalytics: 'true'
     }
 
@@ -143,6 +143,8 @@ dependencies {
     androidTestImplementation testDeps.androidx.core
     androidTestImplementation testDeps.androidx.espresso
     androidTestImplementation testDeps.androidx.junit
+    androidTestImplementation testDeps.google.hilt
+    kaptAndroidTest kaptDeps.google.hilt
 }
 
 /**
