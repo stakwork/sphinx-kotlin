@@ -24,4 +24,6 @@ interface SphinxNotificationManager {
     )
 
     fun clearNotification(notificationId: Int)
+
+    fun clearAllNotifications()
 }

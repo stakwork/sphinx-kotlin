@@ -56,4 +56,8 @@ class SphinxNotificationManagerImpl(
         notificationManager.cancel(notificationId)
     }
 
+    override fun clearAllNotifications() {
+        notificationManager.cancelAll()
+    }
+
 }
