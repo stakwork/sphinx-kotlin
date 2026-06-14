@@ -3,6 +3,15 @@
     <string name="edit_text_message_hint">メッセージ</string>
     <string name="edit_text_optional_message_hint">メッセージ（省略可）</string>
     <string name="text_view_loading_attachment">データを読み込み復号しています</string>
+    <string name="option_block_user">ブロック</string>
+    <string name="option_delete_user">削除</string>
+    <string name="alert_confirm_delete_contact">この友だちを削除してよいですか？</string>
+    <string name="alert_confirm_delete_contact_title">友だちを削除</string>
+    <string name="alert_confirm_block_contact_title">友だちをブロック</string>
+    <string name="alert_confirm_block_contact">この友だちをブロックしてよいですか？</string>
+    <string name="alert_confirm_unblock_contact_title">友だちのブロックを解除</string>
+    <string name="alert_confirm_unblock_contact">この友だちのブロックを解除してよいですか？</string>
+    <string name="alert_not_encrypted_contact">暗号化されていない友だちにはメッセージを送信できません</string>
 
     <string name="chat_muted_message">チャットをミュートしました。このチャットの新着メッセージはプッシュ通知されません。</string>
     <string name="chat_muted_waiting_on_network">ネットワーク待機中</string>
@@ -11,7 +20,7 @@
 
     <string name="unsupported_message_type_placeholder_text">%1$s: まだサポートされていません</string>
     <string name="deleted_message_label_text">このメッセージは削除されました</string>
-    <string name="flagged_message_label_text">This message has been flagged</string>
+    <string name="flagged_message_label_text">このメッセージはフラグが付けられました</string>
     <string name="join_call_header_label_text">...でコールに参加</string>
 
     <string name="failed_message">送信に失敗したメッセージ</string>
@@ -21,8 +30,8 @@
     <string name="send_message_empty_price_error">価格を設定してください</string>
 
     <!--  Separators  -->
-    <string name="unseen_messages">Unseen Messages</string>
-    <string name="today">Today</string>
+    <string name="unseen_messages">未読メッセージ</string>
+    <string name="today">今日</string>
 
     <!--  Message type invoices  -->
     <string name="request_expired">リクエストの有効期限が切れています</string>
@@ -58,7 +67,7 @@
     <!-- Replies -->
     <string name="reply_message_media_content_description">元のメッセージのメディアコンテンツ</string>
     <string name="reply_message_close_button_content_description">閉じる</string>
-    <string name="share_audio_clip">"Share audio clip:"</string>
+    <string name="share_audio_clip">"音声クリップを共有:"</string>
 
     <!--  Purchase Status Labels: Paid Message Details  -->
     <string name="purchase_status_label_paid_message_details_pending">承認待ち</string>
@@ -150,7 +159,7 @@
     <string name="attachments_menu_cancel">キャンセル</string>
     <string name="camera_attachment_option">カメラ</string>
     <string name="library_attachment_option">ライブラリ</string>
-    <string name="gif_attachment_option">Gif</string>
+    <string name="gif_attachment_option">GIF</string>
     <string name="file_attachment_option">ファイル</string>
     <string name="paid_message_attachment_option">有料メッセージ</string>
     <string name="request_attachment_option">リクエスト</string>
